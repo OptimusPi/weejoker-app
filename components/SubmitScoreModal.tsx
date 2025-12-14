@@ -48,8 +48,8 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-            <div className="bg-[var(--balatro-grey-darker)] border-[3px] border-[var(--balatro-gold)] rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl relative overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={onClose}>
+            <div className="bg-[var(--balatro-grey-darker)] border-[3px] border-[var(--balatro-gold)] rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl relative overflow-hidden" onClick={(e) => e.stopPropagation()}>
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors z-10"

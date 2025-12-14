@@ -7,8 +7,8 @@ interface HowToPlayProps {
 
 export function HowToPlay({ onClose }: HowToPlayProps) {
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="relative w-full max-w-2xl bg-balatro-panel border-4 border-balatro-blue shadow-2xl rounded-xl overflow-hidden animate-in zoom-in-95">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
+            <div className="relative w-full max-w-2xl bg-balatro-panel border-4 border-balatro-blue shadow-2xl rounded-xl overflow-hidden animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
 
                 {/* Header */}
                 <div className="bg-balatro-blue p-4 flex justify-between items-center border-b-4 border-blue-800">
