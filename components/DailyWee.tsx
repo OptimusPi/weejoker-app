@@ -24,8 +24,6 @@ export function DailyWee({ seeds }: { seeds: SeedData[] }) {
     const [showSubmit, setShowSubmit] = useState(false);
     const [showHowTo, setShowHowTo] = useState(false);
 
-    if (!mounted) return null;
-
     const todayNumber = getDayNumber(); // Navigation logic
     const isToday = viewingDay === todayNumber;
     const isTomorrow = viewingDay === todayNumber + 1;
@@ -53,6 +51,8 @@ export function DailyWee({ seeds }: { seeds: SeedData[] }) {
         }, 1000);
         return () => clearInterval(interval);
     }, [isTomorrow]);
+
+    if (!mounted) return null;
 
     const getDayDisplay = (day: number) => {
         if (day < 1) return "EPOCH START";
