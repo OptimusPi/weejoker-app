@@ -1,146 +1,283 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Upload, Camera, Copy, Check } from 'lucide-react';
-import { cn } from '@/lib/utils'; // Assuming this exists or I'll simple class strings
-// If utils doesn't exist, I'll stick to standard template literals, but it was in layout.tsx import.
+import { motion, AnimatePresence } from 'framer-motion';
+import { Upload, Camera, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import dailySeeds from '@/lib/dailySeeds.json';
 
-// Mock function to generate a daily seed based on date
-const getDailySeed = () => {
-    const today = new Date();
-    // Simple mock: Use date string to pick a "random" seed
-    // In a real app, this would query the DB for a specific interesting seed
-    const dateStr = today.toISOString().split('T')[0];
-    const mockSeeds = ['87621', 'J8K32', 'WEE42', 'GROSS', 'HIGH7'];
-    const seedIndex = dateStr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % mockSeeds.length;
-    return mockSeeds[seedIndex];
+// Epoch: Dec 14 2025 UTC (Day 1 of Content - Launch Day)
+const WEEJOKER_EPOCH_MS = Date.UTC(2025, 11, 14);
+
+const JAML_ACRONYMS = [
+    "Jimbo's Absolutely Magnificent Loot",
+    "Joker Acquisition & Management Ledger",
+    "Just Add More Legendaries",
+    "Jackpot Amplification Multiplier Language",
+    "Jester's Algorithmic Money Laundering",
+    "Justice Against Mime Lovers",
+    "Jimbo Appreciates My Loyalty",
+    "Jokers Are My Life",
+    "Juiced Aces, Maximum Luck"
+];
+
+function getWeeJokerDay(date: Date = new Date()): number {
+    const todayUTC = Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate()
+    );
+    // If Dec 13 is Day 1, then difference 0 means Day 1.
+    return Math.floor((todayUTC - WEEJOKER_EPOCH_MS) / (24 * 60 * 60 * 1000)) + 1;
+}
+
+const getDailySeed = (dayNumber: number) => {
+    // dayNumber 1 = index 0
+    if (dayNumber < 1) return null; // JAML Territory
+    const index = (dayNumber - 1) % dailySeeds.length;
+    return dailySeeds[index] || dailySeeds[0];
 };
 
 export default function DailyWeePage() {
-    const [seed, setSeed] = useState('');
+    const [currentDay, setCurrentDay] = useState(1); // Defaults to 1 until client hydration
+    const [viewOffset, setViewOffset] = useState(0); // 0 = Today, 1 = Tomorrow, -1 = Yesterday
+    const [jamlText, setJamlText] = useState(JAML_ACRONYMS[0]);
+    const [seed, setSeed] = useState<any>(dailySeeds[0]);
     const [copied, setCopied] = useState(false);
-    const [selectedImage, setSelectedImage] = useState<File | null>(null);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [timeLeft, setTimeLeft] = useState("");
 
+    // Initialize Day
     useEffect(() => {
-        setSeed(getDailySeed());
+        const today = getWeeJokerDay();
+        setCurrentDay(today);
     }, []);
 
+    // Update View Data
+    const viewDay = currentDay + viewOffset;
+    const isFuture = viewOffset > 0;
+    const isJaml = viewDay < 1; // "Day 0" or prior
+
+    useEffect(() => {
+        if (isFuture) {
+            // Countdown Logic
+            const timer = setInterval(() => {
+                const now = new Date();
+                const tomorrow = new Date(now);
+                tomorrow.setUTCDate(now.getUTCDate() + 1);
+                tomorrow.setUTCHours(0, 0, 0, 0);
+                const diff = tomorrow.getTime() - now.getTime();
+
+                const h = Math.floor(diff / (1000 * 60 * 60)).toString().padStart(2, '0');
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+                const s = Math.floor((diff % (1000 * 60)) / 1000).toString().padStart(2, '0');
+                setTimeLeft(`${h}:${m}:${s}`);
+            }, 1000);
+            return () => clearInterval(timer);
+        } else if (isJaml) {
+            // JAML Randomizer
+            const random = JAML_ACRONYMS[Math.floor(Math.random() * JAML_ACRONYMS.length)];
+            setJamlText(random);
+        } else {
+            // Seed Loading
+            setSeed(getDailySeed(viewDay));
+        }
+    }, [viewDay, isFuture, isJaml]);
+
     const copyToClipboard = () => {
-        navigator.clipboard.writeText(seed);
+        if (isFuture || isJaml) return;
+        navigator.clipboard.writeText(seed.seed);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
 
-    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-            setSelectedImage(file);
-            setPreviewUrl(URL.createObjectURL(file));
-        }
-    };
-
     return (
-        <main className="min-h-screen bg-balatro-bg text-balatro-white p-4 flex flex-col items-center pb-20">
-            {/* Header */}
-            <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="w-full max-w-md text-center mt-6 mb-8"
-            >
-                <h1 className="font-header text-5xl text-balatro-gold drop-shadow-[0_4px_0_rgba(0,0,0,0.5)]">
-                    THE DAILY WEE
-                </h1>
-                <p className="font-mono text-balatro-grey-light mt-2 text-lg">
-                    {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
-                </p>
-            </motion.div>
+        <main className="min-h-screen flex flex-col items-center justify-center p-4 gap-8">
 
-            {/* Seed Card */}
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.1 }}
-                className="w-full max-w-md bg-balatro-grey border-2 border-balatro-silver-bright rounded-xl p-6 shadow-balatro-card relative overflow-hidden"
-            >
-                <div className="absolute top-0 left-0 w-full h-2 bg-balatro-red" />
-
-                <h2 className="font-header text-2xl text-center mb-4 text-balatro-white uppercase tracking-wider">
-                    Today's Seed
-                </h2>
-
-                <div className="flex items-center justify-center gap-3 mb-6">
-                    <div className="bg-balatro-black px-6 py-3 rounded-lg border border-balatro-grey-medium shadow-inner">
-                        <span className="font-pixel text-4xl tracking-widest text-balatro-blue">
-                            {seed}
-                        </span>
-                    </div>
+            {/* Header / Navigation */}
+            <div className="text-center space-y-2 relative z-10 w-full max-w-2xl flex flex-col items-center">
+                <div className="flex items-center justify-between w-full px-4">
                     <button
-                        onClick={copyToClipboard}
-                        className="bg-balatro-blue hover:bg-balatro-blue-dark text-white p-3 rounded-lg transition-colors border-b-4 border-balatro-blue-dark active:border-b-0 active:translate-y-1"
+                        onClick={() => setViewOffset(o => o - 1)}
+                        className="p-2 hover:text-balatro-blue transition-colors disabled:opacity-30 text-white/50"
+                        disabled={viewDay <= 0} // Stop at Day 0 (JAML)
                     >
-                        {copied ? <Check size={24} /> : <Copy size={24} />}
+                        <ChevronLeft size={48} />
+                    </button>
+
+                    <div className="flex flex-col items-center">
+                        <div className="inline-block bg-black/40 px-4 py-1 rounded-full border border-white/10 backdrop-blur-sm mb-2">
+                            <span className="text-lg text-balatro-blue uppercase tracking-widest text-shadow">
+                                {isJaml ? "LEGACY ARCHIVE" : isFuture ? "COMING SOON" : "High Score Challenge"}
+                            </span>
+                        </div>
+                        <h1 className="text-5xl md:text-7xl text-white font-header drop-shadow-[4px_4px_0_black] tracking-wide">
+                            {isJaml ? "THE SOURCE" : "THE DAILY WEE"}
+                        </h1>
+                        <p className="text-xl text-balatro-gold uppercase tracking-wider text-shadow">
+                            {isJaml ? "???" : isFuture ? "TOMORROW" : `#${viewDay} • ${new Date().toLocaleDateString()}`}
+                        </p>
+                    </div>
+
+                    <button
+                        onClick={() => setViewOffset(o => o + 1)}
+                        className="p-2 hover:text-balatro-blue transition-colors disabled:opacity-30 text-white/50"
+                        disabled={isFuture} // Only show 1 future card
+                    >
+                        <ChevronRight size={48} />
                     </button>
                 </div>
+            </div>
 
-                <div className="bg-balatro-grey-dark/50 rounded-lg p-4 text-center border border-balatro-grey-medium">
-                    <p className="font-mono text-balatro-silver-light text-sm mb-1 uppercase">Objective</p>
-                    <p className="font-header text-xl text-balatro-white">Highest Wee Joker Chips</p>
-                </div>
-            </motion.div>
+            {/* THE CARD */}
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={viewDay}
+                    initial={{ rotateY: 90, opacity: 0 }}
+                    animate={{ rotateY: 0, opacity: 1 }}
+                    exit={{ rotateY: -90, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="relative group cursor-pointer perspective-1000"
+                    onClick={copyToClipboard}
+                >
+                    {/* Render different cards based on State */}
 
-            {/* Screenshot Upload Section */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="w-full max-w-md mt-8"
-            >
-                <h3 className="font-header text-xl text-balatro-silver-light mb-4 ml-2">
-                    Submit Result
-                </h3>
+                    {/* 1. FUTURE CARD (TEASER) */}
+                    {isFuture && (
+                        <div className="relative w-[340px] md:w-[400px] aspect-[2.5/3.5] bg-[#334155] rounded-xl border-[6px] border-white/20 shadow-[12px_12px_0_rgba(0,0,0,0.4)] flex flex-col items-center p-4 overflow-hidden opacity-90 grayscale-[0.3]">
+                            {/* Overlay Countdown */}
+                            <div className="absolute inset-0 z-20 bg-black/60 flex flex-col items-center justify-center backdrop-blur-[2px]">
+                                <Clock size={48} className="text-balatro-blue mb-2 animate-pulse" />
+                                <span className="font-header text-5xl text-white tracking-widest">{timeLeft}</span>
+                                <span className="text-balatro-gold/80 text-sm mt-2 uppercase tracking-widest">Unlocks at Midnight UTC</span>
+                            </div>
 
-                <label className={cn(
-                    "block w-full aspect-[4/3] rounded-xl border-4 border-dashed transition-all cursor-pointer relative overflow-hidden group",
-                    selectedImage
-                        ? "border-balatro-green bg-balatro-black"
-                        : "border-balatro-grey-light hover:border-balatro-blue bg-balatro-grey/30 hover:bg-balatro-grey/50"
-                )}>
-                    <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleImageSelect}
-                    />
+                            {/* Inner Pattern (Dimmed) */}
+                            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, white 2px, transparent 2px)', backgroundSize: '20px 20px' }}></div>
 
-                    {previewUrl ? (
-                        <img
-                            src={previewUrl}
-                            alt="Submission preview"
-                            className="w-full h-full object-contain"
-                        />
-                    ) : (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-balatro-grey-light group-hover:text-balatro-blue transition-colors">
-                            <Camera size={48} className="mb-2" />
-                            <span className="font-header text-xl">Tap to Upload Screenshot</span>
-                            <span className="font-mono text-sm opacity-70 mt-1">Proof required!</span>
+                            {/* Badges (VISIBLE) */}
+                            <div className="absolute top-4 left-4 bg-balatro-gold text-black uppercase font-bold px-3 py-1 rounded shadow-md border border-white/50 text-sm tracking-wider z-10 opacity-50">Legendary</div>
+
+                            {/* Content */}
+                            <div className="flex-1 flex flex-col items-center justify-center w-full space-y-4 z-10 relative px-4 blur-[2px]">
+                                <div className="text-center space-y-1 w-full">
+                                    <span className="text-balatro-blue uppercase tracking-[0.2em] text-[10px] font-bold bg-black/30 px-2 py-0.5 rounded-full border border-balatro-blue/30">Erratic Deck</span>
+                                    <div className="bg-black/60 px-4 py-3 rounded-lg border-2 border-white/20 shadow-inner w-full flex justify-center">
+                                        <span className="font-header text-5xl text-white tracking-widest drop-shadow-md select-all filter blur-md">
+                                            ????????
+                                        </span>
+                                    </div>
+                                    <span className="text-white/40 text-[10px] uppercase tracking-widest">Hidden</span>
+                                </div>
+
+                                {/* Features (TEASER - VISIBLE but Dimmed) */}
+                                <div className="w-full space-y-1 px-4 opacity-75">
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-px bg-white/20 flex-1"></div>
+                                        <span className="text-[10px] font-pixel text-balatro-orange uppercase tracking-wider">Ante 1 Findings</span>
+                                        <div className="h-px bg-white/20 flex-1"></div>
+                                    </div>
+                                    <div className="flex flex-wrap justify-center gap-2">
+                                        {seed?.wee_a1_cheap && <div className="bg-balatro-grey-dark border border-white px-2 py-1 rounded text-xs font-bold text-balatro-blue shadow-[0_2px_0_rgba(0,0,0,0.4)]">WEE JOKER</div>}
+                                        {seed?.hack_a1 && <div className="bg-balatro-grey-dark border border-white px-2 py-1 rounded text-xs font-bold text-balatro-red shadow-[0_2px_0_rgba(0,0,0,0.4)]">HACK</div>}
+                                        {seed?.copy_jokers_a1 && <div className="bg-balatro-grey-dark border border-white px-2 py-1 rounded text-xs font-bold text-balatro-green shadow-[0_2px_0_rgba(0,0,0,0.4)]">COPY</div>}
+                                        {!seed?.wee_a1_cheap && !seed?.hack_a1 && !seed?.copy_jokers_a1 && <span className="text-white/30 text-xs italic font-mono">No rare jokers found</span>}
+                                    </div>
+                                </div>
+
+                                {/* Stats (Hidden or Visible? Let's hide stats to prevent math-ing the seed) */}
+                                <div className="w-full bg-black/30 rounded-lg p-3 border border-white/10 flex justify-between items-center text-center mt-2 mx-4 opacity-50">
+                                    <div className="flex flex-col items-center w-1/2 border-r border-white/10">
+                                        <span className="text-xl font-header text-balatro-red text-shadow blur-sm">999</span>
+                                        <span className="text-[9px] text-white/50 uppercase tracking-wider font-bold">Score</span>
+                                    </div>
+                                    <div className="flex flex-col items-center w-1/2">
+                                        <span className="text-xl font-header text-balatro-blue text-shadow blur-sm">99</span>
+                                        <span className="text-[9px] text-white/50 uppercase tracking-wider font-bold">Twos Count</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     )}
-                </label>
 
-                <button
-                    disabled={!selectedImage}
-                    className={cn(
-                        "w-full mt-6 py-4 rounded-xl font-header text-2xl tracking-wide shadow-balatro-button transition-all border-b-4 active:border-b-0 active:translate-y-1 active:shadow-none",
-                        selectedImage
-                            ? "bg-balatro-green hover:bg-balatro-green-dark text-white border-balatro-green-dark"
-                            : "bg-balatro-disabled text-balatro-disabled-light border-balatro-disabled-dark cursor-not-allowed"
+                    {/* 2. JAML CARD */}
+                    {isJaml && (
+                        <div className="relative w-[340px] md:w-[400px] aspect-[2.5/3.5] bg-[#0f0f0f] rounded-xl border-[6px] border-balatro-gold/50 shadow-[12px_12px_0_rgba(0,0,0,0.4)] flex flex-col items-center justify-center p-4">
+                            <div className="absolute top-4 left-4 bg-red-900 text-white uppercase font-bold px-3 py-1 rounded text-xs">ERRor</div>
+
+                            <span className="font-header text-8xl text-balatro-red tracking-widest drop-shadow-[4px_4px_0_rgba(255,0,0,0.2)]">JAML</span>
+
+                            <div className="mt-8 px-6 py-4 bg-black/50 rounded border border-white/10 text-center">
+                                <p className="text-balatro-orange font-pixel text-lg leading-tight">
+                                    {jamlText}
+                                </p>
+                            </div>
+                            <span className="text-white/20 text-xs mt-8 uppercase font-mono tracking-widest">System Origin // NULL</span>
+                        </div>
                     )}
-                >
-                    SUBMIT WEE
+
+                    {/* 3. STANDARD SEED CARD */}
+                    {!isFuture && !isJaml && (
+                        <div className="relative w-[340px] md:w-[400px] aspect-[2.5/3.5] bg-[#334155] rounded-xl border-[6px] border-white shadow-[12px_12px_0_rgba(0,0,0,0.4)] flex flex-col items-center p-4 transition-transform duration-200 group-hover:-translate-y-2 group-hover:shadow-[16px_16px_0_rgba(0,0,0,0.4)] overflow-hidden">
+                            {/* Inner Pattern */}
+                            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, white 2px, transparent 2px)', backgroundSize: '20px 20px' }}></div>
+
+                            {/* Badges */}
+                            <div className="absolute top-4 left-4 bg-balatro-gold text-black uppercase font-bold px-3 py-1 rounded shadow-md border border-white/50 text-sm tracking-wider z-10">Legendary</div>
+                            {copied && (
+                                <div className="absolute top-4 right-4 bg-balatro-green text-white uppercase font-bold px-3 py-1 rounded shadow-md border border-white/50 text-sm tracking-wider animate-bounce z-10">COPIED!</div>
+                            )}
+
+                            {/* Content */}
+                            <div className="flex-1 flex flex-col items-center justify-center w-full space-y-4 z-10 relative px-4">
+                                <div className="text-center space-y-1 w-full">
+                                    <span className="text-balatro-blue uppercase tracking-[0.2em] text-[10px] font-bold bg-black/30 px-2 py-0.5 rounded-full border border-balatro-blue/30">Erratic Deck</span>
+                                    <div className="bg-black/60 px-4 py-3 rounded-lg border-2 border-white/20 backdrop-blur-sm shadow-inner w-full flex justify-center">
+                                        <span className="font-header text-5xl text-white tracking-widest drop-shadow-md select-all">
+                                            {seed.seed}
+                                        </span>
+                                    </div>
+                                    <span className="text-white/40 text-[10px] uppercase tracking-widest">Click to Copy</span>
+                                </div>
+
+                                {/* Features */}
+                                <div className="w-full space-y-1 px-4">
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-px bg-white/20 flex-1"></div>
+                                        <span className="text-[10px] font-pixel text-balatro-orange uppercase tracking-wider">Ante 1 Findings</span>
+                                        <div className="h-px bg-white/20 flex-1"></div>
+                                    </div>
+                                    <div className="flex flex-wrap justify-center gap-2">
+                                        {seed.wee_a1_cheap && <div className="bg-balatro-grey-dark border border-white px-2 py-1 rounded text-xs font-bold text-balatro-blue shadow-[0_2px_0_rgba(0,0,0,0.4)]">WEE JOKER</div>}
+                                        {seed.hack_a1 && <div className="bg-balatro-grey-dark border border-white px-2 py-1 rounded text-xs font-bold text-balatro-red shadow-[0_2px_0_rgba(0,0,0,0.4)]">HACK</div>}
+                                        {seed.copy_jokers_a1 && <div className="bg-balatro-grey-dark border border-white px-2 py-1 rounded text-xs font-bold text-balatro-green shadow-[0_2px_0_rgba(0,0,0,0.4)]">COPY</div>}
+                                        {!seed.wee_a1_cheap && !seed.hack_a1 && !seed.copy_jokers_a1 && <span className="text-white/30 text-xs italic font-mono">No rare jokers found</span>}
+                                    </div>
+                                </div>
+
+                                {/* Stats */}
+                                <div className="w-full bg-black/30 rounded-lg p-3 border border-white/10 flex justify-between items-center text-center mt-2 mx-4">
+                                    <div className="flex flex-col items-center w-1/2 border-r border-white/10">
+                                        <span className="text-xl font-header text-balatro-red text-shadow">{seed.score || 0}</span>
+                                        <span className="text-[9px] text-white/50 uppercase tracking-wider font-bold">Score</span>
+                                    </div>
+                                    <div className="flex flex-col items-center w-1/2">
+                                        <span className="text-xl font-header text-balatro-blue text-shadow">{seed.twos || 0}</span>
+                                        <span className="text-[9px] text-white/50 uppercase tracking-wider font-bold">Twos Count</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </motion.div>
+            </AnimatePresence>
+
+            {/* Action Buttons */}
+            <div className="flex gap-4 relative z-10 w-full max-w-md justify-center mt-4">
+                <button className="balatro-btn w-full flex items-center justify-center gap-2" disabled={isJaml || isFuture}>
+                    <Camera size={24} /> Submit Run
                 </button>
-            </motion.div>
+            </div>
+
         </main>
-    );
+    )
 }

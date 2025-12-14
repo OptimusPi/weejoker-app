@@ -1,0 +1,10 @@
+# Wrangler configuration for Cloudflare Pages
+name = "weejoker-app"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = ".vercel/output/static"
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "weejoker-scores"
+database_id = "efae89d7-55f9-4eb1-bdac-5d9dad0845a0"  # Weejoker Scores

@@ -1,58 +1,61 @@
-
 import { Trophy, Calendar, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SeedData } from "@/lib/types";
 
-// Mock Data for past victories
-const PAST_WINNERS = [
-    { date: "12/11/25", seed: "WEEHACK", winner: "JokerKing99", score: 3420 },
-    { date: "12/10/25", seed: "LUCKY7", winner: "FlushCheck", score: 2890 },
-    { date: "12/09/25", seed: "BARON", winner: "SteelCard", score: 4102 },
-    { date: "12/08/25", seed: "MIME", winner: "RedSeal", score: 3150 },
-];
+interface LeaderboardProps {
+    seeds: SeedData[];
+}
 
-export function Leaderboard() {
+export function Leaderboard({ seeds }: LeaderboardProps) {
+    // Derive "Winners" from the top scoring seeds in the dataset
+    // Since we don't have a real backend backend, we treat the highest scoring seeds as the "Hall of Fame"
+    const topSeeds = [...seeds].sort((a, b) => (b.score || 0) - (a.score || 0)).slice(0, 4);
+
     return (
-        <div className="bg-balatro-panel border-4 border-slate-600 rounded-xl p-6 shadow-balatro relative overflow-hidden">
+        <div className="bg-[var(--balatro-grey-darker)] border-[3px] border-white/80 rounded-xl p-6 shadow-2xl relative overflow-hidden">
             {/* Header */}
             <div className="flex justify-between items-center mb-6 relative z-10">
                 <div className="flex items-center gap-3">
-                    <div className="bg-balatro-gold p-2 rounded border-2 border-white shadow-sm">
+                    <div className="bg-[var(--balatro-gold)] p-2 rounded border-2 border-white shadow-sm">
                         <Trophy size={24} className="text-white" />
                     </div>
                     <h2 className="text-3xl md:text-4xl font-header text-white tracking-wider drop-shadow-md">
-                        HALL OF FAME
+                        TOP RATED SEEDS
                     </h2>
                 </div>
-                <div className="text-balatro-blue font-header text-sm uppercase tracking-wider bg-black/30 px-3 py-1 rounded">
-                    Past Victories
+                <div className="text-[var(--balatro-blue)] font-header text-sm uppercase tracking-wider bg-black/40 px-3 py-1 rounded border border-white/10">
+                    Global Rankings
                 </div>
             </div>
 
             {/* List */}
             <div className="space-y-3 relative z-10">
-                {PAST_WINNERS.map((entry, i) => (
-                    <div key={i} className="group flex items-center gap-4 bg-black/40 p-3 rounded-lg border-2 border-transparent hover:border-balatro-blue/50 transition-colors">
+                {topSeeds.map((entry, i) => (
+                    <div key={i} className="group flex items-center gap-4 bg-[#1F2937] p-3 rounded-lg border-2 border-white/5 hover:border-white/40 transition-colors shadow-sm">
                         <div className="w-12 text-center">
-                            <span className="font-pixel text-zinc-500 text-lg">{entry.date}</span>
+                            <span className="font-pixel text-zinc-500 text-lg group-hover:text-white transition-colors">#{i + 1}</span>
                         </div>
 
                         <div className="flex-1 flex flex-col md:flex-row md:items-center gap-1 md:gap-4">
-                            <div className="font-header text-white text-xl tracking-wide flex items-center gap-2">
-                                <User size={16} className="text-balatro-orange" />
-                                {entry.winner}
+                            {/* Seed Display */}
+                            <div className="font-pixel text-xl tracking-widest text-[var(--balatro-blue)] bg-black/20 px-2 py-1 rounded border border-white/5">
+                                {entry.seed}
                             </div>
+
                             <div className="hidden md:block w-px h-4 bg-white/10"></div>
-                            <div className="font-pixel text-zinc-400 text-lg uppercase tracking-widest">
-                                Seed: <span className="text-zinc-300">{entry.seed}</span>
+
+                            {/* Stats */}
+                            <div className="font-pixel text-zinc-400 text-sm uppercase tracking-wider flex gap-4">
+                                <span>Twos: <span className="text-white">{entry.twos}</span></span>
                             </div>
                         </div>
 
                         <div className="text-right">
-                            <div className="font-header text-2xl text-balatro-gold drop-shadow-sm">
-                                +{entry.score}
+                            <div className="font-header text-2xl text-[var(--balatro-gold)] drop-shadow-sm">
+                                {entry.score}
                             </div>
                             <div className="text-[10px] uppercase font-header text-zinc-500 tracking-wider">
-                                Chips
+                                Projected Score
                             </div>
                         </div>
                     </div>
@@ -60,9 +63,7 @@ export function Leaderboard() {
             </div>
 
             {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
-                style={{ backgroundImage: 'linear-gradient(45deg, #ffffff 25%, transparent 25%, transparent 75%, #ffffff 75%, #ffffff), linear-gradient(45deg, #ffffff 25%, transparent 25%, transparent 75%, #ffffff 75%, #ffffff)', backgroundSize: '20px 20px', backgroundPosition: '0 0, 10px 10px' }}>
-            </div>
+            <div className="absolute inset-0 pointer-events-none opacity-5 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%] z-0"></div>
         </div>
     );
 }

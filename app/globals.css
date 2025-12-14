@@ -3,18 +3,169 @@
 @tailwind utilities;
 
 :root {
-    --background: #ffffff;
-    --foreground: #171717;
+    /* Primary Brand Colors */
+    --balatro-red: #ff4c40;
+    --balatro-red-dark: #a02721;
+    --balatro-blue: #0093ff;
+    --balatro-blue-dark: #0057a1;
+    --balatro-orange: #ff9800;
+    --balatro-orange-dark: #a05b00;
+    --balatro-green: #429f79;
+    --balatro-green-dark: #215f46;
+    --balatro-purple: #7d60e0;
+    --balatro-purple-dark: #292189;
+    --balatro-gold: #eaba44;
+    /* BrightGold */
+
+    /* Modal/Panel Colors */
+    --balatro-grey: #3a5055;
+    --balatro-grey-dark: #33464b;
+    --balatro-grey-darker: #1e2b2d;
+    /* DarkGrey */
+    --balatro-shadow: #0b1415;
+    --balatro-border: #b9c2d2;
+    /* BrightSilver */
+
+    /* Text */
+    --balatro-text: #FFFFFF;
+    --balatro-text-grey: #777e89;
+
+    --font-header: 'Rubik', sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --background: #0a0a0a;
-        --foreground: #ededed;
+/* Swirl Background Effect */
+@keyframes swirl {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
     }
 }
 
 body {
-    color: var(--foreground);
-    background: var(--background);
+    /* Authentic Balatro Red/Blue/Grey swirl matching the reference screenshots */
+    background: linear-gradient(-45deg, #2c3e50, #0099DB, #c0392b, #8E44AD);
+    background-size: 400% 400%;
+    animation: swirl 20s ease infinite;
+    min-height: 100vh;
+    color: white;
+    font-family: var(--font-header), sans-serif;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* CRT Scanline Overlay */
+body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: repeating-linear-gradient(to bottom,
+            rgba(0, 0, 0, 0.1),
+            rgba(0, 0, 0, 0.1) 2px,
+            transparent 2px,
+            transparent 4px);
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.15;
+    /* COZY MODE: Much softer scanlines */
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1e293b;
+    border-left: 2px solid white;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #475569;
+    border: 2px solid white;
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+@layer components {
+    .balatro-card {
+        background-color: #334155;
+        border: 3px solid white;
+        border-radius: 0.75rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .balatro-btn {
+        text-transform: uppercase;
+        font-family: var(--font-header), impact, sans-serif;
+        letter-spacing: 0.05em;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.15s ease-in-out;
+        box-shadow: 0 4px 0 rgba(0, 0, 0, 0.4);
+    }
+
+    .balatro-btn:hover {
+        border-color: white;
+    }
+
+    .balatro-btn:active {
+        box-shadow: none;
+        transform: translateY(4px);
+    }
+
+    .balatro-input {
+        background-color: rgba(0, 0, 0, 0.4);
+        border: 2px solid transparent;
+        border-radius: 0.5rem;
+        color: white;
+        font-family: 'Courier New', monospace;
+        padding: 0.5rem 1rem;
+        outline: none;
+        transition: border-color 0.15s ease-in-out;
+    }
+
+    .balatro-input:focus {
+        border-color: var(--balatro-blue);
+    }
+
+    .balatro-input::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+    }
+}
+
+/* Utilities */
+.font-pixel {
+    font-family: 'm6x11', monospace;
+    font-weight: normal !important;
+    /* NEVER BOLD */
+    font-size: 1.25rem;
+    /* Readability bump */
+}
+
+.font-header {
+    font-family: 'm6x11', monospace;
+    font-weight: normal !important;
+    letter-spacing: 0.1em;
+}
+
+.text-shadow-sm {
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+.text-shadow-md {
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
 }

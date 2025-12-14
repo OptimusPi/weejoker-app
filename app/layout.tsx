@@ -1,19 +1,22 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Outfit, JetBrains_Mono, Russo_One, VT323 } from 'next/font/google';
+import { Outfit, JetBrains_Mono } from 'next/font/google';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { DuckDBProvider } from '@/components/DuckDBProvider';
+import { BackgroundShader } from '@/components/BackgroundShader';
 
-const fontHeader = Russo_One({
-    subsets: ['latin'],
+import localFont from 'next/font/local';
+
+const fontHeader = localFont({
+    src: '../public/fonts/m6x11plusplus.otf',
     variable: '--font-header',
-    weight: '400',
+    display: 'swap',
 });
 
-const fontPixel = VT323({
-    subsets: ['latin'],
+const fontPixel = localFont({
+    src: '../public/fonts/m6x11plusplus.otf',
     variable: '--font-pixel',
-    weight: '400',
+    display: 'swap',
 });
 
 const fontSans = Outfit({
@@ -27,8 +30,8 @@ const fontMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-    title: 'Erratic Explorer | Balatro Seed Hunter',
-    description: 'Analyze and find the perfect Balatro erratic deck seeds.',
+    title: 'The Daily Wee | Balatro Seed Hunter',
+    description: 'Find the perfect Balatro seeds.',
 };
 
 export default function RootLayout({
@@ -40,16 +43,45 @@ export default function RootLayout({
         <html lang="en">
             <body
                 className={cn(
-                    'min-h-screen bg-transparent font-sans antialiased overflow-x-hidden',
+                    'min-h-screen font-sans antialiased overflow-x-hidden text-white',
                     fontSans.variable,
                     fontMono.variable,
                     fontHeader.variable,
                     fontPixel.variable
                 )}
             >
-                <DuckDBProvider>
-                    {children}
-                </DuckDBProvider>
+                <BackgroundShader />
+
+                <div className="relative z-10 min-h-screen flex flex-col">
+                    <header className="py-6 border-b border-white/10 bg-black/20 backdrop-blur-sm sticky top-0 z-50">
+                        <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
+                            <Link href="/" className="hover:opacity-80 transition-opacity">
+                                <h1 className="text-4xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-red-600 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] filter contrast-125 font-header">
+                                    THE DAILY WEE
+                                </h1>
+                            </Link>
+                        </div>
+                    </header>
+                    <main className="flex-grow">
+                        {children}
+                    </main>
+                    <footer className="py-12 text-center text-white/60 space-y-6 bg-black/40 backdrop-blur-md">
+                        <p className="font-pixel text-lg">
+                            Not affiliated with LocalThunk or PlayStack.
+                        </p>
+                        <a
+                            href="https://store.steampowered.com/app/2379780/Balatro/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block bg-[#FF4D4D] hover:bg-[#C0392B] text-white font-header text-xl px-8 py-3 rounded shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 transition-all border-2 border-white/20 hover:border-white"
+                        >
+                            BUY BALATRO
+                        </a>
+                        <p className="font-pixel text-sm opacity-80">
+                            Created with ❤️ for the Balatro community.
+                        </p>
+                    </footer>
+                </div>
             </body>
         </html>
     );

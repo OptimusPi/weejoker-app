@@ -6,7 +6,6 @@ import { SeedCard } from "./SeedCard";
 import { FilterBar } from "./FilterBar";
 import { DailyWee } from "./DailyWee";
 import { SeedAnalysisOverlay } from "./SeedAnalysisOverlay";
-import { useDuckDB } from "@/components/DuckDBProvider";
 import { SeedScatterPlot } from "./SeedScatterPlot";
 
 interface ExplorerProps {
@@ -14,140 +13,66 @@ interface ExplorerProps {
 }
 
 export default function Explorer({ initialSeeds }: ExplorerProps) {
-    const { db, conn, loading: dbLoading } = useDuckDB();
+    // Remove DuckDB - it's overkill for 55KB and causing hangs
+    const [seeds, setSeeds] = useState<SeedData[]>(initialSeeds);
+    const [filteredSeeds, setFilteredSeeds] = useState<SeedData[]>(initialSeeds);
     const [search, setSearch] = useState("");
     const [sort, setSort] = useState("default");
     const [selectedSeed, setSelectedSeed] = useState<SeedData | null>(null);
-    const [seeds, setSeeds] = useState<SeedData[]>(initialSeeds);
-    const [isDbReady, setIsDbReady] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-    // Initial Data Load into DuckDB
+    // Data loading
     useEffect(() => {
-        if (!conn || isDbReady) return;
-
         const loadData = async () => {
             try {
-                // 1. Try to load real data from Parquet
-                // We assume the file is at /seeds.parquet in the public folder
-                const parquetUrl = window.location.origin + '/seeds.parquet';
+                const response = await fetch('/seeds.csv');
+                if (!response.ok) throw new Error("Failed to fetch csv");
+                const csvText = await response.text();
 
-                // Check if file exists (optional, but good for fallback logic)
-                const check = await fetch(parquetUrl, { method: 'HEAD' });
+                const lines = csvText.split('\n').filter(l => l.trim().length > 0);
+                const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
 
-                if (check.ok) {
-                    console.log("Found seeds.parquet, loading...");
-                    await conn.query(`
-                        CREATE TABLE IF NOT EXISTS seeds AS 
-                        SELECT * FROM '${parquetUrl}'
-                    `);
-                    console.log("DuckDB: Parquet data loaded!");
-                } else {
-                    console.log("No seeds.parquet found, loading mock data...");
-                    // 2. Fallback to Mock Data
-                    await conn.query(`
-                        CREATE TABLE IF NOT EXISTS seeds (
-                            seed VARCHAR,
-                            run_score INTEGER,
-                            joker_wee INTEGER,
-                            joker_hack INTEGER,
-                            rank_2_count INTEGER,
-                            suit_hearts INTEGER,
-                            suit_diamonds INTEGER,
-                            suit_clubs INTEGER,
-                            suit_spades INTEGER
-                        );
-                    `);
+                const parsedData: SeedData[] = lines.slice(1).map(line => {
+                    const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+                    const obj: any = {};
+                    headers.forEach((h, i) => {
+                        const val = values[i];
+                        obj[h] = isNaN(Number(val)) ? val : Number(val);
+                    });
+                    return obj as SeedData;
+                });
 
-                    // Clear existing
-                    await conn.query('DELETE FROM seeds');
-
-                    // Batch insert mock data
-                    const stmt = await conn.prepare('INSERT INTO seeds VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
-                    for (const s of initialSeeds) {
-                        await stmt.query(
-                            s.seed,
-                            s.run_score || 0,
-                            s.joker_wee || 0,
-                            s.joker_hack || 0,
-                            s.rank_2_count || 0,
-                            s.suit_hearts || 0,
-                            s.suit_diamonds || 0,
-                            s.suit_clubs || 0,
-                            s.suit_spades || 0
-                        );
-                    }
-                    await stmt.close();
-                }
-
-                setIsDbReady(true);
+                setSeeds(parsedData);
+                setFilteredSeeds(parsedData);
+                setLoading(false);
+                console.log("Loaded seeds:", parsedData.length);
             } catch (e) {
-                console.error("DuckDB load error:", e);
+                console.error("CSV Load Error:", e);
+                setLoading(false); // Fail gracefully
             }
         };
-
         loadData();
-    }, [conn, initialSeeds, isDbReady]);
+    }, []);
 
-    // Query Logic
+    // client-side filter/sort
     useEffect(() => {
-        if (!conn || !isDbReady) return;
+        let result = [...seeds];
 
-        const runQuery = async () => {
-            let query = "SELECT * FROM seeds";
-            const params: any[] = [];
+        if (search) {
+            const q = search.toUpperCase();
+            result = result.filter(s => s.seed.includes(q));
+        }
 
-            if (search) {
-                query += " WHERE seed LIKE ?";
-                params.push(`%${search.toUpperCase()}%`);
-            }
+        switch (sort) {
+            case "wee_desc": result.sort((a, b) => (b.wee_a1_cheap || 0) - (a.wee_a1_cheap || 0) || (b.score || 0) - (a.score || 0)); break;
+            case "hack_desc": result.sort((a, b) => (b.hack_a1 || 0) - (a.hack_a1 || 0) || (b.score || 0) - (a.score || 0)); break;
+            case "hearts_desc": result.sort((a, b) => (b.twos || 0) - (a.twos || 0) || (b.score || 0) - (a.score || 0)); break; // Mapped to twos
+            case "spades_desc": result.sort((a, b) => (b.score || 0) - (a.score || 0)); break;
+            default: result.sort((a, b) => (b.score || 0) - (a.score || 0));
+        }
 
-            switch (sort) {
-                case "wee_desc": query += " ORDER BY joker_wee DESC"; break;
-                case "hack_desc": query += " ORDER BY joker_hack DESC"; break;
-                case "hearts_desc": query += " ORDER BY suit_hearts DESC"; break;
-                case "spades_desc": query += " ORDER BY suit_spades DESC"; break;
-                default: query += " ORDER BY run_score DESC";
-            }
-
-            // Limit for performance UI
-            query += " LIMIT 50";
-
-            try {
-                // Construct prepared statement if using parameters (DuckDB-Wasm prepared statements are a bit manual)
-                // For simplicity with this wrapper, simple concatenation for the mock is fine, 
-                // but strictly we should use the prepared statement API if inputs were untrusted.
-                // Since 'search' is local state, we'll use a direct query for this demo step.
-
-                // Note: DuckDB WASM usually handles parameterized queries via prepared statements.
-                // For this quick impl, I'll interpolate carefully.
-                const safeSearch = search.replace(/'/g, "''").toUpperCase();
-                let sql = `SELECT * FROM seeds`;
-                if (search) sql += ` WHERE seed LIKE '%${safeSearch}%'`;
-
-                switch (sort) {
-                    case "wee_desc": sql += " ORDER BY joker_wee DESC"; break;
-                    case "hack_desc": sql += " ORDER BY joker_hack DESC"; break;
-                    case "hearts_desc": sql += " ORDER BY suit_hearts DESC"; break;
-                    case "spades_desc": sql += " ORDER BY suit_spades DESC"; break;
-                    default: sql += " ORDER BY run_score DESC";
-                }
-                sql += " LIMIT 50";
-
-                const arrowTable = await conn.query(sql);
-                const result = arrowTable.toArray().map((row: any) => row.toJSON());
-
-                // Map back to our SeedData type (keys might be lowercased by default but DuckDB preserves case usually? check types)
-                // DuckDB/Arrow toJSON usually returns object with column names.
-                setSeeds(result);
-            } catch (e) {
-                console.error("Query failed", e);
-            }
-        };
-
-        const timer = setTimeout(runQuery, 200); // Debounce
-        return () => clearTimeout(timer);
-    }, [conn, isDbReady, search, sort]);
-
+        setFilteredSeeds(result.slice(0, 50)); // Limit for display
+    }, [seeds, search, sort]);
 
     // Daily seed logic (deterministic for demo purposes, pick the one with most 2s)
     // We can compute this from local data for now to avoid async daily flicker
@@ -155,7 +80,7 @@ export default function Explorer({ initialSeeds }: ExplorerProps) {
         if (seeds.length > 0) {
             // Just fallback to first sorted by default or similar
             return initialSeeds.reduce((prev, current) => {
-                return (prev.rank_2_count || 0) > (current.rank_2_count || 0) ? prev : current;
+                return (prev.score || 0) > (current.score || 0) ? prev : current;
             });
         }
         return initialSeeds[0];
@@ -163,13 +88,16 @@ export default function Explorer({ initialSeeds }: ExplorerProps) {
 
     return (
         <div className="w-full max-w-7xl mx-auto px-4 py-8">
-            <DailyWee seed={dailySeed} />
+            <div className="bg-black/30 p-6 rounded-xl border border-white/10 mb-8">
+                <h3 className="text-2xl font-header text-white mb-2">Seed Archive</h3>
+                <p className="font-pixel text-zinc-400 text-sm">Search the full history of Wee Joker seeds.</p>
+            </div>
 
             <FilterBar onSearch={setSearch} onSortChange={setSort} />
 
             <div className="flex justify-end mb-2">
                 <span className="text-xs font-pixel text-zinc-500 uppercase">
-                    {dbLoading ? "Initializing DB..." : isDbReady ? "Powered by DuckDB WASM" : "Loading Data..."}
+                    {loading ? "Loading Data..." : "Loaded from CSV"}
                 </span>
             </div>
 
@@ -180,27 +108,46 @@ export default function Explorer({ initialSeeds }: ExplorerProps) {
 
             {/* Results Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {seeds.map((seed) => (
+                {filteredSeeds.map((seed, i) => (
                     <SeedCard
-                        key={seed.seed}
+                        key={seed.seed + i}
                         seed={seed}
                         onAnalyze={setSelectedSeed}
                     />
                 ))}
 
-                {seeds.length === 0 && (
+                {filteredSeeds.length === 0 && (
                     <div className="col-span-full py-20 text-center text-zinc-500">
-                        {isDbReady ? "No seeds found matching your criteria." : "Loading seeds..."}
+                        {loading ? "Loading seeds..." : "No seeds found matching your criteria."}
                     </div>
                 )}
             </div>
 
-            {selectedSeed && (
-                <SeedAnalysisOverlay
-                    seed={selectedSeed}
-                    onClose={() => setSelectedSeed(null)}
-                />
-            )}
-        </div>
+            {
+                selectedSeed && (
+                    <SeedAnalysisOverlay
+                        seed={selectedSeed}
+                        onClose={() => setSelectedSeed(null)}
+                    />
+                )
+            }
+
+            {/* External CTA */}
+            <div className="mt-16 mb-8 text-center">
+                <a
+                    href="https://weejoker.app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block transform hover:scale-105 active:scale-95 transition-transform duration-150"
+                >
+                    <div className="balatro-btn text-xl md:text-2xl px-8 py-4 bg-balatro-blue hover:bg-balatro-blue-dark border-balatro-blue-dark shadow-lg">
+                        Visit WeeJoker.app
+                    </div>
+                </a>
+                <p className="mt-4 text-balatro-silver-light font-pixel text-sm opacity-60">
+                    Find your next broken run.
+                </p>
+            </div>
+        </div >
     );
 }
