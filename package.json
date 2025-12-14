@@ -14,10 +14,12 @@
     },
     "dependencies": {
         "@duckdb/duckdb-wasm": "^1.28.0",
+        "@types/papaparse": "^5.5.2",
         "clsx": "^2.1.0",
         "framer-motion": "^11.0.8",
         "lucide-react": "^0.561.0",
         "next": "^15.1.0",
+        "papaparse": "^5.5.3",
         "react": "^19.2.3",
         "react-dom": "^19.2.3",
         "recharts": "^2.12.2",

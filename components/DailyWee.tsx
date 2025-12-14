@@ -12,13 +12,31 @@ import Image from "next/image";
 const EPOCH = new Date('2025-12-13T00:00:00Z').getTime(); // Dec 13 = Day 1
 const getDayNumber = () => Math.floor((Date.now() - EPOCH) / (24 * 60 * 60 * 1000)) + 1;
 
-export function DailyWee({ seeds }: { seeds: SeedData[] }) {
+import Papa from "papaparse";
+
+// ... existing imports
+
+export function DailyWee() {
+    const [seeds, setSeeds] = useState<SeedData[]>([]);
     const [viewingDay, setViewingDay] = useState<number>(1);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         setViewingDay(getDayNumber());
         setMounted(true);
+
+        // Fetch CSV directly
+        fetch('/seeds.csv')
+            .then(res => res.text())
+            .then(csvText => {
+                Papa.parse(csvText, {
+                    header: true,
+                    dynamicTyping: true,
+                    complete: (results: any) => {
+                        setSeeds(results.data);
+                    }
+                });
+            });
     }, []);
 
     const [showSubmit, setShowSubmit] = useState(false);
@@ -29,14 +47,14 @@ export function DailyWee({ seeds }: { seeds: SeedData[] }) {
     const isTomorrow = viewingDay === todayNumber + 1;
     const isWeepoch = viewingDay < 1;
     const canGoBack = viewingDay > 0;
-    const canGoForward = viewingDay <= todayNumber + 1; // Allow going to tomorrow
+    const canGoForward = viewingDay < todayNumber + 1; // Strictly less than tomorrow
 
     const seed = seeds[viewingDay - 1];
 
     // Countdown Logic
     const [timeLeft, setTimeLeft] = useState("");
     useEffect(() => {
-        if (!isTomorrow) return;
+        if (!isTomorrow) return; // Works fine now because it's inside useEffect
         const interval = setInterval(() => {
             const now = new Date();
             const tomorrow = new Date(now);
@@ -51,8 +69,6 @@ export function DailyWee({ seeds }: { seeds: SeedData[] }) {
         }, 1000);
         return () => clearInterval(interval);
     }, [isTomorrow]);
-
-    if (!mounted) return null;
 
     const getDayDisplay = (day: number) => {
         if (day < 1) return "EPOCH START";
@@ -69,7 +85,7 @@ export function DailyWee({ seeds }: { seeds: SeedData[] }) {
                 {/* Header Text */}
                 <div className="text-center mb-4">
                     <div className="font-header text-6xl text-white tracking-widest drop-shadow-[4px_4px_0_rgba(0,0,0,1)] uppercase">
-                        {isWeepoch ? "THE WEEPOCH" : (isTomorrow ? "FUTURE" : (isToday ? "TODAY" : `DAY #${viewingDay}`))}
+                        {isWeepoch ? "THE WEEPOCH" : (isTomorrow ? "FUTURE" : (isToday ? "THE DAILY WEE" : `DAY #${viewingDay}`))}
                     </div>
                     <div className="font-pixel text-[var(--balatro-text-grey)] text-xl uppercase tracking-[0.2em] mt-2">
                         {getDayDisplay(viewingDay)}
@@ -92,13 +108,16 @@ export function DailyWee({ seeds }: { seeds: SeedData[] }) {
                     </button>
 
                     {/* Central Stage */}
-                    <div className="relative z-10 transform hover:scale-105 transition-transform duration-300 w-full max-w-sm md:max-w-md">
+                    <div className="relative z-10 transform hover:scale-105 transition-transform duration-300">
                         {isWeepoch ? (
                             /* WEEPOCH CARD */
-                            <div className="bg-[var(--balatro-grey-dark)] p-12 rounded-3xl border-[3px] border-[var(--balatro-border)] text-center shadow-2xl relative overflow-hidden aspect-[2/3] flex flex-col items-center justify-center">
+                            <div className="w-96 aspect-[2/3] bg-[var(--balatro-grey-dark)] rounded-3xl border-[3px] border-[var(--balatro-border)] text-center shadow-2xl relative overflow-hidden flex flex-col items-center justify-center p-8">
                                 <div className="absolute inset-0 bg-black/20 pointer-events-none"></div>
                                 <div className="text-8xl mb-6">🌌</div>
                                 <div className="font-header text-4xl text-[var(--balatro-gold)] mb-4">BEGINNING</div>
+                                <p className="font-pixel text-white/60 text-sm mb-6 max-w-[80%] mx-auto leading-relaxed">
+                                    Project Zero Point. <br /> The void before the seeds.
+                                </p>
                                 <button
                                     onClick={() => setViewingDay(1)}
                                     className="bg-[var(--balatro-blue)] text-white font-header text-xl px-8 py-3 rounded shadow-lg hover:brightness-110 border-b-4 border-[var(--balatro-blue-dark)] active:border-b-0 active:translate-y-1 transition-all"
@@ -108,10 +127,10 @@ export function DailyWee({ seeds }: { seeds: SeedData[] }) {
                             </div>
                         ) : isTomorrow ? (
                             /* TOMORROW CARD */
-                            <div className="bg-[var(--balatro-grey)] p-8 rounded-3xl border-[6px] border-[var(--balatro-border)] text-center shadow-2xl relative overflow-hidden aspect-[2/3] flex flex-col items-center justify-center group">
-                                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-10"></div>
+                            <div className="w-96 aspect-[2/3] bg-[var(--balatro-grey)] rounded-3xl border-[6px] border-[var(--balatro-border)] text-center shadow-2xl relative overflow-hidden flex flex-col items-center justify-center p-8 group">
+                                <div className="absolute inset-0 bg-black/40 z-10"></div>
                                 {/* Filtered SeedCard in Background */}
-                                {seed && <div className="absolute inset-0 blur-md opacity-50 scale-105"><SeedCard seed={seed} /></div>}
+                                {seed && <div className="absolute inset-0 blur-md opacity-50"><SeedCard seed={seed} className="w-full h-full" /></div>}
 
                                 <div className="relative z-20 flex flex-col items-center">
                                     <div className="text-6xl mb-4">🔒</div>
@@ -126,22 +145,22 @@ export function DailyWee({ seeds }: { seeds: SeedData[] }) {
                             </div>
                         ) : (
                             /* SEED CARD - Scaled Up */
-                            /* Passing className to stretch the card */
-                            <div className="relative">
+                            /* Uniform wrapper */
+                            <div className="w-96 aspect-[2/3] relative">
                                 {seed && (
                                     <SeedCard
                                         seed={seed}
-                                        className="w-full text-lg shadow-2xl border-[6px] border-white/20 hover:-translate-y-0" // Reset standard hover translation as we handle scale
-                                        onAnalyze={() => setShowSubmit(true)} // Reusing analyze button for score submit or details
+                                        className="w-full h-full text-lg shadow-2xl border-[6px] border-white/20 hover:-translate-y-0"
+                                        onAnalyze={() => setShowSubmit(true)}
                                     />
                                 )}
-                                {/* Quick Action for Score */}
-                                <div className="absolute -bottom-16 left-0 right-0 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                {/* Helper Buttons */}
+                                <div className="absolute -bottom-16 left-0 right-0 flex justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
-                                        onClick={() => setShowSubmit(true)}
-                                        className="bg-[var(--balatro-green)] text-white font-header px-6 py-2 rounded-full border-2 border-white shadow-lg flex items-center gap-2 hover:scale-110 transition-transform"
+                                        onClick={() => setShowHowTo(true)}
+                                        className="bg-[var(--balatro-yellow)] text-black font-header px-6 py-2 rounded-full border-2 border-white shadow-lg flex items-center gap-2 hover:scale-110 transition-transform"
                                     >
-                                        <Star size={16} /> SUBMIT SCORE
+                                        ? HOW TO PLAY
                                     </button>
                                 </div>
                             </div>
@@ -161,22 +180,7 @@ export function DailyWee({ seeds }: { seeds: SeedData[] }) {
                     </button>
                 </div>
 
-                {/* Footer Message */}
-                {!isWeepoch && !isTomorrow && (
-                    <div className="font-pixel text-[var(--balatro-text-grey)]/60 text-lg animate-pulse mt-8 flex flex-col items-center gap-2">
-                        <span>Click 'DETAILS' on card to submit score</span>
-                        <div className="flex gap-4 mt-2">
-                            <div className="flex items-center gap-1">
-                                <Image src="/assets/wee_joker.png" width={32} height={32} alt="Wee" className="opacity-80" />
-                                <span className="text-[var(--balatro-blue)]">Wee Joker</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <Image src="/assets/hack.png" width={32} height={32} alt="Hack" className="opacity-80" />
-                                <span className="text-[var(--balatro-red)]">Hack</span>
-                            </div>
-                        </div>
-                    </div>
-                )}
+
             </div>
 
             {showHowTo && <HowToPlay onClose={() => setShowHowTo(false)} />}

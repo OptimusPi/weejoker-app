@@ -70,7 +70,7 @@ export default function RootLayout({
                             Not affiliated with LocalThunk or PlayStack.
                         </p>
                         <a
-                            href="https://store.steampowered.com/app/2379780/Balatro/"
+                            href="https://www.playbalatro.com/"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-block bg-[#FF4D4D] hover:bg-[#C0392B] text-white font-header text-xl px-8 py-3 rounded shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 transition-all border-2 border-white/20 hover:border-white"

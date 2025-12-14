@@ -14,6 +14,11 @@ export async function GET(request: NextRequest) {
         const { env } = getRequestContext();
         const db = env.DB;
 
+        if (!db) {
+            console.error('DB binding not found in env');
+            return NextResponse.json({ error: 'Database binding missing' }, { status: 500 });
+        }
+
         if (week === 'true') {
             // Get top score for each of the past 7 days
             const result = await db.prepare(`

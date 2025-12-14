@@ -48,16 +48,16 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-            <div className="bg-[var(--balatro-grey-darker)] border-[3px] border-[var(--balatro-gold)] rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+            <div className="bg-[var(--balatro-grey-darker)] border-[3px] border-[var(--balatro-gold)] rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl relative overflow-hidden">
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors"
+                    className="absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors z-10"
                 >
                     <X size={24} />
                 </button>
 
-                <div className="text-center mb-6">
+                <div className="text-center mb-6 relative z-10">
                     <Trophy size={48} className="text-[var(--balatro-gold)] mx-auto mb-2" />
                     <h2 className="text-3xl font-header text-white tracking-wider">
                         SUBMIT YOUR SCORE
