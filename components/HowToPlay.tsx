@@ -3,9 +3,10 @@ import { X, ExternalLink, Gamepad2, Copy, Trophy } from "lucide-react";
 
 interface HowToPlayProps {
     onClose: () => void;
+    onSubmit?: () => void;
 }
 
-export function HowToPlay({ onClose }: HowToPlayProps) {
+export function HowToPlay({ onClose, onSubmit }: HowToPlayProps) {
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/80 animate-in fade-in duration-200" onClick={onClose}>
             <div className="relative w-full max-w-2xl bg-[var(--balatro-grey)] border-[3px] border-[var(--balatro-blue)] shadow-[0_8px_0_#000] rounded-xl overflow-hidden animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
@@ -87,10 +88,15 @@ export function HowToPlay({ onClose }: HowToPlayProps) {
                     </div>
                 </div>
 
-                <div className="p-4 border-t-[3px] border-black/10 text-center bg-black/20">
-                    <button onClick={onClose} className="w-full bg-[var(--balatro-orange)] hover:brightness-110 text-white font-header py-3 rounded-xl border-[3px] border-white shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[2px] transition-all text-xl tracking-wider">
+                <div className="p-4 border-t-[3px] border-black/10 text-center bg-black/20 flex gap-4">
+                    <button onClick={onClose} className="flex-1 bg-black/40 hover:bg-black/60 text-white font-header py-3 rounded-xl border-[3px] border-white/30 shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[2px] transition-all text-xl tracking-wider">
                         BACK
                     </button>
+                    {onSubmit && (
+                        <button onClick={onSubmit} className="flex-[2] bg-[var(--balatro-orange)] hover:brightness-110 text-white font-header py-3 rounded-xl border-[3px] border-white shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[2px] transition-all text-xl tracking-wider flex items-center justify-center gap-2">
+                            <span>SUBMIT SCORE</span>
+                        </button>
+                    )}
                 </div>
 
             </div>

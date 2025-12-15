@@ -9,12 +9,11 @@ import { SubmitScoreModal } from "./SubmitScoreModal";
 import { LeaderboardModal } from "./LeaderboardModal";
 import { Sprite } from "./Sprite";
 import Image from "next/image";
-import Papa from "papaparse";
+
 
 // Day calculation
-const EPOCH = new Date('2025-12-15T00:00:00Z').getTime(); // Dec 15 = Day 1 (Launch)
-// If today is Dec 14, (Dec 14 - Dec 15) is negative => Day 0 or -1. 
-// We want Dec 14 to be Day 0.
+const EPOCH = new Date('2025-12-16T00:00:00Z').getTime(); // Dec 16 = Day 1
+// If today is Dec 15, result is 0.
 const getDayNumber = () => Math.floor((Date.now() - EPOCH) / (24 * 60 * 60 * 1000)) + 1;
 
 export function DailyWee() {
@@ -48,27 +47,19 @@ export function DailyWee() {
         }
         setMounted(true);
 
-        // Fetch CSV directly
-        // Fetch CSV and handle DuckDB preamble
-        fetch('/seeds.csv')
-            .then(res => res.text())
-            .then(csvText => {
-                // Remove first line (DuckDB header) if it exists
-                const lines = csvText.split('\n');
-                const cleanCsv = lines[0].startsWith('≡') ? lines.slice(1).join('\n') : csvText;
-
-                Papa.parse(cleanCsv, {
-                    header: true,
-                    dynamicTyping: true,
-                    skipEmptyLines: true,
-                    complete: (results: any) => {
-                        console.log("Parsed Seeds:", results.data.slice(0, 2)); // Debug log
-                        setSeeds(results.data);
-                    },
-                    error: (error: any) => {
-                        console.error("CSV Parse Error:", error);
-                    }
-                });
+        // Fetch the seed for the current viewingDay via server API
+        fetch(`/api/daily?day=${viewingDay}`)
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch seed');
+                return res.json();
+            })
+            .then((seedData: SeedData) => {
+                // Keep seeds as an array for existing rendering logic
+                setSeeds([seedData]);
+            })
+            .catch(error => {
+                console.error('Seed fetch error:', error);
+                setSeeds([]);
             });
     }, []);
 
@@ -125,115 +116,76 @@ export function DailyWee() {
     if (!mounted) return null;
 
     return (
-        <div className="h-[100dvh] w-full relative">
-
-            {/* VIEW 1: MAIN STAGE (Static Base Layer) */}
-            <div className="absolute inset-0 z-10 flex flex-col items-center justify-start sm:justify-center overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-12 scale-90 sm:scale-100 transform-gpu origin-center pt-4 sm:pt-0">
-
-                {/* VIEW 1: HERO STAGE (95% Viewport Height) */}
-                <div className="min-h-[95dvh] w-full relative z-10 flex flex-col items-center justify-start sm:justify-center pt-2 sm:pt-0">
-
-                    {/* Header Text - Newspaper Masthead Style */}
-                    <div className="text-center w-full relative z-20 mb-2 shrink-0">
-                        {/* Top Meta Line */}
-                        <div className="flex justify-between w-full max-w-md mx-auto text-[10px] sm:text-xs font-pixel text-white/60 tracking-widest border-b border-white/20 pb-1 mb-1 uppercase px-4">
+        <div className="h-[100dvh] w-full relative overflow-hidden bg-[var(--balatro-black)]">
+            {/* MAIN VIEW */}
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center overflow-hidden">
+                {/* HERO STAGE - TIGHT LAYOUT */}
+                <div className="h-[100dvh] w-full relative z-10 flex flex-col items-center justify-center pb-2">
+                    {/* Header */}
+                    <div className="text-center w-full relative z-20 mb-1 shrink-0">
+                        <div className="flex justify-between w-full max-w-sm mx-auto text-xs font-pixel text-white/90 tracking-widest border-b border-white/30 pb-1 mb-1 uppercase px-4 drop-shadow-md">
                             <span>Vol. 1</span>
                             <span>{viewingDay < 1 ? 'WEEPOCH' : `No. ${viewingDay}`}</span>
                             <span>200 Chips</span>
                         </div>
-
-                        {/* Main Title */}
-                        <div className="font-header text-5xl sm:text-6xl md:text-7xl text-white tracking-widest drop-shadow-[4px_4px_0_rgba(0,0,0,1)] uppercase leading-none mb-1 select-none">
+                        <div className="font-header text-6xl sm:text-7xl text-white tracking-widest drop-shadow-[4px_4px_0_rgba(0,0,0,1)] uppercase leading-none mb-1 select-none">
                             THE DAILY WEE
                         </div>
-
-                        {/* Slogan Line */}
-                        <div className="w-full max-w-md mx-auto border-t-2 border-b-2 border-white/20 py-1 mb-2 px-4">
-                            <div className="flex justify-between items-center py-1 border-t border-b border-white/10 text-[10px] sm:text-xs font-pixel text-[var(--balatro-text-grey)] uppercase tracking-[0.2em]">
+                        <div className="w-full max-w-sm mx-auto border-t-2 border-b-2 border-white/30 py-0.5 mb-1 px-4">
+                            <div className="flex justify-between items-center py-0.5 border-t border-b border-white/20 text-xs font-pixel text-white/80 uppercase tracking-[0.2em] shadow-sm">
                                 <span>{getDayDisplay(viewingDay)}</span>
-                                <span className="italic normal-case tracking-normal opacity-80 hidden sm:inline">&quot;All the 2s&quot;</span>
+                                <span className="italic normal-case tracking-normal opacity-90 hidden sm:inline">"All the 2s"</span>
                                 <span>Est. 2025</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Main Interaction Area - Flexbox for Stretched Buttons */}
-                    <div className="flex flex-row items-stretch justify-center gap-2 sm:gap-4 w-full max-w-[95vw] sm:max-w-3xl mx-auto px-0 sm:px-4 relative z-30 grow pb-32 sm:pb-12">
-
-                        {/* Left Nav (Tall Flanking Button) */}
-                        <button
-                            onClick={() => canGoBack && updateDay(v => v - 1)}
-                            disabled={!canGoBack}
-                            className={`
-                            hidden sm:flex items-center justify-center w-14 flex-shrink-0
-                            rounded-xl
-                            transition-all duration-75 ease-out
-                            ${!canGoBack
-                                    ? 'opacity-0 cursor-default pointer-events-none'
-                                    : 'bg-[var(--balatro-grey)] shadow-[0_4px_0_#000] hover:bg-[var(--balatro-grey-dark)] active:shadow-none active:translate-y-[2px]'
-                                }
-                        `}
+                    {/* Main Interaction Area - FULL HEIGHT ROW */}
+                    <div className="flex flex-row items-stretch justify-center gap-2 sm:gap-4 w-full max-w-[95vw] sm:max-w-3xl mx-auto px-0 sm:px-4 relative z-30 grow mb-2 min-h-0">
+                        {/* Left Nav */}
+                        <button onClick={() => canGoBack && updateDay(v => v - 1)} disabled={!canGoBack}
+                            className={`hidden sm:flex items-center justify-center w-14 flex-shrink-0 rounded-xl transition-all duration-75 ease-out border-[2px] border-black/20 ${!canGoBack ? 'opacity-0 cursor-default pointer-events-none' : 'bg-[#D04035] shadow-[0_4px_0_#000] hover:bg-[#B03025] hover:brightness-110 active:shadow-none active:translate-y-[2px]'}`}
                         >
                             <ChevronLeft size={36} className="text-white drop-shadow-md" strokeWidth={5} />
                         </button>
-
-                        {/* Mobile Left Nav (Floating) */}
-                        <button
-                            onClick={() => canGoBack && updateDay(v => v - 1)}
-                            disabled={!canGoBack}
-                            className={`
-                            sm:hidden absolute left-0 top-1/2 -translate-y-1/2 z-40
-                            w-12 h-24 rounded-r-xl
-                            flex items-center justify-center transition-all duration-75 ease-out
-                            ${!canGoBack
-                                    ? 'opacity-0 cursor-default pointer-events-none'
-                                    : 'bg-[var(--balatro-grey)] shadow-[0_4px_0_#000] hover:bg-[var(--balatro-grey-dark)] active:shadow-none active:translate-y-[2px]'
-                                }
-                        `}
+                        {/* Mobile Left Nav */}
+                        <button onClick={() => canGoBack && updateDay(v => v - 1)} disabled={!canGoBack}
+                            className={`sm:hidden absolute left-0 top-1/2 -translate-y-1/2 z-40 w-12 h-24 rounded-r-xl flex items-center justify-center transition-all duration-75 ease-out border-y-[2px] border-r-[2px] border-black/20 ${!canGoBack ? 'opacity-0 cursor-default pointer-events-none' : 'bg-[#D04035] shadow-[0_4px_0_#000] hover:bg-[#B03025] active:shadow-none active:translate-y-[2px]'}`}
                         >
                             <ChevronLeft size={32} className="text-white drop-shadow-md" strokeWidth={4} />
                         </button>
 
-
-                        {/* Central Stage (Card) */}
-                        <div className="relative w-full max-w-[22rem] sm:max-w-[24rem] z-20 px-2 sm:px-0 flex flex-col grow">
-
+                        {/* Central Stage */}
+                        <div className="relative w-full max-w-[22rem] sm:max-w-[24rem] z-20 px-2 sm:px-0 flex flex-col grow min-h-0">
                             {isWeepoch ? (
-                                /* WEEPOCH CARD */
-                                <div className="w-full bg-black/30 backdrop-blur-lg rounded-3xl border-[3px] border-white/20 text-center shadow-2xl relative overflow-hidden flex flex-col items-center justify-center p-8 grow">
-                                    <div className="absolute inset-0 bg-black/20 pointer-events-none"></div>
+                                // WEEPOCH CARD
+                                <div className="w-full bg-black/40 backdrop-blur-sm rounded-xl border-[4px] border-white/20 text-center shadow-2xl relative overflow-hidden flex flex-col items-center justify-center p-8 grow">
                                     <div className="text-8xl mb-6">🌌</div>
                                     <div className="font-header text-4xl text-[var(--balatro-gold)] mb-4">BEGINNING</div>
                                     <p className="font-pixel text-white/60 text-sm mb-6 max-w-[80%] mx-auto leading-relaxed">
-                                        Project Zero Point. <br />
-                                        Idea has been rattling around pifreak&apos;s head for quite a while! <br />
-                                        Inspired by daylatro (tfausk) & Wordle.
+                                        Project Zero Point.<br />Idea has been rattling around pifreak's head for quite a while!<br />Inspired by daylatro (tfausk) &amp; Wordle.
                                     </p>
-                                    <button
-                                        onClick={() => updateDay(1)}
+                                    <button onClick={() => updateDay(1)}
                                         className="bg-[var(--balatro-blue)] text-white font-header text-xl px-8 py-3 rounded-xl shadow-[0_4px_0_#000] hover:bg-[var(--balatro-blue-dark)] active:shadow-none active:translate-y-[2px] transition-all duration-75 ease-out"
                                     >
                                         GO TO DAY 1
                                     </button>
                                 </div>
                             ) : isTomorrow ? (
-                                /* TOMORROW CARD */
-                                <div className="w-full bg-black/30 backdrop-blur-lg rounded-3xl border-[6px] border-white/20 text-center shadow-2xl relative overflow-hidden flex flex-col items-center justify-center p-8 group grow">
-                                    <div className="absolute inset-0 bg-black/40 z-10"></div>
-
+                                // TOMORROW CARD
+                                <div className="w-full bg-black/40 backdrop-blur-sm rounded-xl border-[4px] border-white/20 text-center shadow-2xl relative overflow-hidden flex flex-col items-center justify-center p-8 group grow">
                                     <div className="relative z-20 flex flex-col items-center">
                                         <div className="mb-4 text-white/50">
-                                            <div className="bg-black/50 p-4 rounded-xl border-2 border-white/10">
-                                                <div className="w-12 h-12 border-4 border-white/30 rounded-full flex items-center justify-center">
-                                                    <div className="w-6 h-6 bg-white/30 rounded-sm"></div>
+                                            <div className="bg-black/50 p-6 rounded-2xl border-2 border-white/10">
+                                                {/* Padlock Icon Logic - Fallback to built-in lock if specific sprite missing */}
+                                                <div className="w-16 h-16 flex items-center justify-center text-white/40">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="font-header text-4xl text-white mb-2 tracking-widest text-shadow-lg uppercase">
-                                            DAY {viewingDay}
-                                        </div>
+                                        <div className="font-header text-4xl text-white mb-2 tracking-widest text-shadow-lg uppercase">DAY {viewingDay}</div>
                                         <div className="font-pixel text-[var(--balatro-text-grey)] text-lg mb-6">LOCKED UNTIL TOMORROW</div>
-                                        <div className="bg-black/60 px-6 py-3 rounded-xl border border-white/10 shadow-inner">
+                                        <div className="bg-black/80 px-6 py-3 rounded-xl border border-white/20 shadow-inner">
                                             <div className="font-header text-3xl text-[var(--balatro-gold)] tracking-widest tabular-nums animate-pulse">
                                                 {timeLeft || "--:--:--"}
                                             </div>
@@ -241,106 +193,73 @@ export function DailyWee() {
                                     </div>
                                 </div>
                             ) : (
-                                /* SEED CARD */
-                                <div className="w-full relative group/card flex flex-col grow">
+                                // SEED CARD (real data) - FULL HEIGHT
+                                <div className="w-full h-full relative group/card flex flex-col grow min-h-0">
                                     {seed && (
                                         <SeedCard
                                             seed={seed}
-                                            className="w-full text-lg shadow-2xl hover:-translate-y-0 grow flex flex-col"
-                                            onAnalyze={() => setShowSubmit(true)}
+                                            dayNumber={viewingDay}
+                                            className="w-full h-full grow flex flex-col"
+                                            onAnalyze={() => setShowHowTo(true)} // 'Play' button now opens HowToPlay
                                         />
                                     )}
-                                    {/* Helper Buttons - Pushed down and ensured z-index */}
-                                    <div className="mt-8 flex justify-center gap-4 opacity-100 transition-opacity z-50 relative pb-4">
-                                        <button
-                                            onClick={() => setShowHowTo(true)}
-                                            className="bg-[var(--balatro-orange)] text-white font-header px-4 py-2 rounded-xl shadow-[0_4px_0_#000] flex items-center gap-2 hover:bg-[#D04035] hover:brightness-100 transition-transform active:translate-y-[2px] active:shadow-none text-sm"
-                                        >
-                                            ? HOW TO PLAY
-                                        </button>
-                                        <button
-                                            onClick={() => setShowLeaderboard(true)}
-                                            className="bg-[var(--balatro-blue)] text-white font-header px-4 py-2 rounded-xl shadow-[0_4px_0_#000] flex items-center gap-2 hover:bg-[var(--balatro-blue-dark)] transition-transform active:translate-y-[2px] active:shadow-none text-sm"
-                                        >
-                                            <Trophy size={16} className="text-white" />
-                                            HIGH SCORES
-                                        </button>
-                                    </div>
                                 </div>
                             )}
                         </div>
 
-                        {/* Right Nav (Tall Flanking Button) */}
-                        <button
-                            onClick={() => canGoForward && updateDay(v => v + 1)}
-                            disabled={!canGoForward}
-                            className={`
-                            hidden sm:flex items-center justify-center w-14 flex-shrink-0
-                            rounded-xl
-                            transition-all duration-75 ease-out
-                            ${!canGoForward
-                                    ? 'opacity-0 cursor-default pointer-events-none'
-                                    : 'bg-[var(--balatro-grey)] shadow-[0_4px_0_#000] hover:bg-[var(--balatro-grey-dark)] active:shadow-none active:translate-y-[2px]'
-                                }
-                        `}
+                        {/* Right Nav */}
+                        <button onClick={() => canGoForward && updateDay(v => v + 1)} disabled={!canGoForward}
+                            className={`hidden sm:flex items-center justify-center w-14 flex-shrink-0 rounded-xl transition-all duration-75 ease-out border-[2px] border-black/20 ${!canGoForward ? 'opacity-0 cursor-default pointer-events-none' : 'bg-[#D04035] shadow-[0_4px_0_#000] hover:bg-[#B03025] hover:brightness-110 active:shadow-none active:translate-y-[2px]'}`}
                         >
                             <ChevronRight size={36} className="text-white drop-shadow-md" strokeWidth={5} />
                         </button>
-
-                        {/* Mobile Right Nav (Floating) */}
-                        <button
-                            onClick={() => canGoForward && updateDay(v => v + 1)}
-                            disabled={!canGoForward}
-                            className={`
-                            sm:hidden absolute right-0 top-1/2 -translate-y-1/2 z-40
-                            w-12 h-24 rounded-l-xl
-                            flex items-center justify-center transition-all duration-75 ease-out
-                            ${!canGoForward
-                                    ? 'opacity-0 cursor-default pointer-events-none'
-                                    : 'bg-[var(--balatro-grey)] shadow-[0_4px_0_#000] hover:bg-[var(--balatro-grey-dark)] active:shadow-none active:translate-y-[2px]'
-                                }
-                        `}
+                        {/* Mobile Right Nav */}
+                        <button onClick={() => canGoForward && updateDay(v => v + 1)} disabled={!canGoForward}
+                            className={`sm:hidden absolute right-0 top-1/2 -translate-y-1/2 z-40 w-12 h-24 rounded-l-xl flex items-center justify-center transition-all duration-75 ease-out border-y-[2px] border-l-[2px] border-black/20 ${!canGoForward ? 'opacity-0 cursor-default pointer-events-none' : 'bg-[#D04035] shadow-[0_4px_0_#000] hover:bg-[#B03025] active:shadow-none active:translate-y-[2px]'}`}
                         >
                             <ChevronRight size={32} className="text-white drop-shadow-md" strokeWidth={4} />
                         </button>
                     </div>
 
-                    {/* Bottom Trigger for Wee Wisdom - Fixed Bottom Tab - Solid Stone Style */}
-                    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 z-40 pb-0">
-                        <button
-                            onClick={() => setViewMode('wisdom')}
-                            className="group flex flex-col items-center py-4 sm:py-6 px-12 sm:px-16 bg-[var(--balatro-grey)] rounded-t-xl hover:bg-[var(--balatro-grey-dark)] transition-all cursor-pointer relative top-0 shadow-[0_-4px_0_#000] active:shadow-none active:translate-y-[2px]"
+                    {/* "FAKE BANNER AD" FOOTER */}
+                    <div className="w-full max-w-[95vw] sm:max-w-2xl px-2 sm:px-0 z-40 shrink-0">
+                        <button onClick={() => setViewMode('wisdom')}
+                            className="w-full group relative overflow-hidden bg-[var(--balatro-grey)] border-[3px] border-white/40 hover:border-white/80 rounded-xl shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[2px] transition-all p-3 sm:p-4 flex flex-row items-center justify-between gap-4"
                         >
-                            <div className="flex flex-col items-center gap-1">
-                                <span className="font-header text-white uppercase tracking-widest text-base sm:text-lg drop-shadow-md">
-                                    A Wee Bit of Wisdom
+                            <div className="flex flex-col items-start text-left">
+                                <span className="font-header text-[var(--balatro-gold)] text-lg sm:text-xl uppercase tracking-wider leading-none mb-1 drop-shadow-sm">
+                                    So, you like The Daily Wee, huh?
                                 </span>
+                                <span className="font-pixel text-[10px] sm:text-xs text-white/80">
+                                    FREE challenge seeds at: <span className="text-white underline decoration-dashed underline-offset-2">ErraticDeck.app</span>
+                                </span>
+                            </div>
+                            <div className="hidden sm:flex bg-black/30 px-3 py-1.5 rounded border border-white/20 text-[10px] font-pixel text-white/50 uppercase tracking-widest shrink-0">
+                                AD
                             </div>
                         </button>
                     </div>
                 </div>
-
-                {/* VIEW 2: WEE WISDOM (Fixed Overlay Slide-Up) */}
-                <div
-                    className="fixed inset-0 z-50 flex flex-col items-center justify-center transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-none pointer-events-auto"
-                    style={{ transform: viewMode === 'wisdom' ? 'translateY(0)' : 'translateY(120vh)' }}
-                >
-                    <div className="scale-110 w-full max-w-2xl px-6 flex flex-col items-center">
-                        <WeeWisdom onBack={() => setViewMode('main')} />
-                    </div>
+            </div>      {/* VIEW 2: WEE WISDOM (Fixed Overlay Slide-Up) */}
+            <div
+                className="fixed inset-0 z-50 flex flex-col items-center justify-center transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-none pointer-events-auto"
+                style={{ transform: viewMode === 'wisdom' ? 'translateY(0)' : 'translateY(120vh)' }}
+            >
+                <div className="scale-110 w-full max-w-2xl px-6 flex flex-col items-center">
+                    <WeeWisdom onBack={() => setViewMode('main')} />
                 </div>
-
-                {showHowTo && <HowToPlay onClose={() => setShowHowTo(false)} />}
-                {showLeaderboard && <LeaderboardModal dayNumber={viewingDay} onClose={() => setShowLeaderboard(false)} />}
-                {showSubmit && seed && (
-                    <SubmitScoreModal
-                        seed={seed.seed}
-                        dayNumber={viewingDay}
-                        onClose={() => setShowSubmit(false)}
-                        onSuccess={() => alert("Score submitted! 🏆")}
-                    />
-                )}
             </div>
+
+            {showHowTo && <HowToPlay onClose={() => setShowHowTo(false)} onSubmit={() => { setShowHowTo(false); setShowSubmit(true); }} />}
+            {showLeaderboard && <LeaderboardModal dayNumber={viewingDay} onClose={() => setShowLeaderboard(false)} />}
+            {showSubmit && seed && (
+                <SubmitScoreModal
+                    seed={seed.seed}
+                    dayNumber={viewingDay}
+                    onClose={() => setShowSubmit(false)}
+                    onSuccess={() => alert("Score submitted! 🏆")}
+                />
+            )}
         </div>
     );
 }

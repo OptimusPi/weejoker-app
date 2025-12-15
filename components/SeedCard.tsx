@@ -1,148 +1,169 @@
 "use client";
-
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { SeedData } from "@/lib/types";
-import { cn } from "@/lib/utils";
-import { Copy, Check, Eye, Trophy } from "lucide-react";
-import { useState } from "react";
+import { Copy, Check } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Sprite } from "./Sprite";
+import { cn } from "@/lib/utils";
 
 interface SeedCardProps {
     seed: SeedData;
-    className?: string; // Allow external scaling/width classes
-    onAnalyze?: (seed: SeedData) => void;
+    dayNumber: number;
+    className?: string;
+    onAnalyze?: () => void;
 }
 
-export function SeedCard({ seed, className, onAnalyze }: SeedCardProps) {
-    const isHighRun = (seed.score || 0) > 17;
+export function SeedCard({ seed, dayNumber, className, onAnalyze }: SeedCardProps) {
     const [copied, setCopied] = useState(false);
+    const [topScore, setTopScore] = useState<{ name: string; score: number } | null>(null);
 
-    const handleCopy = () => {
-        navigator.clipboard.writeText(seed.seed);
+    // Fetch Top Score when dayNumber changes
+    useEffect(() => {
+        let isMounted = true;
+        // Simple fetch for the top score
+        fetch(`/api/scores?day=${dayNumber}`)
+            .then(res => res.json())
+            .then(data => {
+                if (isMounted) {
+                    if (data.scores && data.scores.length > 0) {
+                        setTopScore({ name: data.scores[0].player_name, score: data.scores[0].score });
+                    } else {
+                        setTopScore(null);
+                    }
+                }
+            })
+            .catch(err => {
+                if (isMounted) {
+                    console.error("Failed to fetch top score", err);
+                    setTopScore(null);
+                }
+            });
+
+        return () => { isMounted = false; };
+    }, [dayNumber]);
+
+    const handleCopy = async () => {
+        await navigator.clipboard.writeText(seed.seed);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
 
-    return (
-        <div className={cn(
-            "group relative transition-all duration-200 hover:-translate-y-2",
-            className
-        )}>
-            {/* Main Card - Glassmorphism Layout */}
-            {/* Outer Container: Glass + White Border */}
-            <div className="bg-black/30 backdrop-blur-lg rounded-xl border-[2px] border-white/50 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] p-1 flex flex-col relative overflow-hidden group-hover:shadow-[0_16px_48px_0_rgba(0,0,0,0.4)] hover:border-white/80 transition-all">
+    // Helper to determine sprites for a row
+    const getSprites = (ante: 1 | 2) => {
+        const sprites: string[] = [];
+        // Wee Joker
+        if ((ante === 1 && (seed.WeeJoker_Ante1 ?? 0) > 0) || (ante === 2 && (seed.WeeJoker_Ante2 ?? 0) > 0)) {
+            sprites.push("weejoker");
+        }
+        // Hack
+        if ((ante === 1 && (seed.Hack_Ante1 ?? 0) > 0) || (ante === 2 && (seed.Hack_Ante2 ?? 0) > 0)) {
+            sprites.push("hack");
+        }
+        // Hanging Chad
+        if ((ante === 1 && (seed.HanginChad_Ante1 ?? 0) > 0) || (ante === 2 && (seed.HanginChad_Ante2 ?? 0) > 0)) {
+            sprites.push("hangingchad");
+        }
 
-                {/* Inner Container: Darker Glass + Border */}
-                <div className="rounded-lg bg-black/20 p-4 flex flex-col gap-4 relative border border-white/10">
-                    {/* Scanline effect */}
-                    <div className="absolute inset-0 pointer-events-none opacity-10 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%] z-0"></div>
+        // Blueprint/Brainstorm - Check generic 'early' flags
+        if (ante === 1) {
+            if ((seed.blueprint_early ?? 0) > 0) sprites.push("blueprint");
+            if ((seed.brainstorm_early ?? 0) > 0) sprites.push("brainstorm");
+        }
+
+        return sprites;
+    };
+
+    return (
+        <div className={cn("relative group flex flex-col", className)}>
+            <div className="absolute inset-0 bg-black/40 rounded-xl blur-sm scale-[1.02] translate-y-2 z-0" />
+
+            {/* Main Container: Solid Balatro Grey - Full Height */}
+            <div className="bg-[var(--balatro-grey)] rounded-xl border-[4px] border-white/20 p-2 flex flex-col relative overflow-hidden h-full z-10 transition-transform active:translate-y-[2px] grow">
+
+                {/* Inner Container: Darker Grey */}
+                <div className="rounded-lg bg-[var(--balatro-grey-dark)] p-4 flex flex-col gap-4 relative border border-white/10 grow h-full">
 
                     {/* Header: Seed ID (Click to Copy) */}
                     <button
                         onClick={(e) => { e.stopPropagation(); handleCopy(); }}
-                        className="flex items-center gap-4 w-full text-left group/seed hover:bg-black/20 p-2 -ml-2 rounded-lg transition-colors outline-none focus:bg-black/20"
+                        className="flex items-center gap-4 w-full text-left group/seed hover:bg-black/20 p-2 -ml-2 rounded-lg transition-colors outline-none focus:bg-black/20 shrink-0"
                         title="Click to Copy Seed"
                     >
-                        {/* Copy Icon (Left) */}
-                        <div className={cn(
-                            "h-10 w-10 flex items-center justify-center rounded-lg border-2 shadow-[0_4px_0_rgba(0,0,0,0.5)] transition-all flex-shrink-0 relative overflow-hidden",
-                            copied
-                                ? "bg-[var(--balatro-green)] border-white text-white translate-y-1 shadow-none"
-                                : "bg-[var(--balatro-blue)] border-white/20 text-white group-hover/seed:brightness-110 group-hover/seed:border-white"
-                        )}>
-                            {copied ? <Check size={20} strokeWidth={3} /> : <Copy size={20} strokeWidth={3} />}
+                        <div className={`p-3 rounded-lg border-2 transition-all duration-300 ${copied ? 'bg-[var(--balatro-blue)] border-white' : 'bg-[var(--balatro-blue)] border-white/20 group-hover/seed:border-white/60'}`}>
+                            {copied ? <Check size={24} className="text-white" strokeWidth={4} /> : <Copy size={24} className="text-white" strokeWidth={3} />}
                         </div>
-
-                        {/* Seed Text */}
                         <div className="flex flex-col">
-                            <h3 className="text-4xl font-header tracking-widest text-white drop-shadow-[3px_3px_0_black] group-hover/seed:scale-[1.02] transition-transform origin-left">
-                                {seed.seed}
-                            </h3>
-                            {copied && <span className="absolute left-[3.5rem] top-8 text-[10px] bg-black/80 px-2 py-0.5 rounded text-[var(--balatro-green)] font-pixel uppercase animate-fade-in-up md:hidden">Copied!</span>}
+                            <span className="font-header text-3xl text-white tracking-widest drop-shadow-md">{seed.seed}</span>
+                            <span className="font-pixel text-[10px] text-white/50 uppercase tracking-wider">{copied ? 'COPIED TO CLIPBOARD' : 'CLICK TO COPY'}</span>
                         </div>
                     </button>
 
-                    {/* Stats Grid - Simplified */}
-                    <div className="flex gap-4 my-2 z-10 w-full">
-                        <div className="bg-[var(--balatro-grey)] rounded-lg border-2 border-white/10 p-2 flex-grow flex flex-col items-center justify-center shadow-inner relative overflow-hidden group/stat">
-                            <span className="text-3xl font-pixel text-white leading-none mb-1 drop-shadow-md">{seed.twos || 0}</span>
-                            <span className="text-[10px] font-header text-[var(--balatro-blue)] uppercase tracking-widest drop-shadow-sm">TWOS</span>
+                    {/* TWO Count Section */}
+                    <div className="bg-black/30 rounded-lg p-4 border border-white/5 shrink-0">
+                        <div className="flex flex-col items-center">
+                            <span className="font-header text-5xl text-white tracking-widest drop-shadow-[0_4px_0_rgba(0,0,0,1)]">
+                                {seed.rank_2_count}
+                            </span>
+                            <span className="font-header text-[var(--balatro-blue)] text-sm tracking-widest uppercase mt-[-4px]">
+                                TWOS
+                            </span>
                         </div>
-                        {/* Hidden Score as requested */}
                     </div>
 
-                    {/* Badges: Rows (A1 / A2) */}
-                    <div className="flex flex-col gap-2 flex-grow z-10">
+                    {/* Sprites Rows - Flex Grow to fill space */}
+                    <div className="flex flex-col gap-2 grow justify-center py-2 h-0 min-h-0">
                         {/* Ante 1 Row */}
-                        <div className="flex items-center gap-3 bg-black/20 p-2 rounded-lg border border-black/10 shadow-inner">
-                            <span className="text-[10px] font-pixel text-white/50 uppercase w-4 shrink-0 text-right">A1</span>
-                            {(seed.Hack_Ante1 || seed.HanginChad_Ante1 || seed.blueprint_early || seed.brainstorm_early || seed.WeeJoker_Ante1 || seed.WeeJoker_Ante2) ? (
-                                <div className="flex flex-wrap gap-2 items-center">
-                                    {((seed.WeeJoker_Ante1 || 0) > 0 || (seed.WeeJoker_Ante2 || 0) > 0) && <Badge label="WEE" spriteName="weejoker" />}
-                                    {(seed.Hack_Ante1 || 0) > 0 && <Badge label="HACK" spriteName="hack" />}
-                                    {(seed.HanginChad_Ante1 || 0) > 0 && <Badge label="CHAD" spriteName="hangingchad" />}
-                                    {((seed.blueprint_early || 0) > 0 || (seed.brainstorm_early || 0) > 0) && <Badge label="COPY" spriteName="blueprint" />}
-                                </div>
-                            ) : (
-                                <span className="text-[10px] font-pixel text-white/20">-</span>
-                            )}
+                        <div className="bg-black/20 rounded-lg p-3 border border-white/5 flex items-center gap-4 grow min-h-[4rem]">
+                            <span className="font-header text-[#D04035] text-xl w-8 shrink-0 text-right">A1</span>
+                            <div className="flex flex-wrap gap-2 items-center justify-center grow">
+                                {getSprites(1).length > 0 ? getSprites(1).map((s, i) => (
+                                    <Sprite key={`a1-${i}`} name={s} width={48} className="drop-shadow-md" />
+                                )) : <span className="font-pixel text-white/20 text-xs">-</span>}
+                            </div>
                         </div>
 
                         {/* Ante 2 Row */}
-                        <div className="flex items-center gap-3 bg-black/20 p-2 rounded-lg border border-black/10 shadow-inner">
-                            <span className="text-[10px] font-pixel text-white/50 uppercase w-4 shrink-0 text-right">A2</span>
-                            {(seed.Hack_Ante2 || seed.HanginChad_Ante2) ? (
-                                <div className="flex flex-wrap gap-2 items-center">
-                                    {(seed.Hack_Ante2 || 0) > 0 && <Badge label="HACK" spriteName="hack" />}
-                                    {(seed.HanginChad_Ante2 || 0) > 0 && <Badge label="CHAD" spriteName="hangingchad" />}
-                                </div>
-                            ) : (
-                                <span className="text-[10px] font-pixel text-white/20">-</span>
-                            )}
+                        <div className="bg-black/20 rounded-lg p-3 border border-white/5 flex items-center gap-4 grow min-h-[4rem]">
+                            <span className="font-header text-[#D04035] text-xl w-8 shrink-0 text-right">A2</span>
+                            <div className="flex flex-wrap gap-2 items-center justify-center grow">
+                                {getSprites(2).length > 0 ? getSprites(2).map((s, i) => (
+                                    <Sprite key={`a2-${i}`} name={s} width={48} className="drop-shadow-md" />
+                                )) : <span className="font-pixel text-white/20 text-xs">-</span>}
+                            </div>
                         </div>
                     </div>
 
-                    {/* Action Footer */}
-                    <div className="mt-2 pt-3 border-t-2 border-dashed border-white/10 flex items-center justify-center z-10">
-                        <div className="flex gap-2">
-                            <button
-                                onClick={(e) => { e.stopPropagation(); handleCopy(); }}
-                                className={cn(
-                                    "flex-grow flex items-center justify-center gap-2 font-header text-xl uppercase tracking-wider py-2 rounded-lg shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[4px] transition-all border-[3px] relative overflow-hidden group/btn outline-none focus:ring-2 focus:ring-white/50",
-                                    copied
-                                        ? "bg-[var(--balatro-green)] border-white text-white"
-                                        : "bg-[var(--balatro-blue)] border-white text-white hover:brightness-110"
-                                )}
-                            >
-                                <span className="relative z-10 transition-transform group-hover/btn:scale-105">{copied ? "COPIED!" : "PLAY"}</span>
-                            </button>
+                    {/* Top Score & Action Bar */}
+                    <div className="mt-auto shrink-0 z-50 flex flex-col gap-2">
+                        {/* Top Score Display - Compact */}
+                        {topScore ? (
+                            <div className="bg-black/40 rounded-lg px-3 py-2 border border-white/10 flex justify-between items-center">
+                                <span className="font-header text-[var(--balatro-gold)] uppercase text-xs tracking-wider">
+                                    Best: {topScore.name.substring(0, 10)}
+                                </span>
+                                <span className="font-header text-white text-lg tracking-widest drop-shadow-sm leading-none">
+                                    {topScore.score.toLocaleString()}
+                                </span>
+                            </div>
+                        ) : (
+                            // Empty state to keep layout consistent or encourage play
+                            <div className="bg-black/40 rounded-lg px-3 py-2 border border-white/10 flex justify-center items-center">
+                                <span className="font-pixel text-white/40 text-[10px] tracking-widest uppercase">
+                                    NO SCORES YET
+                                </span>
+                            </div>
+                        )}
 
-                            <button
-                                onClick={(e) => { e.stopPropagation(); onAnalyze?.(seed); }}
-                                className="px-4 bg-[var(--balatro-gold)] text-black font-header text-lg uppercase tracking-wider rounded-lg shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[4px] transition-all border-[3px] border-white hover:brightness-110 flex items-center justify-center relative overflow-hidden group/submit outline-none focus:ring-2 focus:ring-white/50"
-                                title="Submit Score"
-                            >
-                                <Trophy size={20} className="relative z-10" />
-                            </button>
-                        </div>
+                        {/* Play Button */}
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onAnalyze?.(); }}
+                            className="w-full bg-[var(--balatro-orange)] text-white font-header text-xl px-4 py-3 rounded-xl shadow-[0_4px_0_#000] flex items-center justify-center gap-3 hover:bg-[#D04035] hover:brightness-110 active:shadow-none active:translate-y-[2px] transition-all"
+                        >
+                            <span>PLAY</span>
+                        </button>
                     </div>
-
                 </div>
             </div>
         </div>
-    );
-}
-
-function Badge({ label, color, spriteName }: { label: string, color?: string, spriteName?: string }) {
-    if (spriteName) {
-        return (
-            <div className="flex flex-col items-center group/badge relative" title={label}>
-                <Sprite name={spriteName} width={31} className="shadow-sm border border-black/20 rounded-[2px]" />
-            </div>
-        );
-    }
-    return (
-        <span className={cn("px-1.5 py-0.5 text-[10px] font-header uppercase rounded shadow-sm border-[1.5px] tracking-wider", color)}>
-            {label}
-        </span>
     );
 }
