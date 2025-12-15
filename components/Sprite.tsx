@@ -19,8 +19,8 @@ const JOKER_MAP: Record<string, { x: number; y: number }> = {
     "Droll Joker": { x: 9, y: 0 },
 
     // Key MVP Jokers
-    "Wee Joker": { x: 4, y: 4 }, // Row 5, Col 5 (Approx, verifying) -> Actually let's use the known map or default fallback
-    "weejoker": { x: 4, y: 4 }, // Lowercase mapping for safety
+    "Wee Joker": { x: 0, y: 0 }, // Verified from jokers.json: Use Standard Joker sprite (it's just small)
+    "weejoker": { x: 0, y: 0 },
     "Hanging Chad": { x: 0, y: 8 },
     "Hack": { x: 1, y: 8 },
     "Blueprint": { x: 2, y: 10 },

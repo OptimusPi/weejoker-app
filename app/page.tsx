@@ -9,17 +9,11 @@ import { ClientDailyWeeLoader } from "@/components/ClientDailyWeeLoader";
 
 export default function Home() {
     return (
-        <main className="min-h-screen py-10">
-
-
-
-
-            <div className="container mx-auto px-4 mb-12">
-                <ClientDailyWeeLoader />
-            </div>
+        <main className="min-h-screen">
+            <ClientDailyWeeLoader />
 
             {/* Past Week Results */}
-            <div className="container mx-auto px-4 mb-12">
+            <div className="container mx-auto px-4 py-12">
                 <PastWeekResults />
             </div>
         </main>

@@ -81,9 +81,9 @@ export function SeedScatterPlot({ data }: SeedScatterPlotProps) {
                     <Scatter name="Seeds" data={chartData} fill="#8884d8">
                         {chartData.map((entry, index) => {
                             let color = "#ef4444"; // Default Red
-                            if (entry.hack_a1) color = "#3b82f6"; // Blue for Hack
-                            if (entry.wee_a1_cheap && entry.hack_a1) color = "#a855f7"; // Purple for Synergy
-                            if (entry.twos && entry.twos > 15) color = "#eab308"; // Gold for heavy distributions
+                            if (entry.Hack_Ante1) color = "#3b82f6"; // Blue for Hack
+                            if (entry.WeeJoker_Ante1 && entry.Hack_Ante1) color = "#a855f7"; // Purple for Synergy
+                            if (entry.twos && (entry.twos as number) > 15) color = "#eab308"; // Gold for heavy distributions
 
                             return <Cell key={`cell-${index}`} fill={color} fillOpacity={0.7} stroke="white" strokeWidth={1} />
                         })}

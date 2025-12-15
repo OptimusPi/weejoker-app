@@ -48,21 +48,15 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={onClose}>
-            <div className="bg-[var(--balatro-grey-darker)] border-[3px] border-[var(--balatro-gold)] rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl relative overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors z-10"
-                >
-                    <X size={24} />
-                </button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80" onClick={onClose}>
+            <div className="bg-[var(--balatro-grey)] border-[3px] border-[var(--balatro-gold)] rounded-xl p-8 max-w-md w-full mx-4 shadow-[0_8px_0_#000] relative overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
 
-                <div className="text-center mb-6 relative z-10">
-                    <Trophy size={48} className="text-[var(--balatro-gold)] mx-auto mb-2" />
-                    <h2 className="text-3xl font-header text-white tracking-wider">
+                <div className="text-center mb-6 relative z-10 pt-4">
+                    <Trophy size={48} className="text-[var(--balatro-gold)] mx-auto mb-2 drop-shadow-lg" />
+                    <h2 className="text-3xl font-header text-white tracking-wider text-shadow-md">
                         SUBMIT YOUR SCORE
                     </h2>
-                    <p className="text-zinc-400 font-pixel mt-2">
+                    <p className="text-zinc-300 font-pixel mt-2">
                         Daily Wee #{dayNumber}
                     </p>
                 </div>
@@ -77,7 +71,7 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
                             value={playerName}
                             onChange={(e) => setPlayerName(e.target.value.slice(0, 20))}
                             placeholder="Enter your name..."
-                            className="w-full balatro-input text-lg"
+                            className="w-full balatro-input text-lg bg-black/40 border-2 border-white/20 focus:border-[var(--balatro-blue)] rounded-lg text-white font-header px-4 py-3 outline-none transition-colors"
                             required
                         />
                     </div>
@@ -91,7 +85,7 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
                             value={score}
                             onChange={(e) => setScore(e.target.value)}
                             placeholder="e.g. 1234567"
-                            className="w-full balatro-input text-lg"
+                            className="w-full balatro-input text-lg bg-black/40 border-2 border-white/20 focus:border-[var(--balatro-blue)] rounded-lg text-white font-header px-4 py-3 outline-none transition-colors"
                             min="0"
                             max="999999999"
                             required
@@ -104,14 +98,25 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
                         </div>
                     )}
 
-                    <button
-                        type="submit"
-                        disabled={submitting}
-                        className="w-full bg-[var(--balatro-green)] hover:brightness-110 disabled:opacity-50 text-white font-header text-xl px-6 py-4 rounded-lg border-b-4 border-[#1e5f46] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-3"
-                    >
-                        <Upload size={24} />
-                        {submitting ? 'SUBMITTING...' : 'SUBMIT SCORE'}
-                    </button>
+                    <div className="pt-4 space-y-3">
+                        <button
+                            type="submit"
+                            disabled={submitting}
+                            className="w-full bg-[var(--balatro-blue)] hover:brightness-110 disabled:opacity-50 text-white font-header text-xl px-6 py-3 rounded-xl border-[3px] border-white shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[2px] transition-all flex items-center justify-center gap-3"
+                        >
+                            <Upload size={24} />
+                            {submitting ? 'SUBMITTING...' : 'SUBMIT SCORE'}
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            disabled={submitting}
+                            className="w-full bg-[var(--balatro-orange)] hover:brightness-110 disabled:opacity-50 text-white font-header text-xl px-6 py-3 rounded-xl border-[3px] border-white shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[2px] transition-all"
+                        >
+                            CANCEL
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

@@ -3,17 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'edge';
 
-// MOCK DATA for Local Dev / Missing DB
-const MOCK_SCORES = [
-    { id: 1, player_name: "Dr. Spector", score: 1250000, day_number: 1, submitted_at: new Date().toISOString() },
-    { id: 2, player_name: "LocalLegend", score: 980000, day_number: 1, submitted_at: new Date().toISOString() },
-    { id: 3, player_name: "Jimbo", score: 850000, day_number: 1, submitted_at: new Date().toISOString() },
-    { id: 4, player_name: "BalatroFan", score: 720000, day_number: 1, submitted_at: new Date().toISOString() },
-    { id: 5, player_name: "TheRngGod", score: 650000, day_number: 1, submitted_at: new Date().toISOString() },
-    { id: 6, player_name: "FlushFive", score: 500000, day_number: 1, submitted_at: new Date().toISOString() },
-    { id: 7, player_name: "WeeJoker", score: 8, day_number: 1, submitted_at: new Date().toISOString() },
-    { id: 8, player_name: "Egg", score: 0, day_number: 1, submitted_at: new Date().toISOString() },
-];
+
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
@@ -24,18 +14,13 @@ export async function GET(request: NextRequest) {
         const { env } = getRequestContext();
         const db = env.DB;
 
-        // --- LOCAL DEV / MOCK FALLBACK ---
+        // --- STRICT DB CHECK ---
         if (!db) {
-            console.warn("⚠️ No DB binding found. Using MOCK DATA.");
-            if (week === 'true') {
-                return NextResponse.json({ scores: MOCK_SCORES.slice(0, 5) }); // Mock "Use max per day" logic if needed
-            }
-            if (day) {
-                return NextResponse.json({ scores: MOCK_SCORES });
-            }
-            return NextResponse.json({ scores: MOCK_SCORES });
+            console.error("CRITICAL: No DB binding found.");
+            // Return 500 so UI knows it failed, rather than fake data
+            return NextResponse.json({ error: 'Database not available' }, { status: 500 });
         }
-        // ---------------------------------
+
 
         if (week === 'true') {
             const result = await db.prepare(`
@@ -87,14 +72,12 @@ export async function POST(request: NextRequest) {
         const { env } = getRequestContext();
         const db = env.DB;
 
-        // --- LOCAL DEV / MOCK FALLBACK ---
+        // --- STRICT DB CHECK ---
         if (!db) {
-            console.warn("⚠️ No DB binding found. Mocking SUCCESSFUL submission.");
-            // Simulate network delay
-            await new Promise(r => setTimeout(r, 800));
-            return NextResponse.json({ success: true, id: 9999, mocked: true });
+            console.error("CRITICAL: No DB binding found for INSERT.");
+            return NextResponse.json({ error: 'Database not available' }, { status: 500 });
         }
-        // ---------------------------------
+
 
         const result = await db.prepare(`
             INSERT INTO scores (seed, day_number, player_name, score)

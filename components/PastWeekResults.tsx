@@ -40,7 +40,9 @@ export function PastWeekResults() {
     };
 
     return (
-        <div className="bg-[var(--balatro-grey-darker)] border-[3px] border-white/60 rounded-xl p-6 shadow-2xl">
+        <div className="bg-black/30 backdrop-blur-lg border-[2px] border-white/40 rounded-xl p-6 shadow-2xl relative overflow-hidden">
+            {/* Scanline effect */}
+            <div className="absolute inset-0 pointer-events-none opacity-5 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%] z-0"></div>
             <div className="flex items-center gap-3 mb-6">
                 <div className="bg-[var(--balatro-blue)] p-2 rounded border-2 border-white shadow-sm">
                     <Calendar size={24} className="text-white" />

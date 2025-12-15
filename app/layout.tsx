@@ -40,7 +40,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
             <body
                 className={cn(
                     'min-h-screen font-sans antialiased overflow-x-hidden text-white',
@@ -53,15 +53,7 @@ export default function RootLayout({
                 <BackgroundShader />
 
                 <div className="relative z-10 min-h-screen flex flex-col">
-                    <header className="py-6 border-b border-white/10 bg-black/20 backdrop-blur-sm sticky top-0 z-50">
-                        <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
-                            <Link href="/" className="hover:opacity-80 transition-opacity">
-                                <h1 className="text-4xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-red-600 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] filter contrast-125 font-header">
-                                    THE DAILY WEE
-                                </h1>
-                            </Link>
-                        </div>
-                    </header>
+
                     <main className="flex-grow">
                         {children}
                     </main>

@@ -27,12 +27,12 @@ export function SeedCard({ seed, className, onAnalyze }: SeedCardProps) {
             "group relative transition-all duration-200 hover:-translate-y-2",
             className
         )}>
-            {/* Main Card - Authentic Balatro Layout */}
-            {/* Outer Container: Grey + White Border */}
-            <div className="bg-[var(--balatro-grey)] rounded-xl border-[3px] border-white shadow-[0_6px_0_rgba(0,0,0,0.3)] p-1 flex flex-col relative overflow-hidden group-hover:shadow-[0_10px_0_rgba(0,0,0,0.3)] transition-all">
+            {/* Main Card - Glassmorphism Layout */}
+            {/* Outer Container: Glass + White Border */}
+            <div className="bg-black/30 backdrop-blur-lg rounded-xl border-[2px] border-white/50 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] p-1 flex flex-col relative overflow-hidden group-hover:shadow-[0_16px_48px_0_rgba(0,0,0,0.4)] hover:border-white/80 transition-all">
 
-                {/* Inner Container: Darker Grey + Border */}
-                <div className="rounded-lg bg-[var(--balatro-grey-dark)] p-4 flex flex-col gap-4 relative">
+                {/* Inner Container: Darker Glass + Border */}
+                <div className="rounded-lg bg-black/20 p-4 flex flex-col gap-4 relative border border-white/10">
                     {/* Scanline effect */}
                     <div className="absolute inset-0 pointer-events-none opacity-10 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%] z-0"></div>
 
@@ -107,22 +107,20 @@ export function SeedCard({ seed, className, onAnalyze }: SeedCardProps) {
                             <button
                                 onClick={(e) => { e.stopPropagation(); handleCopy(); }}
                                 className={cn(
-                                    "flex-grow flex items-center justify-center gap-2 font-header text-xl uppercase tracking-wider py-2 rounded-lg shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 transition-all border-2 relative overflow-hidden group/btn outline-none focus:ring-2 focus:ring-white/50",
+                                    "flex-grow flex items-center justify-center gap-2 font-header text-xl uppercase tracking-wider py-2 rounded-lg shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[4px] transition-all border-[3px] relative overflow-hidden group/btn outline-none focus:ring-2 focus:ring-white/50",
                                     copied
                                         ? "bg-[var(--balatro-green)] border-white text-white"
-                                        : "bg-[var(--balatro-blue)] border-white/20 text-white hover:border-white hover:brightness-110"
+                                        : "bg-[var(--balatro-blue)] border-white text-white hover:brightness-110"
                                 )}
                             >
-                                <div className="absolute inset-0 bg-white/10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-200"></div>
-                                <span className="relative z-10 transition-transform group-hover/btn:scale-110">{copied ? "COPIED!" : "PLAY"}</span>
+                                <span className="relative z-10 transition-transform group-hover/btn:scale-105">{copied ? "COPIED!" : "PLAY"}</span>
                             </button>
 
                             <button
                                 onClick={(e) => { e.stopPropagation(); onAnalyze?.(seed); }}
-                                className="px-4 bg-[var(--balatro-gold)] text-black font-header text-lg uppercase tracking-wider rounded-lg shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 transition-all border-2 border-white/20 hover:border-white hover:brightness-110 flex items-center justify-center relative overflow-hidden group/submit outline-none focus:ring-2 focus:ring-white/50"
+                                className="px-4 bg-[var(--balatro-gold)] text-black font-header text-lg uppercase tracking-wider rounded-lg shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[4px] transition-all border-[3px] border-white hover:brightness-110 flex items-center justify-center relative overflow-hidden group/submit outline-none focus:ring-2 focus:ring-white/50"
                                 title="Submit Score"
                             >
-                                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/submit:translate-y-0 transition-transform duration-200"></div>
                                 <Trophy size={20} className="relative z-10" />
                             </button>
                         </div>
