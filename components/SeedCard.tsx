@@ -4,6 +4,7 @@ import { SeedData } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Copy, Check, Eye, Trophy } from "lucide-react";
 import { useState } from "react";
+import { Sprite } from "./Sprite";
 
 interface SeedCardProps {
     seed: SeedData;
@@ -28,38 +29,37 @@ export function SeedCard({ seed, className, onAnalyze }: SeedCardProps) {
         )}>
             {/* Main Card - Authentic Balatro Layout */}
             {/* Outer Container: Grey + White Border */}
-            <div className="h-full bg-[var(--balatro-grey)] rounded-xl border-[3px] border-white shadow-[0_6px_0_rgba(0,0,0,0.3)] p-1 flex flex-col relative overflow-hidden group-hover:shadow-[0_10px_0_rgba(0,0,0,0.3)] transition-all">
+            <div className="bg-[var(--balatro-grey)] rounded-xl border-[3px] border-white shadow-[0_6px_0_rgba(0,0,0,0.3)] p-1 flex flex-col relative overflow-hidden group-hover:shadow-[0_10px_0_rgba(0,0,0,0.3)] transition-all">
 
                 {/* Inner Container: Darker Grey + Border */}
-                <div className="h-full rounded-lg bg-[var(--balatro-grey-dark)] p-4 flex flex-col gap-4 relative">
+                <div className="rounded-lg bg-[var(--balatro-grey-dark)] p-4 flex flex-col gap-4 relative">
                     {/* Scanline effect */}
                     <div className="absolute inset-0 pointer-events-none opacity-10 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%] z-0"></div>
 
-                    {/* Header: Seed ID + Copy Button */}
-                    <div className="flex justify-between items-start z-10 w-full">
-                        <div className="flex flex-col flex-grow">
-                            <div className="flex items-center gap-2 mb-1">
-                                <span className="text-[10px] font-header bg-black/60 px-1.5 py-0.5 rounded text-white/70 tracking-wider uppercase border border-white/10 shadow-inner">SEED</span>
-                            </div>
-                            <div className="flex items-center gap-3 w-full">
-                                <h3 className="text-4xl font-header tracking-widest text-white drop-shadow-[3px_3px_0_black] flex-grow">
-                                    {seed.seed}
-                                </h3>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); handleCopy(); }}
-                                    className={cn(
-                                        "p-2 rounded transition-all border-2 shadow-md relative group/btn overflow-hidden h-10 w-10 flex items-center justify-center flex-shrink-0",
-                                        copied
-                                            ? "bg-[var(--balatro-green)] border-white text-white"
-                                            : "bg-[var(--balatro-grey)] border-white/20 text-white hover:border-white hover:bg-[var(--balatro-grey-light)]"
-                                    )}
-                                    title="Copy Seed"
-                                >
-                                    {copied ? <Check size={18} /> : <Copy size={18} />}
-                                </button>
-                            </div>
+                    {/* Header: Seed ID (Click to Copy) */}
+                    <button
+                        onClick={(e) => { e.stopPropagation(); handleCopy(); }}
+                        className="flex items-center gap-4 w-full text-left group/seed hover:bg-black/20 p-2 -ml-2 rounded-lg transition-colors outline-none focus:bg-black/20"
+                        title="Click to Copy Seed"
+                    >
+                        {/* Copy Icon (Left) */}
+                        <div className={cn(
+                            "h-10 w-10 flex items-center justify-center rounded-lg border-2 shadow-[0_4px_0_rgba(0,0,0,0.5)] transition-all flex-shrink-0 relative overflow-hidden",
+                            copied
+                                ? "bg-[var(--balatro-green)] border-white text-white translate-y-1 shadow-none"
+                                : "bg-[var(--balatro-blue)] border-white/20 text-white group-hover/seed:brightness-110 group-hover/seed:border-white"
+                        )}>
+                            {copied ? <Check size={20} strokeWidth={3} /> : <Copy size={20} strokeWidth={3} />}
                         </div>
-                    </div>
+
+                        {/* Seed Text */}
+                        <div className="flex flex-col">
+                            <h3 className="text-4xl font-header tracking-widest text-white drop-shadow-[3px_3px_0_black] group-hover/seed:scale-[1.02] transition-transform origin-left">
+                                {seed.seed}
+                            </h3>
+                            {copied && <span className="absolute left-[3.5rem] top-8 text-[10px] bg-black/80 px-2 py-0.5 rounded text-[var(--balatro-green)] font-pixel uppercase animate-fade-in-up md:hidden">Copied!</span>}
+                        </div>
+                    </button>
 
                     {/* Stats Grid - Simplified */}
                     <div className="flex gap-4 my-2 z-10 w-full">
@@ -73,14 +73,14 @@ export function SeedCard({ seed, className, onAnalyze }: SeedCardProps) {
                     {/* Badges: Rows (A1 / A2) */}
                     <div className="flex flex-col gap-2 flex-grow z-10">
                         {/* Ante 1 Row */}
-                        <div className="flex items-center gap-3 bg-white/5 p-2 rounded-lg border border-white/5">
+                        <div className="flex items-center gap-3 bg-black/20 p-2 rounded-lg border border-black/10 shadow-inner">
                             <span className="text-[10px] font-pixel text-white/50 uppercase w-4 shrink-0 text-right">A1</span>
-                            {(seed.wee_a1_cheap || seed.hack_a1 || seed.chad_a1 || seed.copy_jokers_a1) ? (
-                                <div className="flex flex-wrap gap-1.5">
-                                    {!!seed.wee_a1_cheap && <Badge label="WEE" color="bg-[var(--balatro-blue)] border-white text-white" />}
-                                    {!!seed.hack_a1 && <Badge label="HACK" color="bg-[var(--balatro-red)] border-white text-white" />}
-                                    {!!seed.chad_a1 && <Badge label="CHAD" color="bg-[var(--balatro-orange)] border-white text-white" />}
-                                    {!!seed.copy_jokers_a1 && <Badge label="COPY" color="bg-purple-600 border-white text-white" />}
+                            {(seed.Hack_Ante1 || seed.HanginChad_Ante1 || seed.blueprint_early || seed.brainstorm_early || seed.WeeJoker_Ante1 || seed.WeeJoker_Ante2) ? (
+                                <div className="flex flex-wrap gap-2 items-center">
+                                    {((seed.WeeJoker_Ante1 || 0) > 0 || (seed.WeeJoker_Ante2 || 0) > 0) && <Badge label="WEE" spriteName="weejoker" />}
+                                    {(seed.Hack_Ante1 || 0) > 0 && <Badge label="HACK" spriteName="hack" />}
+                                    {(seed.HanginChad_Ante1 || 0) > 0 && <Badge label="CHAD" spriteName="hangingchad" />}
+                                    {((seed.blueprint_early || 0) > 0 || (seed.brainstorm_early || 0) > 0) && <Badge label="COPY" spriteName="blueprint" />}
                                 </div>
                             ) : (
                                 <span className="text-[10px] font-pixel text-white/20">-</span>
@@ -88,13 +88,12 @@ export function SeedCard({ seed, className, onAnalyze }: SeedCardProps) {
                         </div>
 
                         {/* Ante 2 Row */}
-                        <div className="flex items-center gap-3 bg-white/5 p-2 rounded-lg border border-white/5">
+                        <div className="flex items-center gap-3 bg-black/20 p-2 rounded-lg border border-black/10 shadow-inner">
                             <span className="text-[10px] font-pixel text-white/50 uppercase w-4 shrink-0 text-right">A2</span>
-                            {(seed.hack_a2 || seed.chad_a2 || seed.copy_jokers_a2) ? (
-                                <div className="flex flex-wrap gap-1.5">
-                                    {!!seed.hack_a2 && <Badge label="HACK" color="bg-[var(--balatro-red)] border-white text-white" />}
-                                    {!!seed.chad_a2 && <Badge label="CHAD" color="bg-[var(--balatro-orange)] border-white text-white" />}
-                                    {!!seed.copy_jokers_a2 && <Badge label="COPY" color="bg-purple-600 border-white text-white" />}
+                            {(seed.Hack_Ante2 || seed.HanginChad_Ante2) ? (
+                                <div className="flex flex-wrap gap-2 items-center">
+                                    {(seed.Hack_Ante2 || 0) > 0 && <Badge label="HACK" spriteName="hack" />}
+                                    {(seed.HanginChad_Ante2 || 0) > 0 && <Badge label="CHAD" spriteName="hangingchad" />}
                                 </div>
                             ) : (
                                 <span className="text-[10px] font-pixel text-white/20">-</span>
@@ -108,7 +107,7 @@ export function SeedCard({ seed, className, onAnalyze }: SeedCardProps) {
                             <button
                                 onClick={(e) => { e.stopPropagation(); handleCopy(); }}
                                 className={cn(
-                                    "flex-grow flex items-center justify-center gap-2 font-header text-xl uppercase tracking-wider py-2 rounded-lg shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 transition-all border-2 relative overflow-hidden group/btn",
+                                    "flex-grow flex items-center justify-center gap-2 font-header text-xl uppercase tracking-wider py-2 rounded-lg shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 transition-all border-2 relative overflow-hidden group/btn outline-none focus:ring-2 focus:ring-white/50",
                                     copied
                                         ? "bg-[var(--balatro-green)] border-white text-white"
                                         : "bg-[var(--balatro-blue)] border-white/20 text-white hover:border-white hover:brightness-110"
@@ -120,7 +119,7 @@ export function SeedCard({ seed, className, onAnalyze }: SeedCardProps) {
 
                             <button
                                 onClick={(e) => { e.stopPropagation(); onAnalyze?.(seed); }}
-                                className="px-4 bg-[var(--balatro-gold)] text-black font-header text-lg uppercase tracking-wider rounded-lg shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 transition-all border-2 border-white/20 hover:border-white hover:brightness-110 flex items-center justify-center relative overflow-hidden group/submit"
+                                className="px-4 bg-[var(--balatro-gold)] text-black font-header text-lg uppercase tracking-wider rounded-lg shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 transition-all border-2 border-white/20 hover:border-white hover:brightness-110 flex items-center justify-center relative overflow-hidden group/submit outline-none focus:ring-2 focus:ring-white/50"
                                 title="Submit Score"
                             >
                                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/submit:translate-y-0 transition-transform duration-200"></div>
@@ -135,7 +134,14 @@ export function SeedCard({ seed, className, onAnalyze }: SeedCardProps) {
     );
 }
 
-function Badge({ label, color }: { label: string, color?: string }) {
+function Badge({ label, color, spriteName }: { label: string, color?: string, spriteName?: string }) {
+    if (spriteName) {
+        return (
+            <div className="flex flex-col items-center group/badge relative" title={label}>
+                <Sprite name={spriteName} width={31} className="shadow-sm border border-black/20 rounded-[2px]" />
+            </div>
+        );
+    }
     return (
         <span className={cn("px-1.5 py-0.5 text-[10px] font-header uppercase rounded shadow-sm border-[1.5px] tracking-wider", color)}>
             {label}

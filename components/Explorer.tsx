@@ -64,9 +64,9 @@ export default function Explorer({ initialSeeds }: ExplorerProps) {
         }
 
         switch (sort) {
-            case "wee_desc": result.sort((a, b) => (b.wee_a1_cheap || 0) - (a.wee_a1_cheap || 0) || (b.score || 0) - (a.score || 0)); break;
-            case "hack_desc": result.sort((a, b) => (b.hack_a1 || 0) - (a.hack_a1 || 0) || (b.score || 0) - (a.score || 0)); break;
-            case "hearts_desc": result.sort((a, b) => (b.twos || 0) - (a.twos || 0) || (b.score || 0) - (a.score || 0)); break; // Mapped to twos
+            case "wee_desc": result.sort((a, b) => ((b.WeeJoker_Ante1 as number) || 0) - ((a.WeeJoker_Ante1 as number) || 0) || (b.score || 0) - (a.score || 0)); break;
+            case "hack_desc": result.sort((a, b) => ((b.Hack_Ante1 as number) || 0) - ((a.Hack_Ante1 as number) || 0) || (b.score || 0) - (a.score || 0)); break;
+            case "hearts_desc": result.sort((a, b) => ((b.twos as number) || 0) - ((a.twos as number) || 0) || (b.score || 0) - (a.score || 0)); break; // Mapped to twos
             case "spades_desc": result.sort((a, b) => (b.score || 0) - (a.score || 0)); break;
             default: result.sort((a, b) => (b.score || 0) - (a.score || 0));
         }

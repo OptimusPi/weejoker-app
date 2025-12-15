@@ -1,27 +1,38 @@
 export interface SeedData {
     seed: string;
-    score: number; // The main rating/score
-    twos: number;  // Count of Rank 2 cards
+    score: number;
 
-    // Joker Flags (0 or 1)
-    wee_a1_cheap?: number;
-    chad_a1?: number;
-    chad_a2?: number;
-    chad_a3?: number;
-    hack_a1?: number;
-    hack_a2?: number;
-    hack_a3?: number;
-    copy_jokers_a1?: number;
-    copy_jokers_a2?: number;
-    copy_jokers_a3?: number;
-    copy_jokers_a4?: number;
-    copy_jokers_a5?: number;
-    drinks_a1?: number;
-    drinks_a2?: number;
-    drinks_a3?: number;
-    drinks_a4?: number;
-    drinks_a1thru8?: number;
+    // User's Renamed JAML Labels
+    twos?: number;
 
-    // Allow for DuckDB dynamic extras if needed
+    // Wee Joker
+    WeeJoker_Ante1?: number;
+    WeeJoker_Ante2?: number;
+
+    // Hanging Chad
+    HanginChad_Ante1?: number;
+    HanginChad_Ante2?: number;
+
+    // Hack
+    Hack_Ante1?: number;
+    Hack_Ante2?: number;
+
+    // Copy Jokers
+    blueprint_early?: number;
+    brainstorm_early?: number;
+
+    // Showman
+    Showman_Ante1?: number;
+
+    // Specific Cards
+    red_Seal_Two?: number;
+    polychrome_Twop?: number;
+
+    // Consumables/Other
+    InvisibleJoker?: number;
+    Temperance?: number;
+    Ankh_Ante1?: number;
+
+    // Allow for extras
     [key: string]: string | number | undefined;
 }

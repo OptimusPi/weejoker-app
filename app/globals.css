@@ -56,7 +56,8 @@ body {
     min-height: 100vh;
     color: white;
     font-family: var(--font-header), sans-serif;
-    overflow-x: hidden;
+    overflow: hidden;
+    /* App-like feel, no scroll */
     position: relative;
 }
 

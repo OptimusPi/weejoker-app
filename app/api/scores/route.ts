@@ -3,8 +3,18 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'edge';
 
-// GET /api/scores?day=1 - Fetch scores for a specific day
-// GET /api/scores?week=true - Fetch past 7 days of top scores
+// MOCK DATA for Local Dev / Missing DB
+const MOCK_SCORES = [
+    { id: 1, player_name: "Dr. Spector", score: 1250000, day_number: 1, submitted_at: new Date().toISOString() },
+    { id: 2, player_name: "LocalLegend", score: 980000, day_number: 1, submitted_at: new Date().toISOString() },
+    { id: 3, player_name: "Jimbo", score: 850000, day_number: 1, submitted_at: new Date().toISOString() },
+    { id: 4, player_name: "BalatroFan", score: 720000, day_number: 1, submitted_at: new Date().toISOString() },
+    { id: 5, player_name: "TheRngGod", score: 650000, day_number: 1, submitted_at: new Date().toISOString() },
+    { id: 6, player_name: "FlushFive", score: 500000, day_number: 1, submitted_at: new Date().toISOString() },
+    { id: 7, player_name: "WeeJoker", score: 8, day_number: 1, submitted_at: new Date().toISOString() },
+    { id: 8, player_name: "Egg", score: 0, day_number: 1, submitted_at: new Date().toISOString() },
+];
+
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const day = searchParams.get('day');
@@ -14,13 +24,20 @@ export async function GET(request: NextRequest) {
         const { env } = getRequestContext();
         const db = env.DB;
 
+        // --- LOCAL DEV / MOCK FALLBACK ---
         if (!db) {
-            console.error('DB binding not found in env');
-            return NextResponse.json({ error: 'Database binding missing' }, { status: 500 });
+            console.warn("⚠️ No DB binding found. Using MOCK DATA.");
+            if (week === 'true') {
+                return NextResponse.json({ scores: MOCK_SCORES.slice(0, 5) }); // Mock "Use max per day" logic if needed
+            }
+            if (day) {
+                return NextResponse.json({ scores: MOCK_SCORES });
+            }
+            return NextResponse.json({ scores: MOCK_SCORES });
         }
+        // ---------------------------------
 
         if (week === 'true') {
-            // Get top score for each of the past 7 days
             const result = await db.prepare(`
                 SELECT day_number, player_name, score, seed, submitted_at
                 FROM scores
@@ -34,7 +51,6 @@ export async function GET(request: NextRequest) {
         }
 
         if (day) {
-            // Get top 10 scores for specific day
             const result = await db.prepare(`
                 SELECT id, player_name, score, submitted_at
                 FROM scores
@@ -52,7 +68,6 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// POST /api/scores - Submit a new score
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
@@ -62,7 +77,6 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        // Basic validation
         if (playerName.length > 20) {
             return NextResponse.json({ error: 'Name too long (max 20 chars)' }, { status: 400 });
         }
@@ -72,6 +86,15 @@ export async function POST(request: NextRequest) {
 
         const { env } = getRequestContext();
         const db = env.DB;
+
+        // --- LOCAL DEV / MOCK FALLBACK ---
+        if (!db) {
+            console.warn("⚠️ No DB binding found. Mocking SUCCESSFUL submission.");
+            // Simulate network delay
+            await new Promise(r => setTimeout(r, 800));
+            return NextResponse.json({ success: true, id: 9999, mocked: true });
+        }
+        // ---------------------------------
 
         const result = await db.prepare(`
             INSERT INTO scores (seed, day_number, player_name, score)
