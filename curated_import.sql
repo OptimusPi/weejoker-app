@@ -1,0 +1,5 @@
+DELETE FROM DailySeeds;
+INSERT INTO DailySeeds (day, seed, score, twos, WeeJoker_Ante1, WeeJoker_Ante2, HanginChad_Ante1, HanginChad_Ante2, Hack_Ante1, Hack_Ante2, blueprint_early, brainstorm_early, Showman_Ante1, red_Seal_Two) VALUES (1, '11JS8DL7', 20, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO DailySeeds (day, seed, score, twos, WeeJoker_Ante1, WeeJoker_Ante2, HanginChad_Ante1, HanginChad_Ante2, Hack_Ante1, Hack_Ante2, blueprint_early, brainstorm_early, Showman_Ante1, red_Seal_Two) VALUES (2, '11FDZX5Q', 19, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO DailySeeds (day, seed, score, twos, WeeJoker_Ante1, WeeJoker_Ante2, HanginChad_Ante1, HanginChad_Ante2, Hack_Ante1, Hack_Ante2, blueprint_early, brainstorm_early, Showman_Ante1, red_Seal_Two) VALUES (3, '12AFZ69O', 40, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO DailySeeds (day, seed, score, twos, WeeJoker_Ante1, WeeJoker_Ante2, HanginChad_Ante1, HanginChad_Ante2, Hack_Ante1, Hack_Ante2, blueprint_early, brainstorm_early, Showman_Ante1, red_Seal_Two) VALUES (4, '13P882WR', 41, 18, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);

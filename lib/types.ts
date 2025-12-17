@@ -33,6 +33,9 @@ export interface SeedData {
     Temperance?: number;
     Ankh_Ante1?: number;
 
+    // Locked State
+    isLocked?: boolean;
+
     // Allow for extras
-    [key: string]: string | number | undefined;
+    [key: string]: string | number | boolean | undefined;
 }

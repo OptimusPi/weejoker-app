@@ -102,7 +102,7 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
                         <button
                             type="submit"
                             disabled={submitting}
-                            className="w-full bg-[var(--balatro-blue)] hover:brightness-110 disabled:opacity-50 text-white font-header text-xl px-6 py-3 rounded-xl border-[3px] border-white shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[2px] transition-all flex items-center justify-center gap-3"
+                            className="w-full bg-[var(--balatro-blue)] hover:brightness-110 disabled:opacity-50 text-white font-header text-xl px-6 py-3 rounded-xl border-none shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[2px] transition-all flex items-center justify-center gap-3"
                         >
                             <Upload size={24} />
                             {submitting ? 'SUBMITTING...' : 'SUBMIT SCORE'}
@@ -112,9 +112,9 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
                             type="button"
                             onClick={onClose}
                             disabled={submitting}
-                            className="w-full bg-[var(--balatro-orange)] hover:brightness-110 disabled:opacity-50 text-white font-header text-xl px-6 py-3 rounded-xl border-[3px] border-white shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[2px] transition-all"
+                            className="w-full bg-[var(--balatro-orange)] hover:brightness-110 disabled:opacity-50 text-white font-header text-2xl px-6 py-3 rounded-xl border-none shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[2px] transition-all uppercase tracking-widest"
                         >
-                            CANCEL
+                            Back
                         </button>
                     </div>
                 </form>

@@ -3,16 +3,18 @@
 import { SeedData } from "@/lib/types";
 import { ChevronLeft, ChevronRight, Star, Trophy, HeartHandshake } from "lucide-react";
 import { SeedCard } from "./SeedCard";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { HowToPlay } from "./HowToPlay";
 import { SubmitScoreModal } from "./SubmitScoreModal";
 import { LeaderboardModal } from "./LeaderboardModal";
 import { Sprite } from "./Sprite";
+
+import { AdRotator } from "./AdRotator";
 import Image from "next/image";
 
 
 // Day calculation
-const EPOCH = new Date('2025-12-16T00:00:00Z').getTime(); // Dec 16 = Day 1
+const EPOCH = new Date('2025-12-18T00:00:00Z').getTime(); // Dec 18 = Day 1
 // If today is Dec 15, result is 0.
 const getDayNumber = () => Math.floor((Date.now() - EPOCH) / (24 * 60 * 60 * 1000)) + 1;
 
@@ -21,6 +23,7 @@ export function DailyWee() {
     const [viewingDay, setViewingDay] = useState<number>(1);
     const [mounted, setMounted] = useState(false);
     const [viewMode, setViewMode] = useState<'main' | 'wisdom'>('main');
+    const [error, setError] = useState<string | null>(null);
 
     // Convert setter to update URL
     const updateDay = (day: number | ((prev: number) => number)) => {
@@ -32,6 +35,8 @@ export function DailyWee() {
             return newDay;
         });
     };
+
+    const [schedule, setSchedule] = useState<any[]>([]);
 
     useEffect(() => {
         // Init from URL or today
@@ -47,21 +52,103 @@ export function DailyWee() {
         }
         setMounted(true);
 
-        // Fetch the seed for the current viewingDay via server API
-        fetch(`/api/daily?day=${viewingDay}`)
+        // Fetch Schedule Once
+        fetch('/daily_ritual.json')
             .then(res => {
-                if (!res.ok) throw new Error('Failed to fetch seed');
+                if (!res.ok) throw new Error("Missing Schedule");
                 return res.json();
             })
-            .then((seedData: SeedData) => {
-                // Keep seeds as an array for existing rendering logic
-                setSeeds([seedData]);
-            })
-            .catch(error => {
-                console.error('Seed fetch error:', error);
-                setSeeds([]);
+            .then(data => setSchedule(data))
+            .catch(e => {
+                console.error("Schedule Error", e);
+                // Fallback or empty
             });
+
     }, []);
+
+    const [topScore, setTopScore] = useState<{ name: string; score: number } | null>(null);
+
+    useEffect(() => {
+        if (!mounted) return;
+
+        const loadDayData = async (day: number) => {
+            // 1. Get Seed from Local Schedule
+            // Schedule is 0-indexed (Day 1 = Index 0)
+            const seedRaw = schedule[day - 1];
+
+            if (day > getDayNumber()) {
+                // Future Hype Mode: Load data but it will be visually locked
+                if (!seedRaw) {
+                    setSeeds([]);
+                    if (schedule.length > 0) setError("Future seed not found.");
+                } else {
+                    // Map Data typically
+                    const seedData: SeedData = {
+                        seed: seedRaw.id,
+                        score: seedRaw.score,
+                        twos: seedRaw.twos,
+                        WeeJoker_Ante1: seedRaw.wj1,
+                        WeeJoker_Ante2: seedRaw.wj2,
+                        HanginChad_Ante1: seedRaw.hc1,
+                        HanginChad_Ante2: seedRaw.hc2,
+                        Hack_Ante1: seedRaw.hk1,
+                        Hack_Ante2: seedRaw.hk2,
+                        blueprint_early: seedRaw.bp,
+                        brainstorm_early: seedRaw.bs,
+                        Showman_Ante1: seedRaw.sh,
+                        red_Seal_Two: seedRaw.rs
+                    };
+                    setSeeds([seedData]);
+                    setError(null);
+                }
+            } else if (!seedRaw) {
+                setSeeds([]);
+                // If schedule didn't load yet, don't error, just wait?
+                if (schedule.length > 0) setError("Seed not found.");
+            } else {
+                // Map Minified JSON to Full Types
+                const seedData: SeedData = {
+                    seed: seedRaw.id,
+                    score: seedRaw.score,
+                    twos: seedRaw.twos,
+                    WeeJoker_Ante1: seedRaw.wj1,
+                    WeeJoker_Ante2: seedRaw.wj2,
+                    HanginChad_Ante1: seedRaw.hc1,
+                    HanginChad_Ante2: seedRaw.hc2,
+                    Hack_Ante1: seedRaw.hk1,
+                    Hack_Ante2: seedRaw.hk2,
+                    blueprint_early: seedRaw.bp,
+                    brainstorm_early: seedRaw.bs,
+                    Showman_Ante1: seedRaw.sh,
+                    red_Seal_Two: seedRaw.rs
+                };
+                setSeeds([seedData]);
+                setError(null);
+            }
+
+            // 2. Fetch Score (Still API)
+            try {
+                const scoreRes = await fetch(`/api/scores?day=${day}`);
+                if (scoreRes.ok) {
+                    const scoreData = await scoreRes.json();
+                    if (scoreData.scores && scoreData.scores.length > 0) {
+                        const top = scoreData.scores[0];
+                        setTopScore({ name: top.playerName || top.player_name || top.name, score: top.score });
+                    } else {
+                        setTopScore(null);
+                    }
+                } else {
+                    setTopScore(null);
+                }
+            } catch (e) {
+                console.error("Score fetch error", e);
+                setTopScore(null);
+            }
+        };
+
+        loadDayData(viewingDay);
+    }, [viewingDay, mounted, schedule]);
+
 
     const [showSubmit, setShowSubmit] = useState(false);
     const [showHowTo, setShowHowTo] = useState(false);
@@ -76,7 +163,8 @@ export function DailyWee() {
     const canGoBack = viewingDay > 0; // Can go back to Day 0 (Weepoch)
     const canGoForward = viewingDay < todayNumber + 1; // Can go to Tomorrow
 
-    const seed = seeds[viewingDay - 1];
+    // For static daily loading, seeds array will contain a single item or be empty
+    const seed = seeds.length > 0 ? seeds[0] : null;
 
     // Derived Logic from User's JAML Columns
     const hasHack = (seed?.Hack_Ante1 ?? 0) > 0 || (seed?.Hack_Ante2 ?? 0) > 0;
@@ -86,29 +174,8 @@ export function DailyWee() {
     const redSealCount = seed?.red_Seal_Two ?? 0;
     const hasWee = (seed?.WeeJoker_Ante1 ?? 0) > 0 || (seed?.WeeJoker_Ante2 ?? 0) > 0;
 
-
-    // Countdown Logic
-    const [timeLeft, setTimeLeft] = useState("");
-    useEffect(() => {
-        if (!isTomorrow) return;
-        const interval = setInterval(() => {
-            const now = new Date();
-            const tomorrow = new Date(now);
-            tomorrow.setUTCHours(24, 0, 0, 0); // Next UTC midnight
-            const diff = tomorrow.getTime() - now.getTime();
-
-            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-            const minutes = Math.floor((diff / (1000 * 60)) % 60);
-            const seconds = Math.floor((diff / 1000) % 60);
-
-            setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
-        }, 1000);
-        return () => clearInterval(interval);
-    }, [isTomorrow]);
-
     const getDayDisplay = (day: number) => {
-        if (day < 1) return "EPOCH START";
-        if (day === todayNumber + 1) return "TOMORROW";
+        // if (day < 1) return "EPOCH START"; // Removed per user request
         const date = new Date(EPOCH + (day - 1) * 24 * 60 * 60 * 1000);
         return date.toLocaleDateString('en-US', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' });
     };
@@ -120,7 +187,7 @@ export function DailyWee() {
             {/* MAIN VIEW */}
             <div className="absolute inset-0 z-10 flex flex-col items-center justify-center overflow-hidden">
                 {/* HERO STAGE - TIGHT LAYOUT */}
-                <div className="h-[100dvh] w-full relative z-10 flex flex-col items-center justify-center pb-2">
+                <div className="h-[100dvh] w-full relative z-10 flex flex-col items-center justify-between pb-4 pt-12 sm:pt-8">
                     {/* Header */}
                     <div className="text-center w-full relative z-20 mb-1 shrink-0">
                         <div className="flex justify-between w-full max-w-sm mx-auto text-xs font-pixel text-white/90 tracking-widest border-b border-white/30 pb-1 mb-1 uppercase px-4 drop-shadow-md">
@@ -131,10 +198,10 @@ export function DailyWee() {
                         <div className="font-header text-6xl sm:text-7xl text-white tracking-widest drop-shadow-[4px_4px_0_rgba(0,0,0,1)] uppercase leading-none mb-1 select-none">
                             THE DAILY WEE
                         </div>
-                        <div className="w-full max-w-sm mx-auto border-t-2 border-b-2 border-white/30 py-0.5 mb-1 px-4">
-                            <div className="flex justify-between items-center py-0.5 border-t border-b border-white/20 text-xs font-pixel text-white/80 uppercase tracking-[0.2em] shadow-sm">
+                        <div className="w-full max-w-sm mx-auto mb-1 px-4">
+                            <div className="flex justify-between items-center py-1 border-y border-white/20 text-xs font-pixel text-white uppercase tracking-[0.2em] shadow-sm">
                                 <span>{getDayDisplay(viewingDay)}</span>
-                                <span className="italic normal-case tracking-normal opacity-90 hidden sm:inline">"All the 2s"</span>
+                                <span className="italic normal-case tracking-normal hidden sm:inline">&quot;All the 2s&quot;</span>
                                 <span>Est. 2025</span>
                             </div>
                         </div>
@@ -144,26 +211,26 @@ export function DailyWee() {
                     <div className="flex flex-row items-stretch justify-center gap-2 sm:gap-4 w-full max-w-[95vw] sm:max-w-3xl mx-auto px-0 sm:px-4 relative z-30 grow mb-2 min-h-0">
                         {/* Left Nav */}
                         <button onClick={() => canGoBack && updateDay(v => v - 1)} disabled={!canGoBack}
-                            className={`hidden sm:flex items-center justify-center w-14 flex-shrink-0 rounded-xl transition-all duration-75 ease-out border-[2px] border-black/20 ${!canGoBack ? 'opacity-0 cursor-default pointer-events-none' : 'bg-[#D04035] shadow-[0_4px_0_#000] hover:bg-[#B03025] hover:brightness-110 active:shadow-none active:translate-y-[2px]'}`}
+                            className={`hidden sm:flex items-center justify-center w-14 flex-shrink-0 rounded-xl transition-all duration-75 ease-out border-[2px] border-black/20 ${!canGoBack ? 'bg-[#5c1a1a] shadow-[0_4px_0_#3d1111] opacity-50 cursor-not-allowed' : 'bg-[var(--balatro-red)] shadow-[0_4px_0_var(--balatro-red-dark)] hover:bg-[var(--balatro-red-dark)] hover:shadow-[0_4px_0_var(--balatro-red-darker)] hover:brightness-100 active:shadow-none active:translate-y-[4px]'}`}
                         >
-                            <ChevronLeft size={36} className="text-white drop-shadow-md" strokeWidth={5} />
+                            <ChevronLeft size={36} className={!canGoBack ? "text-[#8a2e2e] drop-shadow-sm" : "text-white drop-shadow-md"} strokeWidth={5} />
                         </button>
                         {/* Mobile Left Nav */}
                         <button onClick={() => canGoBack && updateDay(v => v - 1)} disabled={!canGoBack}
-                            className={`sm:hidden absolute left-0 top-1/2 -translate-y-1/2 z-40 w-12 h-24 rounded-r-xl flex items-center justify-center transition-all duration-75 ease-out border-y-[2px] border-r-[2px] border-black/20 ${!canGoBack ? 'opacity-0 cursor-default pointer-events-none' : 'bg-[#D04035] shadow-[0_4px_0_#000] hover:bg-[#B03025] active:shadow-none active:translate-y-[2px]'}`}
+                            className={`sm:hidden absolute left-0 top-0 bottom-0 z-40 w-12 flex items-center justify-center transition-all duration-75 ease-out rounded-l-md ${!canGoBack ? 'bg-[#5c1a1a]/90 backdrop-blur-sm opacity-50 cursor-not-allowed' : 'bg-black/10 hover:bg-black/30 active:bg-black/50'}`}
                         >
-                            <ChevronLeft size={32} className="text-white drop-shadow-md" strokeWidth={4} />
+                            <ChevronLeft size={48} className={!canGoBack ? "text-[#8a2e2e] drop-shadow-sm" : "text-white drop-shadow-md"} strokeWidth={4} />
                         </button>
 
                         {/* Central Stage */}
                         <div className="relative w-full max-w-[22rem] sm:max-w-[24rem] z-20 px-2 sm:px-0 flex flex-col grow min-h-0">
                             {isWeepoch ? (
-                                // WEEPOCH CARD
+                                // WEEPOCH CARD (Day 0)
                                 <div className="w-full bg-black/40 backdrop-blur-sm rounded-xl border-[4px] border-white/20 text-center shadow-2xl relative overflow-hidden flex flex-col items-center justify-center p-8 grow">
                                     <div className="text-8xl mb-6">🌌</div>
                                     <div className="font-header text-4xl text-[var(--balatro-gold)] mb-4">BEGINNING</div>
                                     <p className="font-pixel text-white/60 text-sm mb-6 max-w-[80%] mx-auto leading-relaxed">
-                                        Project Zero Point.<br />Idea has been rattling around pifreak's head for quite a while!<br />Inspired by daylatro (tfausk) &amp; Wordle.
+                                        Project Zero Point.<br />Idea has been rattling around pifreak&apos;s head for quite a while!<br />Inspired by daylatro (tfausk) &amp; Wordle.
                                     </p>
                                     <button onClick={() => updateDay(1)}
                                         className="bg-[var(--balatro-blue)] text-white font-header text-xl px-8 py-3 rounded-xl shadow-[0_4px_0_#000] hover:bg-[var(--balatro-blue-dark)] active:shadow-none active:translate-y-[2px] transition-all duration-75 ease-out"
@@ -171,37 +238,41 @@ export function DailyWee() {
                                         GO TO DAY 1
                                     </button>
                                 </div>
-                            ) : isTomorrow ? (
-                                // TOMORROW CARD
-                                <div className="w-full bg-black/40 backdrop-blur-sm rounded-xl border-[4px] border-white/20 text-center shadow-2xl relative overflow-hidden flex flex-col items-center justify-center p-8 group grow">
-                                    <div className="relative z-20 flex flex-col items-center">
-                                        <div className="mb-4 text-white/50">
-                                            <div className="bg-black/50 p-6 rounded-2xl border-2 border-white/10">
-                                                {/* Padlock Icon Logic - Fallback to built-in lock if specific sprite missing */}
-                                                <div className="w-16 h-16 flex items-center justify-center text-white/40">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="font-header text-4xl text-white mb-2 tracking-widest text-shadow-lg uppercase">DAY {viewingDay}</div>
-                                        <div className="font-pixel text-[var(--balatro-text-grey)] text-lg mb-6">LOCKED UNTIL TOMORROW</div>
-                                        <div className="bg-black/80 px-6 py-3 rounded-xl border border-white/20 shadow-inner">
-                                            <div className="font-header text-3xl text-[var(--balatro-gold)] tracking-widest tabular-nums animate-pulse">
-                                                {timeLeft || "--:--:--"}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             ) : (
-                                // SEED CARD (real data) - FULL HEIGHT
+                                // STANDARD CARD (Past, Present, or Future Hype)
                                 <div className="w-full h-full relative group/card flex flex-col grow min-h-0">
-                                    {seed && (
+                                    {seed ? (
                                         <SeedCard
                                             seed={seed}
                                             dayNumber={viewingDay}
                                             className="w-full h-full grow flex flex-col"
-                                            onAnalyze={() => setShowHowTo(true)} // 'Play' button now opens HowToPlay
+                                            onAnalyze={() => setShowHowTo(true)}
+                                            isLocked={viewingDay > todayNumber}
                                         />
+                                    ) : (
+                                        // Loading or Error State
+                                        <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center">
+                                            {error ? (
+                                                <div className="bg-red-900/80 border border-red-500 rounded-lg p-6 max-w-sm flex flex-col items-center gap-4 shadow-xl z-50 relative pointer-events-auto">
+                                                    <p className="text-red-200 font-header text-xl uppercase tracking-wider">
+                                                        {error?.includes("Wait") ? "FUTURE LOCKED" : "Connection Error"}
+                                                    </p>
+                                                    <code className="text-xs text-red-100 font-mono break-words block bg-black/50 p-2 rounded w-full text-left">
+                                                        {error}
+                                                    </code>
+                                                    <button
+                                                        onClick={() => window.location.reload()}
+                                                        className="bg-red-600 text-white font-header text-sm px-6 py-2 rounded shadow-[0_4px_0_#991b1b] hover:bg-red-500 active:shadow-none active:translate-y-[4px] transition-all"
+                                                    >
+                                                        Retry
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="animate-spin text-white/20">
+                                                    <Sprite name="weejoker" width={48} />
+                                                </div>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                             )}
@@ -209,38 +280,31 @@ export function DailyWee() {
 
                         {/* Right Nav */}
                         <button onClick={() => canGoForward && updateDay(v => v + 1)} disabled={!canGoForward}
-                            className={`hidden sm:flex items-center justify-center w-14 flex-shrink-0 rounded-xl transition-all duration-75 ease-out border-[2px] border-black/20 ${!canGoForward ? 'opacity-0 cursor-default pointer-events-none' : 'bg-[#D04035] shadow-[0_4px_0_#000] hover:bg-[#B03025] hover:brightness-110 active:shadow-none active:translate-y-[2px]'}`}
+                            className={`hidden sm:flex items-center justify-center w-14 flex-shrink-0 rounded-xl transition-all duration-75 ease-out border-[2px] border-black/20 ${!canGoForward ? 'bg-[#5c1a1a] shadow-[0_4px_0_#3d1111] opacity-50 cursor-not-allowed' : 'bg-[var(--balatro-red)] shadow-[0_4px_0_var(--balatro-red-dark)] hover:bg-[var(--balatro-red-dark)] hover:shadow-[0_4px_0_var(--balatro-red-darker)] hover:brightness-100 active:shadow-none active:translate-y-[4px]'}`}
                         >
-                            <ChevronRight size={36} className="text-white drop-shadow-md" strokeWidth={5} />
+                            <ChevronRight size={36} className={!canGoForward ? "text-[#8a2e2e] drop-shadow-sm" : "text-white drop-shadow-md"} strokeWidth={5} />
                         </button>
                         {/* Mobile Right Nav */}
                         <button onClick={() => canGoForward && updateDay(v => v + 1)} disabled={!canGoForward}
-                            className={`sm:hidden absolute right-0 top-1/2 -translate-y-1/2 z-40 w-12 h-24 rounded-l-xl flex items-center justify-center transition-all duration-75 ease-out border-y-[2px] border-l-[2px] border-black/20 ${!canGoForward ? 'opacity-0 cursor-default pointer-events-none' : 'bg-[#D04035] shadow-[0_4px_0_#000] hover:bg-[#B03025] active:shadow-none active:translate-y-[2px]'}`}
+                            className={`sm:hidden absolute right-0 top-0 bottom-0 z-40 w-12 flex items-center justify-center transition-all duration-75 ease-out rounded-r-md ${!canGoForward ? 'bg-[#5c1a1a]/90 backdrop-blur-sm opacity-50 cursor-not-allowed' : 'bg-black/10 hover:bg-black/30 active:bg-black/50'}`}
                         >
-                            <ChevronRight size={32} className="text-white drop-shadow-md" strokeWidth={4} />
+                            <ChevronRight size={48} className={!canGoForward ? "text-[#8a2e2e] drop-shadow-sm" : "text-white drop-shadow-md"} strokeWidth={4} />
                         </button>
                     </div>
 
                     {/* "FAKE BANNER AD" FOOTER */}
-                    <div className="w-full max-w-[95vw] sm:max-w-2xl px-2 sm:px-0 z-40 shrink-0">
-                        <button onClick={() => setViewMode('wisdom')}
-                            className="w-full group relative overflow-hidden bg-[var(--balatro-grey)] border-[3px] border-white/40 hover:border-white/80 rounded-xl shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[2px] transition-all p-3 sm:p-4 flex flex-row items-center justify-between gap-4"
-                        >
-                            <div className="flex flex-col items-start text-left">
-                                <span className="font-header text-[var(--balatro-gold)] text-lg sm:text-xl uppercase tracking-wider leading-none mb-1 drop-shadow-sm">
-                                    So, you like The Daily Wee, huh?
-                                </span>
-                                <span className="font-pixel text-[10px] sm:text-xs text-white/80">
-                                    FREE challenge seeds at: <span className="text-white underline decoration-dashed underline-offset-2">ErraticDeck.app</span>
-                                </span>
-                            </div>
-                            <div className="hidden sm:flex bg-black/30 px-3 py-1.5 rounded border border-white/20 text-[10px] font-pixel text-white/50 uppercase tracking-widest shrink-0">
-                                AD
-                            </div>
-                        </button>
+                    <div className="w-full max-w-[95vw] sm:max-w-lg px-2 sm:px-0 z-40 shrink-0">
+                        <AdRotator
+                            onOpenWisdom={() => setViewMode('wisdom')}
+                            onOpenLeaderboard={() => setShowLeaderboard(true)}
+                            topScore={topScore}
+                            isLocked={viewingDay > todayNumber}
+                        />
                     </div>
                 </div>
-            </div>      {/* VIEW 2: WEE WISDOM (Fixed Overlay Slide-Up) */}
+            </div>
+
+            {/* VIEW 2: WEE WISDOM (Fixed Overlay Slide-Up) */}
             <div
                 className="fixed inset-0 z-50 flex flex-col items-center justify-center transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-none pointer-events-auto"
                 style={{ transform: viewMode === 'wisdom' ? 'translateY(0)' : 'translateY(120vh)' }}
@@ -307,7 +371,7 @@ function WeeWisdom({ onBack }: { onBack: () => void }) {
                 {/* Back Button - Full Width Orange Style */}
                 <button
                     onClick={onBack}
-                    className="w-full bg-[var(--balatro-orange)] text-white font-header text-xl px-8 py-3 rounded-lg shadow-[0_4px_0_#000] hover:brightness-110 border-[3px] border-white active:shadow-none active:translate-y-[4px] transition-all duration-75 ease-out uppercase tracking-widest mt-2"
+                    className="w-full bg-[var(--balatro-orange)] text-white font-header text-xl px-8 py-3 rounded-lg shadow-[0_4px_0_#000] hover:brightness-110 border-none active:shadow-none active:translate-y-[4px] transition-all duration-75 ease-out uppercase tracking-widest mt-2"
                 >
                     Back
                 </button>

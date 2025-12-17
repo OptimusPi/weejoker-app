@@ -19,14 +19,21 @@ const JOKER_MAP: Record<string, { x: number; y: number }> = {
     "Droll Joker": { x: 9, y: 0 },
 
     // Key MVP Jokers
-    "Wee Joker": { x: 0, y: 0 }, // Verified from jokers.json: Use Standard Joker sprite (it's just small)
+    "Wee Joker": { x: 0, y: 0 },
     "weejoker": { x: 0, y: 0 },
-    "Hanging Chad": { x: 0, y: 8 },
-    "Hack": { x: 1, y: 8 },
-    "Blueprint": { x: 2, y: 10 },
-    "Brainstorm": { x: 2, y: 11 },
-    "Showman": { x: 3, y: 8 },
-    "Invisible Joker": { x: 4, y: 10 },
+    "Hanging Chad": { x: 9, y: 6 }, // Corrected from 0,8
+    "hangingchad": { x: 9, y: 6 },
+    "Hack": { x: 5, y: 2 },         // Corrected from 1,8
+    "hack": { x: 5, y: 2 },
+    "Blueprint": { x: 0, y: 3 },    // Corrected from 2,10
+    "blueprint": { x: 0, y: 3 },
+    "Brainstorm": { x: 7, y: 7 },   // Corrected from 2,11
+    "brainstorm": { x: 7, y: 7 },
+    "Showman": { x: 6, y: 5 },      // Corrected from 3,8
+    "showman": { x: 6, y: 5 },
+    "Invisible Joker": { x: 1, y: 7 }, // Corrected from 4,10
+    "invisiblejoker": { x: 1, y: 7 },
+    "Red Seal": { x: 0, y: 0 }, // Placeholder/TODO
 };
 
 // Fallback for unknown jokers to prevent crash

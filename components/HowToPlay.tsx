@@ -47,7 +47,7 @@ export function HowToPlay({ onClose, onSubmit }: HowToPlayProps) {
                         <div className="space-y-2">
                             <h3 className="text-xl font-header text-white uppercase">Copy The Daily Seed</h3>
                             <p className="text-zinc-200 font-pixel text-lg leading-tight">
-                                Click the <span className="inline-block bg-[var(--balatro-blue)] text-white text-xs px-1.5 py-0.5 rounded font-header mx-1 border-b-2 border-black/20">COPY</span> button on today's challenge to grab the seed code.
+                                Click the <span className="inline-block bg-[var(--balatro-blue)] text-white text-xs px-1.5 py-0.5 rounded font-header mx-1 border-b-2 border-black/20">COPY</span> button on today&apos;s challenge to grab the seed code.
                             </p>
                         </div>
                     </div>
@@ -82,18 +82,18 @@ export function HowToPlay({ onClose, onSubmit }: HowToPlayProps) {
                         <div>
                             <h3 className="text-xl font-header text-[var(--balatro-gold)] uppercase mb-1">THE GOAL</h3>
                             <p className="font-pixel text-xl text-white">
-                                Beat <span className="text-[var(--balatro-red)]">Ante 8</span>. At the start of Ante 9, screenshot your <span className="text-[var(--balatro-blue)]">Wee Joker</span> chip count (e.g. "+2101 Chips"). That is your score!
+                                Beat <span className="text-[var(--balatro-red)]">Ante 8</span>. At the start of Ante 9, screenshot your <span className="text-[var(--balatro-blue)]">Wee Joker</span> chip count (e.g. &quot;+2101 Chips&quot;). That is your score!
                             </p>
                         </div>
                     </div>
                 </div>
 
                 <div className="p-4 border-t-[3px] border-black/10 text-center bg-black/20 flex gap-4">
-                    <button onClick={onClose} className="flex-1 bg-black/40 hover:bg-black/60 text-white font-header py-3 rounded-xl border-[3px] border-white/30 shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[2px] transition-all text-xl tracking-wider">
-                        BACK
+                    <button onClick={onClose} className="flex-1 bg-[var(--balatro-orange)] hover:bg-[#D04035] text-white font-header py-2 rounded-xl border-none shadow-[0_2px_0_#992e10] active:shadow-none active:translate-y-[2px] transition-all text-2xl tracking-wider">
+                        Back
                     </button>
                     {onSubmit && (
-                        <button onClick={onSubmit} className="flex-[2] bg-[var(--balatro-orange)] hover:brightness-110 text-white font-header py-3 rounded-xl border-[3px] border-white shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[2px] transition-all text-xl tracking-wider flex items-center justify-center gap-2">
+                        <button onClick={onSubmit} className="flex-[2] bg-[var(--balatro-blue)] hover:brightness-110 text-white font-header py-2 rounded-xl border-none shadow-[0_2px_0_#0055aa] active:shadow-none active:translate-y-[2px] transition-all text-2xl tracking-wider flex items-center justify-center gap-2">
                             <span>SUBMIT SCORE</span>
                         </button>
                     )}

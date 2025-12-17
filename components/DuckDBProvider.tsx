@@ -29,6 +29,22 @@ export function DuckDBProvider({ children }: { children: React.ReactNode }) {
     const [error, setError] = useState<Error | null>(null);
 
     useEffect(() => {
+        if (!conn || !db) return;
+
+        return () => {
+            const closeDB = async () => {
+                try {
+                    await conn.close();
+                    await db.terminate();
+                } catch (e) {
+                    console.error("Error closing DuckDB:", e);
+                }
+            };
+            closeDB();
+        };
+    }, [conn, db]);
+
+    useEffect(() => {
         let isMounted = true;
 
         async function setup() {

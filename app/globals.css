@@ -6,6 +6,7 @@
     /* Primary Brand Colors */
     --balatro-red: #ff4c40;
     --balatro-red-dark: #a02721;
+    --balatro-red-darker: #70150f;
     --balatro-blue: #0093ff;
     --balatro-blue-dark: #0057a1;
     --balatro-orange: #ff9800;
@@ -25,6 +26,11 @@
     --balatro-shadow: #0b1415;
     --balatro-border: #b9c2d2;
     /* BrightSilver */
+
+    /* Disabled */
+    --balatro-disabled-face: #545454;
+    --balatro-disabled-text: #6b6b6b;
+    --balatro-disabled-shadow: #2d2d2d;
 
     /* Text */
     --balatro-text: #FFFFFF;

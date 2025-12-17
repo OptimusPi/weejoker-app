@@ -11,6 +11,7 @@ interface D1Database {
 interface D1PreparedStatement {
     bind(...values: any[]): D1PreparedStatement;
     all<T = unknown>(): Promise<D1Result<T>>;
+    first<T = unknown>(colName?: string): Promise<T | null>;
     run(): Promise<D1Result<unknown>>;
 }
 

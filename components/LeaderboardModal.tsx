@@ -21,26 +21,26 @@ export function LeaderboardModal({ dayNumber, onClose }: LeaderboardModalProps) 
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        const fetchScores = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const res = await fetch(`/api/scores?day=${dayNumber}`);
+                if (!res.ok) throw new Error("Failed to load scores");
+                const data = await res.json();
+                if (data.scores) {
+                    setScores(data.scores);
+                }
+            } catch (err) {
+                console.error("API Error:", err);
+                setError("Could not load scores.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchScores();
     }, [dayNumber]);
-
-    const fetchScores = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const res = await fetch(`/api/scores?day=${dayNumber}`);
-            if (!res.ok) throw new Error("Failed to load scores");
-            const data = await res.json();
-            if (data.scores) {
-                setScores(data.scores);
-            }
-        } catch (err) {
-            console.error("API Error:", err);
-            setError("Could not load scores.");
-        } finally {
-            setLoading(false);
-        }
-    };
 
     // Fallback Data for "Jaw Drop" reliability
 
@@ -57,22 +57,22 @@ export function LeaderboardModal({ dayNumber, onClose }: LeaderboardModalProps) 
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80" onClick={onClose}>
-            <div className="bg-[var(--balatro-grey)] border-[3px] border-[var(--balatro-gold)] rounded-xl p-6 md:p-8 max-w-lg w-full mx-4 shadow-[0_8px_0_#000] relative overflow-hidden flex flex-col max-h-[80vh]" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/80 animate-in fade-in duration-200" onClick={onClose}>
+            <div className="bg-[var(--balatro-grey)] border-[3px] border-[var(--balatro-gold)] rounded-xl relative overflow-hidden flex flex-col max-h-[80vh] w-full max-w-lg shadow-[0_8px_0_#000] animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
 
                 {/* Header */}
-                <div className="text-center mb-6 relative z-10 flex-shrink-0 pt-6">
-                    <Trophy size={48} className="text-[var(--balatro-gold)] mx-auto mb-2 drop-shadow-lg" />
-                    <h2 className="text-3xl font-header text-white tracking-wider text-shadow-md">
+                <div className="bg-[var(--balatro-blue)] p-4 flex justify-between items-center border-b-[3px] border-black/20 shrink-0">
+                    <h2 className="text-2xl md:text-3xl font-header text-white tracking-widest text-shadow-sm flex items-center gap-2">
+                        <Trophy size={28} strokeWidth={2.5} />
                         TOP SCORES
                     </h2>
-                    <p className="text-zinc-300 font-pixel mt-1 uppercase tracking-widest text-sm">
+                    <span className="font-pixel text-white/80 text-sm uppercase tracking-wider bg-black/20 px-2 py-1 rounded">
                         Day {dayNumber}
-                    </p>
+                    </span>
                 </div>
 
                 {/* List */}
-                <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar space-y-2 mb-4">
+                <div className="flex-grow overflow-y-auto p-6 md:p-8 custom-scrollbar space-y-2">
                     {loading ? (
                         <div className="text-center py-12 text-zinc-300 font-pixel animate-pulse">
                             Loading Scores...
@@ -114,12 +114,12 @@ export function LeaderboardModal({ dayNumber, onClose }: LeaderboardModalProps) 
                 </div>
 
                 {/* Footer Button */}
-                <div className="p-4 flex-shrink-0 bg-black/20 border-t-[3px] border-black/10 -mx-6 -mb-6 md:-mx-8 md:-mb-8 mt-2">
+                <div className="p-4 flex-shrink-0 bg-black/20 border-t-[3px] border-black/10 text-center">
                     <button
                         onClick={onClose}
-                        className="w-full bg-[var(--balatro-orange)] hover:brightness-110 text-white font-header py-3 rounded-xl border-[3px] border-white shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[2px] transition-all text-xl tracking-wider"
+                        className="w-full bg-[var(--balatro-orange)] hover:bg-[#D04035] text-white font-header py-2 rounded-xl border-none shadow-[0_2px_0_#992e10] active:shadow-none active:translate-y-[2px] transition-all text-2xl tracking-wider"
                     >
-                        BACK
+                        Back
                     </button>
                 </div>
             </div>

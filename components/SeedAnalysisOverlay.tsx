@@ -70,7 +70,7 @@ export function SeedAnalysisOverlay({ seed, onClose }: SeedAnalysisOverlayProps)
                         </div>
                         <div className="space-y-4 font-pixel text-xl flex-1">
                             <div className="flex justify-between items-center p-3 bg-black/40 rounded border-l-4 border-balatro-blue">
-                                <span className="text-gray-300">Rank '2' Count</span>
+                                <span className="text-gray-300">Rank &apos;2&apos; Count</span>
                                 <span className="font-bold text-2xl text-white">{seed.twos}</span>
                             </div>
                             <div className="text-sm text-gray-400 p-2 italic">

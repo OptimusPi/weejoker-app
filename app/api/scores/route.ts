@@ -47,15 +47,20 @@ export async function GET(request: NextRequest) {
         }
 
         return NextResponse.json({ error: 'Missing day or week parameter' }, { status: 400 });
-    } catch (error) {
+    } catch (error: any) {
         console.error('D1 Error:', error);
-        return NextResponse.json({ error: 'Database error', details: String(error) }, { status: 500 });
+        return NextResponse.json({
+            error: 'Database error',
+            details: error.message,
+            stack: error.stack,
+            envDB: !!getRequestContext().env.DB
+        }, { status: 500 });
     }
 }
 
 export async function POST(request: NextRequest) {
     try {
-        const body = await request.json();
+        const body = await request.json() as { seed?: string; dayNumber?: number; playerName?: string; score?: number };
         const { seed, dayNumber, playerName, score } = body;
 
         if (!seed || !dayNumber || !playerName || score === undefined) {

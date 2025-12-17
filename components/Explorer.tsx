@@ -112,7 +112,8 @@ export default function Explorer({ initialSeeds }: ExplorerProps) {
                     <SeedCard
                         key={seed.seed + i}
                         seed={seed}
-                        onAnalyze={setSelectedSeed}
+                        dayNumber={0}
+                        onAnalyze={() => setSelectedSeed(seed)}
                     />
                 ))}
 

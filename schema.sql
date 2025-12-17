@@ -1,10 +1,39 @@
-DROP TABLE IF EXISTS scores;
-CREATE TABLE IF NOT EXISTS scores (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  seed TEXT NOT NULL,
-  day_number INTEGER NOT NULL,
-  player_name TEXT NOT NULL,
-  score INTEGER NOT NULL,
-  submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS DailySeeds;
+
+CREATE TABLE DailySeeds (
+    day INTEGER PRIMARY KEY,
+    seed TEXT,
+    score INTEGER,
+    twos INTEGER,
+    WeeJoker_Ante1 INTEGER,
+    WeeJoker_Ante2 INTEGER,
+    WeeJoker_A1 INTEGER,
+    WeeJoker_A2 INTEGER,
+    HanginChad_Ante1 INTEGER,
+    HanginChad_Ante2 INTEGER,
+    Hack_Ante1 INTEGER,
+    Hack_Ante2 INTEGER,
+    Foil_HangingChad_A1_2 INTEGER,
+    Foil_HangingChad_A1_2_2 INTEGER,
+    Foil_WeeJoker_A1_2 INTEGER,
+    Holographic_HangingChad_A1_2 INTEGER,
+    Holographic_HangingChad_A1_2_2 INTEGER,
+    Holographic_WeeJoker_A1_2 INTEGER,
+    Polychrome_HangingChad_A1_2 INTEGER,
+    Polychrome_Hack_A1_2 INTEGER,
+    Polychrome_WeeJoker_A1_2 INTEGER,
+    Negative_HangingChad_A1_2 INTEGER,
+    Negative_HangingChad_A1_2_2 INTEGER,
+    Negative_WeeJoker_A1_2 INTEGER,
+    blueprint_early INTEGER,
+    brainstorm_early INTEGER,
+    blueprint_early_2 INTEGER,
+    brainstorm_early_2 INTEGER,
+    Showman_Ante1 INTEGER,
+    Showman_Ante1_2 INTEGER,
+    red_Seal_Two INTEGER,
+    polychrome_Two INTEGER,
+    InvisibleJoker INTEGER,
+    Temperance INTEGER,
+    Ankh_Ante1 INTEGER
 );
-CREATE INDEX IF NOT EXISTS idx_day_score ON scores(day_number, score DESC);
