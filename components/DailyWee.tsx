@@ -3,7 +3,7 @@
 import { SeedData } from "@/lib/types";
 import { ChevronLeft, ChevronRight, Star, Trophy, HeartHandshake } from "lucide-react";
 import { SeedCard } from "./SeedCard";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { HowToPlay } from "./HowToPlay";
 import { SubmitScoreModal } from "./SubmitScoreModal";
 import { LeaderboardModal } from "./LeaderboardModal";
@@ -76,7 +76,7 @@ export function DailyWee() {
 
     const [topScore, setTopScore] = useState<{ name: string; score: number } | null>(null);
 
-    const loadDayData = async (day: number) => {
+    const loadDayData = useCallback(async (day: number) => {
         // 1. Get Seed from Local Schedule
         // Schedule is 0-indexed (Day 1 = Index 0)
         const seedRaw = schedule[day - 1];
@@ -149,7 +149,7 @@ export function DailyWee() {
             console.error("Score fetch error", e);
             setTopScore(null);
         }
-    };
+    }, [schedule]);
 
     useEffect(() => {
         if (!mounted) return;

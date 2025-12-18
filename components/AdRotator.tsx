@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { HeartHandshake, ExternalLink, Trophy } from "lucide-react";
+import Image from "next/image";
 
 interface AdProps {
     onOpenWisdom: () => void;
@@ -119,7 +120,7 @@ export function AdRotator({ onOpenWisdom, onOpenLeaderboard, topScore, isLocked 
             {currentAd.type === 'image' && currentAd.src ? (
                 // Full Image Ad
                 <div className="absolute inset-0">
-                    <img src={currentAd.src} alt="Ad" className="w-full h-full object-cover" />
+                    <Image src={currentAd.src} alt="Ad" fill className="object-cover" />
                 </div>
             ) : (
                 // Text/Icon Ad
