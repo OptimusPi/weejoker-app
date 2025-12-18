@@ -7,6 +7,12 @@ if (process.env.NODE_ENV === 'development') {
     });
 }
 
-const nextConfig = {};
+const nextConfig = {
+    experimental: {
+        turbo: {
+            root: '.',
+        },
+    },
+};
 
 export default nextConfig;

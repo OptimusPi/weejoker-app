@@ -57,8 +57,8 @@ export function LeaderboardModal({ dayNumber, onClose }: LeaderboardModalProps) 
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/80 animate-in fade-in duration-200" onClick={onClose}>
-            <div className="bg-[var(--balatro-grey)] border-[3px] border-[var(--balatro-gold)] rounded-xl relative overflow-hidden flex flex-col max-h-[80vh] w-full max-w-lg shadow-[0_8px_0_#000] animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/80 animate-in fade-in duration-150" onClick={onClose}>
+            <div className="relative w-full max-w-lg h-[70vh] flex flex-col bg-[var(--balatro-modal-bg)] border-[3px] border-black/20 rounded-xl overflow-hidden animate-in slide-in-from-bottom-10 duration-150" onClick={(e) => e.stopPropagation()}>
 
                 {/* Header */}
                 <div className="bg-[var(--balatro-blue)] p-4 flex justify-between items-center border-b-[3px] border-black/20 shrink-0">
@@ -93,7 +93,7 @@ export function LeaderboardModal({ dayNumber, onClose }: LeaderboardModalProps) 
                                     flex items-center justify-between p-3 rounded-lg border-2
                                     ${idx === 0
                                         ? 'bg-[var(--balatro-gold)] border-[var(--balatro-gold)] text-black shadow-[ inset_0_0_20px_rgba(255,255,255,0.2) ]'
-                                        : 'bg-black/40 border-white/10 text-white'
+                                        : 'bg-black/40 border-black/20 text-white'
                                     }
                                 `}
                             >
@@ -113,11 +113,11 @@ export function LeaderboardModal({ dayNumber, onClose }: LeaderboardModalProps) 
                     )}
                 </div>
 
-                {/* Footer Button */}
-                <div className="p-4 flex-shrink-0 bg-black/20 border-t-[3px] border-black/10 text-center">
+                {/* Footer Button - NO EXTRA BACKGROUND */}
+                <div className="p-3 flex-shrink-0 text-center">
                     <button
                         onClick={onClose}
-                        className="w-full bg-[var(--balatro-orange)] hover:bg-[#D04035] text-white font-header py-2 rounded-xl border-none shadow-[0_2px_0_#992e10] active:shadow-none active:translate-y-[2px] transition-all text-2xl tracking-wider"
+                        className="w-full bg-[var(--balatro-orange)] hover:brightness-110 active:brightness-90 text-white font-header text-xl px-6 py-3 rounded-lg transition-colors uppercase"
                     >
                         Back
                     </button>

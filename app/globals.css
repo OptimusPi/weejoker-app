@@ -3,40 +3,105 @@
 @tailwind utilities;
 
 :root {
-    /* Primary Brand Colors */
-    --balatro-red: #ff4c40;
-    --balatro-red-dark: #a02721;
-    --balatro-red-darker: #70150f;
-    --balatro-blue: #0093ff;
-    --balatro-blue-dark: #0057a1;
-    --balatro-orange: #ff9800;
-    --balatro-orange-dark: #a05b00;
-    --balatro-green: #429f79;
-    --balatro-green-dark: #215f46;
-    --balatro-purple: #7d60e0;
-    --balatro-purple-dark: #292189;
-    --balatro-gold: #eaba44;
-    /* BrightGold */
+    /* ============================================================ */
+    /* LAYER 1: BASE COLOR PALETTE - Authentic Balatro Colors       */
+    /* ============================================================ */
+    --color-white: #FFFFFF;
+    --color-black: #000000;
+    --color-red: #ff4c40;
+    --color-dark-red: #a02721;
+    --color-darkest-red: #70150f;
+    --color-blue: #0093ff;
+    --color-dark-blue: #0057a1;
+    --color-orange: #ff9800;
+    --color-dark-orange: #a05b00;
+    --color-dark-gold: #b8883a;
+    --color-green: #429f79;
+    --color-dark-green: #215f46;
+    --color-purple: #7d60e0;
+    --color-dark-purple: #292189;
+
+    /* Special/Text Colors */
+    --color-bright-gold: #eaba44;
+    --color-bright-green: #35bd86;
 
     /* Modal/Panel Colors */
-    --balatro-grey: #3a5055;
-    --balatro-grey-dark: #33464b;
-    --balatro-grey-darker: #1e2b2d;
-    /* DarkGrey */
-    --balatro-shadow: #0b1415;
-    --balatro-border: #b9c2d2;
-    /* BrightSilver */
+    --color-grey: #3a5055;
+    --color-medium-grey: #33464b;
+    --color-dark-grey: #1e2b2d;
+    --color-bright-silver: #b9c2d2;
+    --color-light-grey: #777e89;
+    --color-faded-grey: #565b5c;
 
-    /* Disabled */
-    --balatro-disabled-face: #545454;
-    --balatro-disabled-text: #6b6b6b;
-    --balatro-disabled-shadow: #2d2d2d;
+    /* Shadow Colors */
+    --color-medium-shadow: #1e2e32;
+    --color-dark-shadow: #0b1415;
+    --color-translucent-black-33: rgba(0, 0, 0, 0.33);
 
-    /* Text */
-    --balatro-text: #FFFFFF;
-    --balatro-text-grey: #777e89;
+    /* Disabled Control Colors */
+    --color-dark-dull-grey: #2d2d2d;
+    --color-dull-grey: #5c5c5c;
+    --color-light-dull-grey: #6b6b6b;
+    --color-light-dull-wash-grey: #545454;
 
-    --font-header: 'Rubik', sans-serif;
+    /* Other UI Colors */
+    --color-burnt-red: #8f3b36;
+    --color-light-silver: #a3acb9;
+    --color-grey-silver: #686e78;
+
+    /* Additional Purple Colors */
+    --color-purple-violet: #9B7EDE;
+    --color-purple-muted: #6B5AA8;
+
+    /* ============================================================ */
+    /* LAYER 2: SEMANTIC BRUSHES - References to Layer 1 Only       */
+    /* ============================================================ */
+
+    /* Brand Action */
+    --balatro-white: var(--color-white);
+    --balatro-black: var(--color-black);
+    --balatro-red: var(--color-red);
+    --balatro-red-hover: var(--color-dark-red);
+    --balatro-blue: var(--color-blue);
+    --balatro-blue-hover: var(--color-dark-blue);
+    --balatro-orange: var(--color-orange);
+    --balatro-orange-hover: var(--color-dark-orange);
+    --balatro-green: var(--color-green);
+    --balatro-green-hover: var(--color-dark-green);
+    --balatro-purple: var(--color-purple);
+    --balatro-purple-hover: var(--color-dark-purple);
+    --balatro-gold: var(--color-bright-gold);
+
+    /* Badge/Button Semantic Names */
+    --balatro-red-badge-face: var(--color-red);
+    --balatro-red-badge-edge: var(--color-dark-red);
+
+    /* Text Semantic */
+    --balatro-font-gold: var(--color-bright-gold);
+    --balatro-font-green: var(--color-bright-green);
+    --balatro-text-disabled: var(--color-faded-grey);
+
+    /* Modal/Panel Semantic - THE LAW */
+    --balatro-modal-bg: var(--color-grey);
+    /* #3a5055 - The Teal Twinge */
+    --balatro-modal-grey: var(--color-grey);
+    --balatro-modal-inner: var(--color-dark-grey);
+    --balatro-modal-border: var(--color-bright-silver);
+    --balatro-modal-edge-border: var(--color-bright-silver);
+    --balatro-modal-south-edge: var(--color-light-grey);
+    --balatro-modal-shadow: var(--color-dark-shadow);
+
+    /* Legacy Aliases (To keep existing UI from breaking) */
+    --balatro-grey: var(--color-grey);
+    --balatro-grey-dark: var(--color-medium-grey);
+    --balatro-grey-darker: var(--color-dark-grey);
+    --balatro-shadow: var(--color-dark-shadow);
+    --balatro-border: var(--color-bright-silver);
+
+    /* Disabled Control Semantic */
+    --balatro-disabled-face: var(--color-light-dull-wash-grey);
+    --balatro-disabled-text: var(--color-light-dull-grey);
+    --balatro-disabled-shadow: var(--color-dark-dull-grey);
 }
 
 /* Swirl Background Effect */
@@ -108,30 +173,63 @@ body::after {
 
 @layer components {
     .balatro-card {
-        background-color: #334155;
-        border: 3px solid white;
+        background-color: var(--balatro-modal-bg);
+        border: 3px solid rgba(0, 0, 0, 0.2);
         border-radius: 0.75rem;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        box-shadow: 0 8px 0 rgba(0, 0, 0, 0.5);
     }
 
-    .balatro-btn {
-        text-transform: uppercase;
-        font-family: var(--font-header), impact, sans-serif;
-        letter-spacing: 0.05em;
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        transition: all 0.15s ease-in-out;
-        box-shadow: 0 4px 0 rgba(0, 0, 0, 0.4);
-    }
+    @layer components {
 
-    .balatro-btn:hover {
-        border-color: white;
-    }
+        /* THE BALATRO BUTTON STANDARD */
+        .balatro-button-back {
+            background-color: var(--color-orange);
+            color: white !important;
+            font-family: var(--font-header);
+            font-size: 1.5rem;
+            /* 2pt larger than base */
+            padding: 0.75rem 2rem;
+            border-radius: 0.75rem;
+            /* rounded-xl */
+            border: none;
+            box-shadow: 0 4px 0 var(--color-dark-orange);
+            /* The flat 2D shadow */
+            transition: none;
+            /* Balatro is snappy */
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: none;
+            /* Case sensitive "Back" */
+            width: 100%;
+            position: relative;
+        }
 
-    .balatro-btn:active {
-        box-shadow: none;
-        transform: translateY(4px);
+        /* Hover State: Flip to Dark */
+        .balatro-button-back:hover {
+            background-color: var(--color-dark-orange);
+        }
+
+        /* Pressed State: Scoot down, cover the shadow */
+        .balatro-button-back:active {
+            background-color: var(--color-dark-orange);
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        /* Generic Standard Buttons (For Red/Blue/Green etc) */
+        .balatro-button {
+            color: white !important;
+            font-family: var(--font-header);
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     }
 
     .balatro-input {

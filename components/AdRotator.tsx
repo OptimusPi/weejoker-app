@@ -114,7 +114,7 @@ export function AdRotator({ onOpenWisdom, onOpenLeaderboard, topScore, isLocked 
     return (
         <button
             onClick={handleClick}
-            className="w-full group relative overflow-hidden bg-[var(--balatro-grey)] border-[3px] border-black/20 hover:border-black/40 rounded-xl shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[2px] transition-all p-2 flex flex-row items-center justify-between gap-3 min-h-[3.5rem]"
+            className="w-full relative overflow-hidden bg-[var(--balatro-grey)] rounded-lg transition-colors hover:bg-black/20 active:bg-black/40 p-2 flex flex-row items-center justify-between gap-3 min-h-[3.5rem]"
         >
             {currentAd.type === 'image' && currentAd.src ? (
                 // Full Image Ad
@@ -135,16 +135,6 @@ export function AdRotator({ onOpenWisdom, onOpenLeaderboard, topScore, isLocked 
                         </span>
                         <span className="font-pixel text-[8px] sm:text-[10px] text-white/80 line-clamp-1">
                             {currentAd.subtitle}
-                        </span>
-                    </div>
-
-                    {/* Content Right (Badge/Icon) */}
-                    <div className="hidden sm:flex items-center gap-2 bg-black/30 px-2 py-1 rounded border border-white/20 shrink-0 transform group-hover:scale-105 transition-transform">
-                        <span className="text-white/80">
-                            {currentAd.icon}
-                        </span>
-                        <span className="text-[10px] font-pixel text-white/50 uppercase tracking-widest whitespace-nowrap">
-                            {currentAd.actionText}
                         </span>
                     </div>
 

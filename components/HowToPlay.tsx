@@ -8,8 +8,8 @@ interface HowToPlayProps {
 
 export function HowToPlay({ onClose, onSubmit }: HowToPlayProps) {
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/80 animate-in fade-in duration-200" onClick={onClose}>
-            <div className="relative w-full max-w-2xl bg-[var(--balatro-grey)] border-[3px] border-[var(--balatro-blue)] shadow-[0_8px_0_#000] rounded-xl overflow-hidden animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/80 animate-in fade-in duration-150" onClick={onClose}>
+            <div className="relative w-full max-w-lg bg-[var(--balatro-grey)] border-[3px] border-black/20 rounded-xl overflow-hidden animate-in slide-in-from-bottom-10 duration-150" onClick={(e) => e.stopPropagation()}>
 
                 {/* Header */}
                 <div className="bg-[var(--balatro-blue)] p-4 flex justify-between items-center border-b-[3px] border-black/20">
@@ -19,20 +19,20 @@ export function HowToPlay({ onClose, onSubmit }: HowToPlayProps) {
                     </h2>
                 </div>
 
-                <div className="p-6 md:p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                <div className="p-4 md:p-5 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
 
                     {/* Step 1 */}
-                    <div className="flex gap-4">
-                        <div className="w-12 h-12 shrink-0 bg-[var(--balatro-red)] text-white font-header text-2xl flex items-center justify-center rounded-lg border-b-[4px] border-[var(--balatro-red-dark)] shadow-sm">
+                    <div className="flex gap-3">
+                        <div className="w-8 h-8 shrink-0 bg-[var(--balatro-red)] text-white font-header text-lg flex items-center justify-center rounded-md">
                             1
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-1">
                             <h3 className="text-xl font-header text-white uppercase">Get Balatro</h3>
                             <div className="flex flex-wrap gap-2">
-                                <a href="https://www.playbalatro.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-3 py-1 bg-black/40 hover:bg-black/60 rounded border border-white/20 text-sm font-pixel text-[var(--balatro-blue)] transition-colors">
+                                <a href="https://www.playbalatro.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-3 py-1 bg-black/40 hover:bg-black/60 rounded text-sm font-pixel text-[var(--balatro-blue)] transition-colors">
                                     <ExternalLink size={14} /> Buy on Any Platform
                                 </a>
-                                <span className="inline-flex items-center gap-2 px-3 py-1 bg-[#1a4731] border border-[#2d7a54] rounded text-sm font-pixel text-[#4ade80]">
+                                <span className="inline-flex items-center gap-2 px-3 py-1 bg-[#1a4731] rounded text-sm font-pixel text-[#4ade80]">
                                     Free on GamePass / Apple Arcade
                                 </span>
                             </div>
@@ -40,61 +40,68 @@ export function HowToPlay({ onClose, onSubmit }: HowToPlayProps) {
                     </div>
 
                     {/* Step 2 */}
-                    <div className="flex gap-4">
-                        <div className="w-12 h-12 shrink-0 bg-[var(--balatro-orange)] text-white font-header text-2xl flex items-center justify-center rounded-lg border-b-[4px] border-[var(--balatro-orange-dark)] shadow-sm">
+                    <div className="flex gap-3">
+                        <div className="w-8 h-8 shrink-0 bg-[var(--balatro-orange)] text-white font-header text-lg flex items-center justify-center rounded-md">
                             2
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-1">
                             <h3 className="text-xl font-header text-white uppercase">Copy The Daily Seed</h3>
                             <p className="text-zinc-200 font-pixel text-lg leading-tight">
-                                Click the <span className="inline-block bg-[var(--balatro-blue)] text-white text-xs px-1.5 py-0.5 rounded font-header mx-1 border-b-2 border-black/20">COPY</span> button on today&apos;s challenge to grab the seed code.
+                                Click the <span className="inline-block bg-[var(--balatro-blue)] text-white text-xs px-1.5 py-0.5 rounded font-header mx-1 border-b-2 border-black/10">COPY</span> button on today&apos;s challenge to grab the seed code.
                             </p>
                         </div>
                     </div>
 
                     {/* Step 3 */}
-                    <div className="flex gap-4">
-                        <div className="w-12 h-12 shrink-0 bg-[var(--balatro-blue)] text-white font-header text-2xl flex items-center justify-center rounded-lg border-b-[4px] border-[var(--balatro-blue-dark)] shadow-sm">
+                    <div className="flex gap-3">
+                        <div className="w-8 h-8 shrink-0 bg-[var(--balatro-blue)] text-white font-header text-lg flex items-center justify-center rounded-md">
                             3
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-1">
                             <h3 className="text-xl font-header text-white uppercase">Start Run</h3>
-                            <div className="bg-black/40 p-4 rounded border-2 border-white/10 font-pixel text-lg text-zinc-200 space-y-3">
+                            <div className="bg-black/40 p-3 rounded border border-white/5 font-pixel text-base text-zinc-200 space-y-2">
                                 <p className="flex items-center gap-2">
-                                    1. Select <span className="text-[var(--balatro-gold)] bg-black/50 px-2 rounded border border-white/10">Erratic Deck</span>
+                                    1. Select <span className="text-[var(--balatro-gold)] bg-black/50 px-1.5 rounded border border-white/5">Erratic Deck</span>
                                 </p>
                                 <p className="flex items-center gap-2">
-                                    2. Toggle <span className="text-white bg-[var(--balatro-red)] px-1 rounded-sm text-xs">✔</span> <span className="text-[var(--balatro-orange)]">Seeded Run</span> to expand options.
+                                    2. Toggle <span className="text-white bg-[var(--balatro-red)] px-1 rounded-sm text-[10px]">✔</span> <span className="text-[var(--balatro-orange)]">Seeded Run</span>
                                 </p>
                                 <p className="flex items-center gap-2">
-                                    3. Click <span className="bg-[var(--balatro-blue)] text-white px-2 py-0.5 rounded text-sm font-header border-b-2 border-black/20">Paste Seed</span> (it auto-fills!).
+                                    3. Click <span className="bg-[var(--balatro-blue)] text-white px-1.5 py-0.5 rounded text-[10px] font-header">Paste Seed</span>
                                 </p>
                                 <p className="flex items-center gap-2">
-                                    4. Hit <span className="bg-[var(--balatro-blue)] text-white px-3 py-0.5 rounded font-header border-b-4 border-black/20 text-sm">PLAY</span>
+                                    4. Hit <span className="bg-[var(--balatro-blue)] text-white px-2 py-0.5 rounded font-header text-[10px]">PLAY</span>
                                 </p>
                             </div>
                         </div>
                     </div>
 
                     {/* Goal */}
-                    <div className="bg-[#4d3d18] p-4 rounded-xl border-2 border-[var(--balatro-gold)] dashed flex gap-4 items-center">
-                        <Trophy size={48} className="text-[var(--balatro-gold)] shrink-0" />
+                    <div className="bg-[#4d3d18] p-3 rounded-lg border-2 border-[var(--balatro-gold)] border-dashed flex gap-3 items-center">
+                        <Trophy size={32} className="text-[var(--balatro-gold)] shrink-0" />
                         <div>
-                            <h3 className="text-xl font-header text-[var(--balatro-gold)] uppercase mb-1">THE GOAL</h3>
-                            <p className="font-pixel text-xl text-white">
-                                Beat <span className="text-[var(--balatro-red)]">Ante 8</span>. At the start of Ante 9, screenshot your <span className="text-[var(--balatro-blue)]">Wee Joker</span> chip count (e.g. &quot;+2101 Chips&quot;). That is your score!
+                            <h3 className="text-lg font-header text-[var(--balatro-gold)] uppercase">THE GOAL</h3>
+                            <p className="font-pixel text-base text-white leading-tight">
+                                Beat <span className="text-[var(--balatro-red)]">Ante 8</span>. At Ante 9, screenshot your <span className="text-[var(--balatro-blue)]">Wee Joker</span> count. That is your score!
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <div className="p-4 border-t-[3px] border-black/10 text-center bg-black/20 flex gap-4">
-                    <button onClick={onClose} className="flex-1 bg-[var(--balatro-orange)] hover:bg-[#D04035] text-white font-header py-2 rounded-xl border-none shadow-[0_2px_0_#992e10] active:shadow-none active:translate-y-[2px] transition-all text-2xl tracking-wider">
+                {/* Footer Buttons - NO EXTRA BACKGROUND TRAY */}
+                <div className="p-4 flex gap-3 text-center">
+                    <button
+                        onClick={onClose}
+                        className="flex-1 bg-[var(--balatro-orange)] hover:brightness-110 active:brightness-90 text-white font-header text-xl py-3 rounded-lg transition-colors uppercase"
+                    >
                         Back
                     </button>
                     {onSubmit && (
-                        <button onClick={onSubmit} className="flex-[2] bg-[var(--balatro-blue)] hover:brightness-110 text-white font-header py-2 rounded-xl border-none shadow-[0_2px_0_#0055aa] active:shadow-none active:translate-y-[2px] transition-all text-2xl tracking-wider flex items-center justify-center gap-2">
-                            <span>SUBMIT SCORE</span>
+                        <button
+                            onClick={onSubmit}
+                            className="flex-[2] bg-[var(--balatro-blue)] hover:brightness-110 active:brightness-90 text-white font-header text-xl py-3 rounded-lg transition-colors tracking-wider flex items-center justify-center gap-2 uppercase"
+                        >
+                            SUBMIT SCORE
                         </button>
                     )}
                 </div>

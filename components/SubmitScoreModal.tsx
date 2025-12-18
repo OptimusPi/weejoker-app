@@ -48,8 +48,8 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80" onClick={onClose}>
-            <div className="bg-[var(--balatro-grey)] border-[3px] border-[var(--balatro-gold)] rounded-xl p-8 max-w-md w-full mx-4 shadow-[0_8px_0_#000] relative overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 animate-in fade-in duration-150" onClick={onClose}>
+            <div className="bg-[var(--balatro-grey)] border-[3px] border-black/20 rounded-xl p-8 max-w-md w-full mx-4 shadow-[0_8px_0_#000] relative overflow-hidden flex flex-col animate-in slide-in-from-bottom-10 duration-150" onClick={(e) => e.stopPropagation()}>
 
                 <div className="text-center mb-6 relative z-10 pt-4">
                     <Trophy size={48} className="text-[var(--balatro-gold)] mx-auto mb-2 drop-shadow-lg" />
@@ -71,7 +71,7 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
                             value={playerName}
                             onChange={(e) => setPlayerName(e.target.value.slice(0, 20))}
                             placeholder="Enter your name..."
-                            className="w-full balatro-input text-lg bg-black/40 border-2 border-white/20 focus:border-[var(--balatro-blue)] rounded-lg text-white font-header px-4 py-3 outline-none transition-colors"
+                            className="w-full balatro-input text-lg bg-black/40 border-2 border-black/40 focus:border-[var(--balatro-blue)] rounded-lg text-white font-header px-4 py-3 outline-none transition-colors shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]"
                             required
                         />
                     </div>
@@ -85,7 +85,7 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
                             value={score}
                             onChange={(e) => setScore(e.target.value)}
                             placeholder="e.g. 1234567"
-                            className="w-full balatro-input text-lg bg-black/40 border-2 border-white/20 focus:border-[var(--balatro-blue)] rounded-lg text-white font-header px-4 py-3 outline-none transition-colors"
+                            className="w-full balatro-input text-lg bg-black/40 border-2 border-black/40 focus:border-[var(--balatro-blue)] rounded-lg text-white font-header px-4 py-3 outline-none transition-colors shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]"
                             min="0"
                             max="999999999"
                             required
@@ -102,7 +102,7 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
                         <button
                             type="submit"
                             disabled={submitting}
-                            className="w-full bg-[var(--balatro-blue)] hover:brightness-110 disabled:opacity-50 text-white font-header text-xl px-6 py-3 rounded-xl border-none shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[2px] transition-all flex items-center justify-center gap-3"
+                            className="w-full bg-[var(--balatro-blue)] hover:brightness-110 active:brightness-90 disabled:opacity-50 text-white font-header text-xl px-6 py-3 rounded-lg transition-colors flex items-center justify-center gap-3"
                         >
                             <Upload size={24} />
                             {submitting ? 'SUBMITTING...' : 'SUBMIT SCORE'}
@@ -112,7 +112,7 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
                             type="button"
                             onClick={onClose}
                             disabled={submitting}
-                            className="w-full bg-[var(--balatro-orange)] hover:brightness-110 disabled:opacity-50 text-white font-header text-2xl px-6 py-3 rounded-xl border-none shadow-[0_4px_0_#000] active:shadow-none active:translate-y-[2px] transition-all uppercase tracking-widest"
+                            className="w-full bg-[var(--balatro-orange)] hover:brightness-110 active:brightness-90 disabled:opacity-50 text-white font-header text-xl px-6 py-3 rounded-lg transition-colors flex items-center justify-center uppercase"
                         >
                             Back
                         </button>
