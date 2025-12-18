@@ -96,7 +96,7 @@ export function AdRotator({ onOpenWisdom, onOpenLeaderboard, topScore, isLocked 
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % ads.length);
-        }, 20000); // 20 Seconds
+        }, 8000); // 8 Seconds
         return () => clearInterval(interval);
     }, [ads.length]);
 

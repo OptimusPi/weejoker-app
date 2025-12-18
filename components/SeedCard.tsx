@@ -113,12 +113,12 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, isLocked }: Se
                 <div className="bg-black/20 rounded-lg p-1 select-none shrink-0 h-12 flex items-center">
                     {isLocked ? (
                         <div className="flex items-center gap-3 w-full px-2">
-                            <div className="p-1.5 rounded-md bg-black/20 text-white/20">
+                            <div className="p-1.5 rounded-md bg-black/20 text-white/40">
                                 🔒
                             </div>
                             <div className="flex flex-col">
-                                <span className="font-header text-xl text-white/20 tracking-widest leading-none blur-[1px]">XXXXXXXX</span>
-                                <span className="font-pixel text-[8px] text-white/20 uppercase tracking-tighter">LOCKED</span>
+                                <span className="font-header text-xl text-white/40 tracking-widest leading-none blur-[1px]">XXXXXXXX</span>
+                                <span className="font-pixel text-[8px] text-white/40 uppercase tracking-tighter">LOCKED</span>
                             </div>
                         </div>
                     ) : (
@@ -197,7 +197,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, isLocked }: Se
                         </div>
                     ) : (
                         <div className="bg-black/10 rounded-lg px-2 py-1 flex justify-center items-center">
-                            <span className="font-pixel text-white/20 text-[9px] tracking-widest uppercase">
+                            <span className="font-pixel text-white/40 text-[9px] tracking-widest uppercase">
                                 {isLocked ? "LOCKED" : "NO SCORES"}
                             </span>
                         </div>
