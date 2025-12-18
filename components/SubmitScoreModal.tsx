@@ -49,12 +49,12 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 animate-in fade-in duration-150" onClick={onClose}>
-            <div className="bg-[var(--balatro-grey)] border-[3px] border-black/20 rounded-xl p-8 max-w-md w-full mx-4 shadow-[0_8px_0_#000] relative overflow-hidden flex flex-col animate-in slide-in-from-bottom-10 duration-150" onClick={(e) => e.stopPropagation()}>
+            <div className="balatro-panel p-8 max-w-md w-full mx-4 flex flex-col animate-in slide-in-from-bottom-10 duration-150" onClick={(e) => e.stopPropagation()}>
 
                 <div className="text-center mb-6 relative z-10 pt-4">
-                    <Trophy size={48} className="text-[var(--balatro-gold)] mx-auto mb-2 drop-shadow-lg" />
+                    <Trophy size={48} className="text-[var(--balatro-gold)] mx-auto mb-2 drop-shadow-lg juice-float" />
                     <h2 className="text-3xl font-header text-white tracking-wider text-shadow-md">
-                        SUBMIT YOUR SCORE
+                        Submit Your Score
                     </h2>
                     <p className="text-zinc-300 font-pixel mt-2">
                         Daily Wee #{dayNumber}
@@ -71,7 +71,7 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
                             value={playerName}
                             onChange={(e) => setPlayerName(e.target.value.slice(0, 20))}
                             placeholder="Enter your name..."
-                            className="w-full balatro-input text-lg bg-black/40 border-2 border-black/40 focus:border-[var(--balatro-blue)] rounded-lg text-white font-header px-4 py-3 outline-none transition-colors shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]"
+                            className="w-full balatro-input text-lg px-4 py-3"
                             required
                         />
                     </div>
@@ -85,7 +85,7 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
                             value={score}
                             onChange={(e) => setScore(e.target.value)}
                             placeholder="e.g. 1234567"
-                            className="w-full balatro-input text-lg bg-black/40 border-2 border-black/40 focus:border-[var(--balatro-blue)] rounded-lg text-white font-header px-4 py-3 outline-none transition-colors shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]"
+                            className="w-full balatro-input text-lg px-4 py-3"
                             min="0"
                             max="999999999"
                             required
@@ -102,17 +102,17 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
                         <button
                             type="submit"
                             disabled={submitting}
-                            className="w-full bg-[var(--balatro-blue)] hover:brightness-110 active:brightness-90 disabled:opacity-50 text-white font-header text-xl px-6 py-3 rounded-lg transition-colors flex items-center justify-center gap-3"
+                            className="w-full balatro-button balatro-button-blue text-xl px-6 py-3 flex items-center justify-center gap-3 disabled:opacity-50"
                         >
                             <Upload size={24} />
-                            {submitting ? 'SUBMITTING...' : 'SUBMIT SCORE'}
+                            {submitting ? 'Submitting...' : 'Submit Score'}
                         </button>
 
                         <button
                             type="button"
                             onClick={onClose}
                             disabled={submitting}
-                            className="w-full bg-[var(--balatro-orange)] hover:brightness-110 active:brightness-90 disabled:opacity-50 text-white font-header text-xl px-6 py-3 rounded-lg transition-colors flex items-center justify-center uppercase"
+                            className="balatro-button-back disabled:opacity-50"
                         >
                             Back
                         </button>

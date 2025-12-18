@@ -37,3 +37,12 @@ CREATE TABLE DailySeeds (
     Temperance INTEGER,
     Ankh_Ante1 INTEGER
 );
+
+CREATE TABLE IF NOT EXISTS scores (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    seed TEXT NOT NULL,
+    day_number INTEGER NOT NULL,
+    player_name TEXT NOT NULL,
+    score INTEGER NOT NULL,
+    submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);

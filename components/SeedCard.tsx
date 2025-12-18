@@ -53,29 +53,35 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, isLocked }: Se
         setTimeout(() => setCopied(false), 2000);
     };
 
-    // Helper to determine sprites for a row
-    const getSprites = (ante: 1 | 2) => {
-        const sprites: string[] = [];
+    // Helper to determine jokers for a row
+    const getJokers = (ante: 1 | 2) => {
+        const jokers: { id: string; name: string; tally: number | undefined }[] = [];
+
         // Wee Joker
-        if ((ante === 1 && (seed.WeeJoker_Ante1 ?? 0) > 0) || (ante === 2 && (seed.WeeJoker_Ante2 ?? 0) > 0)) {
-            sprites.push("weejoker");
+        const weeTally = ante === 1 ? seed.WeeJoker_Ante1 : seed.WeeJoker_Ante2;
+        if ((weeTally ?? 0) > 0) {
+            jokers.push({ id: "weejoker", name: "Wee Joker", tally: weeTally as number });
         }
+
         // Hack
-        if ((ante === 1 && (seed.Hack_Ante1 ?? 0) > 0) || (ante === 2 && (seed.Hack_Ante2 ?? 0) > 0)) {
-            sprites.push("hack");
+        const hackTally = ante === 1 ? seed.Hack_Ante1 : seed.Hack_Ante2;
+        if ((hackTally ?? 0) > 0) {
+            jokers.push({ id: "hack", name: "Hack", tally: hackTally as number });
         }
+
         // Hanging Chad
-        if ((ante === 1 && (seed.HanginChad_Ante1 ?? 0) > 0) || (ante === 2 && (seed.HanginChad_Ante2 ?? 0) > 0)) {
-            sprites.push("hangingchad");
+        const chadTally = ante === 1 ? seed.HanginChad_Ante1 : seed.HanginChad_Ante2;
+        if ((chadTally ?? 0) > 0) {
+            jokers.push({ id: "hangingchad", name: "Hanging Chad", tally: chadTally as number });
         }
 
-        // Blueprint/Brainstorm - Check generic 'early' flags
+        // Blueprint/Brainstorm
         if (ante === 1) {
-            if ((seed.blueprint_early ?? 0) > 0) sprites.push("blueprint");
-            if ((seed.brainstorm_early ?? 0) > 0) sprites.push("brainstorm");
+            if ((seed.blueprint_early ?? 0) > 0) jokers.push({ id: "blueprint", name: "Blueprint", tally: seed.blueprint_early as number });
+            if ((seed.brainstorm_early ?? 0) > 0) jokers.push({ id: "brainstorm", name: "Brainstorm", tally: seed.brainstorm_early as number });
         }
 
-        return sprites;
+        return jokers;
     };
 
     // Countdown Logic (only if locked)
@@ -104,83 +110,66 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, isLocked }: Se
     }, [isLocked]);
 
     return (
-        <div className={cn("relative group flex flex-col", className)}>
-            {/* Main Container - BALATRO CARD STYLE */}
-            {/* Main Container - BALATRO CARD STYLE */}
-            <div className="bg-[var(--balatro-grey)] rounded-xl border-[3px] border-black/20 p-1.5 flex flex-col relative overflow-hidden h-full z-10 grow gap-1.5">
+        <div className={cn("relative group flex flex-col juice-wobble", className)}>
+            {/* Main Container - BALATRO PANEL STYLE */}
+            <div className="balatro-panel p-1.5 flex flex-col relative h-full z-10 grow gap-1.5 min-h-[340px]">
 
                 {/* Header: Seed ID */}
-                <div className="bg-black/20 rounded-lg p-1 select-none shrink-0 h-12 flex items-center">
-                    {isLocked ? (
-                        <div className="flex items-center gap-3 w-full px-2">
-                            <div className="p-1.5 rounded-md bg-black/20 text-white/40">
-                                🔒
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="font-header text-xl text-white/40 tracking-widest leading-none blur-[1px]">XXXXXXXX</span>
-                                <span className="font-pixel text-[8px] text-white/40 uppercase tracking-tighter">LOCKED</span>
-                            </div>
-                        </div>
-                    ) : (
+                {!isLocked && (
+                    <div className="bg-black/20 rounded-lg p-0.5 select-none shrink-0 h-10 flex items-center justify-center">
                         <button
                             onClick={(e) => { e.stopPropagation(); handleCopy(); }}
-                            className="flex items-center gap-2 w-full text-left outline-none px-1"
+                            className="flex items-center gap-2 outline-none"
                             title="Click to Copy Seed"
                         >
-                            <div className={`p-1.5 rounded-md ${copied ? 'bg-[var(--balatro-green)]' : 'bg-black/20'}`}>
-                                {copied ? <Check size={16} className="text-white" strokeWidth={4} /> : <Copy size={16} className="text-white/60" strokeWidth={3} />}
+                            <div className={cn("p-1 rounded-md transition-colors", copied ? 'bg-[var(--balatro-green)]' : 'bg-black/20')}>
+                                {copied ? <Check size={14} className="text-white" strokeWidth={4} /> : <Copy size={14} className="text-white/60" strokeWidth={3} />}
                             </div>
-                            <div className="flex flex-col">
-                                <span className="font-header text-xl text-white tracking-widest leading-none">{seed.seed}</span>
-                                <span className="font-pixel text-[8px] text-white/40 uppercase tracking-tighter">{copied ? 'COPIED' : 'CLICK TO COPY'}</span>
-                            </div>
+                            <span className="font-header text-lg text-white tracking-widest leading-none">{seed.seed}</span>
                         </button>
-                    )}
-                </div>
+                    </div>
+                )}
 
-                {/* Main Stats Area */}
-                <div className="bg-black/10 rounded-lg p-1 px-3 flex flex-col items-center shrink-0">
-                    <span className="font-header text-3xl text-white tracking-widest leading-none">
+                {/* Main Stats Area: TWOS */}
+                <div className="bg-black/10 rounded-lg p-0.5 px-3 flex flex-col items-center shrink-0">
+                    <span className="font-header text-2xl text-white tracking-widest leading-none">
                         {seed.twos ?? 0}
                     </span>
-                    <span className="font-header text-[var(--balatro-blue)] text-[10px] tracking-widest uppercase mt-[-1px]">
-                        TWOS
+                    <span className="font-header text-[var(--balatro-blue)] text-[9px] tracking-widest uppercase mt-[-1px]">
+                        Starting 2's
                     </span>
                 </div>
 
                 {/* Ante Rows */}
-                <div className="flex flex-col gap-1 shrink-0 justify-center">
-                    {/* Ante 1 Row */}
-                    <div className="bg-black/5 rounded-lg p-1.5 flex items-center gap-2">
-                        <span className="font-header text-[var(--color-red)] text-md w-5 shrink-0 text-right opacity-80">A1</span>
-                        <div className="flex flex-wrap gap-1 items-center justify-center grow">
-                            {((seed.WeeJoker_Ante1 ?? 0) > 0) && (
-                                <div className="flex items-center gap-1 bg-black/30 px-1.5 py-0.5 rounded">
-                                    <Sprite name="weejoker" width={22} />
-                                    <span className="font-header text-[var(--balatro-blue)] text-[9px]">WEE JOKER</span>
+                <div className="flex flex-col gap-2 shrink-0 justify-center">
+                    {[1, 2].map((anteNum) => {
+                        const jokers = getJokers(anteNum as 1 | 2);
+                        return (
+                            <div key={`ante-${anteNum}`} className="bg-black/10 rounded-lg p-2 flex flex-col gap-1.5">
+                                <div className="flex justify-between items-center opacity-60">
+                                    <span className="font-header text-[var(--color-red)] text-xs tracking-widest">Ante {anteNum}</span>
+                                    {jokers.length === 0 && <span className="font-pixel text-white/10 text-[10px]">None</span>}
                                 </div>
-                            )}
-                            {getSprites(1).filter(s => s !== 'weejoker').length > 0 ? getSprites(1).filter(s => s !== 'weejoker').map((s, i) => (
-                                <Sprite key={`a1-${i}`} name={s} width={32} />
-                            )) : (!((seed.WeeJoker_Ante1 ?? 0) > 0) && <span className="font-pixel text-white/5 text-[10px]">NONE</span>)}
-                        </div>
-                    </div>
-
-                    {/* Ante 2 Row */}
-                    <div className="bg-black/5 rounded-lg p-1.5 flex items-center gap-2">
-                        <span className="font-header text-[var(--color-red)] text-md w-5 shrink-0 text-right opacity-80">A2</span>
-                        <div className="flex flex-wrap gap-1 items-center justify-center grow">
-                            {((seed.WeeJoker_Ante2 ?? 0) > 0) && (
-                                <div className="flex items-center gap-1 bg-black/30 px-1.5 py-0.5 rounded">
-                                    <Sprite name="weejoker" width={22} />
-                                    <span className="font-header text-[var(--balatro-blue)] text-[9px]">WEE JOKER</span>
+                                <div className="flex flex-wrap gap-2 items-start justify-center">
+                                    {jokers.map((j) => (
+                                        <div key={`${anteNum}-${j.id}`} className="relative bg-black/30 rounded-md p-1 pt-1.5 pb-2 flex flex-col items-center min-w-[50px] group/joker">
+                                            {/* Hype Stat Badge */}
+                                            {j.tally !== undefined && (
+                                                <div className="absolute -top-1 -right-1 bg-[var(--balatro-blue)] text-white font-header text-[10px] px-1 rounded-sm shadow-md z-20">
+                                                    +{j.tally}
+                                                </div>
+                                            )}
+                                            <Sprite name={j.id} width={36} />
+                                            {/* Name Tag */}
+                                            <div className="mt-1 bg-black/40 px-1 rounded-sm w-full text-center">
+                                                <span className="font-header text-[8px] text-white/80 whitespace-nowrap">{j.name}</span>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                            )}
-                            {getSprites(2).filter(s => s !== 'weejoker').length > 0 ? getSprites(2).filter(s => s !== 'weejoker').map((s, i) => (
-                                <Sprite key={`a2-${i}`} name={s} width={32} />
-                            )) : (!((seed.WeeJoker_Ante2 ?? 0) > 0) && <span className="font-pixel text-white/5 text-[10px]">NONE</span>)}
-                        </div>
-                    </div>
+                            </div>
+                        );
+                    })}
                 </div>
 
                 {/* Top Score & Action Bar */}
@@ -205,15 +194,19 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, isLocked }: Se
 
                     {/* Play Button or Countdown */}
                     {isLocked ? (
-                        <div className="w-full bg-[var(--balatro-disabled-face)] text-[var(--balatro-disabled-text)] font-header text-lg px-4 py-2 rounded-lg flex items-center justify-center gap-2 cursor-not-allowed">
+                        <div className="w-full bg-[var(--balatro-disabled-face)] text-[var(--balatro-disabled-text)] font-header text-lg px-4 py-1.5 rounded-lg flex items-center justify-center gap-2 cursor-not-allowed">
                             <span>{timeLeft || "--:--:--"}</span>
                         </div>
                     ) : (
                         <button
-                            onClick={(e) => { e.stopPropagation(); onAnalyze?.(); }}
-                            className="w-full bg-[var(--balatro-orange)] text-white font-header text-lg px-4 py-2 rounded-lg flex items-center justify-center hover:bg-[var(--color-dark-orange)] opacity-100 transition-colors uppercase"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleCopy();
+                                onAnalyze?.();
+                            }}
+                            className="w-full balatro-button balatro-button-blue text-xl py-2 uppercase"
                         >
-                            PLAY
+                            Play Daily Wee
                         </button>
                     )}
                 </div>

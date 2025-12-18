@@ -30,8 +30,8 @@ const fontMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-    title: 'The Daily Wee | Balatro Seed Hunter',
-    description: 'Find the perfect Balatro seeds.',
+    title: 'The Daily Wee',
+    description: 'A daily ritual game revolving around Wee Joker appreciation.',
 };
 
 export default function RootLayout({

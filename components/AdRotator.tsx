@@ -114,7 +114,7 @@ export function AdRotator({ onOpenWisdom, onOpenLeaderboard, topScore, isLocked 
     return (
         <button
             onClick={handleClick}
-            className="w-full relative overflow-hidden bg-[var(--balatro-grey)] rounded-lg transition-colors hover:bg-black/20 active:bg-black/40 p-2 flex flex-row items-center justify-between gap-3 min-h-[3.5rem]"
+            className="w-full relative overflow-hidden bg-[var(--balatro-grey)] rounded-[4px] border border-black/20 transition-colors hover:bg-black/20 active:bg-black/40 p-1 px-3 flex flex-row items-center justify-between gap-2 min-h-[3rem]"
         >
             {currentAd.type === 'image' && currentAd.src ? (
                 // Full Image Ad

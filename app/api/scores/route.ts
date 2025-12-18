@@ -83,6 +83,18 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Database not available' }, { status: 500 });
         }
 
+        // Safety: ensure score table exists in prod
+        await db.prepare(`
+            CREATE TABLE IF NOT EXISTS scores (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                seed TEXT NOT NULL,
+                day_number INTEGER NOT NULL,
+                player_name TEXT NOT NULL,
+                score INTEGER NOT NULL,
+                submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `).run();
+
 
         const result = await db.prepare(`
             INSERT INTO scores (seed, day_number, player_name, score)

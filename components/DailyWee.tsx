@@ -182,10 +182,28 @@ export function DailyWee() {
     const hasWee = (seed?.WeeJoker_Ante1 ?? 0) > 0 || (seed?.WeeJoker_Ante2 ?? 0) > 0;
 
     const getDayDisplay = (day: number) => {
-        // if (day < 1) return "EPOCH START"; // Removed per user request
         const date = new Date(EPOCH + (day - 1) * 24 * 60 * 60 * 1000);
         return date.toLocaleDateString('en-US', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' });
     };
+
+    const getTheme = (day: number) => {
+        const date = new Date(EPOCH + (day - 1) * 24 * 60 * 60 * 1000);
+        const dayOfWeek = date.getUTCDay(); // 0 is Sunday, 1 is Monday...
+
+        const themes = [
+            { name: "Searing Sunday", color: "var(--balatro-red)", icon: "🔥" },    // Sunday
+            { name: "Ritual Monday", color: "var(--balatro-gold)", icon: "👁️" },    // Monday
+            { name: "Twosday", color: "var(--balatro-blue)", icon: "2️⃣" },           // Tuesday
+            { name: "Weednesday", color: "var(--balatro-green)", icon: "🃏" },        // Wednesday
+            { name: "Hacking Thursday", color: "var(--balatro-orange)", icon: "💻" }, // Thursday
+            { name: "Blueprint Friday", color: "var(--balatro-blue)", icon: "📐" },   // Friday
+            { name: "Showman Saturday", color: "var(--balatro-gold)", icon: "🎩" },   // Saturday
+        ];
+
+        return themes[dayOfWeek] || themes[0];
+    };
+
+    const currentTheme = getTheme(viewingDay);
 
     if (!mounted) return null;
 
@@ -199,18 +217,31 @@ export function DailyWee() {
                     {/* Top Anchor Area - Centers Header in space above card */}
                     <div className="flex-1 w-full flex items-center justify-center p-1 min-h-0 overflow-hidden">
                         <div className="text-center w-full relative z-20 px-4">
-                            <div className="flex justify-between w-full max-w-sm mx-auto text-[9px] font-pixel text-white/60 tracking-widest border-b border-white/10 pb-0.5 mb-1 uppercase">
-                                <span>Vol. 1</span>
-                                <span>{viewingDay < 1 ? 'WEEPOCH' : `No. ${viewingDay}`}</span>
-                                <span>200 Chips</span>
+                            <div className="flex justify-between w-full max-w-sm mx-auto text-[10px] items-end border-b border-white/10 pb-1 mb-2 uppercase">
+                                <div className="flex flex-col items-start gap-0.5">
+                                    <span className="text-[var(--balatro-gold)] font-header text-[8px] leading-none">Today's Seed</span>
+                                    <span className="font-pixel text-white/90 text-sm leading-none">{seed?.seed || '--------'}</span>
+                                </div>
+                                <div className="flex flex-col items-end gap-0.5">
+                                    <span className="text-white/60 font-header text-[8px] leading-none">Starting 2's</span>
+                                    <span className="font-pixel text-[var(--balatro-gold)] text-sm leading-none">{seed?.twos || '0'}</span>
+                                </div>
                             </div>
                             <div className="font-header text-3xl sm:text-4xl text-white tracking-widest uppercase leading-none mb-1 select-none">
                                 THE DAILY WEE
                             </div>
-                            <div className="w-full max-w-sm mx-auto">
+                            <div className="w-full max-w-sm mx-auto flex flex-col gap-1">
                                 <div className="flex justify-between items-center py-0.5 border-y border-white/10 text-[8px] font-pixel text-white/40 uppercase tracking-[0.2em]">
                                     <span>{getDayDisplay(viewingDay)}</span>
                                     <span>Est. 2025</span>
+                                </div>
+                                {/* Theme Badge */}
+                                <div
+                                    className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-header tracking-widest self-center shadow-lg"
+                                    style={{ backgroundColor: currentTheme.color, color: 'white' }}
+                                >
+                                    <span>{currentTheme.icon}</span>
+                                    <span className="mt-[2px]">{currentTheme.name}</span>
                                 </div>
                             </div>
                         </div>
@@ -219,8 +250,10 @@ export function DailyWee() {
                     {/* Main Interaction Area - FIXED HEIGHT NO JUMP */}
                     <div className="flex flex-row items-stretch justify-center gap-2 w-full max-w-[22rem] mx-auto p-0 relative z-30 h-[380px] shrink-0">
                         {/* Left Nav Button */}
-                        <button onClick={() => canGoBack && updateDay(v => v - 1)} disabled={!canGoBack}
-                            className={`flex items-center justify-center w-8 flex-shrink-0 rounded-lg transition-colors ${!canGoBack ? 'bg-[#1a0808] opacity-10' : 'bg-[var(--color-red)] hover:brightness-110 active:brightness-90'}`}
+                        <button
+                            onClick={() => canGoBack && updateDay(v => v - 1)}
+                            disabled={!canGoBack}
+                            className="balatro-nav-button"
                         >
                             <ChevronLeft size={24} className="text-white" strokeWidth={4} />
                         </button>
@@ -229,16 +262,16 @@ export function DailyWee() {
                         {/* Central Stage - STRICT HEIGHT */}
                         <div className="relative flex-1 z-20 flex flex-col min-w-0 overflow-hidden shadow-[0_4px_0_rgba(0,0,0,0.2)]">
                             {viewingDay === 0 ? (
-                                // WEEPOCH CARD (Day 0)
-                                <div className="bg-[var(--balatro-modal-bg)] p-4 flex flex-col items-center justify-center text-center relative h-full">
-                                    <div className="text-2xl mb-1">🌌</div>
-                                    <div className="font-header text-lg text-[var(--balatro-gold)] mb-1 uppercase">Beginning</div>
-                                    <p className="font-pixel text-white/30 text-[8px] mb-3 max-w-[80%] mx-auto leading-tight">Project Zero Point.</p>
-                                    <button onClick={() => updateDay(1)}
-                                        className="bg-[var(--balatro-blue)] text-white font-header text-xs px-3 py-1 rounded hover:brightness-110 active:brightness-90 transition-none"
-                                    >
-                                        GO TO DAY 1
-                                    </button>
+                                // WEEPOCH CARD (Day 0) - PREMIUM ACRYLIC CONTRAST
+                                <div className="acrylic-card p-6 flex flex-col items-center justify-center text-center relative h-full">
+                                    <div className="text-4xl mb-4 drop-shadow-2xl grayscale brightness-150">
+                                        <Sprite name="weejoker" width={64} />
+                                    </div>
+                                    <h3 className="font-header text-4xl text-[var(--balatro-gold)] mb-2 uppercase tracking-[0.2em] drop-shadow-md">WEEPOCH</h3>
+                                    <div className="w-12 h-0.5 bg-[var(--balatro-gold)]/30 mb-4" />
+                                    <p className="font-pixel text-white/50 text-sm max-w-[80%] mx-auto leading-relaxed">
+                                        Project Zero Point.<br />Where the ritual first began.
+                                    </p>
                                 </div>
                             ) : (
                                 <div className="w-full h-full relative flex flex-col">
@@ -267,17 +300,19 @@ export function DailyWee() {
                         </div>
 
                         {/* Right Nav Button */}
-                        <button onClick={() => canGoBack && canGoForward && updateDay(v => v + 1)} disabled={!canGoForward}
-                            className={`flex items-center justify-center w-8 flex-shrink-0 rounded-lg transition-colors ${!canGoForward ? 'bg-[#1a0808] opacity-10' : 'bg-[var(--color-red)] hover:brightness-110 active:brightness-90'}`}
+                        <button
+                            onClick={() => canGoForward && updateDay(v => v + 1)}
+                            disabled={!canGoForward}
+                            className="balatro-nav-button"
                         >
                             <ChevronRight size={24} className="text-white" strokeWidth={4} />
                         </button>
 
                     </div>
 
-                    {/* Bottom Anchor Area - Centers Ad Rotator in space below card */}
-                    <div className="flex-1 w-full flex items-center justify-center p-1 min-h-0">
-                        <div className="w-full max-w-[90vw] sm:max-w-sm z-40">
+                    {/* Bottom Fixed Area - Fixed 8px spacing */}
+                    <div className="w-full flex-shrink-0 pt-2 pb-2">
+                        <div className="w-full max-w-[22rem] mx-auto px-1">
                             <AdRotator
                                 onOpenWisdom={() => setViewMode('wisdom')}
                                 onOpenLeaderboard={() => setShowLeaderboard(true)}
@@ -318,12 +353,12 @@ export function DailyWee() {
 function WeeWisdom({ onBack }: { onBack: () => void }) {
     return (
         <div className="w-full">
-            <div className="bg-[var(--balatro-grey)] border-[3px] border-black/20 rounded-xl p-8 flex flex-col gap-6 items-center shadow-[0_4px_0_rgba(0,0,0,0.3)] relative overflow-hidden">
+            <div className="balatro-panel p-8 flex flex-col gap-6 items-center relative overflow-hidden">
 
                 {/* Header Row: Sprite + Text */}
                 <div className="flex items-center gap-4 w-full justify-center">
                     <Sprite name="weejoker" width={48} className="drop-shadow-lg" />
-                    <h3 className="text-[var(--balatro-blue)] font-header text-3xl uppercase tracking-widest drop-shadow-md">
+                    <h3 className="text-[var(--balatro-blue)] font-header text-3xl tracking-widest drop-shadow-md">
                         Wee Wisdom
                     </h3>
                 </div>
@@ -339,7 +374,7 @@ function WeeWisdom({ onBack }: { onBack: () => void }) {
                         Just like in Balatro, small connections stack up to big results.
                     </p>
 
-                    <div className="pt-4 border-t-2 border-dashed border-white/20 flex flex-col sm:flex-row gap-4 justify-between items-center w-full">
+                    <div className="pt-4 border-t-2 border-dashed border-white/20 flex flex-col sm:flex-row gap-4 justify-between items-center w-full text-left">
                         <span className="text-xs font-pixel text-white/60 italic">
                             Got 8 minutes? Call a friend today.
                         </span>
@@ -347,10 +382,10 @@ function WeeWisdom({ onBack }: { onBack: () => void }) {
                             href="https://findahelpline.com/"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="bg-[var(--balatro-blue)] text-white hover:brightness-110 px-4 py-2 rounded-lg transition-colors font-header text-xs tracking-wider uppercase flex items-center gap-2"
+                            className="balatro-button balatro-button-blue text-xs flex items-center gap-2"
                         >
                             <HeartHandshake size={16} />
-                            Lonely? FIND SUPPORT
+                            Find Support
                         </a>
                     </div>
                 </div>
@@ -358,7 +393,7 @@ function WeeWisdom({ onBack }: { onBack: () => void }) {
                 {/* Back Button - Full Width Orange Style */}
                 <button
                     onClick={onBack}
-                    className="w-full bg-[var(--balatro-orange)] text-white font-header text-xl px-8 py-3 rounded-lg hover:brightness-110 active:brightness-90 transition-all uppercase tracking-widest mt-2"
+                    className="balatro-button-back mt-2"
                 >
                     Back
                 </button>

@@ -58,13 +58,13 @@ export function LeaderboardModal({ dayNumber, onClose }: LeaderboardModalProps) 
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/80 animate-in fade-in duration-150" onClick={onClose}>
-            <div className="relative w-full max-w-lg h-[70vh] flex flex-col bg-[var(--balatro-modal-bg)] border-[3px] border-black/20 rounded-xl overflow-hidden animate-in slide-in-from-bottom-10 duration-150" onClick={(e) => e.stopPropagation()}>
+            <div className="balatro-panel relative w-full max-w-lg h-[70vh] flex flex-col animate-in slide-in-from-bottom-10 duration-150" onClick={(e) => e.stopPropagation()}>
 
                 {/* Header */}
                 <div className="bg-[var(--balatro-blue)] p-4 flex justify-between items-center border-b-[3px] border-black/20 shrink-0">
                     <h2 className="text-2xl md:text-3xl font-header text-white tracking-widest text-shadow-sm flex items-center gap-2">
                         <Trophy size={28} strokeWidth={2.5} />
-                        TOP SCORES
+                        Top Scores
                     </h2>
                     <span className="font-pixel text-white/80 text-sm uppercase tracking-wider bg-black/20 px-2 py-1 rounded">
                         Day {dayNumber}
@@ -117,7 +117,7 @@ export function LeaderboardModal({ dayNumber, onClose }: LeaderboardModalProps) 
                 <div className="p-3 flex-shrink-0 text-center">
                     <button
                         onClick={onClose}
-                        className="w-full bg-[var(--balatro-orange)] hover:brightness-110 active:brightness-90 text-white font-header text-xl px-6 py-3 rounded-lg transition-colors uppercase"
+                        className="balatro-button-back"
                     >
                         Back
                     </button>

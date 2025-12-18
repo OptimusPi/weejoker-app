@@ -1,5 +1,6 @@
 
-import { X, ExternalLink, Gamepad2, Copy, Trophy } from "lucide-react";
+import { X, ExternalLink, Gamepad2, Copy, Trophy, CheckCircle2 } from "lucide-react";
+import { useState } from "react";
 
 interface HowToPlayProps {
     onClose: () => void;
@@ -7,105 +8,100 @@ interface HowToPlayProps {
 }
 
 export function HowToPlay({ onClose, onSubmit }: HowToPlayProps) {
+    const [step, setStep] = useState(1);
+    const totalSteps = 3;
+
+    const nextStep = () => {
+        if (step < totalSteps) setStep(step + 1);
+        else onClose();
+    };
+
+    const prevStep = () => {
+        if (step > 1) setStep(step - 1);
+        else onClose();
+    };
+
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/80 animate-in fade-in duration-150" onClick={onClose}>
-            <div className="relative w-full max-w-lg bg-[var(--balatro-grey)] border-[3px] border-black/20 rounded-xl overflow-hidden animate-in slide-in-from-bottom-10 duration-150" onClick={(e) => e.stopPropagation()}>
+            <div className="balatro-panel relative w-full max-w-sm overflow-hidden animate-in slide-in-from-bottom-10 duration-150" onClick={(e) => e.stopPropagation()}>
 
                 {/* Header */}
-                <div className="bg-[var(--balatro-blue)] p-4 flex justify-between items-center border-b-[3px] border-black/20">
-                    <h2 className="text-2xl md:text-3xl font-header text-white tracking-widest text-shadow-md flex items-center gap-2">
-                        <Gamepad2 size={28} />
-                        HOW TO PLAY
+                <div className="bg-[var(--balatro-blue)] p-4 flex justify-between items-center border-b-[2px] border-black/20">
+                    <h2 className="text-xl md:text-2xl font-header text-white tracking-widest text-shadow-md flex items-center gap-2 uppercase">
+                        {step === 1 ? 'Step 1' : step === 2 ? 'Step 2' : 'Final Step'}
                     </h2>
+                    <div className="flex gap-1">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className={`w-2 h-2 rounded-full ${step === i ? 'bg-white' : 'bg-white/20'}`} />
+                        ))}
+                    </div>
                 </div>
 
-                <div className="p-4 md:p-5 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
-
-                    {/* Step 1 */}
-                    <div className="flex gap-3">
-                        <div className="w-8 h-8 shrink-0 bg-[var(--balatro-red)] text-white font-header text-lg flex items-center justify-center rounded-md">
-                            1
-                        </div>
-                        <div className="space-y-1">
-                            <h3 className="text-xl font-header text-white uppercase">Get Balatro</h3>
-                            <div className="flex flex-wrap gap-2">
-                                <a href="https://www.playbalatro.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-3 py-1 bg-black/40 hover:bg-black/60 rounded text-sm font-pixel text-[var(--balatro-blue)] transition-colors">
-                                    <ExternalLink size={14} /> Buy on Any Platform
+                <div className="p-5 flex flex-col items-center text-center gap-4">
+                    {step === 1 && (
+                        <div className="space-y-4 animate-in slide-in-from-right-4 duration-200">
+                            <h3 className="text-2xl font-header text-white uppercase tracking-wider">Get Balatro</h3>
+                            <p className="text-zinc-200 font-pixel text-lg leading-tight">
+                                You need the game to participate.<br />Available on PC, Console, and Mobile.
+                            </p>
+                            <div className="flex flex-col gap-2 w-full">
+                                <a href="https://www.playbalatro.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-black/40 hover:bg-black/60 rounded-lg text-sm font-pixel text-[var(--balatro-blue)] transition-colors border border-white/10">
+                                    <ExternalLink size={14} /> Buy on Store
                                 </a>
-                                <span className="inline-flex items-center gap-2 px-3 py-1 bg-[#1a4731] rounded text-sm font-pixel text-[#4ade80]">
-                                    Free on GamePass / Apple Arcade
+                                <span className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#1a4731] rounded-lg text-[10px] font-header text-[#4ade80] border border-white/10">
+                                    Free on GamePass / Arcade
                                 </span>
                             </div>
                         </div>
-                    </div>
+                    )}
 
-                    {/* Step 2 */}
-                    <div className="flex gap-3">
-                        <div className="w-8 h-8 shrink-0 bg-[var(--balatro-orange)] text-white font-header text-lg flex items-center justify-center rounded-md">
-                            2
-                        </div>
-                        <div className="space-y-1">
-                            <h3 className="text-xl font-header text-white uppercase">Copy The Daily Seed</h3>
+                    {step === 2 && (
+                        <div className="space-y-4 animate-in slide-in-from-right-4 duration-200">
+                            <h3 className="text-2xl font-header text-white uppercase tracking-wider">The Ritual</h3>
                             <p className="text-zinc-200 font-pixel text-lg leading-tight">
-                                Click the <span className="inline-block bg-[var(--balatro-blue)] text-white text-xs px-1.5 py-0.5 rounded font-header mx-1 border-b-2 border-black/10">COPY</span> button on today&apos;s challenge to grab the seed code.
+                                Click the <span className="text-[var(--balatro-blue)] font-header">Play Daily Wee</span> button to grab today's seed.
                             </p>
-                        </div>
-                    </div>
-
-                    {/* Step 3 */}
-                    <div className="flex gap-3">
-                        <div className="w-8 h-8 shrink-0 bg-[var(--balatro-blue)] text-white font-header text-lg flex items-center justify-center rounded-md">
-                            3
-                        </div>
-                        <div className="space-y-1">
-                            <h3 className="text-xl font-header text-white uppercase">Start Run</h3>
-                            <div className="bg-black/40 p-3 rounded border border-white/5 font-pixel text-base text-zinc-200 space-y-2">
-                                <p className="flex items-center gap-2">
-                                    1. Select <span className="text-[var(--balatro-gold)] bg-black/50 px-1.5 rounded border border-white/5">Erratic Deck</span>
-                                </p>
-                                <p className="flex items-center gap-2">
-                                    2. Toggle <span className="text-white bg-[var(--balatro-red)] px-1 rounded-sm text-[10px]">✔</span> <span className="text-[var(--balatro-orange)]">Seeded Run</span>
-                                </p>
-                                <p className="flex items-center gap-2">
-                                    3. Click <span className="bg-[var(--balatro-blue)] text-white px-1.5 py-0.5 rounded text-[10px] font-header">Paste Seed</span>
-                                </p>
-                                <p className="flex items-center gap-2">
-                                    4. Hit <span className="bg-[var(--balatro-blue)] text-white px-2 py-0.5 rounded font-header text-[10px]">PLAY</span>
-                                </p>
+                            <div className="bg-black/20 p-4 rounded-xl border border-dashed border-white/10 flex flex-col items-center gap-2">
+                                <div className="p-2 bg-black/40 rounded-lg">
+                                    <Copy size={32} className="text-[var(--balatro-blue)]" />
+                                </div>
+                                <span className="font-pixel text-xs text-white/40 uppercase">Clicking Play copies seed</span>
                             </div>
                         </div>
-                    </div>
+                    )}
 
-                    {/* Goal */}
-                    <div className="bg-[#4d3d18] p-3 rounded-lg border-2 border-[var(--balatro-gold)] border-dashed flex gap-3 items-center">
-                        <Trophy size={32} className="text-[var(--balatro-gold)] shrink-0" />
-                        <div>
-                            <h3 className="text-lg font-header text-[var(--balatro-gold)] uppercase">THE GOAL</h3>
-                            <p className="font-pixel text-base text-white leading-tight">
-                                Beat <span className="text-[var(--balatro-red)]">Ante 8</span>. At Ante 9, screenshot your <span className="text-[var(--balatro-blue)]">Wee Joker</span> count. That is your score!
+                    {step === 3 && (
+                        <div className="space-y-4 animate-in slide-in-from-right-4 duration-200">
+                            <h3 className="text-2xl font-header text-white uppercase tracking-wider">The Goal</h3>
+                            <div className="bg-[#4d3d18] p-4 rounded-xl border-2 border-[var(--balatro-gold)] border-dashed flex flex-col gap-2 items-center">
+                                <Trophy size={40} className="text-[var(--balatro-gold)]" />
+                                <p className="font-pixel text-lg text-white leading-tight">
+                                    Beat <span className="text-[var(--balatro-red)]">Ante 8</span>.<br />
+                                    Count your <span className="text-[var(--balatro-blue)]">Wee Jokers</span> at Ante 9.
+                                </p>
+                            </div>
+                            <p className="text-[var(--balatro-gold)] font-header text-xs tracking-widest uppercase">
+                                Snap a screenshot & submit!
                             </p>
                         </div>
-                    </div>
-                </div>
-
-                {/* Footer Buttons - NO EXTRA BACKGROUND TRAY */}
-                <div className="p-4 flex gap-3 text-center">
-                    <button
-                        onClick={onClose}
-                        className="flex-1 bg-[var(--balatro-orange)] hover:brightness-110 active:brightness-90 text-white font-header text-xl py-3 rounded-lg transition-colors uppercase"
-                    >
-                        Back
-                    </button>
-                    {onSubmit && (
-                        <button
-                            onClick={onSubmit}
-                            className="flex-[2] bg-[var(--balatro-blue)] hover:brightness-110 active:brightness-90 text-white font-header text-xl py-3 rounded-lg transition-colors tracking-wider flex items-center justify-center gap-2 uppercase"
-                        >
-                            SUBMIT SCORE
-                        </button>
                     )}
-                </div>
 
+                    {/* Action Button */}
+                    <button
+                        onClick={nextStep}
+                        className="balatro-button balatro-button-blue w-full text-xl py-2 mt-2"
+                    >
+                        {step === 1 ? 'Got it' : step === 2 ? 'Next' : "Let's Play!"}
+                    </button>
+
+                    {/* Back Button */}
+                    <button
+                        onClick={prevStep}
+                        className="balatro-button-back"
+                    >
+                        {step === 1 ? 'Back' : 'Previous Step'}
+                    </button>
+                </div>
             </div>
         </div>
     );

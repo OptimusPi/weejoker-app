@@ -172,11 +172,18 @@ body::after {
 }
 
 @layer components {
-    .balatro-card {
+    .balatro-panel {
         background-color: var(--balatro-modal-bg);
-        border: 3px solid rgba(0, 0, 0, 0.2);
+        border: 2px solid rgba(0, 0, 0, 0.2);
         border-radius: 0.75rem;
-        box-shadow: 0 8px 0 rgba(0, 0, 0, 0.5);
+        box-shadow: 0 4px 0 rgba(0, 0, 0, 0.4);
+        position: relative;
+        overflow: hidden;
+        padding: 0.75rem;
+    }
+
+    .balatro-card {
+        @apply balatro-panel;
     }
 
     @layer components {
@@ -186,49 +193,125 @@ body::after {
             background-color: var(--color-orange);
             color: white !important;
             font-family: var(--font-header);
-            font-size: 1.5rem;
-            /* 2pt larger than base */
-            padding: 0.75rem 2rem;
-            border-radius: 0.75rem;
-            /* rounded-xl */
+            font-size: 1.25rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.4rem;
             border: none;
-            box-shadow: 0 4px 0 var(--color-dark-orange);
-            /* The flat 2D shadow */
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.8);
             transition: none;
-            /* Balatro is snappy */
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             text-transform: none;
-            /* Case sensitive "Back" */
             width: 100%;
             position: relative;
         }
 
-        /* Hover State: Flip to Dark */
         .balatro-button-back:hover {
             background-color: var(--color-dark-orange);
         }
 
-        /* Pressed State: Scoot down, cover the shadow */
         .balatro-button-back:active {
             background-color: var(--color-dark-orange);
-            transform: translateY(4px);
+            transform: translateY(2px);
             box-shadow: none;
         }
 
-        /* Generic Standard Buttons (For Red/Blue/Green etc) */
+        /* Generic Standard Buttons */
         .balatro-button {
             color: white !important;
             font-family: var(--font-header);
             border: none;
-            border-radius: 0.75rem;
+            border-radius: 0.4rem;
             cursor: pointer;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: none;
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.8);
+            padding: 0.4rem 1.25rem;
+            font-size: 1.1rem;
+            text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .balatro-button:hover {
+            filter: brightness(0.9);
+            /* Darken face on hover */
+        }
+
+        .balatro-button:active {
+            transform: translateY(2px);
+            box-shadow: none;
+            filter: brightness(0.9);
+        }
+
+        /* Specific Button Colors to override filter brightness if needed */
+        .balatro-button-red {
+            background-color: var(--color-red);
+        }
+
+        .balatro-button-red:hover {
+            background-color: var(--color-dark-red);
+            filter: none;
+        }
+
+        .balatro-button-red:active {
+            background-color: var(--color-dark-red);
+            filter: none;
+        }
+
+        .balatro-button-blue {
+            background-color: var(--color-blue);
+        }
+
+        .balatro-button-blue:hover {
+            background-color: var(--color-dark-blue);
+            filter: none;
+        }
+
+        .balatro-button-blue:active {
+            background-color: var(--color-dark-blue);
+            filter: none;
+        }
+
+        /* Nav Buttons (Left/Right) */
+        .balatro-nav-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            flex-shrink: 0;
+            border-radius: 0.5rem;
+            transition: background-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
+            background-color: var(--color-red);
+            position: relative;
+        }
+
+        .balatro-nav-button:hover:not(:disabled) {
+            filter: brightness(1.1);
+        }
+
+        .balatro-nav-button:active:not(:disabled) {
+            filter: brightness(0.9);
+            transform: translateY(1px);
+        }
+
+        .balatro-nav-button:disabled {
+            cursor: not-allowed;
+            background-color: #1a0808;
+            opacity: 0.2;
+            filter: grayscale(1);
+        }
+
+        .balatro-nav-button:disabled::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-color: black;
+            opacity: 0.8;
+            border-radius: 0.5rem;
         }
     }
 
@@ -237,10 +320,11 @@ body::after {
         border: 2px solid transparent;
         border-radius: 0.5rem;
         color: white;
-        font-family: 'Courier New', monospace;
+        font-family: var(--font-pixel), monospace;
         padding: 0.5rem 1rem;
         outline: none;
         transition: border-color 0.15s ease-in-out;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
     }
 
     .balatro-input:focus {
@@ -250,19 +334,81 @@ body::after {
     .balatro-input::placeholder {
         color: rgba(255, 255, 255, 0.3);
     }
+
+    /* PREMIUM CONTRAST: EPOCH HERO CARD */
+    .acrylic-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(12px) saturate(180%);
+        -webkit-backdrop-filter: blur(12px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .acrylic-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.1) 0%,
+                transparent 50%,
+                rgba(255, 255, 255, 0.05) 100%);
+        pointer-events: none;
+    }
+}
+
+/* Juice Animations */
+@keyframes balatro-wobble {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(-1deg) scale(1.02);
+    }
+
+    75% {
+        transform: rotate(1deg) scale(1.02);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+@keyframes balatro-float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.juice-wobble:hover {
+    animation: balatro-wobble 0.3s ease-in-out infinite;
+}
+
+.juice-float {
+    animation: balatro-float 3s ease-in-out infinite;
 }
 
 /* Utilities */
 .font-pixel {
-    font-family: 'm6x11', monospace;
+    font-family: var(--font-pixel), monospace;
     font-weight: normal !important;
-    /* NEVER BOLD */
     font-size: 1.25rem;
-    /* Readability bump */
 }
 
 .font-header {
-    font-family: 'm6x11', monospace;
+    font-family: var(--font-header), font-pixel, monospace;
     font-weight: normal !important;
     letter-spacing: 0.1em;
 }
