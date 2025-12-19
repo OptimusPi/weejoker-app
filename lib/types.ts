@@ -33,8 +33,11 @@ export interface SeedData {
     Temperance?: number;
     Ankh_Ante1?: number;
 
-    // Locked State
-    isLocked?: boolean;
+    // Theme Info
+    themeName?: string;
+    themeJoker?: string;
+    themeCardAnte1?: number;
+    themeCardAnte2?: number;
 
     // Allow for extras
     [key: string]: string | number | boolean | undefined;

@@ -193,8 +193,8 @@ body::after {
             background-color: var(--color-orange);
             color: white !important;
             font-family: var(--font-header);
-            font-size: 1.25rem;
-            padding: 0.5rem 1.5rem;
+            font-size: 1.1rem;
+            padding: 0.4rem 1.25rem;
             border-radius: 0.4rem;
             border: none;
             box-shadow: 0 2px 0 rgba(0, 0, 0, 0.8);
@@ -247,6 +247,15 @@ body::after {
             filter: brightness(0.9);
         }
 
+        .balatro-button:disabled {
+            cursor: not-allowed;
+            background-color: var(--color-dark-dull-grey) !important;
+            color: var(--color-dull-grey) !important;
+            opacity: 1 !important;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
         /* Specific Button Colors to override filter brightness if needed */
         .balatro-button-red {
             background-color: var(--color-red);
@@ -259,6 +268,8 @@ body::after {
 
         .balatro-button-red:active {
             background-color: var(--color-dark-red);
+            transform: translateY(2px);
+            box-shadow: none;
             filter: none;
         }
 
@@ -273,6 +284,24 @@ body::after {
 
         .balatro-button-blue:active {
             background-color: var(--color-dark-blue);
+            transform: translateY(2px);
+            box-shadow: none;
+            filter: none;
+        }
+
+        .balatro-button-gold {
+            background-color: var(--balatro-gold);
+        }
+
+        .balatro-button-gold:hover {
+            background-color: var(--color-dark-gold);
+            filter: none;
+        }
+
+        .balatro-button-gold:active {
+            background-color: var(--color-dark-gold);
+            transform: translateY(2px);
+            box-shadow: none;
             filter: none;
         }
 
@@ -290,28 +319,24 @@ body::after {
         }
 
         .balatro-nav-button:hover:not(:disabled) {
-            filter: brightness(1.1);
+            background-color: var(--color-dark-red);
         }
 
         .balatro-nav-button:active:not(:disabled) {
-            filter: brightness(0.9);
-            transform: translateY(1px);
+            background-color: var(--color-dark-red);
+            transform: translateY(2px);
+            box-shadow: none;
         }
 
         .balatro-nav-button:disabled {
             cursor: not-allowed;
-            background-color: #1a0808;
-            opacity: 0.2;
-            filter: grayscale(1);
-        }
-
-        .balatro-nav-button:disabled::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background-color: black;
-            opacity: 0.8;
-            border-radius: 0.5rem;
+            background-color: #2d2d2d;
+            /* Solid dark grey */
+            color: #5c5c5c;
+            box-shadow: none;
+            opacity: 1;
+            /* NO TRANSPARENCY */
+            filter: none;
         }
     }
 

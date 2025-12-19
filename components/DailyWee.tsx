@@ -14,8 +14,8 @@ import Image from "next/image";
 
 
 // Day calculation
-const EPOCH = new Date('2025-12-18T00:00:00Z').getTime(); // Dec 18 = Day 1
-// If today is Dec 15, result is 0.
+const EPOCH = new Date('2025-12-20T00:00:00Z').getTime(); // Dec 20 = Day 1
+// WEEPOCH (Day 0) = Dec 19 (UTC Today)
 const getDayNumber = () => Math.floor((Date.now() - EPOCH) / (24 * 60 * 60 * 1000)) + 1;
 
 export function DailyWee() {
@@ -87,11 +87,10 @@ export function DailyWee() {
                 setSeeds([]);
                 if (schedule.length > 0) setError("Future seed not found.");
             } else {
-                // Map Data typically
                 const seedData: SeedData = {
                     seed: seedRaw.id,
-                    score: seedRaw.score,
-                    twos: seedRaw.twos,
+                    score: seedRaw.s,
+                    twos: seedRaw.w,
                     WeeJoker_Ante1: seedRaw.wj1,
                     WeeJoker_Ante2: seedRaw.wj2,
                     HanginChad_Ante1: seedRaw.hc1,
@@ -101,21 +100,21 @@ export function DailyWee() {
                     blueprint_early: seedRaw.bp,
                     brainstorm_early: seedRaw.bs,
                     Showman_Ante1: seedRaw.sh,
-                    red_Seal_Two: seedRaw.rs
+                    red_Seal_Two: seedRaw.rs,
+                    themeName: seedRaw.t,
+                    themeJoker: seedRaw.j,
+                    themeCardAnte1: seedRaw.t1,
+                    themeCardAnte2: seedRaw.t2
                 };
                 setSeeds([seedData]);
                 setError(null);
             }
-        } else if (!seedRaw) {
-            setSeeds([]);
-            // If schedule didn't load yet, don't error, just wait?
-            if (schedule.length > 0) setError("Seed not found.");
-        } else {
-            // Map Minified JSON to Full Types
+        } else if (seedRaw) {
+            // Current or Past Day
             const seedData: SeedData = {
                 seed: seedRaw.id,
-                score: seedRaw.score,
-                twos: seedRaw.twos,
+                score: seedRaw.s,
+                twos: typeof seedRaw.w === 'number' ? seedRaw.w : (parseInt(seedRaw.w as any) || 0),
                 WeeJoker_Ante1: seedRaw.wj1,
                 WeeJoker_Ante2: seedRaw.wj2,
                 HanginChad_Ante1: seedRaw.hc1,
@@ -125,10 +124,17 @@ export function DailyWee() {
                 blueprint_early: seedRaw.bp,
                 brainstorm_early: seedRaw.bs,
                 Showman_Ante1: seedRaw.sh,
-                red_Seal_Two: seedRaw.rs
+                red_Seal_Two: seedRaw.rs,
+                themeName: seedRaw.t,
+                themeJoker: seedRaw.j,
+                themeCardAnte1: seedRaw.t1,
+                themeCardAnte2: seedRaw.t2
             };
             setSeeds([seedData]);
             setError(null);
+        } else {
+            setSeeds([]);
+            if (schedule.length > 0) setError("Seed not found.");
         }
 
         // 2. Fetch Score (Still API)
@@ -154,7 +160,7 @@ export function DailyWee() {
     useEffect(() => {
         if (!mounted) return;
         loadDayData(viewingDay);
-    }, [viewingDay, mounted, schedule]);
+    }, [viewingDay, mounted, loadDayData]);
 
 
     const [showSubmit, setShowSubmit] = useState(false);
@@ -186,24 +192,40 @@ export function DailyWee() {
         return date.toLocaleDateString('en-US', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' });
     };
 
-    const getTheme = (day: number) => {
+    const getTheme = (day: number, seedData: SeedData | null) => {
+        if (seedData?.themeName) {
+            const name = seedData.themeName;
+            // Map Colors to Themes
+            let color = "var(--balatro-gold)";
+            let icon = "👁️";
+
+            if (name.includes("Madness")) { color = "var(--balatro-red)"; icon = "🔥"; }
+            else if (name.includes("Twosday")) { color = "var(--balatro-blue)"; icon = "2️⃣"; }
+            else if (name.includes("Wee")) { color = "var(--balatro-green)"; icon = "🃏"; }
+            else if (name.includes("Threshold")) { color = "var(--balatro-orange)"; icon = "⚖️"; }
+            else if (name.includes("Foil")) { color = "var(--balatro-blue)"; icon = "📐"; }
+            else if (name.includes("Weekend")) { color = "var(--balatro-gold)"; icon = "🎩"; }
+
+            return { name, color, icon };
+        }
+
         const date = new Date(EPOCH + (day - 1) * 24 * 60 * 60 * 1000);
         const dayOfWeek = date.getUTCDay(); // 0 is Sunday, 1 is Monday...
 
-        const themes = [
-            { name: "Searing Sunday", color: "var(--balatro-red)", icon: "🔥" },    // Sunday
-            { name: "Ritual Monday", color: "var(--balatro-gold)", icon: "👁️" },    // Monday
+        const defaultThemes = [
+            { name: "Weekend Ritual", color: "var(--balatro-gold)", icon: "🔥" },    // Sunday
+            { name: "Madness Monday", color: "var(--balatro-red)", icon: "🔥" },    // Monday
             { name: "Twosday", color: "var(--balatro-blue)", icon: "2️⃣" },           // Tuesday
-            { name: "Weednesday", color: "var(--balatro-green)", icon: "🃏" },        // Wednesday
-            { name: "Hacking Thursday", color: "var(--balatro-orange)", icon: "💻" }, // Thursday
-            { name: "Blueprint Friday", color: "var(--balatro-blue)", icon: "📐" },   // Friday
-            { name: "Showman Saturday", color: "var(--balatro-gold)", icon: "🎩" },   // Saturday
+            { name: "Wee Wednesday", color: "var(--balatro-green)", icon: "🃏" },        // Wednesday
+            { name: "Threshold Thursday", color: "var(--balatro-orange)", icon: "💻" }, // Thursday
+            { name: "Foil Friday", color: "var(--balatro-blue)", icon: "📐" },   // Friday
+            { name: "Weekend Ritual", color: "var(--balatro-gold)", icon: "🎩" },   // Saturday
         ];
 
-        return themes[dayOfWeek] || themes[0];
+        return defaultThemes[dayOfWeek] || defaultThemes[0];
     };
 
-    const currentTheme = getTheme(viewingDay);
+    const currentTheme = getTheme(viewingDay, seed);
 
     if (!mounted) return null;
 
@@ -214,20 +236,10 @@ export function DailyWee() {
                 {/* HERO STAGE - ANCHORED LAYOUT */}
                 <div className="h-[100dvh] w-full relative z-10 flex flex-col items-center">
 
-                    {/* Top Anchor Area - Centers Header in space above card */}
-                    <div className="flex-1 w-full flex items-center justify-center p-1 min-h-0 overflow-hidden">
+                    {/* Top Anchor Area - Centered but compact */}
+                    <div className="flex-shrink-0 w-full flex items-center justify-center p-0.5 min-h-0 overflow-hidden mt-6 mb-2">
                         <div className="text-center w-full relative z-20 px-4">
-                            <div className="flex justify-between w-full max-w-sm mx-auto text-[10px] items-end border-b border-white/10 pb-1 mb-2 uppercase">
-                                <div className="flex flex-col items-start gap-0.5">
-                                    <span className="text-[var(--balatro-gold)] font-header text-[8px] leading-none">Today's Seed</span>
-                                    <span className="font-pixel text-white/90 text-sm leading-none">{seed?.seed || '--------'}</span>
-                                </div>
-                                <div className="flex flex-col items-end gap-0.5">
-                                    <span className="text-white/60 font-header text-[8px] leading-none">Starting 2's</span>
-                                    <span className="font-pixel text-[var(--balatro-gold)] text-sm leading-none">{seed?.twos || '0'}</span>
-                                </div>
-                            </div>
-                            <div className="font-header text-3xl sm:text-4xl text-white tracking-widest uppercase leading-none mb-1 select-none">
+                            <div className="font-header font-normal text-3xl sm:text-4xl text-white tracking-wider uppercase leading-none mb-1 select-none drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
                                 THE DAILY WEE
                             </div>
                             <div className="w-full max-w-sm mx-auto flex flex-col gap-1">
@@ -281,6 +293,7 @@ export function DailyWee() {
                                             dayNumber={viewingDay}
                                             className="w-full h-full"
                                             onAnalyze={() => setShowHowTo(true)}
+                                            onOpenSubmit={() => setShowSubmit(true)}
                                             isLocked={viewingDay > todayNumber}
                                         />
                                     ) : (
@@ -310,9 +323,9 @@ export function DailyWee() {
 
                     </div>
 
-                    {/* Bottom Fixed Area - Fixed 8px spacing */}
-                    <div className="w-full flex-shrink-0 pt-2 pb-2">
-                        <div className="w-full max-w-[22rem] mx-auto px-1">
+                    {/* Bottom Fixed Area - Tightened spacing */}
+                    <div className="w-full flex-shrink-0 pt-1 pb-2">
+                        <div className="w-full max-w-[22rem] mx-auto">
                             <AdRotator
                                 onOpenWisdom={() => setViewMode('wisdom')}
                                 onOpenLeaderboard={() => setShowLeaderboard(true)}
@@ -333,7 +346,14 @@ export function DailyWee() {
                     </div>
                 </div>
 
-                {showHowTo && <HowToPlay onClose={() => setShowHowTo(false)} onSubmit={() => { setShowHowTo(false); setShowSubmit(true); }} />}
+                {showHowTo && (
+                    <HowToPlay
+                        onClose={() => setShowHowTo(false)}
+                        themeName={currentTheme.name}
+                        seedId={seed?.seed || '--------'}
+                        onSubmit={() => { setShowHowTo(false); setShowSubmit(true); }}
+                    />
+                )}
                 {showLeaderboard && <LeaderboardModal dayNumber={viewingDay} onClose={() => setShowLeaderboard(false)} />}
                 {showSubmit && seed && (
                     <SubmitScoreModal

@@ -33,6 +33,8 @@ const JOKER_MAP: Record<string, { x: number; y: number }> = {
     "showman": { x: 6, y: 5 },
     "Invisible Joker": { x: 1, y: 7 }, // Corrected from 4,10
     "invisiblejoker": { x: 1, y: 7 },
+    "Madness": { x: 8, y: 11 },
+    "madness": { x: 8, y: 11 },
     "Red Seal": { x: 0, y: 0 }, // Placeholder/TODO
 };
 

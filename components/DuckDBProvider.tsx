@@ -70,14 +70,6 @@ export function DuckDBProvider({ children }: { children: React.ReactNode }) {
 
         return () => {
             isMounted = false;
-            // Cleanup provided by Next.js/React lifecycle automatically usually, 
-            // but we could close connection here if needed.
-            if (conn) {
-                conn.close().catch(console.error);
-            }
-            if (db) {
-                db.terminate().catch(console.error);
-            }
         };
     }, []);
 

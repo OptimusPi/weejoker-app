@@ -17,9 +17,20 @@ export async function GET(request: NextRequest) {
         // --- STRICT DB CHECK ---
         if (!db) {
             console.error("CRITICAL: No DB binding found.");
-            // Return 500 so UI knows it failed, rather than fake data
             return NextResponse.json({ error: 'Database not available' }, { status: 500 });
         }
+
+        // Safety: ensure score table exists
+        await db.prepare(`
+            CREATE TABLE IF NOT EXISTS scores (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                seed TEXT NOT NULL,
+                day_number INTEGER NOT NULL,
+                player_name TEXT NOT NULL,
+                score INTEGER NOT NULL,
+                submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `).run();
 
 
         if (week === 'true') {

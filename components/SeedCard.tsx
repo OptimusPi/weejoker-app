@@ -10,13 +10,14 @@ interface SeedCardProps {
     dayNumber: number;
     className?: string;
     onAnalyze?: () => void;
+    onOpenSubmit?: () => void;
     isLocked?: boolean;
 }
 
 // Simple hook removed as it was unused
 
 
-export function SeedCard({ seed, dayNumber, className, onAnalyze, isLocked }: SeedCardProps) {
+export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, isLocked }: SeedCardProps) {
     const [copied, setCopied] = useState(false);
     const [topScore, setTopScore] = useState<{ name: string; score: number } | null>(null);
 
@@ -55,30 +56,42 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, isLocked }: Se
 
     // Helper to determine jokers for a row
     const getJokers = (ante: 1 | 2) => {
-        const jokers: { id: string; name: string; tally: number | undefined }[] = [];
+        const jokers: { id: string; name: string; tally?: number }[] = [];
+
+        // Theme Joker Support
+        if (seed.themeJoker && seed.themeJoker !== "Joker") {
+            const themeTally = ante === 1 ? seed.themeCardAnte1 : seed.themeCardAnte2;
+            if ((themeTally ?? 0) > 0) {
+                const jokerId = seed.themeJoker.toLowerCase().replace(/ /g, "");
+                jokers.push({ id: jokerId, name: seed.themeJoker, tally: themeTally as number });
+            }
+        }
+
+        // Standard MVP Jokers (Skip if they were already added as the Theme Joker)
+        const isAlreadyAdded = (name: string) => jokers.some(j => j.name === name);
 
         // Wee Joker
         const weeTally = ante === 1 ? seed.WeeJoker_Ante1 : seed.WeeJoker_Ante2;
-        if ((weeTally ?? 0) > 0) {
+        if ((weeTally ?? 0) > 0 && !isAlreadyAdded("Wee Joker")) {
             jokers.push({ id: "weejoker", name: "Wee Joker", tally: weeTally as number });
         }
 
         // Hack
         const hackTally = ante === 1 ? seed.Hack_Ante1 : seed.Hack_Ante2;
-        if ((hackTally ?? 0) > 0) {
+        if ((hackTally ?? 0) > 0 && !isAlreadyAdded("Hack")) {
             jokers.push({ id: "hack", name: "Hack", tally: hackTally as number });
         }
 
         // Hanging Chad
         const chadTally = ante === 1 ? seed.HanginChad_Ante1 : seed.HanginChad_Ante2;
-        if ((chadTally ?? 0) > 0) {
+        if ((chadTally ?? 0) > 0 && !isAlreadyAdded("Hanging Chad")) {
             jokers.push({ id: "hangingchad", name: "Hanging Chad", tally: chadTally as number });
         }
 
         // Blueprint/Brainstorm
         if (ante === 1) {
-            if ((seed.blueprint_early ?? 0) > 0) jokers.push({ id: "blueprint", name: "Blueprint", tally: seed.blueprint_early as number });
-            if ((seed.brainstorm_early ?? 0) > 0) jokers.push({ id: "brainstorm", name: "Brainstorm", tally: seed.brainstorm_early as number });
+            if ((seed.blueprint_early ?? 0) > 0 && !isAlreadyAdded("Blueprint")) jokers.push({ id: "blueprint", name: "Blueprint", tally: seed.blueprint_early as number });
+            if ((seed.brainstorm_early ?? 0) > 0 && !isAlreadyAdded("Brainstorm")) jokers.push({ id: "brainstorm", name: "Brainstorm", tally: seed.brainstorm_early as number });
         }
 
         return jokers;
@@ -114,30 +127,35 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, isLocked }: Se
             {/* Main Container - BALATRO PANEL STYLE */}
             <div className="balatro-panel p-1.5 flex flex-col relative h-full z-10 grow gap-1.5 min-h-[340px]">
 
-                {/* Header: Seed ID */}
-                {!isLocked && (
-                    <div className="bg-black/20 rounded-lg p-0.5 select-none shrink-0 h-10 flex items-center justify-center">
-                        <button
-                            onClick={(e) => { e.stopPropagation(); handleCopy(); }}
-                            className="flex items-center gap-2 outline-none"
-                            title="Click to Copy Seed"
-                        >
-                            <div className={cn("p-1 rounded-md transition-colors", copied ? 'bg-[var(--balatro-green)]' : 'bg-black/20')}>
-                                {copied ? <Check size={14} className="text-white" strokeWidth={4} /> : <Copy size={14} className="text-white/60" strokeWidth={3} />}
-                            </div>
-                            <span className="font-header text-lg text-white tracking-widest leading-none">{seed.seed}</span>
-                        </button>
+                {/* Header Row: Seed (Left 50%) | Starting 2's (Right 50%) */}
+                <div className="flex w-full overflow-hidden rounded-lg border-2 border-black/20 shrink-0 h-10">
+                    {/* Seed ID Side */}
+                    <div className="w-1/2 bg-black/40 flex items-center justify-center border-r-2 border-black/20 overflow-hidden">
+                        {!isLocked ? (
+                            <button
+                                onClick={(e) => { e.stopPropagation(); handleCopy(); }}
+                                className="flex items-center gap-2 outline-none w-full px-2 justify-center"
+                                title="Click to Copy Seed"
+                            >
+                                <div className={cn("p-1 rounded-md transition-colors shrink-0", copied ? 'bg-[var(--balatro-green)]' : 'bg-black/20')}>
+                                    {copied ? <Check size={10} className="text-white" strokeWidth={4} /> : <Copy size={10} className="text-white/60" strokeWidth={3} />}
+                                </div>
+                                <span className="font-header text-sm text-white tracking-widest truncate">{seed.seed}</span>
+                            </button>
+                        ) : (
+                            <span className="font-header text-sm text-white/40 tracking-widest leading-none truncate">--------</span>
+                        )}
                     </div>
-                )}
 
-                {/* Main Stats Area: TWOS */}
-                <div className="bg-black/10 rounded-lg p-0.5 px-3 flex flex-col items-center shrink-0">
-                    <span className="font-header text-2xl text-white tracking-widest leading-none">
-                        {seed.twos ?? 0}
-                    </span>
-                    <span className="font-header text-[var(--balatro-blue)] text-[9px] tracking-widest uppercase mt-[-1px]">
-                        Starting 2's
-                    </span>
+                    {/* Starting 2's Side */}
+                    <div className="w-1/2 bg-black/20 flex flex-col items-center justify-center p-0.5">
+                        <span className="font-header text-lg text-white tracking-widest leading-none">
+                            {seed.twos ?? 0}
+                        </span>
+                        <span className="font-header text-[var(--balatro-blue)] text-[8px] tracking-widest uppercase mt-[-2px]">
+                            Starting 2&apos;s
+                        </span>
+                    </div>
                 </div>
 
                 {/* Ante Rows */}
@@ -194,20 +212,30 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, isLocked }: Se
 
                     {/* Play Button or Countdown */}
                     {isLocked ? (
-                        <div className="w-full bg-[var(--balatro-disabled-face)] text-[var(--balatro-disabled-text)] font-header text-lg px-4 py-1.5 rounded-lg flex items-center justify-center gap-2 cursor-not-allowed">
+                        <div className="w-full bg-[var(--balatro-disabled-face)] text-[var(--balatro-disabled-text)] font-header text-lg px-4 py-3 rounded-lg flex items-center justify-center gap-2 cursor-not-allowed">
                             <span>{timeLeft || "--:--:--"}</span>
                         </div>
                     ) : (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleCopy();
-                                onAnalyze?.();
-                            }}
-                            className="w-full balatro-button balatro-button-blue text-xl py-2 uppercase"
-                        >
-                            Play Daily Wee
-                        </button>
+                        <div className="flex gap-1.5 w-full">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onAnalyze?.();
+                                }}
+                                className="flex-1 balatro-button balatro-button-blue text-sm py-3 leading-tight uppercase"
+                            >
+                                How do I<br />play?
+                            </button>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onOpenSubmit?.();
+                                }}
+                                className="flex-1 balatro-button balatro-button-gold text-sm py-3 leading-tight uppercase"
+                            >
+                                Submit<br />score
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>
