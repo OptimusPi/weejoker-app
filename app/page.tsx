@@ -13,7 +13,7 @@ export default function Home() {
             <ClientDailyWeeLoader />
 
             {/* Past Week Results */}
-            <div className="container mx-auto px-4 py-12">
+            <div className="container mx-auto px-4 py-4">
                 <PastWeekResults />
             </div>
         </main>

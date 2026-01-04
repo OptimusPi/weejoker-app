@@ -58,20 +58,9 @@ export default function RootLayout({
                     <main className="flex-grow">
                         {children}
                     </main>
-                    <footer className="py-12 text-center text-white/60 space-y-6 bg-black/40 backdrop-blur-md">
-                        <p className="font-pixel text-lg">
-                            Not affiliated with LocalThunk or PlayStack.
-                        </p>
-                        <a
-                            href="https://www.playbalatro.com/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-block bg-[#FF4D4D] hover:bg-[#C0392B] text-white font-header text-xl px-8 py-3 rounded shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 transition-all border-2 border-white/20 hover:border-white"
-                        >
-                            BUY BALATRO
-                        </a>
-                        <p className="font-pixel text-sm opacity-80">
-                            Created with ❤️ for the Balatro community.
+                    <footer className="w-full py-4 text-center text-white/20 font-pixel text-[10px] uppercase tracking-widest pointer-events-none fixed bottom-0 z-0">
+                        <p>
+                            Not affiliated with LocalThunk or PlayStack. • <a href="https://store.steampowered.com/app/2379780/Balatro/" target="_blank" className="hover:text-white/40 pointer-events-auto transition-colors">BUY BALATRO</a> • Created with ❤️ for the Balatro community.
                         </p>
                     </footer>
                 </div>

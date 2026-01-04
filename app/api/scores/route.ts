@@ -47,13 +47,34 @@ export async function GET(request: NextRequest) {
         }
 
         if (day) {
-            const result = await db.prepare(`
+            const dayNum = parseInt(day);
+            let result = await db.prepare(`
                 SELECT id, player_name, score, submitted_at
                 FROM scores
                 WHERE day_number = ?
                 ORDER BY score DESC
                 LIMIT 10
-            `).bind(parseInt(day)).all();
+            `).bind(dayNum).all();
+
+            // Seed default scores if table is empty for this day
+            if (result.results.length === 0) {
+                await db.prepare(`
+                INSERT INTO scores (seed, day_number, player_name, score) VALUES 
+                ('11JS8DL7', ?, 'Jimbo', 200),
+                ('11JS8DL7', ?, 'Jeannie', 120),
+                ('11JS8DL7', ?, 'Chippy', 80)
+               `).bind(dayNum, dayNum, dayNum).run();
+
+                // Re-fetch after seeding
+                result = await db.prepare(`
+                SELECT id, player_name, score, submitted_at
+                FROM scores
+                WHERE day_number = ?
+                ORDER BY score DESC
+                LIMIT 10
+            `).bind(dayNum).all();
+            }
+
             return NextResponse.json({ scores: result.results });
         }
 

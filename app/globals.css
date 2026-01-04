@@ -127,7 +127,7 @@ body {
     min-height: 100vh;
     color: white;
     font-family: var(--font-header), sans-serif;
-    overflow: hidden;
+    overflow-y: auto;
     /* App-like feel, no scroll */
     position: relative;
 }
@@ -249,8 +249,10 @@ body::after {
 
         .balatro-button:disabled {
             cursor: not-allowed;
-            background-color: var(--color-dark-dull-grey) !important;
-            color: var(--color-dull-grey) !important;
+            background-color: #4a2a2a !important;
+            /* Greyish Red Dark */
+            color: #a06060 !important;
+            /* Greyish Red Light */
             opacity: 1 !important;
             box-shadow: none !important;
             transform: none !important;
