@@ -14,8 +14,8 @@ import Image from "next/image";
 
 
 // Day calculation
-const EPOCH = new Date('2025-12-20T00:00:00Z').getTime(); // Dec 20 = Day 1
-// WEEPOCH (Day 0) = Dec 19 (UTC Today)
+const EPOCH = new Date('2025-12-19T00:00:00Z').getTime(); // Dec 19 = Day 1
+// WEEPOCH (Day 0) = also Dec 19
 const getDayNumber = () => Math.floor((Date.now() - EPOCH) / (24 * 60 * 60 * 1000)) + 1;
 
 export function DailyWee() {
@@ -188,7 +188,8 @@ export function DailyWee() {
     const hasWee = (seed?.WeeJoker_Ante1 ?? 0) > 0 || (seed?.WeeJoker_Ante2 ?? 0) > 0;
 
     const getDayDisplay = (day: number) => {
-        const date = new Date(EPOCH + (day - 1) * 24 * 60 * 60 * 1000);
+        const adjustedDay = day < 1 ? 1 : day;
+        const date = new Date(EPOCH + (adjustedDay - 1) * 24 * 60 * 60 * 1000);
         return date.toLocaleDateString('en-US', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' });
     };
 
@@ -245,6 +246,7 @@ export function DailyWee() {
                             <div className="w-full max-w-sm mx-auto flex flex-col gap-1">
                                 <div className="flex justify-between items-center py-0.5 border-y border-white/10 text-[8px] font-pixel text-white/40 uppercase tracking-[0.2em]">
                                     <span>{getDayDisplay(viewingDay)}</span>
+                                    <span className="text-[var(--balatro-gold)] font-bold">NO. {viewingDay < 1 ? 1 : viewingDay}</span>
                                     <span>Est. 2025</span>
                                 </div>
                                 {/* Theme Badge */}
@@ -276,14 +278,33 @@ export function DailyWee() {
                             {viewingDay === 0 ? (
                                 // WEEPOCH CARD (Day 0) - PREMIUM ACRYLIC CONTRAST
                                 <div className="acrylic-card p-6 flex flex-col items-center justify-center text-center relative h-full">
+                                    <div className="absolute top-2 right-2 opacity-20">
+                                        <Sprite name="weejoker" width={32} />
+                                    </div>
                                     <div className="text-4xl mb-4 drop-shadow-2xl grayscale brightness-150">
                                         <Sprite name="weejoker" width={64} />
                                     </div>
-                                    <h3 className="font-header text-4xl text-[var(--balatro-gold)] mb-2 uppercase tracking-[0.2em] drop-shadow-md">WEEPOCH</h3>
+                                    <h3 className="font-header text-4xl text-[var(--balatro-gold)] mb-2 uppercase tracking-[0.2em] drop-shadow-md">WEEPOCH (Day 1)</h3>
                                     <div className="w-12 h-0.5 bg-[var(--balatro-gold)]/30 mb-4" />
-                                    <p className="font-pixel text-white/50 text-sm max-w-[80%] mx-auto leading-relaxed">
+                                    <p className="font-pixel text-white/50 text-[10px] max-w-[80%] mx-auto leading-relaxed mb-6 uppercase tracking-widest">
                                         Project Zero Point.<br />Where the ritual first began.
                                     </p>
+
+                                    {/* Action Buttons for Intro Card */}
+                                    <div className="flex gap-2 w-full mt-auto">
+                                        <button
+                                            onClick={() => setShowHowTo(true)}
+                                            className="flex-1 balatro-button balatro-button-blue text-[10px] py-3 leading-tight uppercase"
+                                        >
+                                            How do I<br />play?
+                                        </button>
+                                        <button
+                                            onClick={() => updateDay(1)}
+                                            className="flex-1 balatro-button balatro-button-gold text-[10px] py-3 leading-tight uppercase"
+                                        >
+                                            Enter<br />Ritual
+                                        </button>
+                                    </div>
                                 </div>
                             ) : (
                                 <div className="w-full h-full relative flex flex-col">
