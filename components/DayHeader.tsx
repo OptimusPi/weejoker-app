@@ -14,7 +14,7 @@ interface DayHeaderProps {
 
 export function DayHeader({ dayNumber, displayDate, theme }: DayHeaderProps) {
     return (
-        <div className="flex-shrink-0 w-full flex items-center justify-center p-0.5 min-h-0 overflow-hidden mt-6 mb-2">
+        <div className="flex-shrink-0 w-full flex items-center justify-center p-0.5 min-h-0 overflow-hidden">
             <div className="text-center w-full relative z-20 px-4">
                 <div className="font-header font-normal text-2xl sm:text-3xl text-white tracking-wider uppercase leading-none mb-1 select-none drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
                     THE DAILY WEE

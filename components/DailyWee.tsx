@@ -192,13 +192,13 @@ export function DailyWee() {
             <div className="absolute inset-0 z-10 flex flex-col items-center overflow-hidden">
                 <div className="h-[100dvh] w-full relative z-10 flex flex-col items-center">
 
-                    <DayHeader
-                        dayNumber={viewingDay}
-                        displayDate={getDayDisplay(viewingDay)}
-                        theme={currentTheme}
-                    />
+                    <div className="flex-1 flex flex-col justify-center items-center w-full min-h-0 gap-2">
+                        <DayHeader
+                            dayNumber={viewingDay}
+                            displayDate={getDayDisplay(viewingDay)}
+                            theme={currentTheme}
+                        />
 
-                    <div className="flex-1 flex flex-col justify-center items-center w-full min-h-0">
                         <DayNavigation
                             onPrev={() => canGoBack && updateDay(v => v - 1)}
                             onNext={() => canGoForward && updateDay(v => v + 1)}
@@ -233,10 +233,7 @@ export function DailyWee() {
                                 </div>
                             )}
                         </DayNavigation>
-                    </div>
-
-                    <div className="w-full flex-shrink-0 pt-1 pb-2">
-                        <div className="w-full max-w-[22rem] mx-auto">
+                        <div className="w-full flex-shrink-0 max-w-[22rem] mx-auto">
                             <AdRotator
                                 onOpenWisdom={() => setViewMode('wisdom')}
                                 onOpenLeaderboard={() => setShowLeaderboard(true)}
