@@ -11,6 +11,7 @@ interface HowToPlayProps {
 
 export function HowToPlay({ onClose, onSubmit, themeName = "Daily Ritual", seedId = "--------" }: HowToPlayProps) {
     const [step, setStep] = useState(1);
+    const [copied, setCopied] = useState(false);
     const totalSteps = 4;
 
     const nextStep = () => {
@@ -62,17 +63,23 @@ export function HowToPlay({ onClose, onSubmit, themeName = "Daily Ritual", seedI
                             <p className="text-zinc-200 font-pixel text-lg leading-tight">
                                 Copy the Daily Seed and enter it in the Balatro <span className="text-[var(--balatro-blue)] font-header">New Run</span> menu.
                             </p>
-                            <div className="bg-black/20 p-3 rounded-lg border-2 border-[var(--balatro-blue)] border-dashed flex items-center justify-between px-4">
-                                <span className="font-header text-white tracking-widest text-lg">{seedId}</span>
-                                <button
-                                    onClick={async () => {
-                                        await navigator.clipboard.writeText(seedId);
-                                    }}
-                                    className="p-1.5 bg-[var(--balatro-blue)] rounded shadow-sm active:translate-y-0.5 transition-transform"
+                            <button
+                                onClick={async () => {
+                                    await navigator.clipboard.writeText(seedId);
+                                    setCopied(true);
+                                    setTimeout(() => setCopied(false), 3140);
+                                }}
+                                className={`w-full p-3 rounded-lg border-2 border-dashed flex items-center justify-between px-4 transition-all duration-200 group ${copied ? 'bg-[var(--balatro-green)] border-[var(--balatro-green)]' : 'bg-black/20 border-[var(--balatro-blue)] hover:bg-black/40'}`}
+                            >
+                                <span className="font-header text-white tracking-widest text-lg">
+                                    {copied ? "COPIED!" : seedId}
+                                </span>
+                                <div
+                                    className={`p-1.5 rounded shadow-sm transition-transform ${copied ? 'bg-white/20' : 'bg-[var(--balatro-blue)] group-active:translate-y-0.5'}`}
                                 >
-                                    <Copy size={16} className="text-white" />
-                                </button>
-                            </div>
+                                    {copied ? <CheckCircle2 size={16} className="text-white" /> : <Copy size={16} className="text-white" />}
+                                </div>
+                            </button>
                         </div>
                     )}
 

@@ -10,14 +10,14 @@ interface WeepochCardProps {
 
 export function WeepochCard({ onShowHowTo, onEnterRitual }: WeepochCardProps) {
     return (
-        <div className="balatro-panel p-6 flex flex-col items-center justify-center text-center relative h-full">
+        <div className="balatro-panel p-3 flex flex-col items-center justify-center text-center relative h-full overflow-hidden">
             <div className="absolute top-2 right-2 opacity-20">
                 <Sprite name="weejoker" width={32} />
             </div>
-            <div className="text-4xl mb-4 drop-shadow-2xl grayscale brightness-150">
-                <Sprite name="weejoker" width={64} />
+            <div className="text-3xl mb-2 drop-shadow-2xl grayscale brightness-150">
+                <Sprite name="weejoker" width={48} />
             </div>
-            <h3 className="font-header text-3xl text-[var(--balatro-gold)] mb-2 uppercase tracking-[0.2em] drop-shadow-md">WEEPOCH (Day 0)</h3>
+            <h3 className="font-header text-2xl text-[var(--balatro-gold)] mb-1 uppercase tracking-[0.2em] drop-shadow-md">WEEPOCH</h3>
             <div className="w-12 h-0.5 bg-[var(--balatro-gold)]/30 mb-4" />
 
             <div className="font-pixel text-white/50 text-[10px] max-w-[90%] mx-auto leading-relaxed mb-6 space-y-3">

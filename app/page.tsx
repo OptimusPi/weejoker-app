@@ -12,10 +12,7 @@ export default function Home() {
         <main className="min-h-screen">
             <ClientDailyWeeLoader />
 
-            {/* Past Week Results */}
-            <div className="container mx-auto px-4 py-4">
-                <PastWeekResults />
-            </div>
+// PastWeekResults usage removed
         </main>
     );
 }

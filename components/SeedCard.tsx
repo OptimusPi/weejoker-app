@@ -51,7 +51,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
     const handleCopy = async () => {
         await navigator.clipboard.writeText(seed.seed);
         setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        setTimeout(() => setCopied(false), 3140);
     };
 
     // Helper to determine jokers for a row
@@ -163,7 +163,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                     {[1, 2].map((anteNum) => {
                         const jokers = getJokers(anteNum as 1 | 2);
                         return (
-                            <div key={`ante-${anteNum}`} className="bg-black/10 rounded-lg p-2 flex flex-col gap-1.5">
+                            <div key={`ante-${anteNum}`} className="bg-black/10 rounded-lg p-2 flex flex-col gap-1.5 h-[100px] shrink-0 justify-start overflow-visible">
                                 <div className="flex justify-between items-center opacity-60">
                                     <span className="font-header text-[var(--color-red)] text-xs tracking-widest">Ante {anteNum}</span>
                                     {jokers.length === 0 && <span className="font-pixel text-white/10 text-[10px]">None</span>}

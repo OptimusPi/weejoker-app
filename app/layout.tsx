@@ -58,11 +58,7 @@ export default function RootLayout({
                     <main className="flex-grow">
                         {children}
                     </main>
-                    <footer className="w-full py-4 text-center text-white/20 font-pixel text-[10px] uppercase tracking-widest pointer-events-none fixed bottom-0 z-0">
-                        <p>
-                            Not affiliated with LocalThunk or PlayStack. • <a href="https://store.steampowered.com/app/2379780/Balatro/" target="_blank" className="hover:text-white/40 pointer-events-auto transition-colors">BUY BALATRO</a> • Created with ❤️ for the Balatro community.
-                        </p>
-                    </footer>
+
                 </div>
             </body>
         </html>

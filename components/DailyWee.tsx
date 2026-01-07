@@ -233,14 +233,7 @@ export function DailyWee() {
                                 </div>
                             )}
                         </DayNavigation>
-                        <div className="w-full flex-shrink-0 max-w-[22rem] mx-auto">
-                            <AdRotator
-                                onOpenWisdom={() => setViewMode('wisdom')}
-                                onOpenLeaderboard={() => setShowLeaderboard(true)}
-                                topScore={topScore}
-                                isLocked={viewingDay > todayNumber}
-                            />
-                        </div>
+
                     </div>
                 </div>
 
