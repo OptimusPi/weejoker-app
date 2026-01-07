@@ -125,7 +125,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
     return (
         <div className={cn("relative group flex flex-col juice-wobble", className)}>
             {/* Main Container - BALATRO PANEL STYLE */}
-            <div className="balatro-panel p-1.5 flex flex-col relative h-full z-10 grow gap-1.5 min-h-[340px]">
+            <div className="balatro-panel p-1.5 flex flex-col relative h-full z-10 grow gap-1.5 min-h-[340px] !overflow-visible">
 
                 {/* Header Row: Seed (Left 50%) | Starting 2's (Right 50%) */}
                 <div className="flex w-full overflow-hidden rounded-lg border-2 border-black/20 shrink-0 h-10">
@@ -170,14 +170,14 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                                 </div>
                                 <div className="flex flex-wrap gap-2 items-start justify-center">
                                     {jokers.map((j) => (
-                                        <div key={`${anteNum}-${j.id}`} className="relative bg-black/30 rounded-md p-1 pt-1.5 pb-2 flex flex-col items-center min-w-[50px] group/joker">
+                                        <div key={`${anteNum}-${j.id}`} className="relative rounded-md p-1 pt-1.5 pb-2 flex flex-col items-center min-w-[50px] group/joker">
                                             {/* Hype Stat Badge */}
                                             {j.tally !== undefined && (
                                                 <div className="absolute -top-1 -right-1 bg-[var(--balatro-blue)] text-white font-header text-[10px] px-1 rounded-sm shadow-md z-20">
                                                     +{j.tally}
                                                 </div>
                                             )}
-                                            <Sprite name={j.id} width={36} />
+                                            <Sprite name={j.id} width={j.id === 'weejoker' ? 24 : 36} />
                                             {/* Name Tag */}
                                             <div className="mt-1 bg-black/40 px-1 rounded-sm w-full text-center">
                                                 <span className="font-header text-[8px] text-white/80 whitespace-nowrap">{j.name}</span>

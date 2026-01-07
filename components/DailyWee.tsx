@@ -12,7 +12,7 @@ import { LeaderboardModal } from "./LeaderboardModal";
 import { Sprite } from "./Sprite";
 
 // Day calculation
-const EPOCH = new Date('2026-01-04T00:00:00Z').getTime(); // Jan 4, 2026 = Day 1 (Launch)
+const EPOCH = new Date('2026-01-06T00:00:00Z').getTime(); // Jan 6, 2026 = Day 1 (Launch)
 const getDayNumber = () => Math.floor((Date.now() - EPOCH) / (24 * 60 * 60 * 1000)) + 1;
 
 export function DailyWee() {

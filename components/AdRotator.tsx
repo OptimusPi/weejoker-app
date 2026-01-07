@@ -86,7 +86,7 @@ export function AdRotator({ onOpenWisdom, onOpenLeaderboard, topScore, isLocked 
                 id: 'erratic',
                 type: 'external',
                 link: "https://ErraticDeck.app",
-                title: "Like Erratic Deck, Bored of Wee Joker?",
+                title: "Fan of Erratic Deck?",
                 subtitle: "Challenge your friends at ErraticDeck.app",
                 actionText: "SEARCH NOW",
                 icon: <ExternalLink size={20} />,
@@ -115,7 +115,7 @@ export function AdRotator({ onOpenWisdom, onOpenLeaderboard, topScore, isLocked 
     return (
         <button
             onClick={handleClick}
-            className="w-full relative overflow-hidden bg-[var(--balatro-grey)] rounded-[4px] border border-black/20 transition-colors hover:bg-black/20 active:bg-black/40 p-1 px-3 flex flex-row items-center justify-between gap-2 min-h-[3rem]"
+            className="w-full relative overflow-hidden bg-[var(--balatro-grey)] rounded-[4px] border border-black/20 transition-colors hover:bg-black/20 active:bg-black/40 p-1 px-2 flex flex-row items-center justify-between gap-2 min-h-[2.5rem] sm:min-h-[3rem]"
         >
             {currentAd.type === 'image' && currentAd.src ? (
                 // Full Image Ad

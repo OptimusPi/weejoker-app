@@ -23,7 +23,7 @@ export function DayHeader({ dayNumber, displayDate, theme }: DayHeaderProps) {
                     <div className="flex justify-between items-center py-0.5 border-y border-white/10 text-[8px] font-pixel text-white/40 uppercase tracking-[0.2em]">
                         <span>{displayDate}</span>
                         <span className="text-[var(--balatro-gold)] font-bold">NO. {dayNumber < 1 ? 1 : dayNumber}</span>
-                        <span>Est. 2025</span>
+                        <span>Est. 2026</span>
                     </div>
                     {/* Theme Badge */}
                     <div
