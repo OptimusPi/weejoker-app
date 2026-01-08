@@ -72,6 +72,7 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
                             onChange={(e) => setPlayerName(e.target.value.slice(0, 20))}
                             placeholder="Enter your name..."
                             className="w-full balatro-input text-lg px-4 py-3"
+                            maxLength={20}
                             required
                         />
                     </div>
@@ -81,13 +82,16 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
                             Final Score (Chips)
                         </label>
                         <input
-                            type="number"
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             value={score}
-                            onChange={(e) => setScore(e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value.replace(/[^0-9]/g, '');
+                                if (val.length <= 12) setScore(val);
+                            }}
                             placeholder="e.g. 1234567"
                             className="w-full balatro-input text-lg px-4 py-3"
-                            min="0"
-                            max="999999999"
                             required
                         />
                     </div>

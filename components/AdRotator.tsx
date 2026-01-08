@@ -115,7 +115,7 @@ export function AdRotator({ onOpenWisdom, onOpenLeaderboard, topScore, isLocked 
     return (
         <button
             onClick={handleClick}
-            className="w-full relative overflow-hidden bg-[var(--balatro-grey)] rounded-[4px] border border-black/20 transition-colors hover:bg-black/20 active:bg-black/40 p-1 px-2 flex flex-row items-center justify-between gap-2 min-h-[2.5rem] sm:min-h-[3rem]"
+            className="w-full relative overflow-hidden ad-rotator-button rounded-[4px] border border-black/20 p-1 px-3 flex flex-row items-center justify-between gap-3 min-h-[40px]"
         >
             {currentAd.type === 'image' && currentAd.src ? (
                 // Full Image Ad
@@ -129,18 +129,18 @@ export function AdRotator({ onOpenWisdom, onOpenLeaderboard, topScore, isLocked 
                     <div className="flex flex-col items-start text-left z-10 shrink min-w-0">
                         {/* Title with Ad Color Highlight */}
                         <span
-                            className="font-header font-normal text-sm sm:text-base uppercase tracking-normal leading-tight mb-0.5 drop-shadow-sm transition-colors duration-500 whitespace-normal w-full"
+                            className="font-header font-normal text-[11px] sm:text-[13px] uppercase tracking-wider leading-none mb-0.5 drop-shadow-sm transition-colors duration-200 whitespace-nowrap truncate w-full"
                             style={{ color: currentAd.color }}
                         >
                             {currentAd.title}
                         </span>
-                        <span className="font-pixel font-normal text-[8px] sm:text-[10px] text-white/80 line-clamp-1">
+                        <span className="font-pixel font-normal text-[7px] sm:text-[9px] text-white/70 truncate w-full uppercase">
                             {currentAd.subtitle}
                         </span>
                     </div>
 
-                    {/* Mobile Only: Simple Icon */}
-                    <div className="sm:hidden text-white/50 shrink-0">
+                    {/* Simple Icon - Right Aligned */}
+                    <div className="text-white/40 shrink-0">
                         {currentAd.icon}
                     </div>
                 </>

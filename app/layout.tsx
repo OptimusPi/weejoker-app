@@ -61,7 +61,7 @@ export default function RootLayout({
 
                     <footer className="balatro-footer">
                         <p className="balatro-footer-text">
-                            NOT AFFILIATED WITH LOCALTHUNK OR <a href="https://www.playstack.com/games/balatro/" target="_blank" className="hover:text-white underline decoration-white/20 underline-offset-2">PLAYSTACK</a> • <a href="https://playbalatro.com/" target="_blank" className="hover:text-white underline decoration-white/20 underline-offset-2 text-[var(--balatro-gold)]">BUY BALATRO</a> • CREATED WITH <span className="text-[var(--balatro-red)] mx-0.5">❤</span> FOR THE BALATRO COMMUNITY
+                            NOT AFFILIATED WITH LOCALTHUNK OR <a href="https://www.playstack.com/games/balatro/" target="_blank" className="hover:text-white underline decoration-white/20 underline-offset-2">PLAYSTACK</a> • <a href="https://playbalatro.com/" target="_blank" className="hover:text-white underline decoration-white/20 underline-offset-2 text-[var(--balatro-gold)]">BUY BALATRO</a> • CREATED WITH <span className="text-[var(--balatro-red)] mx-1 juice-heart">❤</span> FOR THE BALATRO COMMUNITY
                         </p>
                     </footer>
 

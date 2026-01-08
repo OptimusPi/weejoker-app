@@ -125,104 +125,118 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                     </div>
                 </div>
 
-                {/* View Container */}
-                <div className="flex-1 flex flex-col min-h-0">
+                {/* View Tabs - Challenges UI Style */}
+                <div className="flex gap-1 justify-center shrink-0 mt-0.5">
+                    {(['DEFAULT', 'PLAY', 'SCORES'] as CardView[]).map((v) => (
+                        <button
+                            key={v}
+                            onClick={() => setView(v)}
+                            className={cn(
+                                "px-2 py-1 rounded-t-md font-header text-[8px] uppercase tracking-wider transition-colors border-t border-x border-black/20",
+                                view === v ? "bg-[var(--balatro-red)] text-white" : "bg-black/40 text-white/40 hover:bg-black/60"
+                            )}
+                        >
+                            {v === 'DEFAULT' ? 'DETAILS' : v === 'PLAY' ? 'HOW TO' : 'SCORES'}
+                        </button>
+                    ))}
+                </div>
+
+                {/* View Container - Strict height to prevent scrolling */}
+                <div className="flex-1 flex flex-col min-h-0 bg-black/20 rounded-b-lg border-x border-b border-black/20 overflow-hidden shadow-inner">
                     {view === 'DEFAULT' && (
-                        <div className="flex flex-col gap-1.5 py-1">
-                            {[1, 2].map((anteNum) => {
-                                const jokers = getJokers(anteNum as 1 | 2);
-                                return (
-                                    <div key={`ante-${anteNum}`} className="flex items-center gap-2 h-[55px] shrink-0 overflow-visible relative pl-7 group">
-                                        <div className="balatro-side-label">ANTE {anteNum}</div>
-                                        <div className="flex gap-1 items-end">
-                                            {jokers.length === 0 ? (
-                                                <span className="font-pixel text-white/10 text-[10px] uppercase tracking-widest">No Jokers</span>
-                                            ) : jokers.map((j) => (
-                                                <div key={`${anteNum}-${j.id}`} className="relative flex flex-col items-center">
-                                                    {j.tally !== undefined && j.tally > 1 && (
-                                                        <div className="absolute -top-1 -right-1 bg-[var(--balatro-blue)] text-white font-header text-[8px] w-3.5 h-3.5 flex items-center justify-center rounded-full z-20 shadow-md">
-                                                            {j.tally}
-                                                        </div>
-                                                    )}
-                                                    <Sprite name={j.id} width={j.id === 'weejoker' ? 24 : 36} />
-                                                    <span className="font-header text-[7px] text-white/50 uppercase mt-0.5 leading-none">{j.name}</span>
+                        <div className="flex-1 flex flex-col justify-center gap-1.5 px-2 py-1 overflow-visible">
+                            <div className="flex flex-wrap gap-2 items-center justify-center">
+                                {[1, 2].flatMap((anteNum) =>
+                                    getJokers(anteNum as 1 | 2).map((j) => (
+                                        <div key={`${anteNum}-${j.id}`} className="relative flex flex-col items-center group/joker">
+                                            {/* Ante Badge */}
+                                            <div className={cn(
+                                                "absolute -top-1 -left-1 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[7px] font-header z-20 shadow-sm border border-white/20",
+                                                anteNum === 1 ? "bg-[var(--balatro-gold)] text-black" : "bg-[var(--balatro-blue)] text-white"
+                                            )}>
+                                                {anteNum}
+                                            </div>
+
+                                            {/* Count Badge */}
+                                            {j.tally !== undefined && j.tally > 1 && (
+                                                <div className="absolute -top-1 -right-1 bg-white text-black font-header text-[7px] w-3.5 h-3.5 flex items-center justify-center rounded-full z-20 shadow-sm">
+                                                    {j.tally}
                                                 </div>
-                                            ))}
+                                            )}
+
+                                            <Sprite
+                                                name={j.id}
+                                                width={j.id === 'weejoker' ? 18 : 32}
+                                                className="drop-shadow-sm transition-transform group-hover/joker:scale-110"
+                                            />
+                                            <span className="font-header text-[6px] text-white uppercase mt-0.5 leading-none">{j.name}</span>
                                         </div>
-                                    </div>
-                                );
-                            })}
+                                    ))
+                                )}
+                                {getJokers(1).length === 0 && getJokers(2).length === 0 && (
+                                    <span className="font-pixel text-white/10 text-[9px] uppercase tracking-widest py-4">No Jokers Found</span>
+                                )}
+                            </div>
                         </div>
                     )}
 
                     {view === 'PLAY' && (
-                        <div className="flex-1 flex flex-col p-2 bg-black/10 rounded-lg text-center gap-2 justify-center">
-                            <h3 className="font-header text-white text-xs uppercase tracking-widest text-[var(--balatro-gold)]">Instructions</h3>
-                            <p className="font-header text-[10px] text-white/70 leading-relaxed uppercase tracking-wider">
-                                1. Buy Wee Joker in Ante {seed.WeeJoker_Ante1 ? '1' : '2'}.<br />
-                                2. Copy it with Hack/Chad.<br />
-                                3. Scale it with 2s.<br />
-                                4. Post your high score!
-                            </p>
-                            <div className="flex flex-col gap-1 mt-1">
-                                <button onClick={() => setView('SCORES')} className="balatro-button balatro-button-blue text-[10px] py-1 uppercase">View Scores</button>
-                                <button onClick={onAnalyze} className="balatro-button balatro-button-gold text-[10px] py-1 uppercase">How to play?</button>
+                        <div className="flex-1 flex flex-col p-2 text-center gap-2 justify-center">
+                            <h3 className="font-header text-[var(--balatro-gold)] text-[10px] uppercase tracking-widest shrink-0">Strategy Guide</h3>
+                            <div className="font-header text-[9px] text-white/70 leading-relaxed uppercase tracking-wider flex-1 flex flex-col justify-center">
+                                <p>1. Buy Wee Joker in Ante {seed.WeeJoker_Ante1 ? '1' : '2'}.</p>
+                                <p>2. Copy it with Hack/Chad.</p>
+                                <p>3. Scale it with 2s.</p>
+                                <p>4. Submit your high score!</p>
                             </div>
+                            <button onClick={onAnalyze} className="balatro-button balatro-button-gold text-[8px] py-1.5 uppercase shrink-0">How do I play?</button>
                         </div>
                     )}
 
                     {view === 'SCORES' && (
-                        <div className="flex-1 flex flex-col p-1.5 bg-black/10 rounded-lg min-h-0">
-                            <div className="flex justify-between items-center px-1 mb-1 border-b border-white/5 pb-0.5">
-                                <span className="font-header text-[8px] text-white/40 uppercase tracking-widest">Global Ranking</span>
-                                <button onClick={() => setView('DEFAULT')} className="font-header text-[8px] text-[var(--balatro-red)] uppercase tracking-widest hover:text-white">Close</button>
-                            </div>
-                            <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 flex flex-col gap-0.5">
+                        <div className="flex-1 flex flex-col p-1.5 min-h-0">
+                            <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-0.5">
                                 {allScores.length > 0 ? allScores.map((s, idx) => (
-                                    <div key={s.id} className="flex justify-between items-center bg-white/5 p-1 rounded-sm">
-                                        <div className="flex gap-2 items-center">
+                                    <div key={idx} className="flex justify-between items-center bg-white/5 p-1 rounded-sm">
+                                        <div className="flex gap-1.5 items-center">
                                             <span className="font-pixel text-[8px] text-white/20 w-3">#{idx + 1}</span>
-                                            <span className="font-header text-[10px] text-white uppercase truncate max-w-[80px]">{s.player_name}</span>
+                                            <span className="font-header text-[9px] text-white uppercase truncate max-w-[70px]">{s.player_name}</span>
                                         </div>
-                                        <span className="font-header text-[10px] text-[var(--balatro-gold)]">{s.score.toLocaleString()}</span>
+                                        <span className="font-header text-[9px] text-[var(--balatro-gold)]">{s.score.toLocaleString()}</span>
                                     </div>
                                 )) : (
                                     <div className="flex-1 flex items-center justify-center font-pixel text-[8px] text-white/10 uppercase italic">No scores yet</div>
                                 )}
                             </div>
                             {canSubmit && (
-                                <button onClick={onOpenSubmit} className="mt-1 w-full balatro-button balatro-button-gold text-[10px] py-2 uppercase">Submit Mine</button>
+                                <button onClick={onOpenSubmit} className="mt-1 w-full balatro-button balatro-button-gold text-[8px] py-2 uppercase shrink-0">Submit Score</button>
                             )}
                         </div>
                     )}
                 </div>
 
-                {/* Footer UI - Dynamic Buttons */}
-                <div className="mt-auto shrink-0 z-50 flex flex-col gap-1.5">
-                    {view === 'DEFAULT' ? (
-                        <>
-                            {!isLocked && topScore && (
-                                <div className="bg-black/10 rounded-lg px-2 py-1 flex justify-between items-center cursor-pointer hover:bg-black/20" onClick={() => setView('SCORES')}>
-                                    <span className="font-header text-[var(--balatro-gold)] uppercase text-[9px] tracking-wider">#1 {topScore.name}</span>
-                                    <span className="font-header text-white text-sm tracking-widest">{topScore.score.toLocaleString()}</span>
-                                </div>
-                            )}
-                            {isLocked ? (
-                                <button className="w-full bg-black/40 text-white/20 font-header text-md py-3 rounded-lg flex items-center justify-center gap-2 cursor-not-allowed border border-white/5 uppercase tracking-widest shadow-inner">
-                                    (LOCKED) WEE NO. {dayNumber}
-                                </button>
-                            ) : (
-                                <button
-                                    onClick={() => setView('PLAY')}
-                                    className="w-full balatro-button balatro-button-red text-md py-3 uppercase tracking-widest font-header"
-                                >
-                                    PLAY WEE NO. {dayNumber}
-                                </button>
-                            )}
-                        </>
+                {/* Footer UI - Fixed Action Button */}
+                <div className="mt-1.5 shrink-0 z-50">
+                    {!isLocked && topScore && view === 'DEFAULT' ? (
+                        <div className="bg-black/10 rounded-lg px-2 py-1 mb-1.5 flex justify-between items-center cursor-pointer hover:bg-black/20" onClick={() => setView('SCORES')}>
+                            <span className="font-header text-[var(--balatro-gold)] uppercase text-[9px] tracking-wider">#1 {topScore.name}</span>
+                            <span className="font-header text-white text-sm tracking-widest leading-none">{topScore.score.toLocaleString()}</span>
+                        </div>
+                    ) : null}
+
+                    {isLocked ? (
+                        <div className="w-full bg-black/40 text-white/20 font-header text-md py-3 rounded-lg flex items-center justify-center border border-white/5 uppercase tracking-widest">
+                            (LOCKED) WEE NO. {dayNumber}
+                        </div>
                     ) : (
-                        <button onClick={() => setView('DEFAULT')} className="w-full balatro-button balatro-button-blue text-sm py-2 uppercase tracking-widest font-header">
-                            Back
+                        <button
+                            onClick={() => { if (view === 'DEFAULT') setView('PLAY'); else setView('DEFAULT'); }}
+                            className={cn(
+                                "w-full balatro-button text-md py-3 uppercase tracking-widest font-header",
+                                view === 'DEFAULT' ? "balatro-button-red" : "balatro-button-blue"
+                            )}
+                        >
+                            {view === 'DEFAULT' ? `PLAY WEE NO. ${dayNumber}` : 'BACK TO SEED'}
                         </button>
                     )}
                 </div>

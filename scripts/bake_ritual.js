@@ -194,8 +194,11 @@ function main() {
             // Deterministic pick based on dayOffset so the schedule is stable
             const stats = pool[dayOffset % pool.length];
 
+            const rawId = stats.seed || stats.id || 'ERROR';
+            const cleanId = rawId.replace(/[\u0000-\u001F\u007F-\u009F]/g, "").trim();
+
             schedule.push({
-                id: stats.seed || stats.id,
+                id: cleanId,
                 t: stats.themeName || config.name,
                 j: stats.themeJoker || config.joker,
                 s: parseInt(stats.score || stats.s) || 0,

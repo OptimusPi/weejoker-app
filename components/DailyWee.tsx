@@ -178,11 +178,11 @@ export function DailyWee() {
     if (!mounted) return null;
 
     return (
-        <div className="h-[100dvh] w-full relative overflow-y-auto overflow-x-hidden bg-transparent">
-            <div className="absolute inset-0 z-10 flex flex-col items-center overflow-hidden">
-                <div className="h-[100dvh] w-full relative z-10 flex flex-col items-center">
+        <div className="h-[100dvh] w-full relative overflow-hidden bg-transparent">
+            <div className="absolute inset-0 z-10 flex flex-col items-center">
+                <div className="h-full w-full relative z-10 flex flex-col items-center">
 
-                    <div className="flex-1 flex flex-col justify-center items-center w-full min-h-0 gap-2">
+                    <div className="flex-1 flex flex-col justify-center items-center w-full min-h-0 gap-1 py-2">
                         <DayHeader
                             dayNumber={viewingDay}
                             displayDate={getDayDisplay(viewingDay)}
@@ -225,8 +225,8 @@ export function DailyWee() {
                             )}
                         </DayNavigation>
 
-                        {/* Banner Ad Rotator - RESTORED */}
-                        <div className="w-full max-w-md px-4 mt-2">
+                        {/* Banner Ad Rotator - Tightened */}
+                        <div className="w-full max-w-md px-4 mt-1">
                             <AdRotator
                                 onOpenWisdom={() => setViewMode('wisdom')}
                                 onOpenLeaderboard={() => setShowLeaderboard(true)}
