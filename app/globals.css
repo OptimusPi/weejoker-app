@@ -265,13 +265,14 @@ body::after {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 2.5rem;
+        width: 3.5rem;
+        /* Wider for thumbs */
         flex-shrink: 0;
         border-radius: 0.5rem;
         background-color: var(--color-red);
         box-shadow: 0 4px 0 var(--color-dark-red);
         position: relative;
-        transition: transform 0.1s, box-shadow 0.1s;
+        transition: background-color 0.1s;
     }
 
     .balatro-nav-button:hover:not(:disabled) {
@@ -279,7 +280,7 @@ body::after {
     }
 
     .balatro-nav-button:active:not(:disabled) {
-        transform: translateY(4px);
+        transform: translateY(2px);
         box-shadow: none;
     }
 
@@ -288,6 +289,23 @@ body::after {
         background-color: var(--color-red);
         box-shadow: 0 4px 0 var(--color-dark-red);
         opacity: 0.4;
+    }
+
+    /* Ambient Sway */
+    @keyframes balatro-sway {
+
+        0%,
+        100% {
+            transform: rotate(-0.5deg) translateY(0);
+        }
+
+        50% {
+            transform: rotate(0.5deg) translateY(-2px);
+        }
+    }
+
+    .balatro-sway {
+        animation: balatro-sway 6s ease-in-out infinite;
     }
 
     .balatro-input {
