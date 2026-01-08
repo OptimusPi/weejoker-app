@@ -25,7 +25,7 @@ function executeD1(sql) {
     // Note: Wrangler output for SELECT is JSON
     try {
         // Only works for simple queries without special chars issue in shell
-        const cmd = `npx wrangler d1 execute DailyWee ${ENV_FLAG} --command "${sql}" --json`;
+        const cmd = `npx wrangler d1 execute weejoker-scores ${ENV_FLAG} --command "${sql}" --json`;
         const output = execSync(cmd, { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] }); // Pipe stdout, ignore stderr to keep it clean
         return JSON.parse(output)[0].results; // D1 returns array of result sets
     } catch (e) {

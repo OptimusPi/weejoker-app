@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 
         if (day) {
             const dayNum = parseInt(day);
-            let result = await db.prepare(`
+            const result = await db.prepare(`
                 SELECT id, player_name, score, submitted_at
                 FROM scores
                 WHERE day_number = ?
@@ -56,25 +56,7 @@ export async function GET(request: NextRequest) {
                 LIMIT 10
             `).bind(dayNum).all();
 
-            // Seed default scores if table is empty for this day
-            if (result.results.length === 0) {
-                await db.prepare(`
-                INSERT INTO scores (seed, day_number, player_name, score) VALUES 
-                ('11JS8DL7', ?, 'Jimbo', 200),
-                ('11JS8DL7', ?, 'Jeannie', 120),
-                ('11JS8DL7', ?, 'Chippy', 80)
-               `).bind(dayNum, dayNum, dayNum).run();
-
-                // Re-fetch after seeding
-                result = await db.prepare(`
-                SELECT id, player_name, score, submitted_at
-                FROM scores
-                WHERE day_number = ?
-                ORDER BY score DESC
-                LIMIT 10
-            `).bind(dayNum).all();
-            }
-
+            // Return real scores only - no fake data seeding
             return NextResponse.json({ scores: result.results });
         }
 

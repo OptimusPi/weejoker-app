@@ -13,7 +13,7 @@ interface DayNavigationProps {
 
 export function DayNavigation({ onPrev, onNext, canPrev, canNext, children }: DayNavigationProps) {
     return (
-        <div className="flex flex-row items-stretch justify-center gap-2 w-full max-w-[22rem] mx-auto p-0 relative z-30 h-[380px] shrink-0">
+        <div className="flex flex-row items-stretch justify-center gap-2 w-full max-w-[22rem] mx-auto p-0 relative z-30 h-[460px] shrink-0">
             {/* Left Nav Button */}
             <button
                 onClick={onPrev}
@@ -23,8 +23,8 @@ export function DayNavigation({ onPrev, onNext, canPrev, canNext, children }: Da
                 <ChevronLeft size={24} className="text-white" strokeWidth={4} />
             </button>
 
-            {/* Central Stage - STRICT HEIGHT */}
-            <div className="relative flex-1 z-20 flex flex-col min-w-0 overflow-hidden shadow-[0_4px_0_rgba(0,0,0,0.2)]">
+            {/* Central Stage - FLEXIBLE HEIGHT */}
+            <div className="relative flex-1 z-20 flex flex-col min-w-0 shadow-[0_4px_0_rgba(0,0,0,0.2)]">
                 {children}
             </div>
 

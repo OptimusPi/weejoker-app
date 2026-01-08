@@ -63,7 +63,7 @@ export function Sprite({ name, className, width }: SpriteProps) {
 
     return (
         <div
-            className={`relative overflow-hidden inline-block ${className}`}
+            className={`relative overflow-hidden inline-block juice-pop ${className}`}
             style={{
                 width: finalW,
                 height: finalH,

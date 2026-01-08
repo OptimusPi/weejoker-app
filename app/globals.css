@@ -120,7 +120,6 @@
 }
 
 body {
-    /* Authentic Balatro Red/Blue/Grey swirl matching the reference screenshots */
     background: linear-gradient(-45deg, #2c3e50, #0099DB, #c0392b, #8E44AD);
     background-size: 400% 400%;
     animation: swirl 20s ease infinite;
@@ -128,7 +127,6 @@ body {
     color: white;
     font-family: var(--font-header), sans-serif;
     overflow-y: hidden;
-    /* App-like feel, no scroll */
     position: relative;
 }
 
@@ -148,7 +146,6 @@ body::after {
     pointer-events: none;
     z-index: 9999;
     opacity: 0.15;
-    /* COZY MODE: Much softer scanlines */
 }
 
 /* Custom Scrollbar */
@@ -186,160 +183,111 @@ body::after {
         @apply balatro-panel;
     }
 
-    @layer components {
+    /* THE BALATRO BUTTON STANDARD */
+    .balatro-button-back {
+        background-color: var(--color-orange);
+        color: white !important;
+        font-family: var(--font-header);
+        font-size: 1.1rem;
+        padding: 0.4rem 1.25rem;
+        border-radius: 0.4rem;
+        border: none;
+        box-shadow: 0 2px 0 rgba(0, 0, 0, 0.8);
+        transition: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-transform: none;
+        width: 100%;
+        position: relative;
+    }
 
-        /* THE BALATRO BUTTON STANDARD */
-        .balatro-button-back {
-            background-color: var(--color-orange);
-            color: white !important;
-            font-family: var(--font-header);
-            font-size: 1.1rem;
-            padding: 0.4rem 1.25rem;
-            border-radius: 0.4rem;
-            border: none;
-            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.8);
-            transition: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-transform: none;
-            width: 100%;
-            position: relative;
-        }
+    .balatro-button-back:hover {
+        background-color: var(--color-dark-orange);
+    }
 
-        .balatro-button-back:hover {
-            background-color: var(--color-dark-orange);
-        }
+    .balatro-button-back:active {
+        background-color: var(--color-dark-orange);
+        transform: translateY(2px);
+        box-shadow: none;
+    }
 
-        .balatro-button-back:active {
-            background-color: var(--color-dark-orange);
-            transform: translateY(2px);
-            box-shadow: none;
-        }
+    .balatro-button {
+        color: white !important;
+        font-family: var(--font-header);
+        border: none;
+        border-radius: 0.4rem;
+        cursor: pointer;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: none;
+        box-shadow: 0 2px 0 rgba(0, 0, 0, 0.8);
+        padding: 0.4rem 1.25rem;
+        font-size: 1.1rem;
+        text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+    }
 
-        /* Generic Standard Buttons */
-        .balatro-button {
-            color: white !important;
-            font-family: var(--font-header);
-            border: none;
-            border-radius: 0.4rem;
-            cursor: pointer;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: none;
-            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.8);
-            padding: 0.4rem 1.25rem;
-            font-size: 1.1rem;
-            text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
-        }
+    .balatro-button:hover {
+        filter: brightness(0.9);
+    }
 
-        .balatro-button:hover {
-            filter: brightness(0.9);
-            /* Darken face on hover */
-        }
+    .balatro-button:active {
+        transform: translateY(2px);
+        box-shadow: none;
+        filter: brightness(0.9);
+    }
 
-        .balatro-button:active {
-            transform: translateY(2px);
-            box-shadow: none;
-            filter: brightness(0.9);
-        }
+    .balatro-button:disabled {
+        cursor: not-allowed;
+        background-color: #4a2a2a !important;
+        color: #a06060 !important;
+        opacity: 1 !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
 
-        .balatro-button:disabled {
-            cursor: not-allowed;
-            background-color: #4a2a2a !important;
-            /* Greyish Red Dark */
-            color: #a06060 !important;
-            /* Greyish Red Light */
-            opacity: 1 !important;
-            box-shadow: none !important;
-            transform: none !important;
-        }
+    .balatro-button-red {
+        background-color: var(--color-red);
+    }
 
-        /* Specific Button Colors to override filter brightness if needed */
-        .balatro-button-red {
-            background-color: var(--color-red);
-        }
+    .balatro-button-blue {
+        background-color: var(--color-blue);
+    }
 
-        .balatro-button-red:hover {
-            background-color: var(--color-dark-red);
-            filter: none;
-        }
+    .balatro-button-gold {
+        background-color: var(--balatro-gold);
+    }
 
-        .balatro-button-red:active {
-            background-color: var(--color-dark-red);
-            transform: translateY(2px);
-            box-shadow: none;
-            filter: none;
-        }
+    .balatro-nav-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        flex-shrink: 0;
+        border-radius: 0.5rem;
+        background-color: var(--color-red);
+        box-shadow: 0 4px 0 var(--color-dark-red);
+        position: relative;
+        transition: transform 0.1s, box-shadow 0.1s;
+    }
 
-        .balatro-button-blue {
-            background-color: var(--color-blue);
-        }
+    .balatro-nav-button:hover:not(:disabled) {
+        background-color: var(--color-dark-red);
+    }
 
-        .balatro-button-blue:hover {
-            background-color: var(--color-dark-blue);
-            filter: none;
-        }
+    .balatro-nav-button:active:not(:disabled) {
+        transform: translateY(4px);
+        box-shadow: none;
+    }
 
-        .balatro-button-blue:active {
-            background-color: var(--color-dark-blue);
-            transform: translateY(2px);
-            box-shadow: none;
-            filter: none;
-        }
-
-        .balatro-button-gold {
-            background-color: var(--balatro-gold);
-        }
-
-        .balatro-button-gold:hover {
-            background-color: var(--color-dark-gold);
-            filter: none;
-        }
-
-        .balatro-button-gold:active {
-            background-color: var(--color-dark-gold);
-            transform: translateY(2px);
-            box-shadow: none;
-            filter: none;
-        }
-
-        /* Nav Buttons (Left/Right) */
-        .balatro-nav-button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 2rem;
-            flex-shrink: 0;
-            border-radius: 0.5rem;
-            transition: background-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
-            background-color: var(--color-red);
-            position: relative;
-        }
-
-        .balatro-nav-button:hover:not(:disabled) {
-            background-color: var(--color-dark-red);
-        }
-
-        .balatro-nav-button:active:not(:disabled) {
-            background-color: var(--color-dark-red);
-            transform: translateY(2px);
-            box-shadow: none;
-        }
-
-        .balatro-nav-button:disabled {
-            cursor: not-allowed;
-            background-color: #2d2d2d;
-            /* Solid dark grey */
-            color: #5c5c5c;
-            box-shadow: none;
-            opacity: 1;
-            /* NO TRANSPARENCY */
-            filter: none;
-        }
+    .balatro-nav-button:disabled {
+        cursor: not-allowed;
+        background-color: var(--color-red);
+        box-shadow: 0 4px 0 var(--color-dark-red);
+        opacity: 0.4;
     }
 
     .balatro-input {
@@ -358,31 +306,14 @@ body::after {
         border-color: var(--balatro-blue);
     }
 
-    .balatro-input::placeholder {
-        color: rgba(255, 255, 255, 0.3);
-    }
-
-    /* PREMIUM CONTRAST: EPOCH HERO CARD */
     .acrylic-card {
         background: rgba(255, 255, 255, 0.03);
         backdrop-filter: blur(12px) saturate(180%);
-        -webkit-backdrop-filter: blur(12px) saturate(180%);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 1rem;
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         position: relative;
         overflow: hidden;
-    }
-
-    .acrylic-card::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(135deg,
-                rgba(255, 255, 255, 0.1) 0%,
-                transparent 50%,
-                rgba(255, 255, 255, 0.05) 100%);
-        pointer-events: none;
     }
 }
 
@@ -405,27 +336,31 @@ body::after {
     }
 }
 
-@keyframes balatro-float {
+@keyframes juice-pop {
     0% {
-        transform: translateY(0px);
+        transform: scale(0.6) rotate(-5deg);
+        filter: brightness(2);
     }
 
-    50% {
-        transform: translateY(-5px);
+    40% {
+        transform: scale(1.15) rotate(4deg);
+        filter: brightness(1);
+    }
+
+    70% {
+        transform: scale(0.95) rotate(-2deg);
     }
 
     100% {
-        transform: translateY(0px);
+        transform: scale(1) rotate(0deg);
     }
 }
 
-.juice-wobble:hover {
-    animation: balatro-wobble 0.3s ease-in-out infinite;
+.juice-pop {
+    animation: juice-pop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-.juice-float {
-    animation: balatro-float 3s ease-in-out infinite;
-}
+/* Removed infinite wobble - it was nauseating. Juice should be one-shot on mount only. */
 
 /* Utilities */
 .font-pixel {
@@ -446,4 +381,47 @@ body::after {
 
 .text-shadow-md {
     text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
+}
+
+/* ============================================================ */
+/* EMERGENCY UI FIXES: SIDE LABELS & AUTO-SCALING FOOTER        */
+/* ============================================================ */
+
+.balatro-side-label {
+    position: absolute;
+    left: -1rem;
+    top: 50%;
+    transform: translateY(-50%) rotate(-90deg);
+    color: rgba(255, 255, 255, 0.3);
+    font-family: var(--font-header);
+    font-size: 10px;
+    z-index: 50;
+    white-space: nowrap;
+    pointer-events: none;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+
+.balatro-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 32px;
+    background: #000000;
+    border-top: 2px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.balatro-footer-text {
+    font-family: var(--font-header);
+    font-weight: normal;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    font-size: clamp(5px, 1.8vw, 11px);
 }

@@ -158,17 +158,7 @@ export function DailyWee() {
     };
 
     const getTheme = (day: number, seedData: SeedData | null) => {
-        if (seedData?.themeName) {
-            const name = seedData.themeName;
-            let color = "var(--balatro-gold)", icon = "👁️";
-            if (name.includes("Madness")) { color = "var(--balatro-red)"; icon = "🔥"; }
-            else if (name.includes("Twosday")) { color = "var(--balatro-blue)"; icon = "2️⃣"; }
-            else if (name.includes("Wee")) { color = "var(--balatro-green)"; icon = "🃏"; }
-            else if (name.includes("Threshold")) { color = "var(--balatro-orange)"; icon = "⚖️"; }
-            else if (name.includes("Foil")) { color = "var(--balatro-blue)"; icon = "📐"; }
-            else if (name.includes("Weekend")) { color = "var(--balatro-gold)"; icon = "🎩"; }
-            return { name, color, icon };
-        }
+        // Always calculate theme from actual weekday, not seed data
         const date = new Date(EPOCH + (day - 1) * 24 * 60 * 60 * 1000);
         const dayOfWeek = date.getUTCDay();
         const defaultThemes = [
@@ -188,7 +178,7 @@ export function DailyWee() {
     if (!mounted) return null;
 
     return (
-        <div className="h-[100dvh] w-full relative overflow-hidden bg-transparent">
+        <div className="h-[100dvh] w-full relative overflow-y-auto overflow-x-hidden bg-transparent">
             <div className="absolute inset-0 z-10 flex flex-col items-center overflow-hidden">
                 <div className="h-[100dvh] w-full relative z-10 flex flex-col items-center">
 
@@ -217,6 +207,7 @@ export function DailyWee() {
                                             onAnalyze={() => setShowHowTo(true)}
                                             onOpenSubmit={() => setShowSubmit(true)}
                                             isLocked={viewingDay > todayNumber}
+                                            canSubmit={viewingDay === todayNumber}
                                         />
                                     ) : (
                                         <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-[var(--balatro-grey-dark)]">
@@ -233,6 +224,16 @@ export function DailyWee() {
                                 </div>
                             )}
                         </DayNavigation>
+
+                        {/* Banner Ad Rotator - RESTORED */}
+                        <div className="w-full max-w-md px-4 mt-2">
+                            <AdRotator
+                                onOpenWisdom={() => setViewMode('wisdom')}
+                                onOpenLeaderboard={() => setShowLeaderboard(true)}
+                                topScore={topScore}
+                                isLocked={viewingDay > todayNumber}
+                            />
+                        </div>
 
                     </div>
                 </div>
