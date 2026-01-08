@@ -201,82 +201,66 @@ body::after {
         @apply balatro-panel;
     }
 
-    /* THE BALATRO BUTTON STANDARD */
-    .balatro-button-back {
-        background-color: var(--color-orange);
-        color: white !important;
-        font-family: var(--font-header);
-        font-size: 1.1rem;
-        padding: 0.4rem 1.25rem;
-        border-radius: 0.4rem;
-        border: none;
-        box-shadow: 0 2px 0 rgba(0, 0, 0, 0.8);
-        transition: none;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-transform: none;
-        width: 100%;
-        position: relative;
-    }
-
-    .balatro-button-back:hover {
-        background-color: var(--color-dark-orange);
-    }
-
-    .balatro-button-back:active {
-        background-color: var(--color-dark-orange);
-        transform: translateY(2px);
-        box-shadow: none;
-    }
-
+    /* THE BALATRO BUTTON STANDARD - Tactical Sinking Style */
     .balatro-button {
         color: white !important;
         font-family: var(--font-header);
         border: none;
-        border-radius: 0.4rem;
+        border-radius: 0.5rem;
         cursor: pointer;
         position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
         transition: none;
-        box-shadow: 0 2px 0 rgba(0, 0, 0, 0.8);
-        padding: 0.4rem 1.25rem;
+        padding: 0.6rem 1.25rem;
         font-size: 1.1rem;
-        text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+        text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        /* The "Side" of the button */
+        box-shadow: 0 4px 0 rgba(0, 0, 0, 0.8);
     }
 
-    .balatro-button:hover {
-        filter: brightness(0.9);
+    .balatro-button-blue {
+        background-color: var(--color-blue);
+        box-shadow: 0 4px 0 var(--color-dark-blue);
     }
 
-    .balatro-button:active {
-        transform: translateY(2px);
+    .balatro-button-red {
+        background-color: var(--color-red);
+        box-shadow: 0 4px 0 var(--color-dark-red);
+    }
+
+    .balatro-button-gold {
+        background-color: var(--balatro-gold);
+        box-shadow: 0 4px 0 var(--color-dark-gold);
+    }
+
+    .balatro-button-orange,
+    .balatro-button-back {
+        background-color: var(--color-orange);
+        box-shadow: 0 4px 0 var(--color-dark-orange);
+    }
+
+    .balatro-button:hover:not(:disabled) {
+        transform: translateY(-1px);
+        filter: brightness(1.1);
+        box-shadow: 0 5px 0 rgba(0, 0, 0, 0.9);
+    }
+
+    .balatro-button:active:not(:disabled) {
+        transform: translateY(4px);
         box-shadow: none;
         filter: brightness(0.9);
     }
 
     .balatro-button:disabled {
         cursor: not-allowed;
-        background-color: #4a2a2a !important;
-        color: #a06060 !important;
-        opacity: 1 !important;
-        box-shadow: none !important;
-        transform: none !important;
-    }
-
-    .balatro-button-red {
-        background-color: var(--color-red);
-    }
-
-    .balatro-button-blue {
-        background-color: var(--color-blue);
-    }
-
-    .balatro-button-gold {
-        background-color: var(--balatro-gold);
+        background-color: var(--color-dark-dull-grey) !important;
+        color: var(--color-dull-grey) !important;
+        box-shadow: 0 2px 0 var(--color-black) !important;
+        transform: translateY(2px) !important;
     }
 
     .balatro-nav-button {
