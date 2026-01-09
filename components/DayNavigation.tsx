@@ -13,7 +13,7 @@ interface DayNavigationProps {
 
 export function DayNavigation({ onPrev, onNext, canPrev, canNext, children }: DayNavigationProps) {
     return (
-        <div className="flex flex-row items-stretch justify-center gap-2 w-full max-w-[22rem] mx-auto p-0 relative z-30 h-[460px] shrink-0">
+        <div className="flex flex-row items-stretch justify-center gap-2 w-full max-w-md mx-auto p-0 relative z-30 h-[460px] shrink-0">
             {/* Left Nav Button */}
             <button
                 onClick={onPrev}

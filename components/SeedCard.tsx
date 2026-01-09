@@ -125,15 +125,17 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                     </div>
                 </div>
 
-                {/* View Tabs - Challenges UI Style */}
+                {/* View Tabs - Authentic Balatro Multi-Layer Shadows */}
                 <div className="flex gap-1 justify-center shrink-0 mt-0.5">
                     {(['DEFAULT', 'PLAY', 'SCORES'] as CardView[]).map((v) => (
                         <button
                             key={v}
                             onClick={() => setView(v)}
                             className={cn(
-                                "px-2 py-1 rounded-t-md font-header text-[8px] uppercase tracking-wider transition-colors border-t border-x border-black/20",
-                                view === v ? "bg-[var(--balatro-red)] text-white" : "bg-black/40 text-white/40 hover:bg-black/60"
+                                "relative px-3 py-1.5 rounded-md font-header text-[9px] uppercase tracking-wider transition-all text-white bg-[var(--balatro-red)]",
+                                view === v
+                                    ? "shadow-[1px_1px_0_rgba(0,0,0,0.5),0_2px_0_var(--color-dark-red)] active:shadow-none active:translate-y-[2px]"
+                                    : "shadow-[1px_1px_0_rgba(0,0,0,0.3),0_1px_0_rgba(0,0,0,0.6)] opacity-70 hover:opacity-90 active:shadow-none active:translate-y-[1px]"
                             )}
                         >
                             {v === 'DEFAULT' ? 'DETAILS' : v === 'PLAY' ? 'HOW TO' : 'SCORES'}
@@ -141,10 +143,10 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                     ))}
                 </div>
 
-                {/* View Container - Strict height to prevent scrolling */}
-                <div className="flex-1 flex flex-col min-h-0 bg-black/20 rounded-b-lg border-x border-b border-black/20 overflow-hidden shadow-inner">
+                {/* View Container - Direct content, no inner panel */}
+                <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                     {view === 'DEFAULT' && (
-                        <div className="flex-1 flex flex-col justify-center gap-1.5 px-2 py-1 overflow-visible">
+                        <div className="flex-1 flex flex-col justify-center gap-2 px-2 py-2 overflow-visible">
                             <div className="flex flex-wrap gap-2 items-center justify-center">
                                 {[1, 2].flatMap((anteNum) =>
                                     getJokers(anteNum as 1 | 2).map((j) => (
