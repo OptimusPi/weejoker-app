@@ -182,11 +182,11 @@ export function DailyWee() {
             <div className="absolute inset-0 z-10 flex flex-col items-center">
                 <div className="h-full w-full relative z-10 flex flex-col items-center">
 
-                    <div className="flex-1 flex flex-col justify-center items-center w-full min-h-0 gap-1 py-2">
+                    <div className="flex-1 flex flex-col justify-start items-center w-full min-h-0 gap-1 pt-4 pb-2">
                         <DayHeader
                             dayNumber={viewingDay}
                             displayDate={getDayDisplay(viewingDay)}
-                            theme={currentTheme}
+                            theme={viewingDay === 0 ? null : currentTheme}
                         />
 
                         <DayNavigation
@@ -225,8 +225,8 @@ export function DailyWee() {
                             )}
                         </DayNavigation>
 
-                        {/* Banner Ad Rotator - Full width alignment */}
-                        <div className="w-full max-w-md px-0 mt-0.5">
+                        {/* Banner Ad Rotator - Constrained to central card width */}
+                        <div className="w-full max-w-[340px] px-2 mt-1 z-40 relative">
                             <AdRotator
                                 onOpenWisdom={() => setViewMode('wisdom')}
                                 onOpenLeaderboard={() => setShowLeaderboard(true)}

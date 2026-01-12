@@ -45,9 +45,10 @@ export interface SpriteProps {
     name: string;
     className?: string;
     width?: number; // Optional override width (height auto-calcs)
+    delayClass?: string; // Optional animation delay class
 }
 
-export function Sprite({ name, className, width }: SpriteProps) {
+export function Sprite({ name, className, width, delayClass }: SpriteProps) {
     // Instant Lookup
     const pos = JOKER_MAP[name] || JOKER_MAP[name.toLowerCase()] || JOKER_MAP["Joker"];
 
@@ -63,7 +64,7 @@ export function Sprite({ name, className, width }: SpriteProps) {
 
     return (
         <div
-            className={`relative overflow-hidden inline-block juice-pop ${className}`}
+            className={`relative overflow-hidden inline-block juice-pop ${delayClass || ''} ${className}`}
             style={{
                 width: finalW,
                 height: finalH,
@@ -73,7 +74,7 @@ export function Sprite({ name, className, width }: SpriteProps) {
         >
             <div
                 style={{
-                    backgroundImage: `url(/assets/Jokers.png)`,
+                    backgroundImage: `url(/Assets/Jokers.png)`,
                     backgroundPosition: `${bgX}px ${bgY}px`,
                     width: CARD_WIDTH, // Original Width
                     height: CARD_HEIGHT, // Original Height

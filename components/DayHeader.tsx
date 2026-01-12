@@ -9,30 +9,32 @@ interface DayHeaderProps {
         name: string;
         color: string;
         icon: string;
-    };
+    } | null;
 }
 
 export function DayHeader({ dayNumber, displayDate, theme }: DayHeaderProps) {
     return (
-        <div className="flex-shrink-0 w-full flex items-center justify-center pt-2 min-h-0 overflow-hidden">
+        <div className="flex-shrink-0 w-full flex items-center justify-center pt-0 min-h-0 overflow-hidden">
             <div className="text-center w-full relative z-20 px-4">
-                <div className="font-header font-normal text-2xl sm:text-3xl text-white tracking-wider uppercase leading-none mb-1 select-none balatro-text-shadow-hard">
-                    THE DAILY WEE
+                <div className="font-header font-normal text-2xl sm:text-3xl text-white tracking-wider leading-none mb-1 select-none balatro-text-shadow-hard">
+                    The Daily Wee
                 </div>
                 <div className="w-full max-w-sm mx-auto flex flex-col gap-1">
-                    <div className="flex justify-between items-center py-0.5 border-y border-white/10 text-[8px] font-pixel text-white/40 uppercase tracking-[0.2em]">
+                    <div className="flex justify-between items-center py-0.5 border-y border-white/10 text-[8px] font-pixel text-white/40 tracking-[0.2em]">
                         <span>{displayDate}</span>
-                        <span className="text-[var(--balatro-gold)] font-bold">NO. {dayNumber < 1 ? 1 : dayNumber}</span>
+                        <span className="text-[var(--balatro-gold)]">No. {dayNumber < 1 ? 1 : dayNumber}</span>
                         <span>Est. 2026</span>
                     </div>
                     {/* Theme Badge */}
-                    <div
-                        className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-header tracking-widest self-center shadow-lg"
-                        style={{ backgroundColor: theme.color, color: 'white' }}
-                    >
-                        <span className="balatro-text-shadow-small">{theme.icon}</span>
-                        <span className="mt-[2px] balatro-text-shadow-small">{theme.name}</span>
-                    </div>
+                    {theme && (
+                        <div
+                            className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-header tracking-widest self-center shadow-lg"
+                            style={{ backgroundColor: theme.color, color: 'white' }}
+                        >
+                            <span className="balatro-text-shadow-small">{theme.icon}</span>
+                            <span className="mt-[2px] balatro-text-shadow-small">{theme.name}</span>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -134,7 +134,7 @@ export function HowToPlay({ onClose, onSubmit, themeName = "Daily Ritual", seedI
                     {/* Back Button */}
                     <button
                         onClick={prevStep}
-                        className="balatro-button-back"
+                        className="balatro-button balatro-button-orange w-full py-3 text-md"
                     >
                         Back
                     </button>

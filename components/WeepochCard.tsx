@@ -10,7 +10,7 @@ interface WeepochCardProps {
 
 export function WeepochCard({ onShowHowTo, onEnterRitual }: WeepochCardProps) {
     return (
-        <div className="balatro-panel p-3 flex flex-col items-center justify-start text-center relative h-full overflow-hidden balatro-sway min-h-[345px]">
+        <div className="balatro-panel p-3 flex flex-col items-center justify-start text-center relative h-[85vh] max-h-[600px] w-full overflow-hidden">
             <div className="relative z-10 flex flex-col items-center w-full h-full">
                 {/* Hero Section */}
                 <div className="bg-black/20 rounded-xl p-2 border border-black/10 shadow-md mb-2 mt-1 shrink-0">
@@ -47,17 +47,16 @@ export function WeepochCard({ onShowHowTo, onEnterRitual }: WeepochCardProps) {
                     </div>
                 </div>
 
-                {/* Flat Action Buttons */}
                 <div className="flex gap-2 w-full mt-auto mb-1 px-1 shrink-0">
                     <button
                         onClick={onShowHowTo}
-                        className="flex-1 balatro-button balatro-button-blue py-3 text-[10px] uppercase leading-none"
+                        className="flex-1 balatro-button balatro-button-blue py-3 text-base leading-none"
                     >
                         How do I<br />play?
                     </button>
                     <button
                         onClick={onEnterRitual}
-                        className="flex-1 balatro-button balatro-button-gold py-3 text-[10px] uppercase leading-none"
+                        className="flex-1 balatro-button balatro-button-gold py-3 text-base leading-none"
                     >
                         Enter<br />Ritual
                     </button>

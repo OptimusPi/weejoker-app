@@ -3,6 +3,8 @@ import { SeedData } from "@/lib/types";
 import { Copy, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Sprite } from "./Sprite";
+import { PlayingCard } from "./PlayingCard";
+import { CardFan } from "./CardFan";
 import { cn } from "@/lib/utils";
 
 interface SeedCardProps {
@@ -50,7 +52,17 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
     }, [dayNumber]);
 
     const handleCopy = async () => {
-        await navigator.clipboard.writeText(seed.seed);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(seed.seed);
+        } else {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = seed.seed;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+        }
         setCopied(true);
         setTimeout(() => setCopied(false), 3140);
     };
@@ -103,62 +115,65 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
 
     return (
         <div className={cn("relative group flex flex-col", className)}>
-            <div className="balatro-panel p-1.5 flex flex-col relative h-full z-10 grow gap-1.5 min-h-[345px] !overflow-visible">
+            <div className="balatro-panel p-1.5 flex flex-col relative h-[85vh] max-h-[600px] z-10 grow gap-1.5 !overflow-visible">
 
                 {/* Header Row: Seed & Twos */}
-                <div className="flex w-full overflow-hidden rounded-lg border-2 border-black/20 shrink-0 h-10">
+                <div className="flex w-full overflow-visible rounded-lg border-2 border-black/20 shrink-0 h-20">
                     <div className="w-1/2 bg-black/40 flex items-center justify-center border-r-2 border-black/20 overflow-hidden px-1">
                         {!isLocked ? (
                             <button onClick={handleCopy} className="flex items-center gap-2 outline-none w-full justify-center">
-                                <div className={cn("p-1 rounded-md transition-colors shrink-0", copied ? 'bg-[var(--balatro-green)]' : 'bg-black/20')}>
-                                    {copied ? <Check size={10} className="text-white" strokeWidth={4} /> : <Copy size={10} className="text-white/60" strokeWidth={3} />}
+                                <div className={cn("p-1.5 rounded-md transition-colors shrink-0", copied ? 'bg-[var(--balatro-green)]' : 'bg-black/20')}>
+                                    {copied ? <Check size={14} className="text-white" strokeWidth={4} /> : <Copy size={14} className="text-white/60" strokeWidth={3} />}
                                 </div>
-                                <span className={cn("font-header text-xs tracking-wider truncate", copied ? 'text-[var(--balatro-green)]' : 'text-white')}>{copied ? 'COPIED!' : seed.seed}</span>
+                                <span className={cn("font-header text-base tracking-wider truncate", copied ? 'text-[var(--balatro-green)]' : 'text-white')}>{copied ? 'Copied!' : seed.seed}</span>
                             </button>
                         ) : (
                             <span className="font-header text-sm text-white/40 tracking-widest leading-none">--------</span>
                         )}
                     </div>
-                    <div className="w-1/2 bg-black/20 flex flex-col items-center justify-center p-0.5">
-                        <span className="font-header text-lg text-white tracking-widest leading-none">{seed.twos ?? 0}</span>
-                        <span className="font-header text-[var(--balatro-blue)] text-[8px] tracking-widest uppercase mt-[-2px]">Starting 2&apos;s</span>
+                    <div className="w-1/2 bg-black/20 flex items-center justify-center p-0.5 overflow-visible">
+                        {!isLocked ? (
+                            <CardFan count={seed.twos} className="scale-110" />
+                        ) : (
+                            <span className="font-header text-sm text-white/40 tracking-widest leading-none">--</span>
+                        )}
                     </div>
                 </div>
 
                 {/* View Tabs */}
-                <div className="flex gap-1 justify-center shrink-0 mt-1">
+                <div className="flex gap-1.5 justify-center shrink-0 mt-2">
                     {(['DEFAULT', 'PLAY', 'SCORES'] as CardView[]).map((v) => (
                         <button
                             key={v}
                             onClick={() => setView(v)}
                             className={cn(
-                                "balatro-tab balatro-button-red",
+                                "balatro-tab balatro-button-red min-w-20 py-1.5",
                                 view === v && "balatro-selected-tab"
                             )}
                         >
-                            {v === 'DEFAULT' ? 'DETAILS' : v === 'PLAY' ? 'HOW TO' : 'SCORES'}
+                            {v === 'DEFAULT' ? 'Details' : v === 'PLAY' ? 'How to' : 'Scores'}
                         </button>
                     ))}
                 </div>
 
                 {/* View Container - Direct content, no inner panel */}
-                <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                <div className="flex-1 flex flex-col w-full relative overflow-hidden">
                     {view === 'DEFAULT' && (
-                        <div className="flex-1 flex flex-col justify-center gap-2 px-2 py-2 overflow-visible">
-                            <div className="flex flex-col gap-2">
-                                {[1, 2].map((anteNum) => {
-                                    const jokers = getJokers(anteNum as 1 | 2);
-                                    if (jokers.length === 0) return null;
+                        <div className="flex-1 flex flex-col justify-center gap-2 py-2 overflow-visible">
+                            <div className="flex flex-col gap-2 h-full">
+                                {/* ROW 0: Ante 1 - 42% */}
+                                {(() => {
+                                    const jokers = getJokers(1);
                                     return (
-                                        <div key={anteNum} className="bg-black/30 rounded-lg p-2 juice-pop balatro-sway balatro-item-${anteNum}" style={{ minHeight: '80px' }}>
-                                            {/* Ante Label - Always Blue */}
-                                            <div className="text-center font-header text-[10px] tracking-wider uppercase py-1 px-1 rounded mb-2 bg-[var(--balatro-blue)] text-white">
-                                                Ante {anteNum}
+                                        <div key={`ante1-${seed.seed}`} className="rounded-lg p-1 flex items-center juice-pop balatro-delay-1 balatro-sway balatro-item-1 flex-1 min-h-[100px]" style={{ backgroundColor: '#27373a' }}>
+                                            {/* Vertical Label on Left */}
+                                            <div className="flex items-center justify-center" style={{ width: '24px', height: '100%' }}>
+                                                <span className="font-header text-[22px] tracking-wider select-none" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', color: '#3a5055' }}>Ante 1</span>
                                             </div>
-                                            {/* Jokers - Horizontal Row */}
-                                            <div className="flex gap-3 justify-center items-start flex-wrap">
-                                                {jokers.map((j, jIdx) => (
-                                                    <div key={j.id} className={`relative flex flex-col items-center group balatro-item-${(anteNum - 1) * 4 + jIdx + 1}`}>
+                                            {/* Jokers Area */}
+                                            <div className="flex-1 flex gap-2 justify-center items-center flex-wrap px-1">
+                                                {jokers.length > 0 ? jokers.map((j, jIdx) => (
+                                                    <div key={j.id} className={`relative flex flex-col items-center group balatro-item-${jIdx + 1}`}>
                                                         <div className="relative">
                                                             {j.tally !== undefined && j.tally > 1 && (
                                                                 <div className="absolute -top-1 -right-1 bg-white text-black font-header text-[8px] w-4 h-4 flex items-center justify-center rounded-full z-20 shadow-sm">
@@ -167,22 +182,75 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                                                             )}
                                                             <Sprite
                                                                 name={j.id}
-                                                                width={j.id === 'weejoker' ? 28 : 52}
+                                                                width={j.id === 'weejoker' ? 36 : 52}
                                                                 className="drop-shadow-md"
+                                                                delayClass={`balatro-delay-${jIdx + 2}`}
                                                             />
                                                         </div>
-                                                        {/* Tooltip name below */}
-                                                        <span className="font-header text-[7px] text-white/60 uppercase mt-1 leading-none text-center max-w-[60px]">{j.name}</span>
+                                                        <span className="font-header text-[8px] text-white uppercase mt-1 leading-none text-center max-w-[60px]">{j.name}</span>
                                                     </div>
-                                                ))}
+                                                )) : (
+                                                    <span className="font-pixel text-white/20 text-[10px] uppercase">None</span>
+                                                )}
                                             </div>
                                         </div>
                                     );
-                                })}
+                                })()}
+
+                                {/* ROW 1: Ante 2 - 42% */}
+                                {(() => {
+                                    const jokers = getJokers(2);
+                                    return (
+                                        <div key={`ante2-${seed.seed}`} className="rounded-lg p-1 flex items-center juice-pop balatro-delay-3 balatro-sway balatro-item-2 flex-1 min-h-[100px]" style={{ backgroundColor: '#27373a' }}>
+                                            {/* Vertical Label on Left */}
+                                            <div className="flex items-center justify-center" style={{ width: '24px', height: '100%' }}>
+                                                <span className="font-header text-[22px] tracking-wider select-none" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', color: '#3a5055' }}>Ante 2</span>
+                                            </div>
+                                            {/* Jokers Area */}
+                                            <div className="flex-1 flex gap-2 justify-center items-center flex-wrap px-1">
+                                                {jokers.length > 0 ? jokers.map((j, jIdx) => (
+                                                    <div key={j.id} className={`relative flex flex-col items-center group balatro-item-${4 + jIdx + 1}`}>
+                                                        <div className="relative">
+                                                            {j.tally !== undefined && j.tally > 1 && (
+                                                                <div className="absolute -top-1 -right-1 bg-white text-black font-header text-[8px] w-4 h-4 flex items-center justify-center rounded-full z-20 shadow-sm">
+                                                                    {j.tally}
+                                                                </div>
+                                                            )}
+                                                            <Sprite
+                                                                name={j.id}
+                                                                width={j.id === 'weejoker' ? 36 : 52}
+                                                                className="drop-shadow-md"
+                                                                delayClass={`balatro-delay-${jIdx + 4}`}
+                                                            />
+                                                        </div>
+                                                        <span className="font-header text-[8px] text-white uppercase mt-1 leading-none text-center max-w-[60px]">{j.name}</span>
+                                                    </div>
+                                                )) : (
+                                                    <span className="font-pixel text-white/20 text-[10px] uppercase">None</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+
+                                {/* ROW 2: Top Score - 16% - ALWAYS RENDER */}
+                                <div key={`score-${seed.seed}`} className="bg-black/30 rounded-lg px-3 py-2 flex items-center justify-between juice-pop balatro-delay-5" style={{ height: '16%', minHeight: '35px' }}>
+                                    {topScore ? (
+                                        <>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[16px]">🏆</span>
+                                                <span className="font-header text-[11px] text-white uppercase tracking-wide">{topScore.name}</span>
+                                            </div>
+                                            <span className="font-header text-[11px] text-[var(--balatro-blue)] tracking-wide">+{topScore.score.toLocaleString()} Chips</span>
+                                        </>
+                                    ) : (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[16px]">🏆</span>
+                                            <span className="font-pixel text-white/40 text-[14px]">No Winner Yet!</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                            {getJokers(1).length === 0 && getJokers(2).length === 0 && (
-                                <span className="font-pixel text-white/10 text-[10px] uppercase tracking-widest py-4 text-center">No Jokers Found</span>
-                            )}
                         </div>
                     )}
 
@@ -195,7 +263,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                                 <p>3. Scale it with 2s.</p>
                                 <p>4. Submit your high score!</p>
                             </div>
-                            <button onClick={onAnalyze} className="balatro-button balatro-button-gold text-[8px] py-1.5 uppercase shrink-0">How do I play?</button>
+                            <button onClick={onAnalyze} className="balatro-button balatro-button-blue text-sm py-2 shrink-0">How do I play?</button>
                         </div>
                     )}
 
@@ -237,9 +305,9 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                     ) : view === 'DEFAULT' ? (
                         <button
                             onClick={() => setView('PLAY')}
-                            className="w-full balatro-button balatro-button-red text-md py-3 uppercase tracking-widest font-header"
+                            className="w-full balatro-button balatro-button-blue text-md py-2 tracking-widest font-header shrink-0"
                         >
-                            PLAY WEE NO. {dayNumber}
+                            Play Wee No. {dayNumber}
                         </button>
                     ) : null}
 
@@ -247,7 +315,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                     {!isLocked && view !== 'DEFAULT' && (
                         <button
                             onClick={() => setView('DEFAULT')}
-                            className="w-full balatro-button balatro-button-back text-md py-3 uppercase tracking-widest font-header"
+                            className="w-full balatro-button balatro-button-orange text-md py-2 tracking-widest font-header shrink-0"
                         >
                             Back
                         </button>

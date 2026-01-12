@@ -153,29 +153,13 @@ main {
    ============================================================================ */
 
 body {
-    background: linear-gradient(-45deg, #2c3e50, #0099DB, #c0392b, #8E44AD);
-    background-size: 400% 400%;
-    animation: swirl 20s ease infinite;
+    background: #1a1a2e;
     min-height: 100vh;
     color: white;
-    font-family: var(--font-header), sans-serif;
     overflow-y: hidden;
     position: relative;
 }
 
-@keyframes swirl {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
-}
 
 /* CRT Scanline Overlay */
 body::after {
@@ -244,14 +228,17 @@ body::after {
     /* Text drop shadows */
     .balatro-text-shadow-hard {
         filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.8));
+        animation: balatro-sway 6s ease-in-out infinite;
     }
 
     .balatro-text-shadow-small {
         filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.8));
+        animation: balatro-sway 6s ease-in-out infinite;
     }
 
     .balatro-text-shadow-bold {
         filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 1));
+        animation: balatro-sway 6s ease-in-out infinite;
     }
 
     /* Select box shadow */
@@ -278,8 +265,9 @@ body::after {
     .balatro-button,
     .balatro-nav-button,
     .balatro-tab {
-        color: white !important;
+        color: white;
         font-family: var(--font-header);
+        font-weight: normal;
         border: none;
         border-radius: 0.5rem;
         cursor: pointer;
@@ -287,22 +275,23 @@ body::after {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 0.6rem 1.25rem;
-        font-size: 1.1rem;
+        padding: 0.5rem 1rem;
+        font-size: 1.5rem;
         text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
-        text-transform: uppercase;
         letter-spacing: 0.05em;
         background-color: var(--color-red);
-        box-shadow: 0 4px 0 var(--color-dark-shadow);
-        transition: none !important;
+        box-shadow: 0 2px 0 var(--color-dark-shadow);
+        transition: none;
         user-select: none;
+
     }
 
     /* Smaller tabs variant */
     .balatro-tab {
-        padding: 0.4rem 0.75rem;
-        font-size: 0.7rem;
+        padding: 0.35rem 0.65rem;
+        font-size: 1rem;
         letter-spacing: 0.03em;
+        box-shadow: 0 1px 0 var(--color-dark-shadow);
     }
 
     /* Button Color Variants */
@@ -358,9 +347,13 @@ body::after {
 
     /* Button States */
     .balatro-button:active:not(:disabled),
-    .balatro-nav-button:active:not(:disabled),
+    .balatro-nav-button:active:not(:disabled) {
+        transform: translateY(2px);
+        box-shadow: none;
+    }
+
     .balatro-tab:active:not(:disabled) {
-        transform: translateY(4px);
+        transform: translateY(1px);
         box-shadow: none;
     }
 
@@ -440,24 +433,72 @@ body::after {
         }
     }
 
-    /* Ambient Sway Animation */
+    /* Ambient Sway Animation - From Balatro source: 0.02 radians (~1.15deg) */
     .balatro-sway {
-        animation: balatro-sway 6s ease-in-out infinite;
+        animation: balatro-sway 8s ease-in-out infinite;
     }
 
     @keyframes balatro-sway {
 
         0%,
         100% {
-            transform: rotate(-0.5deg) translateY(0);
+            transform: rotate(-1.15deg) translateY(-1px);
+        }
+
+        25% {
+            transform: rotate(0.6deg) translateY(1px);
         }
 
         50% {
-            transform: rotate(0.5deg) translateY(-2px);
+            transform: rotate(1.15deg) translateY(-1px);
+        }
+
+        75% {
+            transform: rotate(-0.6deg) translateY(1px);
         }
     }
 
     /* Staggered animation delays for items */
+    .balatro-delay-1 {
+        animation-delay: 0.05s !important;
+    }
+
+    .balatro-delay-2 {
+        animation-delay: 0.1s !important;
+    }
+
+    .balatro-delay-3 {
+        animation-delay: 0.15s !important;
+    }
+
+    .balatro-delay-4 {
+        animation-delay: 0.2s !important;
+    }
+
+    .balatro-delay-5 {
+        animation-delay: 0.25s !important;
+    }
+
+    .balatro-delay-6 {
+        animation-delay: 0.3s !important;
+    }
+
+    .balatro-delay-7 {
+        animation-delay: 0.35s !important;
+    }
+
+    .balatro-delay-8 {
+        animation-delay: 0.4s !important;
+    }
+
+    .balatro-delay-9 {
+        animation-delay: 0.45s !important;
+    }
+
+    .balatro-delay-10 {
+        animation-delay: 0.5s !important;
+    }
+
     .balatro-item-1 {
         animation-delay: 0s;
     }
