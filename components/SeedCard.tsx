@@ -125,17 +125,15 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                     </div>
                 </div>
 
-                {/* View Tabs - Authentic Balatro Multi-Layer Shadows */}
+                {/* View Tabs */}
                 <div className="flex gap-1 justify-center shrink-0 mt-0.5">
                     {(['DEFAULT', 'PLAY', 'SCORES'] as CardView[]).map((v) => (
                         <button
                             key={v}
                             onClick={() => setView(v)}
                             className={cn(
-                                "relative px-3 py-1.5 rounded-md font-header text-[9px] uppercase tracking-wider transition-all text-white bg-[var(--balatro-red)]",
-                                view === v
-                                    ? "shadow-[1px_1px_0_rgba(0,0,0,0.5),0_2px_0_var(--color-dark-red)] active:shadow-none active:translate-y-[2px]"
-                                    : "shadow-[1px_1px_0_rgba(0,0,0,0.3),0_1px_0_rgba(0,0,0,0.6)] opacity-70 hover:opacity-90 active:shadow-none active:translate-y-[1px]"
+                                "balatro-tab balatro-button-red",
+                                view === v && "balatro-selected-tab"
                             )}
                         >
                             {v === 'DEFAULT' ? 'DETAILS' : v === 'PLAY' ? 'HOW TO' : 'SCORES'}
@@ -146,39 +144,47 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                 {/* View Container - Direct content, no inner panel */}
                 <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                     {view === 'DEFAULT' && (
-                        <div className="flex-1 flex flex-col justify-center gap-2 px-2 py-2 overflow-visible">
-                            <div className="flex flex-wrap gap-2 items-center justify-center">
-                                {[1, 2].flatMap((anteNum) =>
-                                    getJokers(anteNum as 1 | 2).map((j) => (
-                                        <div key={`${anteNum}-${j.id}`} className="relative flex flex-col items-center group/joker">
-                                            {/* Ante Badge */}
+                        <div className="flex-1 flex flex-col justify-center gap-1.5 px-2 py-2 overflow-visible">
+                            <div className="grid grid-cols-2 gap-1.5">
+                                {[1, 2].map((anteNum) => {
+                                    const jokers = getJokers(anteNum as 1 | 2);
+                                    if (jokers.length === 0) return null;
+                                    return (
+                                        <div key={anteNum} className="bg-black/30 rounded-lg p-1.5 border border-white/10">
+                                            {/* Ante Label */}
                                             <div className={cn(
-                                                "absolute -top-1 -left-1 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[7px] font-header z-20 shadow-sm border border-white/20",
+                                                "text-center font-header text-[9px] tracking-wider uppercase py-0.5 px-1 rounded mb-1",
                                                 anteNum === 1 ? "bg-[var(--balatro-gold)] text-black" : "bg-[var(--balatro-blue)] text-white"
                                             )}>
-                                                {anteNum}
+                                                Ante {anteNum}
                                             </div>
-
-                                            {/* Count Badge */}
-                                            {j.tally !== undefined && j.tally > 1 && (
-                                                <div className="absolute -top-1 -right-1 bg-white text-black font-header text-[7px] w-3.5 h-3.5 flex items-center justify-center rounded-full z-20 shadow-sm">
-                                                    {j.tally}
-                                                </div>
-                                            )}
-
-                                            <Sprite
-                                                name={j.id}
-                                                width={j.id === 'weejoker' ? 18 : 32}
-                                                className="drop-shadow-sm transition-transform group-hover/joker:scale-110"
-                                            />
-                                            <span className="font-header text-[6px] text-white uppercase mt-0.5 leading-none">{j.name}</span>
+                                            {/* Jokers */}
+                                            <div className="flex flex-col gap-1">
+                                                {jokers.map((j) => (
+                                                    <div key={j.id} className="bg-white/5 rounded p-1 flex items-center gap-1.5">
+                                                        <div className="relative shrink-0">
+                                                            {j.tally !== undefined && j.tally > 1 && (
+                                                                <div className="absolute -top-0.5 -right-0.5 bg-white text-black font-header text-[7px] w-3 h-3 flex items-center justify-center rounded-full z-20 shadow-sm">
+                                                                    {j.tally}
+                                                                </div>
+                                                            )}
+                                                            <Sprite
+                                                                name={j.id}
+                                                                width={j.id === 'weejoker' ? 22 : 40}
+                                                                className="drop-shadow-sm"
+                                                            />
+                                                        </div>
+                                                        <span className="font-header text-[8px] text-white uppercase leading-tight flex-1">{j.name}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
-                                    ))
-                                )}
-                                {getJokers(1).length === 0 && getJokers(2).length === 0 && (
-                                    <span className="font-pixel text-white/10 text-[9px] uppercase tracking-widest py-4">No Jokers Found</span>
-                                )}
+                                    );
+                                })}
                             </div>
+                            {getJokers(1).length === 0 && getJokers(2).length === 0 && (
+                                <span className="font-pixel text-white/10 text-[9px] uppercase tracking-widest py-4 text-center">No Jokers Found</span>
+                            )}
                         </div>
                     )}
 
@@ -218,9 +224,9 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                 </div>
 
                 {/* Footer UI - Fixed Action Button */}
-                <div className="mt-1.5 shrink-0 z-50">
+                <div className="mt-1.5 shrink-0 z-50 flex flex-col gap-1.5">
                     {!isLocked && topScore && view === 'DEFAULT' ? (
-                        <div className="bg-black/10 rounded-lg px-2 py-1 mb-1.5 flex justify-between items-center cursor-pointer hover:bg-black/20" onClick={() => setView('SCORES')}>
+                        <div className="bg-black/10 rounded-lg px-2 py-1 flex justify-between items-center cursor-pointer hover:bg-black/20" onClick={() => setView('SCORES')}>
                             <span className="font-header text-[var(--balatro-gold)] uppercase text-[9px] tracking-wider">#1 {topScore.name}</span>
                             <span className="font-header text-white text-sm tracking-widest leading-none">{topScore.score.toLocaleString()}</span>
                         </div>
@@ -230,15 +236,22 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                         <div className="w-full bg-black/40 text-white/20 font-header text-md py-3 rounded-lg flex items-center justify-center border border-white/5 uppercase tracking-widest">
                             (LOCKED) WEE NO. {dayNumber}
                         </div>
-                    ) : (
+                    ) : view === 'DEFAULT' ? (
                         <button
-                            onClick={() => { if (view === 'DEFAULT') setView('PLAY'); else setView('DEFAULT'); }}
-                            className={cn(
-                                "w-full balatro-button text-md py-3 uppercase tracking-widest font-header",
-                                view === 'DEFAULT' ? "balatro-button-red" : "balatro-button-blue"
-                            )}
+                            onClick={() => setView('PLAY')}
+                            className="w-full balatro-button balatro-button-red text-md py-3 uppercase tracking-widest font-header"
                         >
-                            {view === 'DEFAULT' ? `PLAY WEE NO. ${dayNumber}` : 'BACK TO SEED'}
+                            PLAY WEE NO. {dayNumber}
+                        </button>
+                    ) : null}
+
+                    {/* Bottom-most button: Always Orange "Back" */}
+                    {!isLocked && view !== 'DEFAULT' && (
+                        <button
+                            onClick={() => setView('DEFAULT')}
+                            className="w-full balatro-button balatro-button-back text-md py-3 uppercase tracking-widest font-header"
+                        >
+                            Back
                         </button>
                     )}
                 </div>

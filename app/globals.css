@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================================
+   GLOBALS.CSS - The Daily Wee Design System
+   ============================================================================
+   Structure:
+   1. Reset & Base Styles
+   2. CSS Custom Properties (Design Tokens)
+   3. Background & Ambient Effects
+   4. Scrollbar Styling
+   5. Component Layer (Panels, Buttons, Inputs)
+   6. Animations
+   7. Utility Classes
+   ============================================================================ */
+
+/* ============================================================================
+   1. RESET & BASE STYLES
+   ============================================================================ */
+
 html,
 body {
     margin: 0;
@@ -20,30 +37,47 @@ main {
     overflow: hidden;
 }
 
+/* ============================================================================
+   2. CSS CUSTOM PROPERTIES (DESIGN TOKENS)
+   ============================================================================
+   Two-layer system:
+   - Layer 1: Raw color values (--color-*)
+   - Layer 2: Semantic aliases (--balatro-*)
+   ============================================================================ */
+
 :root {
-    /* ============================================================ */
-    /* LAYER 1: BASE COLOR PALETTE - Authentic Balatro Colors       */
-    /* ============================================================ */
+    /* --------------------------------
+       LAYER 1: RAW COLOR PALETTE
+       Authentic Balatro colors
+       -------------------------------- */
+
+    /* Core Colors */
     --color-white: #FFFFFF;
     --color-black: #000000;
+
+    /* Brand Colors (Face / Hover pairs) */
     --color-red: #ff4c40;
     --color-dark-red: #a02721;
     --color-darkest-red: #70150f;
+
     --color-blue: #0093ff;
     --color-dark-blue: #0057a1;
+
     --color-orange: #ff9800;
     --color-dark-orange: #a05b00;
-    --color-dark-gold: #b8883a;
+
     --color-green: #429f79;
     --color-dark-green: #215f46;
+
     --color-purple: #7d60e0;
     --color-dark-purple: #292189;
 
-    /* Special/Text Colors */
+    /* Gold & Accent Colors */
     --color-bright-gold: #eaba44;
+    --color-dark-gold: #b8883a;
     --color-bright-green: #35bd86;
 
-    /* Modal/Panel Colors */
+    /* Panel & Modal Greys */
     --color-grey: #3a5055;
     --color-medium-grey: #33464b;
     --color-dark-grey: #1e2b2d;
@@ -56,26 +90,25 @@ main {
     --color-dark-shadow: #0b1415;
     --color-translucent-black-33: rgba(0, 0, 0, 0.33);
 
-    /* Disabled Control Colors */
+    /* Disabled State Colors */
     --color-dark-dull-grey: #2d2d2d;
     --color-dull-grey: #5c5c5c;
     --color-light-dull-grey: #6b6b6b;
     --color-light-dull-wash-grey: #545454;
 
-    /* Other UI Colors */
+    /* Misc UI Colors */
     --color-burnt-red: #8f3b36;
     --color-light-silver: #a3acb9;
     --color-grey-silver: #686e78;
-
-    /* Additional Purple Colors */
     --color-purple-violet: #9B7EDE;
     --color-purple-muted: #6B5AA8;
 
-    /* ============================================================ */
-    /* LAYER 2: SEMANTIC BRUSHES - References to Layer 1 Only       */
-    /* ============================================================ */
+    /* --------------------------------
+       LAYER 2: SEMANTIC ALIASES
+       Reference Layer 1 only
+       -------------------------------- */
 
-    /* Brand Action */
+    /* Brand Action Colors */
     --balatro-white: var(--color-white);
     --balatro-black: var(--color-black);
     --balatro-red: var(--color-red);
@@ -90,39 +123,46 @@ main {
     --balatro-purple-hover: var(--color-dark-purple);
     --balatro-gold: var(--color-bright-gold);
 
-    /* Badge/Button Semantic Names */
-    --balatro-red-badge-face: var(--color-red);
-    --balatro-red-badge-edge: var(--color-dark-red);
-
-    /* Text Semantic */
+    /* Text Colors */
     --balatro-font-gold: var(--color-bright-gold);
     --balatro-font-green: var(--color-bright-green);
     --balatro-text-disabled: var(--color-faded-grey);
 
-    /* Modal/Panel Semantic - THE LAW */
+    /* Modal/Panel Colors */
     --balatro-modal-bg: var(--color-grey);
-    /* #3a5055 - The Teal Twinge */
     --balatro-modal-grey: var(--color-grey);
     --balatro-modal-inner: var(--color-dark-grey);
     --balatro-modal-border: var(--color-bright-silver);
-    --balatro-modal-edge-border: var(--color-bright-silver);
-    --balatro-modal-south-edge: var(--color-light-grey);
     --balatro-modal-shadow: var(--color-dark-shadow);
 
-    /* Legacy Aliases (To keep existing UI from breaking) */
+    /* Legacy Aliases (backwards compatibility) */
     --balatro-grey: var(--color-grey);
     --balatro-grey-dark: var(--color-medium-grey);
     --balatro-grey-darker: var(--color-dark-grey);
     --balatro-shadow: var(--color-dark-shadow);
     --balatro-border: var(--color-bright-silver);
 
-    /* Disabled Control Semantic */
+    /* Disabled State */
     --balatro-disabled-face: var(--color-light-dull-wash-grey);
     --balatro-disabled-text: var(--color-light-dull-grey);
     --balatro-disabled-shadow: var(--color-dark-dull-grey);
 }
 
-/* Swirl Background Effect */
+/* ============================================================================
+   3. BACKGROUND & AMBIENT EFFECTS
+   ============================================================================ */
+
+body {
+    background: linear-gradient(-45deg, #2c3e50, #0099DB, #c0392b, #8E44AD);
+    background-size: 400% 400%;
+    animation: swirl 20s ease infinite;
+    min-height: 100vh;
+    color: white;
+    font-family: var(--font-header), sans-serif;
+    overflow-y: hidden;
+    position: relative;
+}
+
 @keyframes swirl {
     0% {
         background-position: 0% 50%;
@@ -137,25 +177,11 @@ main {
     }
 }
 
-body {
-    background: linear-gradient(-45deg, #2c3e50, #0099DB, #c0392b, #8E44AD);
-    background-size: 400% 400%;
-    animation: swirl 20s ease infinite;
-    min-height: 100vh;
-    color: white;
-    font-family: var(--font-header), sans-serif;
-    overflow-y: hidden;
-    position: relative;
-}
-
 /* CRT Scanline Overlay */
 body::after {
     content: "";
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+    inset: 0;
     background: repeating-linear-gradient(to bottom,
             rgba(0, 0, 0, 0.1),
             rgba(0, 0, 0, 0.1) 2px,
@@ -166,7 +192,10 @@ body::after {
     opacity: 0.15;
 }
 
-/* Custom Scrollbar */
+/* ============================================================================
+   4. SCROLLBAR STYLING
+   ============================================================================ */
+
 ::-webkit-scrollbar {
     width: 12px;
 }
@@ -186,8 +215,18 @@ body::after {
     background: #64748b;
 }
 
+/* ============================================================================
+   5. COMPONENT LAYER
+   ============================================================================ */
+
 @layer components {
-    .balatro-panel {
+
+    /* ------------------------------------------------------------------------
+       PANELS & CARDS
+       ------------------------------------------------------------------------ */
+
+    .balatro-panel,
+    .balatro-card {
         background-color: var(--balatro-modal-bg);
         border: 2px solid rgba(0, 0, 0, 0.2);
         border-radius: 0.75rem;
@@ -197,118 +236,147 @@ body::after {
         padding: 0.75rem;
     }
 
-    .balatro-card {
-        @apply balatro-panel;
+    /* Navigation central stage */
+    .balatro-nav-stage {
+        box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
     }
 
-    /* THE BALATRO BUTTON STANDARD - Tactical Sinking Style */
-    .balatro-button {
+    /* Text drop shadows */
+    .balatro-text-shadow-hard {
+        filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.8));
+    }
+
+    .balatro-text-shadow-small {
+        filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.8));
+    }
+
+    .balatro-text-shadow-bold {
+        filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 1));
+    }
+
+    /* Select box shadow */
+    .balatro-select-shadow {
+        box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.4);
+    }
+
+    /* Leaderboard gold winner glow */
+    .balatro-gold-glow {
+        box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+
+    /* ------------------------------------------------------------------------
+       BUTTONS - Balatro 2D Flat Style
+       
+       Rules:
+       1. Flat face color
+       2. 4px solid shadow (--color-dark-shadow)
+       3. NO transitions - snap between states
+       4. Hover: darken face, no movement
+       5. Active: shadow gone, translate down 4px
+       ------------------------------------------------------------------------ */
+
+    .balatro-button,
+    .balatro-nav-button,
+    .balatro-tab {
         color: white !important;
         font-family: var(--font-header);
         border: none;
         border-radius: 0.5rem;
         cursor: pointer;
         position: relative;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        transition: none;
         padding: 0.6rem 1.25rem;
         font-size: 1.1rem;
         text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        /* The "Side" of the button */
-        box-shadow: 0 4px 0 rgba(0, 0, 0, 0.8);
+        background-color: var(--color-red);
+        box-shadow: 0 4px 0 var(--color-dark-shadow);
+        transition: none !important;
+        user-select: none;
+    }
+
+    /* Smaller tabs variant */
+    .balatro-tab {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.7rem;
+        letter-spacing: 0.03em;
+    }
+
+    /* Button Color Variants */
+    .balatro-button-red {
+        background-color: var(--color-red);
+    }
+
+    .balatro-button-red:hover:not(:disabled) {
+        background-color: var(--color-dark-red);
     }
 
     .balatro-button-blue {
         background-color: var(--color-blue);
-        box-shadow: 0 4px 0 var(--color-dark-blue);
     }
 
-    .balatro-button-red {
-        background-color: var(--color-red);
-        box-shadow: 0 4px 0 var(--color-dark-red);
+    .balatro-button-blue:hover:not(:disabled) {
+        background-color: var(--color-dark-blue);
     }
 
     .balatro-button-gold {
         background-color: var(--balatro-gold);
-        box-shadow: 0 4px 0 var(--color-dark-gold);
+    }
+
+    .balatro-button-gold:hover:not(:disabled) {
+        background-color: var(--color-dark-gold);
     }
 
     .balatro-button-orange,
     .balatro-button-back {
         background-color: var(--color-orange);
-        box-shadow: 0 4px 0 var(--color-dark-orange);
     }
 
-    .balatro-button:hover:not(:disabled) {
-        transform: translateY(-1px);
-        filter: brightness(1.1);
-        box-shadow: 0 5px 0 rgba(0, 0, 0, 0.9);
+    .balatro-button-orange:hover:not(:disabled),
+    .balatro-button-back:hover:not(:disabled) {
+        background-color: var(--color-dark-orange);
     }
 
-    .balatro-button:active:not(:disabled) {
+    .balatro-button-green {
+        background-color: var(--color-green);
+    }
+
+    .balatro-button-green:hover:not(:disabled) {
+        background-color: var(--color-dark-green);
+    }
+
+    .balatro-button-purple {
+        background-color: var(--color-purple);
+    }
+
+    .balatro-button-purple:hover:not(:disabled) {
+        background-color: var(--color-dark-purple);
+    }
+
+    /* Button States */
+    .balatro-button:active:not(:disabled),
+    .balatro-nav-button:active:not(:disabled),
+    .balatro-tab:active:not(:disabled) {
         transform: translateY(4px);
         box-shadow: none;
-        filter: brightness(0.9);
     }
 
-    .balatro-button:disabled {
+    .balatro-button:disabled,
+    .balatro-nav-button:disabled,
+    .balatro-tab:disabled {
         cursor: not-allowed;
-        background-color: var(--color-dark-dull-grey) !important;
-        color: var(--color-dull-grey) !important;
-        box-shadow: 0 2px 0 var(--color-black) !important;
-        transform: translateY(2px) !important;
+        filter: brightness(0.4) saturate(0.6);
+        box-shadow: 0 4px 0 var(--color-dark-shadow) !important;
+        opacity: 1 !important;
+        color: rgba(255, 255, 255, 0.5) !important;
     }
 
-    .balatro-nav-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 3.8rem;
-        /* Wider for thumbs */
-        flex-shrink: 0;
-        border-radius: 0.5rem;
-        background-color: var(--color-red);
-        box-shadow: 0 4px 0 var(--color-dark-red);
-        position: relative;
-        transition: background-color 0.1s;
-    }
-
-    .balatro-nav-button:hover:not(:disabled) {
-        background-color: var(--color-dark-red);
-    }
-
-    .balatro-nav-button:active:not(:disabled) {
-        transform: translateY(2px);
-        box-shadow: none;
-    }
-
-    .balatro-nav-button:disabled {
-        cursor: not-allowed;
-        background-color: var(--color-red);
-        box-shadow: 0 4px 0 var(--color-dark-red);
-        opacity: 0.4;
-    }
-
-    /* Ambient Sway */
-    @keyframes balatro-sway {
-
-        0%,
-        100% {
-            transform: rotate(-0.5deg) translateY(0);
-        }
-
-        50% {
-            transform: rotate(0.5deg) translateY(-2px);
-        }
-    }
-
-    .balatro-sway {
-        animation: balatro-sway 6s ease-in-out infinite;
-    }
+    /* ------------------------------------------------------------------------
+       INPUTS
+       ------------------------------------------------------------------------ */
 
     .balatro-input {
         background-color: rgba(0, 0, 0, 0.4);
@@ -326,6 +394,11 @@ body::after {
         border-color: var(--balatro-blue);
     }
 
+    /* ------------------------------------------------------------------------
+       SPECIAL COMPONENTS
+       ------------------------------------------------------------------------ */
+
+    /* Acrylic/Glass Card (used sparingly) */
     .acrylic-card {
         background: rgba(255, 255, 255, 0.03);
         backdrop-filter: blur(12px) saturate(180%);
@@ -335,9 +408,61 @@ body::after {
         position: relative;
         overflow: hidden;
     }
+
+    /* Selected Tab Indicator (Pure CSS Triangle) */
+    .balatro-selected-tab::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 8px solid var(--color-red);
+        animation: tab-arrow-bounce 0.6s ease-in-out infinite;
+    }
+
+    @keyframes tab-arrow-bounce {
+
+        0% {
+            transform: translateX(-50%) translateY(-4px);
+        }
+
+        25% {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        50%,
+        100% {
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+
+    /* Ambient Sway Animation */
+    .balatro-sway {
+        animation: balatro-sway 6s ease-in-out infinite;
+    }
+
+    @keyframes balatro-sway {
+
+        0%,
+        100% {
+            transform: rotate(-0.5deg) translateY(0);
+        }
+
+        50% {
+            transform: rotate(0.5deg) translateY(-2px);
+        }
+    }
 }
 
-/* Juice Animations */
+/* ============================================================================
+   6. ANIMATIONS (Outside @layer for global availability)
+   ============================================================================ */
+
+/* Wobble */
 @keyframes balatro-wobble {
     0% {
         transform: rotate(0deg);
@@ -356,6 +481,7 @@ body::after {
     }
 }
 
+/* Pop */
 @keyframes juice-pop {
     0% {
         transform: scale(0.6) rotate(-5deg);
@@ -380,8 +506,7 @@ body::after {
     animation: juice-pop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-/* Removed infinite wobble - it was nauseating. Juice should be one-shot on mount only. */
-
+/* Heartbeat */
 @keyframes heartbeat {
     0% {
         transform: scale(1);
@@ -399,10 +524,7 @@ body::after {
         transform: scale(1.5);
     }
 
-    70% {
-        transform: scale(1);
-    }
-
+    70%,
     100% {
         transform: scale(1);
     }
@@ -414,6 +536,7 @@ body::after {
     transform-origin: center;
 }
 
+/* Ad Rotator Button (special case) */
 .ad-rotator-button {
     background-color: var(--balatro-grey) !important;
     transition: filter 0.1s ease-out, transform 0.1s ease-out;
@@ -428,12 +551,9 @@ body::after {
     transform: translateY(1px);
 }
 
-/* Utilities */
-.font-pixel {
-    font-family: var(--font-pixel), monospace;
-    font-weight: normal !important;
-    font-size: 1.25rem;
-}
+/* ============================================================================
+   7. UTILITY CLASSES
+   ============================================================================ */
 
 .font-header {
     font-family: var(--font-header), font-pixel, monospace;
@@ -447,48 +567,4 @@ body::after {
 
 .text-shadow-md {
     text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
-}
-
-/* ============================================================ */
-/* EMERGENCY UI FIXES: SIDE LABELS & AUTO-SCALING FOOTER        */
-/* ============================================================ */
-
-.balatro-side-label {
-    position: absolute;
-    left: -1rem;
-    top: 50%;
-    transform: translateY(-50%) rotate(-90deg);
-    color: rgba(255, 255, 255, 0.3);
-    font-family: var(--font-header);
-    font-size: 10px;
-    z-index: 50;
-    white-space: nowrap;
-    pointer-events: none;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-}
-
-.balatro-footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 20px;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(4px);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-}
-
-.balatro-footer-text {
-    font-family: var(--font-header);
-    font-weight: normal;
-    color: #ffffff;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    white-space: nowrap;
-    font-size: clamp(8px, 2vw, 13px);
 }

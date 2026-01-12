@@ -52,7 +52,7 @@ export function SeedScatterPlot({ data }: SeedScatterPlotProps) {
             className="w-full h-[400px] bg-balatro-grey-darker border-2 border-balatro-grey rounded-xl p-4 relative overflow-hidden shadow-balatro-inner"
         >
             <div className="absolute top-4 left-4 z-10 pointer-events-none">
-                <h3 className="text-white font-header text-xl uppercase drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">Seed Distribution</h3>
+                <h3 className="text-white font-header text-xl uppercase balatro-text-shadow-bold">Seed Distribution</h3>
                 <p className="text-balatro-blue font-pixel text-lg">Twos vs. Score</p>
             </div>
 

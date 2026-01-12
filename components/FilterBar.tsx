@@ -37,7 +37,7 @@ export function FilterBar({ onSearch, onSortChange }: FilterBarProps) {
                     <div className="relative mt-2 h-full">
                         <select
                             onChange={(e) => onSortChange(e.target.value)}
-                            className="bg-balatro-orange hover:bg-balatro-orange-dark text-white border-b-4 border-[#a05b00] active:border-b-0 active:translate-y-1 rounded-lg font-header text-xl shadow-[0_4px_0_0_rgba(0,0,0,0.4)] appearance-none cursor-pointer uppercase tracking-wider py-4 pl-6 pr-12 w-full md:w-64 text-center transition-all focus:outline-none"
+                            className="bg-balatro-orange hover:bg-balatro-orange-dark text-white border-b-4 border-[#a05b00] active:border-b-0 active:translate-y-1 rounded-lg font-header text-xl balatro-select-shadow appearance-none cursor-pointer uppercase tracking-wider py-4 pl-6 pr-12 w-full md:w-64 text-center transition-all focus:outline-none"
                         >
                             <option value="default">Most Rated</option>
                             <option value="wee_desc">Wee Joker</option>

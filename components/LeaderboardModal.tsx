@@ -92,7 +92,7 @@ export function LeaderboardModal({ dayNumber, onClose }: LeaderboardModalProps) 
                                 className={`
                                     flex items-center justify-between p-3 rounded-lg border-2
                                     ${idx === 0
-                                        ? 'bg-[var(--balatro-gold)] border-[var(--balatro-gold)] text-black shadow-[ inset_0_0_20px_rgba(255,255,255,0.2) ]'
+                                        ? 'bg-[var(--balatro-gold)] border-[var(--balatro-gold)] text-black balatro-gold-glow'
                                         : 'bg-black/40 border-black/20 text-white'
                                     }
                                 `}

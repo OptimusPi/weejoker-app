@@ -16,7 +16,7 @@ export function DayHeader({ dayNumber, displayDate, theme }: DayHeaderProps) {
     return (
         <div className="flex-shrink-0 w-full flex items-center justify-center p-0.5 min-h-0 overflow-hidden">
             <div className="text-center w-full relative z-20 px-4">
-                <div className="font-header font-normal text-2xl sm:text-3xl text-white tracking-wider uppercase leading-none mb-1 select-none drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
+                <div className="font-header font-normal text-2xl sm:text-3xl text-white tracking-wider uppercase leading-none mb-1 select-none balatro-text-shadow-hard">
                     THE DAILY WEE
                 </div>
                 <div className="w-full max-w-sm mx-auto flex flex-col gap-1">
@@ -30,8 +30,8 @@ export function DayHeader({ dayNumber, displayDate, theme }: DayHeaderProps) {
                         className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-header tracking-widest self-center shadow-lg"
                         style={{ backgroundColor: theme.color, color: 'white' }}
                     >
-                        <span className="drop-shadow-[0_2px_0_rgba(0,0,0,0.8)]">{theme.icon}</span>
-                        <span className="mt-[2px] drop-shadow-[0_2px_0_rgba(0,0,0,0.8)]">{theme.name}</span>
+                        <span className="balatro-text-shadow-small">{theme.icon}</span>
+                        <span className="mt-[2px] balatro-text-shadow-small">{theme.name}</span>
                     </div>
                 </div>
             </div>

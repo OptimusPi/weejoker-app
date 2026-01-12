@@ -18,13 +18,13 @@ export function DayNavigation({ onPrev, onNext, canPrev, canNext, children }: Da
             <button
                 onClick={onPrev}
                 disabled={!canPrev}
-                className="balatro-nav-button"
+                className="balatro-button balatro-button-red balatro-nav-button"
             >
                 <ChevronLeft size={24} className="text-white" strokeWidth={4} />
             </button>
 
             {/* Central Stage - FLEXIBLE HEIGHT */}
-            <div className="relative flex-1 z-20 flex flex-col min-w-0 shadow-[0_4px_0_rgba(0,0,0,0.2)]">
+            <div className="relative flex-1 z-20 flex flex-col min-w-0 balatro-nav-stage">
                 {children}
             </div>
 
@@ -32,7 +32,7 @@ export function DayNavigation({ onPrev, onNext, canPrev, canNext, children }: Da
             <button
                 onClick={onNext}
                 disabled={!canNext}
-                className="balatro-nav-button"
+                className="balatro-button balatro-button-red balatro-nav-button"
             >
                 <ChevronRight size={24} className="text-white" strokeWidth={4} />
             </button>
