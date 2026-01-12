@@ -5,11 +5,10 @@ import { useState } from "react";
 interface HowToPlayProps {
     onClose: () => void;
     onSubmit?: () => void;
-    themeName?: string;
     seedId?: string;
 }
 
-export function HowToPlay({ onClose, onSubmit, themeName = "Daily Ritual", seedId = "--------" }: HowToPlayProps) {
+export function HowToPlay({ onClose, onSubmit, seedId = "--------" }: HowToPlayProps) {
     const [step, setStep] = useState(1);
     const [copied, setCopied] = useState(false);
     const totalSteps = 4;
@@ -97,7 +96,7 @@ export function HowToPlay({ onClose, onSubmit, themeName = "Daily Ritual", seedI
                                 </p>
                                 <p className="font-pixel text-lg text-white leading-tight flex items-center gap-3">
                                     <span className="w-6 h-6 rounded-full bg-[var(--balatro-blue)] flex items-center justify-center text-[10px] font-header shrink-0">3</span>
-                                    <span>Select {themeName.includes("Madness") ? <span className="text-[var(--balatro-gold)] font-header">Gold Stake</span> : "White Stake"}</span>
+                                    <span>Select <span className="font-header">White Stake</span></span>
                                 </p>
                             </div>
                         </div>

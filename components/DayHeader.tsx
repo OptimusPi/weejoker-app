@@ -5,14 +5,9 @@ import React from "react";
 interface DayHeaderProps {
     dayNumber: number;
     displayDate: string;
-    theme: {
-        name: string;
-        color: string;
-        icon: string;
-    } | null;
 }
 
-export function DayHeader({ dayNumber, displayDate, theme }: DayHeaderProps) {
+export function DayHeader({ dayNumber, displayDate }: DayHeaderProps) {
     return (
         <div className="flex-shrink-0 w-full flex items-center justify-center pt-0 min-h-0 overflow-hidden">
             <div className="text-center w-full relative z-20 px-4">
@@ -25,16 +20,6 @@ export function DayHeader({ dayNumber, displayDate, theme }: DayHeaderProps) {
                         <span className="text-[var(--balatro-gold)]">No. {dayNumber < 1 ? 1 : dayNumber}</span>
                         <span>Est. 2026</span>
                     </div>
-                    {/* Theme Badge */}
-                    {theme && (
-                        <div
-                            className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-header tracking-widest self-center shadow-lg"
-                            style={{ backgroundColor: theme.color, color: 'white' }}
-                        >
-                            <span className="balatro-text-shadow-small">{theme.icon}</span>
-                            <span className="mt-[2px] balatro-text-shadow-small">{theme.name}</span>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>

@@ -1,8 +1,44 @@
+// Balatro deck types
+export type DeckType =
+    | 'red' | 'blue' | 'yellow' | 'green' | 'black'
+    | 'magic' | 'nebula' | 'ghost' | 'abandoned' | 'checkered'
+    | 'zodiac' | 'painted' | 'anaglyph' | 'plasma' | 'erratic';
+
+// Balatro stake types
+export type StakeType =
+    | 'white' | 'red' | 'green' | 'black'
+    | 'blue' | 'purple' | 'orange' | 'gold';
+
+/**
+ * Configuration for a Daily Ritual challenge
+ * Matches the dailyritual.schema.json structure
+ */
+export interface RitualConfig {
+    filterId: string;       // e.g. "wee_joker_daily"
+    searchId: string;       // e.g. "wee_joker_daily__erratic_white"
+    deck: DeckType;
+    stake: StakeType;
+    seeds: string;          // Path to seeds file
+    name: string;           // Display name
+    author: string;         // Curator username
+    description?: string;   // Brief description
+    tutorial?: string;      // How to use this seed
+    epoch?: string;         // ISO date-time for Day 1
+    icon?: string;          // Emoji for the ritual
+    color?: string;         // Theme color (CSS value)
+}
+
+/**
+ * Seed data record from the seeds file
+ * Core fields (seed, score) are always present
+ * All other fields are dynamic based on the JAML filter columns
+ */
 export interface SeedData {
     seed: string;
     score: number;
 
-    // User's Renamed JAML Labels
+    // Common JAML labels for The Daily Wee
+    // These can vary based on the ritual's JAML filter
     twos?: number;
 
     // Wee Joker
@@ -33,12 +69,7 @@ export interface SeedData {
     Temperance?: number;
     Ankh_Ante1?: number;
 
-    // Theme Info
-    themeName?: string;
-    themeJoker?: string;
-    themeCardAnte1?: number;
-    themeCardAnte2?: number;
-
-    // Allow for extras
+    // Dynamic fields from JAML filter
+    // Column names are derived from the filter's "label" fields
     [key: string]: string | number | boolean | undefined;
 }

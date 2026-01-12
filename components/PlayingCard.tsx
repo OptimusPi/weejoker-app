@@ -42,7 +42,7 @@ export function PlayingCard({ rank, suit, size = 40, style, className = '' }: Pl
     const cardStyle: CSSProperties = {
         width: `${SPRITE_WIDTH * scale}px`,
         height: `${SPRITE_HEIGHT * scale}px`,
-        backgroundImage: 'url(/Assets/Decks/8BitDeck.png)',
+        backgroundImage: 'url(/assets/Decks/8BitDeck.png)',
         backgroundPosition: `-${coords.x * SPRITE_WIDTH * scale}px -${coords.y * SPRITE_HEIGHT * scale}px`,
         backgroundSize: `${13 * SPRITE_WIDTH * scale}px ${4 * SPRITE_HEIGHT * scale}px`,
         imageRendering: 'pixelated',

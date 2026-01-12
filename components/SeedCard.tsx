@@ -69,13 +69,6 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
 
     const getJokers = (ante: 1 | 2) => {
         const jokers: { id: string; name: string; tally?: number }[] = [];
-        if (seed.themeJoker && seed.themeJoker !== "Joker") {
-            const themeTally = ante === 1 ? seed.themeCardAnte1 : seed.themeCardAnte2;
-            if ((themeTally ?? 0) > 0) {
-                const jokerId = seed.themeJoker.toLowerCase().replace(/ /g, "");
-                jokers.push({ id: jokerId, name: seed.themeJoker, tally: themeTally as number });
-            }
-        }
         const isAlreadyAdded = (name: string) => jokers.some(j => j.name === name);
         const weeTally = ante === 1 ? seed.WeeJoker_Ante1 : seed.WeeJoker_Ante2;
         if ((weeTally ?? 0) > 0 && !isAlreadyAdded("Wee Joker")) {
@@ -133,7 +126,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                     </div>
                     <div className="w-1/2 bg-black/20 flex items-center justify-center p-0.5 overflow-visible">
                         {!isLocked ? (
-                            <CardFan count={seed.twos} className="scale-110" />
+                            <CardFan count={seed.twos ?? 0} className="scale-110" />
                         ) : (
                             <span className="font-header text-sm text-white/40 tracking-widest leading-none">--</span>
                         )}

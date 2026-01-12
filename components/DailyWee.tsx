@@ -91,11 +91,7 @@ export function DailyWee() {
                     blueprint_early: seedRaw.bp,
                     brainstorm_early: seedRaw.bs,
                     Showman_Ante1: seedRaw.sh,
-                    red_Seal_Two: seedRaw.rs,
-                    themeName: seedRaw.t,
-                    themeJoker: seedRaw.j,
-                    themeCardAnte1: seedRaw.t1,
-                    themeCardAnte2: seedRaw.t2
+                    red_Seal_Two: seedRaw.rs
                 };
                 setSeeds([seedData]);
                 setError(null);
@@ -114,11 +110,7 @@ export function DailyWee() {
                 blueprint_early: seedRaw.bp,
                 brainstorm_early: seedRaw.bs,
                 Showman_Ante1: seedRaw.sh,
-                red_Seal_Two: seedRaw.rs,
-                themeName: seedRaw.t,
-                themeJoker: seedRaw.j,
-                themeCardAnte1: seedRaw.t1,
-                themeCardAnte2: seedRaw.t2
+                red_Seal_Two: seedRaw.rs
             };
             setSeeds([seedData]);
             setError(null);
@@ -157,23 +149,7 @@ export function DailyWee() {
         return date.toLocaleDateString('en-US', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' });
     };
 
-    const getTheme = (day: number, seedData: SeedData | null) => {
-        // Always calculate theme from actual weekday, not seed data
-        const date = new Date(EPOCH + (day - 1) * 24 * 60 * 60 * 1000);
-        const dayOfWeek = date.getUTCDay();
-        const defaultThemes = [
-            { name: "Weekend Ritual", color: "var(--balatro-gold)", icon: "🔥" },    // Sunday
-            { name: "Madness Monday", color: "var(--balatro-red)", icon: "🔥" },    // Monday
-            { name: "Twosday", color: "var(--balatro-blue)", icon: "2️⃣" },           // Tuesday
-            { name: "Wee Wednesday", color: "var(--balatro-green)", icon: "🃏" },        // Wednesday
-            { name: "Threshold Thursday", color: "var(--balatro-orange)", icon: "💻" }, // Thursday
-            { name: "Foil Friday", color: "var(--balatro-blue)", icon: "📐" },   // Friday
-            { name: "Weekend Ritual", color: "var(--balatro-gold)", icon: "🎩" },   // Saturday
-        ];
-        return defaultThemes[dayOfWeek] || defaultThemes[0];
-    };
 
-    const currentTheme = getTheme(viewingDay, seed);
 
     if (!mounted) return null;
 
@@ -186,7 +162,6 @@ export function DailyWee() {
                         <DayHeader
                             dayNumber={viewingDay}
                             displayDate={getDayDisplay(viewingDay)}
-                            theme={viewingDay === 0 ? null : currentTheme}
                         />
 
                         <DayNavigation
@@ -226,7 +201,7 @@ export function DailyWee() {
                         </DayNavigation>
 
                         {/* Banner Ad Rotator - Constrained to central card width */}
-                        <div className="w-full max-w-[340px] px-2 mt-1 z-40 relative">
+                        <div className="w-full max-w-[340px] px-2 mt-8 z-40 relative">
                             <AdRotator
                                 onOpenWisdom={() => setViewMode('wisdom')}
                                 onOpenLeaderboard={() => setShowLeaderboard(true)}
@@ -250,7 +225,6 @@ export function DailyWee() {
                 {showHowTo && (
                     <HowToPlay
                         onClose={() => setShowHowTo(false)}
-                        themeName={currentTheme.name}
                         seedId={seed?.seed || '--------'}
                         onSubmit={() => { setShowHowTo(false); setShowSubmit(true); }}
                     />

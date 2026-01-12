@@ -1,0 +1,147 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://weejoker.app/schemas/dailyritual.schema.json",
+    "title": "Daily Ritual Configuration",
+    "description": "Configuration for a Daily Ritual challenge in the Motely JAML ecosystem",
+    "type": "object",
+    "required": [
+        "filterId",
+        "searchId",
+        "deck",
+        "stake",
+        "seeds",
+        "name",
+        "author"
+    ],
+    "properties": {
+        "filterId": {
+            "type": "string",
+            "description": "Normalized filter name (lowercase with underscores), e.g. 'perkeo_observatory'",
+            "pattern": "^[a-z0-9_]+$",
+            "examples": [
+                "perkeo_observatory",
+                "wee_joker_daily",
+                "blueprint_madness"
+            ]
+        },
+        "searchId": {
+            "type": "string",
+            "description": "Full search ID combining filterId + deck + stake, e.g. 'perkeo_observatory__ghost_black'",
+            "pattern": "^[a-z0-9_]+__[a-z]+_[a-z]+$",
+            "examples": [
+                "perkeo_observatory__ghost_black",
+                "wee_joker_daily__erratic_white"
+            ]
+        },
+        "deck": {
+            "type": "string",
+            "description": "Balatro deck type",
+            "enum": [
+                "red",
+                "blue",
+                "yellow",
+                "green",
+                "black",
+                "magic",
+                "nebula",
+                "ghost",
+                "abandoned",
+                "checkered",
+                "zodiac",
+                "painted",
+                "anaglyph",
+                "plasma",
+                "erratic"
+            ]
+        },
+        "stake": {
+            "type": "string",
+            "description": "Balatro stake difficulty",
+            "enum": [
+                "white",
+                "red",
+                "green",
+                "black",
+                "blue",
+                "purple",
+                "orange",
+                "gold"
+            ]
+        },
+        "seeds": {
+            "type": "string",
+            "description": "Path or filename to seeds data file (.db, .csv, .json, or .parquet)",
+            "pattern": ".*\\.(db|csv|json|parquet)$",
+            "examples": [
+                "perkeo_observatory__ghost_black.db",
+                "seeds.csv"
+            ]
+        },
+        "name": {
+            "type": "string",
+            "description": "Human-readable display name for the ritual",
+            "minLength": 3,
+            "maxLength": 100,
+            "examples": [
+                "Daily Perkeo Observatory Challenge",
+                "The Daily Wee"
+            ]
+        },
+        "author": {
+            "type": "string",
+            "description": "Curator/author username who created this ritual",
+            "minLength": 1,
+            "maxLength": 50,
+            "examples": [
+                "pifreak",
+                "community"
+            ]
+        },
+        "description": {
+            "type": "string",
+            "description": "Brief description of what this ritual is about",
+            "maxLength": 500,
+            "examples": [
+                "A Daily Ritual for Balatro focused on the Observatory voucher paired with the Legendary Joker Perkeo!"
+            ]
+        },
+        "tutorial": {
+            "type": "string",
+            "description": "Instructions on how to use this seed properly - explains the mechanic, required choices, and tips from the curator",
+            "maxLength": 1000,
+            "examples": [
+                "Get Perkeo in Ante 1 or 2 from Arcana pack"
+            ]
+        },
+        "epoch": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC epoch timestamp for Day 1 of this ritual",
+            "default": "2026-01-06T00:00:00Z",
+            "examples": [
+                "2026-01-06T00:00:00Z",
+                "2026-02-01T00:00:00Z"
+            ]
+        },
+        "icon": {
+            "type": "string",
+            "description": "Emoji or icon identifier for the ritual",
+            "maxLength": 10,
+            "examples": [
+                "🃏",
+                "🔮",
+                "👻"
+            ]
+        },
+        "color": {
+            "type": "string",
+            "description": "Theme color for the ritual (CSS color value)",
+            "pattern": "^(#[0-9a-fA-F]{6}|var\\(--[a-z-]+\\))$",
+            "examples": [
+                "#ff6b6b",
+                "var(--balatro-blue)"
+            ]
+        }
+    },
+    "additionalProperties": false
+}
