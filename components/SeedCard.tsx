@@ -102,7 +102,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
     }, [isLocked]);
 
     return (
-        <div className={cn("relative group flex flex-col balatro-sway", className)}>
+        <div className={cn("relative group flex flex-col", className)}>
             <div className="balatro-panel p-1.5 flex flex-col relative h-full z-10 grow gap-1.5 min-h-[345px] !overflow-visible">
 
                 {/* Header Row: Seed & Twos */}
@@ -126,7 +126,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                 </div>
 
                 {/* View Tabs */}
-                <div className="flex gap-1 justify-center shrink-0 mt-0.5">
+                <div className="flex gap-1 justify-center shrink-0 mt-1">
                     {(['DEFAULT', 'PLAY', 'SCORES'] as CardView[]).map((v) => (
                         <button
                             key={v}
@@ -144,37 +144,35 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                 {/* View Container - Direct content, no inner panel */}
                 <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                     {view === 'DEFAULT' && (
-                        <div className="flex-1 flex flex-col justify-center gap-1.5 px-2 py-2 overflow-visible">
-                            <div className="grid grid-cols-2 gap-1.5">
+                        <div className="flex-1 flex flex-col justify-center gap-2 px-2 py-2 overflow-visible">
+                            <div className="flex flex-col gap-2">
                                 {[1, 2].map((anteNum) => {
                                     const jokers = getJokers(anteNum as 1 | 2);
                                     if (jokers.length === 0) return null;
                                     return (
-                                        <div key={anteNum} className="bg-black/30 rounded-lg p-1.5 border border-white/10">
-                                            {/* Ante Label */}
-                                            <div className={cn(
-                                                "text-center font-header text-[9px] tracking-wider uppercase py-0.5 px-1 rounded mb-1",
-                                                anteNum === 1 ? "bg-[var(--balatro-gold)] text-black" : "bg-[var(--balatro-blue)] text-white"
-                                            )}>
+                                        <div key={anteNum} className="bg-black/30 rounded-lg p-2 juice-pop balatro-sway balatro-item-${anteNum}" style={{ minHeight: '80px' }}>
+                                            {/* Ante Label - Always Blue */}
+                                            <div className="text-center font-header text-[10px] tracking-wider uppercase py-1 px-1 rounded mb-2 bg-[var(--balatro-blue)] text-white">
                                                 Ante {anteNum}
                                             </div>
-                                            {/* Jokers */}
-                                            <div className="flex flex-col gap-1">
-                                                {jokers.map((j) => (
-                                                    <div key={j.id} className="bg-white/5 rounded p-1 flex items-center gap-1.5">
-                                                        <div className="relative shrink-0">
+                                            {/* Jokers - Horizontal Row */}
+                                            <div className="flex gap-3 justify-center items-start flex-wrap">
+                                                {jokers.map((j, jIdx) => (
+                                                    <div key={j.id} className={`relative flex flex-col items-center group balatro-item-${(anteNum - 1) * 4 + jIdx + 1}`}>
+                                                        <div className="relative">
                                                             {j.tally !== undefined && j.tally > 1 && (
-                                                                <div className="absolute -top-0.5 -right-0.5 bg-white text-black font-header text-[7px] w-3 h-3 flex items-center justify-center rounded-full z-20 shadow-sm">
+                                                                <div className="absolute -top-1 -right-1 bg-white text-black font-header text-[8px] w-4 h-4 flex items-center justify-center rounded-full z-20 shadow-sm">
                                                                     {j.tally}
                                                                 </div>
                                                             )}
                                                             <Sprite
                                                                 name={j.id}
-                                                                width={j.id === 'weejoker' ? 22 : 40}
-                                                                className="drop-shadow-sm"
+                                                                width={j.id === 'weejoker' ? 28 : 52}
+                                                                className="drop-shadow-md"
                                                             />
                                                         </div>
-                                                        <span className="font-header text-[8px] text-white uppercase leading-tight flex-1">{j.name}</span>
+                                                        {/* Tooltip name below */}
+                                                        <span className="font-header text-[7px] text-white/60 uppercase mt-1 leading-none text-center max-w-[60px]">{j.name}</span>
                                                     </div>
                                                 ))}
                                             </div>
@@ -183,7 +181,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                                 })}
                             </div>
                             {getJokers(1).length === 0 && getJokers(2).length === 0 && (
-                                <span className="font-pixel text-white/10 text-[9px] uppercase tracking-widest py-4 text-center">No Jokers Found</span>
+                                <span className="font-pixel text-white/10 text-[10px] uppercase tracking-widest py-4 text-center">No Jokers Found</span>
                             )}
                         </div>
                     )}

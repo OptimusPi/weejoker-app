@@ -226,7 +226,7 @@ export function DailyWee() {
                         </DayNavigation>
 
                         {/* Banner Ad Rotator - Full width alignment */}
-                        <div className="w-full max-w-md px-0 mt-1">
+                        <div className="w-full max-w-md px-0 mt-0.5">
                             <AdRotator
                                 onOpenWisdom={() => setViewMode('wisdom')}
                                 onOpenLeaderboard={() => setShowLeaderboard(true)}
