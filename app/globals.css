@@ -3,31 +3,31 @@
 @tailwind utilities;
 
 /* ============================================================================
-   GLOBALS.CSS - The Daily Wee Design System
+   GLOBALS.CSS - The Daily Wee (Balatro Edition)
    ============================================================================
-   Structure:
-   1. Reset & Base Styles
-   2. CSS Custom Properties (Design Tokens)
-   3. Background & Ambient Effects
-   4. Scrollbar Styling
-   5. Component Layer (Panels, Buttons, Inputs)
-   6. Animations
-   7. Utility Classes
+   Source of Truth: X:\BalatroSeedOracle\external\Balatro\globals.lua
    ============================================================================ */
 
 /* ============================================================================
    1. RESET & BASE STYLES
    ============================================================================ */
-
 html,
 body {
     margin: 0;
     padding: 0;
-    height: 100dvh;
+    min-height: 100svh;
     width: 100vw;
-    overflow: hidden;
-    overscroll-behavior: none;
-    position: fixed;
+    background-color: #374244;
+    /* Fallback */
+    color: white;
+    overflow-x: hidden;
+}
+
+/* Allow shader to be seen */
+@supports (background: paint(something)) or (z-index: -1) {
+    body {
+        background-color: transparent;
+    }
 }
 
 #__next,
@@ -37,236 +37,107 @@ main {
     overflow: hidden;
 }
 
-/* ============================================================================
-   2. CSS CUSTOM PROPERTIES (DESIGN TOKENS)
-   ============================================================================
-   Two-layer system:
-   - Layer 1: Raw color values (--color-*)
-   - Layer 2: Semantic aliases (--balatro-*)
-   ============================================================================ */
+* {
+    font-weight: normal !important;
+}
 
+/* ============================================================================
+   2. DESIGN TOKENS (CSS VARIABLES)
+   ============================================================================ */
 :root {
     /* --------------------------------
-       LAYER 1: RAW COLOR PALETTE
-       Authentic Balatro colors
+       AUTHENTIC BALATRO PALETTE (Source: globals.lua)
        -------------------------------- */
 
-    /* Core Colors */
-    --color-white: #FFFFFF;
-    --color-black: #000000;
+    /* Primary Game Colors */
+    --balatro-red: #FE5F55;
+    /* G.C.RED / G.C.MULT */
+    --balatro-blue: #009dff;
+    /* G.C.BLUE / G.C.CHIPS */
+    --balatro-green: #4BC292;
+    /* G.C.GREEN */
+    --balatro-orange: #fda200;
+    /* G.C.ORANGE */
+    --balatro-gold: #eac058;
+    /* G.C.GOLD */
+    --balatro-purple: #8867a5;
+    /* G.C.PURPLE */
 
-    /* Brand Colors (Face / Hover pairs) */
-    --color-red: #ff4c40;
-    --color-dark-red: #a02721;
-    --color-darkest-red: #70150f;
+    /* Backgrounds & Panels */
+    --balatro-black: #374244;
+    /* G.C.BLACK (Slate Grey - Main BG) */
+    --balatro-light-black: #4f6367;
+    /* G.C.L_BLACK (Secondary BG) */
+    --balatro-grey: #5f7377;
+    /* G.C.GREY */
+    --balatro-joker-grey: #bfc7d5;
+    /* G.C.JOKER_GREY */
 
-    --color-blue: #0093ff;
-    --color-dark-blue: #0057a1;
+    /* Text & UI */
+    --balatro-text-light: #FFFFFF;
+    /* G.C.UI.TEXT_LIGHT */
+    --balatro-text-dark: #4F6367;
+    /* G.C.UI.TEXT_DARK */
+    --balatro-outline-light: #D8D8D8;
+    /* G.C.UI.OUTLINE_LIGHT */
+    --balatro-outline-dark: #7A9E9F;
+    /* G.C.UI.OUTLINE_DARK */
 
-    --color-orange: #ff9800;
-    --color-dark-orange: #a05b00;
+    /* Shadows - Actual Pitch Black */
+    --balatro-shadow: #000000;
 
-    --color-green: #429f79;
-    --color-dark-green: #215f46;
+    /* Semantic Aliases (Backwards Compatibility) */
+    --balatro-modal-bg: var(--balatro-black);
+    --balatro-modal-inner: var(--balatro-light-black);
+    --balatro-modal-border: var(--balatro-outline-light);
 
-    --color-purple: #7d60e0;
-    --color-dark-purple: #292189;
-
-    /* Gold & Accent Colors */
-    --color-bright-gold: #eaba44;
-    --color-dark-gold: #b8883a;
-    --color-bright-green: #35bd86;
-
-    /* Panel & Modal Greys */
-    --color-grey: #3a5055;
-    --color-medium-grey: #33464b;
-    --color-dark-grey: #1e2b2d;
-    --color-bright-silver: #b9c2d2;
-    --color-light-grey: #777e89;
-    --color-faded-grey: #565b5c;
-
-    /* Shadow Colors */
-    --color-medium-shadow: #1e2e32;
-    --color-dark-shadow: #0b1415;
-    --color-translucent-black-33: rgba(0, 0, 0, 0.33);
-
-    /* Disabled State Colors */
-    --color-dark-dull-grey: #2d2d2d;
-    --color-dull-grey: #5c5c5c;
-    --color-light-dull-grey: #6b6b6b;
-    --color-light-dull-wash-grey: #545454;
-
-    /* Misc UI Colors */
-    --color-burnt-red: #8f3b36;
-    --color-light-silver: #a3acb9;
-    --color-grey-silver: #686e78;
-    --color-purple-violet: #9B7EDE;
-    --color-purple-muted: #6B5AA8;
-
-    /* --------------------------------
-       LAYER 2: SEMANTIC ALIASES
-       Reference Layer 1 only
-       -------------------------------- */
-
-    /* Brand Action Colors */
-    --balatro-white: var(--color-white);
-    --balatro-black: var(--color-black);
-    --balatro-red: var(--color-red);
-    --balatro-red-hover: var(--color-dark-red);
-    --balatro-blue: var(--color-blue);
-    --balatro-blue-hover: var(--color-dark-blue);
-    --balatro-orange: var(--color-orange);
-    --balatro-orange-hover: var(--color-dark-orange);
-    --balatro-green: var(--color-green);
-    --balatro-green-hover: var(--color-dark-green);
-    --balatro-purple: var(--color-purple);
-    --balatro-purple-hover: var(--color-dark-purple);
-    --balatro-gold: var(--color-bright-gold);
-
-    /* Text Colors */
-    --balatro-font-gold: var(--color-bright-gold);
-    --balatro-font-green: var(--color-bright-green);
-    --balatro-text-disabled: var(--color-faded-grey);
-
-    /* Modal/Panel Colors */
-    --balatro-modal-bg: var(--color-grey);
-    --balatro-modal-grey: var(--color-grey);
-    --balatro-modal-inner: var(--color-dark-grey);
-    --balatro-modal-border: var(--color-bright-silver);
-    --balatro-modal-shadow: var(--color-dark-shadow);
-
-    /* Legacy Aliases (backwards compatibility) */
-    --balatro-grey: var(--color-grey);
-    --balatro-grey-dark: var(--color-medium-grey);
-    --balatro-grey-darker: var(--color-dark-grey);
-    --balatro-shadow: var(--color-dark-shadow);
-    --balatro-border: var(--color-bright-silver);
-
-    /* Disabled State */
-    --balatro-disabled-face: var(--color-light-dull-wash-grey);
-    --balatro-disabled-text: var(--color-light-dull-grey);
-    --balatro-disabled-shadow: var(--color-dark-dull-grey);
+    /* Legacy Mappings (Deprecated but kept for safety) */
+    --color-red: var(--balatro-red);
+    --color-blue: var(--balatro-blue);
+    --color-green: var(--balatro-green);
+    --color-orange: var(--balatro-orange);
+    --color-gold: var(--balatro-gold);
 }
 
 /* ============================================================================
-   3. BACKGROUND & AMBIENT EFFECTS
+   3. BACKGROUND & EFFECTS
    ============================================================================ */
 
-body {
-    background: #1a1a2e;
-    min-height: 100vh;
-    color: white;
-    overflow-y: hidden;
-    position: relative;
-}
-
-
-/* CRT Scanline Overlay */
-body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(to bottom,
-            rgba(0, 0, 0, 0.1),
-            rgba(0, 0, 0, 0.1) 2px,
-            transparent 2px,
-            transparent 4px);
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 0.15;
-}
 
 /* ============================================================================
-   4. SCROLLBAR STYLING
+   4. COMPONENT LAYER
    ============================================================================ */
-
-::-webkit-scrollbar {
-    width: 12px;
-}
-
-::-webkit-scrollbar-track {
-    background: #1e293b;
-    border-left: 2px solid white;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #475569;
-    border: 2px solid white;
-    border-radius: 6px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #64748b;
-}
-
-/* ============================================================================
-   5. COMPONENT LAYER
-   ============================================================================ */
-
 @layer components {
 
-    /* ------------------------------------------------------------------------
-       PANELS & CARDS
-       ------------------------------------------------------------------------ */
-
-    .balatro-panel,
-    .balatro-card {
-        background-color: var(--balatro-modal-bg);
-        border: 2px solid rgba(0, 0, 0, 0.2);
+    /* --- PANELS --- */
+    /* authentic G.C.BLACK panel with hard shadow */
+    .balatro-panel {
+        background-color: var(--balatro-black);
+        border: 2px solid var(--balatro-outline-light);
         border-radius: 0.75rem;
-        box-shadow: 0 4px 0 rgba(0, 0, 0, 0.4);
+        box-shadow: 0 4px 0 var(--balatro-shadow);
         position: relative;
         overflow: hidden;
         padding: 0.75rem;
     }
 
-    /* Navigation central stage */
-    .balatro-nav-stage {
-        box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+    .balatro-panel-inner {
+        background-color: var(--balatro-light-black);
+        border-radius: 0.5rem;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
-    /* Text drop shadows */
-    .balatro-text-shadow-hard {
-        filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.8));
-        animation: balatro-sway 6s ease-in-out infinite;
-    }
-
-    .balatro-text-shadow-small {
-        filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.8));
-        animation: balatro-sway 6s ease-in-out infinite;
-    }
-
-    .balatro-text-shadow-bold {
-        filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 1));
-        animation: balatro-sway 6s ease-in-out infinite;
-    }
-
-    /* Select box shadow */
-    .balatro-select-shadow {
-        box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.4);
-    }
-
-    /* Leaderboard gold winner glow */
-    .balatro-gold-glow {
-        box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.2);
-    }
-
-    /* ------------------------------------------------------------------------
-       BUTTONS - Balatro 2D Flat Style
-       
+    /* --- BUTTONS (2D Flat Style) --- */
+    /* 
        Rules:
-       1. Flat face color
-       2. 4px solid shadow (--color-dark-shadow)
-       3. NO transitions - snap between states
-       4. Hover: darken face, no movement
-       5. Active: shadow gone, translate down 4px
-       ------------------------------------------------------------------------ */
-
-    .balatro-button,
-    .balatro-nav-button,
-    .balatro-tab {
-        color: white;
-        font-family: var(--font-header);
+       1. Solid face color (from palette)
+       2. 4px solid black shadow
+       3. NO transitions (snap)
+       4. Active: translate down 4px, remove shadow
+    */
+    .balatro-button {
+        color: var(--balatro-text-light);
+        font-family: var(--font-header), monospace;
         font-weight: normal;
         border: none;
         border-radius: 0.5rem;
@@ -275,370 +146,139 @@ body::after {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 0.5rem 1rem;
+        padding: 0.75rem 1.5rem;
+        text-transform: uppercase;
         font-size: 1.5rem;
-        text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
-        letter-spacing: 0.05em;
-        background-color: var(--color-red);
-        box-shadow: 0 2px 0 var(--color-dark-shadow);
+
+        /* Authentic Text Shadow */
+        text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+
+        /* Authentic Button Shadow */
+        background-color: var(--balatro-red);
+        /* Default */
+        box-shadow: 0 4px 0 var(--balatro-shadow);
         transition: none;
-        user-select: none;
-
+        transform: translateY(0);
     }
 
-    /* Smaller tabs variant */
-    .balatro-tab {
-        padding: 0.35rem 0.65rem;
-        font-size: 1rem;
-        letter-spacing: 0.03em;
-        box-shadow: 0 1px 0 var(--color-dark-shadow);
-    }
-
-    /* Button Color Variants */
+    /* Button Variants */
     .balatro-button-red {
-        background-color: var(--color-red);
-    }
-
-    .balatro-button-red:hover:not(:disabled) {
-        background-color: var(--color-dark-red);
+        background-color: var(--balatro-red);
     }
 
     .balatro-button-blue {
-        background-color: var(--color-blue);
+        background-color: var(--balatro-blue);
     }
 
-    .balatro-button-blue:hover:not(:disabled) {
-        background-color: var(--color-dark-blue);
+    .balatro-button-green {
+        background-color: var(--balatro-green);
+    }
+
+    .balatro-button-orange {
+        background-color: var(--balatro-orange);
+    }
+
+    .balatro-button-purple {
+        background-color: var(--balatro-purple);
     }
 
     .balatro-button-gold {
         background-color: var(--balatro-gold);
+        color: white;
     }
 
-    .balatro-button-gold:hover:not(:disabled) {
-        background-color: var(--color-dark-gold);
+    /* Interaction State */
+    .balatro-button:hover:not(:disabled) {
+        filter: brightness(1.1);
     }
 
-    .balatro-button-orange,
-    .balatro-button-back {
-        background-color: var(--color-orange);
+    .balatro-button:active:not(:disabled) {
+        transform: translateY(4px);
+        box-shadow: none !important;
     }
 
-    .balatro-button-orange:hover:not(:disabled),
-    .balatro-button-back:hover:not(:disabled) {
-        background-color: var(--color-dark-orange);
-    }
-
-    .balatro-button-green {
-        background-color: var(--color-green);
-    }
-
-    .balatro-button-green:hover:not(:disabled) {
-        background-color: var(--color-dark-green);
-    }
-
-    .balatro-button-purple {
-        background-color: var(--color-purple);
-    }
-
-    .balatro-button-purple:hover:not(:disabled) {
-        background-color: var(--color-dark-purple);
-    }
-
-    /* Button States */
-    .balatro-button:active:not(:disabled),
-    .balatro-nav-button:active:not(:disabled) {
-        transform: translateY(2px);
-        box-shadow: none;
-    }
-
-    .balatro-tab:active:not(:disabled) {
-        transform: translateY(1px);
-        box-shadow: none;
-    }
-
-    .balatro-button:disabled,
-    .balatro-nav-button:disabled,
-    .balatro-tab:disabled {
+    .balatro-button:disabled {
+        background-color: var(--balatro-grey) !important;
         cursor: not-allowed;
-        filter: brightness(0.4) saturate(0.6);
-        box-shadow: 0 4px 0 var(--color-dark-shadow) !important;
-        opacity: 1 !important;
-        color: rgba(255, 255, 255, 0.5) !important;
+        filter: grayscale(0.8);
+        box-shadow: 0 4px 0 var(--balatro-shadow) !important;
+        /* Keep shadow for disabled */
+        transform: none !important;
     }
 
-    /* ------------------------------------------------------------------------
-       INPUTS
-       ------------------------------------------------------------------------ */
-
+    /* --- INPUTS --- */
     .balatro-input {
-        background-color: rgba(0, 0, 0, 0.4);
-        border: 2px solid transparent;
+        background-color: var(--balatro-black);
+        border: 2px solid var(--balatro-outline-dark);
         border-radius: 0.5rem;
         color: white;
         font-family: var(--font-pixel), monospace;
         padding: 0.5rem 1rem;
         outline: none;
-        transition: border-color 0.15s ease-in-out;
         box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
     }
 
     .balatro-input:focus {
         border-color: var(--balatro-blue);
-    }
-
-    /* ------------------------------------------------------------------------
-       SPECIAL COMPONENTS
-       ------------------------------------------------------------------------ */
-
-    /* Acrylic/Glass Card (used sparingly) */
-    .acrylic-card {
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(12px) saturate(180%);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 1rem;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        position: relative;
-        overflow: hidden;
-    }
-
-    /* Selected Tab Indicator (Pure CSS Triangle) */
-    .balatro-selected-tab::before {
-        content: "";
-        position: absolute;
-        top: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 0;
-        border-left: 6px solid transparent;
-        border-right: 6px solid transparent;
-        border-top: 8px solid var(--color-red);
-        animation: tab-arrow-bounce 1.2s ease-in-out infinite;
-    }
-
-    @keyframes tab-arrow-bounce {
-
-        0% {
-            transform: translateX(-50%) translateY(-4px);
-        }
-
-        25% {
-            transform: translateX(-50%) translateY(0);
-        }
-
-        50%,
-        100% {
-            transform: translateX(-50%) translateY(0);
-        }
-    }
-
-    /* Ambient Sway Animation - From Balatro source: 0.02 radians (~1.15deg) */
-    .balatro-sway {
-        animation: balatro-sway 8s ease-in-out infinite;
-    }
-
-    @keyframes balatro-sway {
-
-        0%,
-        100% {
-            transform: rotate(-1.15deg) translateY(-1px);
-        }
-
-        25% {
-            transform: rotate(0.6deg) translateY(1px);
-        }
-
-        50% {
-            transform: rotate(1.15deg) translateY(-1px);
-        }
-
-        75% {
-            transform: rotate(-0.6deg) translateY(1px);
-        }
-    }
-
-    /* Staggered animation delays for items */
-    .balatro-delay-1 {
-        animation-delay: 0.05s !important;
-    }
-
-    .balatro-delay-2 {
-        animation-delay: 0.1s !important;
-    }
-
-    .balatro-delay-3 {
-        animation-delay: 0.15s !important;
-    }
-
-    .balatro-delay-4 {
-        animation-delay: 0.2s !important;
-    }
-
-    .balatro-delay-5 {
-        animation-delay: 0.25s !important;
-    }
-
-    .balatro-delay-6 {
-        animation-delay: 0.3s !important;
-    }
-
-    .balatro-delay-7 {
-        animation-delay: 0.35s !important;
-    }
-
-    .balatro-delay-8 {
-        animation-delay: 0.4s !important;
-    }
-
-    .balatro-delay-9 {
-        animation-delay: 0.45s !important;
-    }
-
-    .balatro-delay-10 {
-        animation-delay: 0.5s !important;
-    }
-
-    .balatro-item-1 {
-        animation-delay: 0s;
-    }
-
-    .balatro-item-2 {
-        animation-delay: 0.1s;
-    }
-
-    .balatro-item-3 {
-        animation-delay: 0.2s;
-    }
-
-    .balatro-item-4 {
-        animation-delay: 0.3s;
-    }
-
-    .balatro-item-5 {
-        animation-delay: 0.4s;
-    }
-
-    .balatro-item-6 {
-        animation-delay: 0.5s;
-    }
-
-    .balatro-item-7 {
-        animation-delay: 0.6s;
-    }
-
-    .balatro-item-8 {
-        animation-delay: 0.7s;
+        background-color: var(--balatro-black);
     }
 }
 
 /* ============================================================================
-   6. ANIMATIONS (Outside @layer for global availability)
+   5. RITUAL SPECIFIC UTILITIES
    ============================================================================ */
-
-/* Wobble */
-@keyframes balatro-wobble {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    25% {
-        transform: rotate(-1deg) scale(1.02);
-    }
-
-    75% {
-        transform: rotate(1deg) scale(1.02);
-    }
-
-    100% {
-        transform: rotate(0deg);
-    }
+.ritual-locked-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    width: 100vw;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
 }
 
-/* Pop */
-@keyframes juice-pop {
-    0% {
-        transform: scale(0.6) rotate(-5deg);
-        filter: brightness(2);
-    }
-
-    40% {
-        transform: scale(1.15) rotate(4deg);
-        filter: brightness(1);
-    }
-
-    70% {
-        transform: scale(0.95) rotate(-2deg);
-    }
-
-    100% {
-        transform: scale(1) rotate(0deg);
-    }
+.match-height-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 0;
+    width: 100%;
 }
 
-.juice-pop {
-    animation: juice-pop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+.floating-help-button {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    background-color: var(--balatro-blue);
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: var(--font-header), monospace;
+    font-size: 2rem;
+    box-shadow: 0 4px 0 var(--balatro-shadow);
+    cursor: pointer;
+    z-index: 1000;
+    transition: transform 0.1s;
+    user-select: none;
 }
 
-/* Heartbeat */
-@keyframes heartbeat {
-    0% {
-        transform: scale(1);
-    }
-
-    15% {
-        transform: scale(1.3);
-    }
-
-    30% {
-        transform: scale(1);
-    }
-
-    45% {
-        transform: scale(1.5);
-    }
-
-    70%,
-    100% {
-        transform: scale(1);
-    }
+.floating-help-button:active {
+    transform: translateY(4px);
+    box-shadow: none;
 }
-
-.juice-heart {
-    display: inline-block;
-    animation: heartbeat 1.5s ease-in-out infinite;
-    transform-origin: center;
-}
-
-/* Ad Rotator Button (special case) */
-.ad-rotator-button {
-    background-color: var(--balatro-grey) !important;
-    transition: filter 0.1s ease-out, transform 0.1s ease-out;
-}
-
-.ad-rotator-button:hover {
-    filter: brightness(1.2);
-}
-
-.ad-rotator-button:active {
-    filter: brightness(0.8);
-    transform: translateY(1px);
-}
-
-/* ============================================================================
-   7. UTILITY CLASSES
-   ============================================================================ */
 
 .font-header {
-    font-family: var(--font-header), font-pixel, monospace;
-    font-weight: normal !important;
+    font-family: var(--font-header), monospace;
     letter-spacing: 0.1em;
 }
 
-.text-shadow-sm {
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
-}
-
-.text-shadow-md {
+.text-shadow-balatro {
     text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
 }
