@@ -4,18 +4,19 @@ import { useState, useEffect } from "react";
 import { X, Trophy, Crown, Medal } from "lucide-react";
 
 interface LeaderboardModalProps {
-    dayNumber: number;
+    ritualId: string;
+    seed: string;
     onClose: () => void;
 }
 
 interface ScoreEntry {
     id: number;
     player_name: string;
-    score: number;
+    score: string;
     submitted_at: string;
 }
 
-export function LeaderboardModal({ dayNumber, onClose }: LeaderboardModalProps) {
+export function LeaderboardModal({ ritualId, seed, onClose }: LeaderboardModalProps) {
     const [scores, setScores] = useState<ScoreEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -25,7 +26,7 @@ export function LeaderboardModal({ dayNumber, onClose }: LeaderboardModalProps) 
             setLoading(true);
             setError(null);
             try {
-                const res = await fetch(`/api/scores?day=${dayNumber}`);
+                const res = await fetch(`/api/scores?seed=${seed}&ritualId=${ritualId}`);
                 if (!res.ok) throw new Error("Failed to load scores");
                 const data = await res.json();
                 if (data.scores) {
@@ -40,13 +41,14 @@ export function LeaderboardModal({ dayNumber, onClose }: LeaderboardModalProps) 
         };
 
         fetchScores();
-    }, [dayNumber]);
+    }, [ritualId, seed]);
 
     // Fallback Data for "Jaw Drop" reliability
 
 
-    const formatScore = (num: number) => {
-        return num.toLocaleString();
+    const formatScore = (val: string) => {
+        const num = Number(val);
+        return isNaN(num) ? val : num.toLocaleString();
     };
 
     const getRankIcon = (index: number) => {
@@ -67,7 +69,7 @@ export function LeaderboardModal({ dayNumber, onClose }: LeaderboardModalProps) 
                         Top Scores
                     </h2>
                     <span className="font-pixel text-white/80 text-sm uppercase tracking-wider bg-black/20 px-2 py-1 rounded">
-                        Day {dayNumber}
+                        {ritualId} | {seed}
                     </span>
                 </div>
 

@@ -18,7 +18,7 @@ export function SeedAnalysisOverlay({ seed, onClose }: SeedAnalysisOverlayProps)
     if (seed.copy_jokers_a1) tips.push("Copy Joker available early. Flexible build path.");
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/95 animate-in fade-in duration-200" onClick={onClose}>
             <div
                 className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto balatro-panel bg-balatro-panel p-6 md:p-8 animate-in zoom-in-95 duration-200 border-4 border-white/20 shadow-2xl"
                 onClick={e => e.stopPropagation()}
@@ -27,6 +27,8 @@ export function SeedAnalysisOverlay({ seed, onClose }: SeedAnalysisOverlayProps)
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 p-2 bg-balatro-red text-white rounded border-b-4 border-red-800 hover:bg-red-500 active:translate-y-1 active:border-b-0 transition-all font-header shadow-balatro"
+                    aria-label="Close"
+                    title="Close"
                 >
                     <X size={24} strokeWidth={3} />
                 </button>

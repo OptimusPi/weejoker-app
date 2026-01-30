@@ -1,0 +1,118 @@
+
+> weejoker-app@0.1.0 build
+> next build
+
+Γû▓ Next.js 16.1.1 (Turbopack)
+
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 3 errors:
+./lib/analyzer/ImmolateWrapper/index.ts:54:1
+Export Game doesn't exist in target module
+  52 | import { InstanceParams } from "@balatro-ts/struct/InstanceParams";
+  53 | import { JokerData } from "@balatro-ts/struct/JokerData";
+> 54 | import { Game } from "./Game";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  55 | import { Type } from "@balatro-ts/enum/cards/CardType";
+  56 | import { Card } from "@balatro-ts/enum/cards/Card";
+  57 | import { Voucher } from "@balatro-ts/enum/Voucher";
+
+The export Game was not found in module [project]/lib/analyzer/ImmolateWrapper/Game.ts [app-client] (ecmascript).
+Did you mean to import BalatroGameExtended?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Edge App Route:
+    ./lib/analyzer/ImmolateWrapper/index.ts
+    ./lib/seedAnalyzer.ts
+    ./app/api/analyze/[seed]/route.ts
+
+  Client Component Browser:
+    ./lib/analyzer/ImmolateWrapper/index.ts [Client Component Browser]
+    ./lib/hooks/useSeedAnalyzer.ts [Client Component Browser]
+    ./components/DailyRitual.tsx [Client Component Browser]
+    ./components/DailyRitual.tsx [Server Component]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./lib/analyzer/ImmolateWrapper/index.ts [Client Component SSR]
+    ./lib/hooks/useSeedAnalyzer.ts [Client Component SSR]
+    ./components/DailyRitual.tsx [Client Component SSR]
+    ./components/DailyRitual.tsx [Server Component]
+    ./app/page.tsx [Server Component]
+
+
+./lib/analyzer/ImmolateWrapper/index.ts:54:1
+Export Game doesn't exist in target module
+  52 | import { InstanceParams } from "@balatro-ts/struct/InstanceParams";
+  53 | import { JokerData } from "@balatro-ts/struct/JokerData";
+> 54 | import { Game } from "./Game";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  55 | import { Type } from "@balatro-ts/enum/cards/CardType";
+  56 | import { Card } from "@balatro-ts/enum/cards/Card";
+  57 | import { Voucher } from "@balatro-ts/enum/Voucher";
+
+The export Game was not found in module [project]/lib/analyzer/ImmolateWrapper/Game.ts [app-edge-route] (ecmascript).
+Did you mean to import BalatroGameExtended?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Edge App Route:
+    ./lib/analyzer/ImmolateWrapper/index.ts
+    ./lib/seedAnalyzer.ts
+    ./app/api/analyze/[seed]/route.ts
+
+  Client Component Browser:
+    ./lib/analyzer/ImmolateWrapper/index.ts [Client Component Browser]
+    ./lib/hooks/useSeedAnalyzer.ts [Client Component Browser]
+    ./components/DailyRitual.tsx [Client Component Browser]
+    ./components/DailyRitual.tsx [Server Component]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./lib/analyzer/ImmolateWrapper/index.ts [Client Component SSR]
+    ./lib/hooks/useSeedAnalyzer.ts [Client Component SSR]
+    ./components/DailyRitual.tsx [Client Component SSR]
+    ./components/DailyRitual.tsx [Server Component]
+    ./app/page.tsx [Server Component]
+
+
+./lib/analyzer/ImmolateWrapper/index.ts:54:1
+Export Game doesn't exist in target module
+  52 | import { InstanceParams } from "@balatro-ts/struct/InstanceParams";
+  53 | import { JokerData } from "@balatro-ts/struct/JokerData";
+> 54 | import { Game } from "./Game";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  55 | import { Type } from "@balatro-ts/enum/cards/CardType";
+  56 | import { Card } from "@balatro-ts/enum/cards/Card";
+  57 | import { Voucher } from "@balatro-ts/enum/Voucher";
+
+The export Game was not found in module [project]/lib/analyzer/ImmolateWrapper/Game.ts [app-ssr] (ecmascript).
+Did you mean to import BalatroGameExtended?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Edge App Route:
+    ./lib/analyzer/ImmolateWrapper/index.ts
+    ./lib/seedAnalyzer.ts
+    ./app/api/analyze/[seed]/route.ts
+
+  Client Component Browser:
+    ./lib/analyzer/ImmolateWrapper/index.ts [Client Component Browser]
+    ./lib/hooks/useSeedAnalyzer.ts [Client Component Browser]
+    ./components/DailyRitual.tsx [Client Component Browser]
+    ./components/DailyRitual.tsx [Server Component]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./lib/analyzer/ImmolateWrapper/index.ts [Client Component SSR]
+    ./lib/hooks/useSeedAnalyzer.ts [Client Component SSR]
+    ./components/DailyRitual.tsx [Client Component SSR]
+    ./components/DailyRitual.tsx [Server Component]
+    ./app/page.tsx [Server Component]
+
+
+    at <unknown> (./lib/analyzer/ImmolateWrapper/index.ts:54:1)
+    at <unknown> (./lib/analyzer/ImmolateWrapper/index.ts:54:1)
+    at <unknown> (./lib/analyzer/ImmolateWrapper/index.ts:54:1)

@@ -5,12 +5,12 @@ import { Upload, X, Trophy } from "lucide-react";
 
 interface SubmitScoreModalProps {
     seed: string;
-    dayNumber: number;
+    ritualId: string;
     onClose: () => void;
     onSuccess: () => void;
 }
 
-export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: SubmitScoreModalProps) {
+export function SubmitScoreModal({ seed, ritualId, onClose, onSuccess }: SubmitScoreModalProps) {
     const [playerName, setPlayerName] = useState("");
     const [score, setScore] = useState("");
     const [submitting, setSubmitting] = useState(false);
@@ -27,9 +27,9 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     seed,
-                    dayNumber,
+                    ritualId,
                     playerName: playerName.trim(),
-                    score: parseInt(score, 10)
+                    score: score.trim()
                 })
             });
 
@@ -49,7 +49,7 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 animate-in fade-in duration-150" onClick={onClose}>
-            <div className="balatro-panel p-8 max-w-md w-full mx-4 flex flex-col animate-in slide-in-from-bottom-10 duration-150" onClick={(e) => e.stopPropagation()}>
+            <div className="balatro-panel p-6 max-w-md w-full mx-4 flex flex-col animate-in slide-in-from-bottom-10 duration-150" onClick={(e) => e.stopPropagation()}>
 
                 <div className="text-center mb-6 relative z-10 pt-4">
                     <Trophy size={48} className="text-[var(--balatro-gold)] mx-auto mb-2 drop-shadow-lg juice-float" />
@@ -57,13 +57,13 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
                         Submit Your Score
                     </h2>
                     <p className="text-zinc-300 font-pixel mt-2">
-                        Daily Wee #{dayNumber}
+                        {ritualId} | {seed}
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-zinc-400 font-pixel text-sm uppercase mb-2">
+                        <label className="block text-zinc-400 font-pixel text-sm mb-2">
                             Your Name (max 20 chars)
                         </label>
                         <input
@@ -78,19 +78,14 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
                     </div>
 
                     <div>
-                        <label className="block text-zinc-400 font-pixel text-sm uppercase mb-2">
+                        <label className="block text-zinc-400 font-pixel text-sm mb-2">
                             Final Score (Chips)
                         </label>
                         <input
                             type="text"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
                             value={score}
-                            onChange={(e) => {
-                                const val = e.target.value.replace(/[^0-9]/g, '');
-                                if (val.length <= 12) setScore(val);
-                            }}
-                            placeholder="e.g. 1234567"
+                            onChange={(e) => setScore(e.target.value)}
+                            placeholder="e.g. 1.5e12 or 42000"
                             className="w-full balatro-input text-lg px-4 py-3"
                             required
                         />
@@ -116,7 +111,7 @@ export function SubmitScoreModal({ seed, dayNumber, onClose, onSuccess }: Submit
                             type="button"
                             onClick={onClose}
                             disabled={submitting}
-                            className="balatro-button-back disabled:opacity-50"
+                            className="w-full balatro-button balatro-button-orange text-lg py-2 disabled:opacity-50"
                         >
                             Back
                         </button>

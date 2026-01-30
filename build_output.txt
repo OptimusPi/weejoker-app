@@ -1,0 +1,22 @@
+
+> weejoker-app@0.1.0 build
+> next build
+
+Γû▓ Next.js 16.1.1 (Turbopack)
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 1649.4ms
+  Running TypeScript ...
+Failed to compile.
+
+./lib/blueprint/BalatroAnalyzer.ts:20:32
+Type error: Cannot find module '../ImmolateWrapper' or its corresponding type declarations.
+
+  18 | import { Option } from "./struct/Option";
+  19 | import { RandomQueueNames, RNGSource } from "./enum/QueueName";
+> 20 | import { MiscCardSource } from "../ImmolateWrapper";
+     |                                ^
+  21 | import { BossBlind } from "./enum/BossBlind";
+  22 |
+  23 | // @ts-ignore
+Next.js build worker exited with code: 1 and signal: null

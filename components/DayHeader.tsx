@@ -15,7 +15,7 @@ export function DayHeader({ dayNumber, displayDate }: DayHeaderProps) {
                     The Daily Wee
                 </div>
                 <div className="w-full max-w-sm mx-auto flex flex-col gap-1">
-                    <div className="flex justify-between items-center py-0.5 border-y border-white/10 text-[8px] font-pixel text-white/40 tracking-[0.2em]">
+                    <div className="flex justify-between items-center py-1 border-y border-white/10 text-[13px] font-pixel text-white/40 tracking-[0.2em] uppercase">
                         <span>{displayDate}</span>
                         <span className="text-[var(--balatro-gold)]">No. {dayNumber < 1 ? 1 : dayNumber}</span>
                         <span>Est. 2026</span>

@@ -38,3 +38,6 @@ next-env.d.ts
 # cloudflare
 .wrangler
 
+/.agent
+/.claude
+/.cursor

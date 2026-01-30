@@ -3,52 +3,97 @@ import { PlayingCard } from './PlayingCard';
 
 interface CardFanProps {
     count: number;
+    cards?: string[]; // New: Actual card strings like ["2_C", "10_H"]
     className?: string;
+    label?: string;
+    showLabel?: boolean;
 }
 
-export function CardFan({ count, className = '' }: CardFanProps) {
-    // Limit count to avoid 100% overlap, but user said 11-20
-    const displayCount = Math.min(count, 22);
+const RANK_MAP: Record<string, string> = {
+    '2': '2', '3': '3', '4': '4', '5': '5', '6': '6', '7': '7', '8': '8', '9': '9', '10': '10',
+    'J': 'Jack', 'Q': 'Queen', 'K': 'King', 'A': 'Ace'
+};
+const SUIT_MAP: Record<string, string> = {
+    'H': 'Hearts', 'C': 'Clubs', 'D': 'Diamonds', 'S': 'Spades'
+};
 
-    // Calculate arc
-    const arcAngle = 50; // Total degrees of the arc
-    const startAngle = -arcAngle / 2;
-    const angleStep = arcAngle / (displayCount - 1 || 1);
+const parseJamzCard = (jamz: string) => {
+    const [r, s] = jamz.split('_');
+    return {
+        rank: RANK_MAP[r] || '2',
+        suit: SUIT_MAP[s] || 'Clubs'
+    };
+};
 
-    const radius = 120; // Radius of the arc in pixels
+export function CardFan({ count, cards, className = '', label, showLabel = true }: CardFanProps) {
+    const displayCount = cards ? cards.length : count;
+
+    // Responsive sizing for full decks
+    const cardSize = displayCount > 40 ? 46 : displayCount > 30 ? 32 : displayCount > 12 ? 36 : displayCount > 8 ? 42 : displayCount > 5 ? 48 : 54;
+
+    // Tighter overlap for full deck (0.85 for 52 cards is good)
+    const overlap = displayCount > 40 ? 0.88 : displayCount > 30 ? 0.85 : displayCount > 15 ? 0.75 : displayCount > 6 ? 0.6 : 0.45;
+    const cardSpacing = cardSize * (1 - overlap);
+
+    // Dynamic rotation range based on count
+    const maxRotation = displayCount > 40 ? 40 : displayCount > 20 ? 30 : displayCount > 10 ? 15 : 25;
+
+    // Height for the cards area
+    const cardsHeight = cardSize * 2.5;
 
     return (
-        <div className={`relative h-12 w-28 flex items-end justify-center perspective-1000 overflow-visible ${className}`}>
-            {Array.from({ length: displayCount }).map((_, i) => {
-                const angle = startAngle + (i * angleStep);
-                const angleRad = (angle * Math.PI) / 180;
+        <div className={`flex flex-col items-center gap-1 ${className}`}>
+            <div
+                className="relative"
+                style={{
+                    width: '100%',
+                    height: `${cardsHeight}px`,
+                }}
+            >
+                {displayCount > 0 ? (
+                    Array.from({ length: displayCount }).map((_, i) => {
+                        const centerIndex = (displayCount - 1) / 2;
+                        const offset = i - centerIndex;
+                        const xPos = offset * cardSpacing;
+                        // Parabolic Y offset for arc effect
+                        const yOffset = Math.pow(Math.abs(offset / (centerIndex || 1)), 2) * (displayCount > 20 ? 20 : 10);
+                        const rotation = (offset / (centerIndex || 1)) * maxRotation;
 
-                // Offset calculation for arc - subtle parabola
-                const xOffset = radius * Math.sin(angleRad) * 0.8;
-                const yOffset = radius * (1 - Math.cos(angleRad)) * 0.4;
+                        // Use actual card data if available, otherwise default to 2 of Clubs
+                        const cardData = cards ? parseJamzCard(cards[i]) : { rank: "2", suit: "Clubs" as any };
 
-                return (
-                    <PlayingCard
-                        key={i}
-                        rank="2"
-                        suit="Clubs"
-                        size={42}
-                        className="absolute bottom-1 balatro-sway"
-                        style={{
-                            transformOrigin: 'bottom center',
-                            transform: `translateX(${xOffset}px) translateY(${yOffset}px) rotate(${angle}deg)`,
-                            zIndex: i,
-                            filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.4))',
-                            animationDelay: `${i * 0.04}s`
-                        }}
-                    />
-                );
-            })}
-
-            {/* Floating Label */}
-            <div className="absolute top-[-10px] left-1/2 -translate-x-1/2 z-[100] bg-[var(--balatro-blue)] text-white font-header text-xs px-2 py-1 rounded-md shadow-lg border border-white/20 whitespace-nowrap">
-                {count}x 2&apos;s
+                        return (
+                            <div
+                                key={i}
+                                className="absolute"
+                                style={{
+                                    left: '50%',
+                                    bottom: '0',
+                                    transform: `translateX(calc(-50% + ${xPos}px)) translateY(${yOffset}px) rotate(${rotation}deg)`,
+                                    transformOrigin: 'bottom center',
+                                    zIndex: i,
+                                    animationDelay: `${i * 0.02}s`,
+                                }}
+                            >
+                                <PlayingCard
+                                    rank={cardData.rank as any}
+                                    suit={cardData.suit as any}
+                                    size={cardSize}
+                                    style={{
+                                        filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.4))',
+                                    }}
+                                />
+                            </div>
+                        );
+                    })
+                ) : (
+                    <div className="flex items-center justify-center h-full w-full bg-white/5 rounded-lg border border-white/5">
+                        <span className="font-pixel text-white/10 text-[10px] uppercase tracking-widest">Deck Empty</span>
+                    </div>
+                )}
             </div>
+
         </div>
     );
 }
+

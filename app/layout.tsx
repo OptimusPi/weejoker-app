@@ -4,6 +4,7 @@ import { Outfit, JetBrains_Mono } from 'next/font/google';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { BackgroundShader } from '@/components/BackgroundShader';
+import { NavBar } from '@/components/NavBar';
 
 import localFont from 'next/font/local';
 
@@ -54,16 +55,12 @@ export default function RootLayout({
                 <BackgroundShader />
 
                 <div className="relative z-10 min-h-screen flex flex-col">
-
+                    <NavBar />
                     <main className="flex-grow">
                         {children}
                     </main>
 
-                    <footer className="balatro-footer">
-                        <p className="balatro-footer-text">
-                            NOT AFFILIATED WITH LOCALTHUNK OR <a href="https://www.playstack.com/games/balatro/" target="_blank" className="hover:text-white underline decoration-white/20 underline-offset-2">PLAYSTACK</a> • <a href="https://playbalatro.com/" target="_blank" className="hover:text-white underline decoration-white/20 underline-offset-2 text-[var(--balatro-gold)]">BUY BALATRO</a> • CREATED WITH <span className="text-[var(--balatro-red)] mx-1 juice-heart">❤</span> FOR THE BALATRO COMMUNITY
-                        </p>
-                    </footer>
+                    {/* Footer is now rendered client-side for cycling suits */}
 
                 </div>
             </body>

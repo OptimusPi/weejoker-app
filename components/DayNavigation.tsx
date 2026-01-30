@@ -13,14 +13,16 @@ interface DayNavigationProps {
 
 export function DayNavigation({ onPrev, onNext, canPrev, canNext, children }: DayNavigationProps) {
     return (
-        <div className="flex flex-row items-stretch justify-center gap-2 w-full max-w-md mx-auto p-0 relative z-30 h-[460px] shrink-0">
+        <div className="flex flex-row items-center justify-center gap-2 w-full max-w-7xl mx-auto p-0 relative z-30 flex-1 min-h-0">
             {/* Left Nav Button */}
             <button
                 onClick={onPrev}
                 disabled={!canPrev}
-                className="balatro-button balatro-button-red balatro-nav-button"
+                className="balatro-button balatro-button-red balatro-nav-button !rounded-md h-12 w-12 !p-0 flex items-center justify-center shrink-0"
+                aria-label="Previous Day"
+                title="Previous Day"
             >
-                <ChevronLeft size={24} className="text-white" strokeWidth={4} />
+                <ChevronLeft size={32} className="text-white" strokeWidth={3} />
             </button>
 
             {/* Central Stage - FLEXIBLE HEIGHT */}
@@ -32,9 +34,11 @@ export function DayNavigation({ onPrev, onNext, canPrev, canNext, children }: Da
             <button
                 onClick={onNext}
                 disabled={!canNext}
-                className="balatro-button balatro-button-red balatro-nav-button"
+                className="balatro-button balatro-button-red balatro-nav-button !rounded-md h-12 w-12 !p-0 flex items-center justify-center shrink-0"
+                aria-label="Next Day"
+                title="Next Day"
             >
-                <ChevronRight size={24} className="text-white" strokeWidth={4} />
+                <ChevronRight size={32} className="text-white" strokeWidth={3} />
             </button>
         </div>
     );

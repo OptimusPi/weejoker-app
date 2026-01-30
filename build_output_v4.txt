@@ -1,0 +1,23 @@
+
+> weejoker-app@0.1.0 build
+> next build
+
+Γû▓ Next.js 16.1.1 (Turbopack)
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 1359.3ms
+  Running TypeScript ...
+  Collecting page data using 15 workers ...
+ΓÜá Using edge runtime on a page currently disables static generation for that page
+  Generating static pages using 15 workers (0/5) ...
+  Generating static pages using 15 workers (1/5) 
+Error occurred prerendering page "/jaml-builder". Read more: https://nextjs.org/docs/messages/prerender-error
+ReferenceError: Cannot access 'v' before initialization
+    at module evaluation (X:\weejoker.app\.next\server\chunks\ssr\app_jaml-builder_page_tsx_1f52a677._.js:1:4647)
+    at instantiateModule (X:\weejoker.app\.next\server\chunks\ssr\[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (X:\weejoker.app\.next\server\chunks\ssr\[turbopack]_runtime.js:763:12)
+    at Context.commonJsRequire [as r] (X:\weejoker.app\.next\server\chunks\ssr\[turbopack]_runtime.js:249:12) {
+  digest: '701181484'
+}
+Export encountered an error on /jaml-builder/page: /jaml-builder, exiting the build.
+Γ¿» Next.js build worker exited with code: 1 and signal: null

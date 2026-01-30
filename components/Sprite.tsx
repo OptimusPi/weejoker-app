@@ -1,56 +1,45 @@
 "use client";
 
+import { getSpriteData } from "@/lib/SpriteMapper";
+import { cn } from "@/lib/utils";
+
 // Dimensions of a single card in the sprite sheet
 const CARD_WIDTH = 71;
 const CARD_HEIGHT = 95;
-
-// Static Joker Mapping (No more fetch garbage)
-const JOKER_MAP: Record<string, { x: number; y: number }> = {
-    // Basic Jokers
-    "Joker": { x: 0, y: 0 },
-    "Greedy Joker": { x: 1, y: 0 },
-    "Lusty Joker": { x: 2, y: 0 },
-    "Wrathful Joker": { x: 3, y: 0 },
-    "Gluttonous Joker": { x: 4, y: 0 },
-    "Jolly Joker": { x: 5, y: 0 },
-    "Zany Joker": { x: 6, y: 0 },
-    "Mad Joker": { x: 7, y: 0 },
-    "Crazy Joker": { x: 8, y: 0 },
-    "Droll Joker": { x: 9, y: 0 },
-
-    // Key MVP Jokers
-    "Wee Joker": { x: 0, y: 0 },
-    "weejoker": { x: 0, y: 0 },
-    "Hanging Chad": { x: 9, y: 6 }, // Corrected from 0,8
-    "hangingchad": { x: 9, y: 6 },
-    "Hack": { x: 5, y: 2 },         // Corrected from 1,8
-    "hack": { x: 5, y: 2 },
-    "Blueprint": { x: 0, y: 3 },    // Corrected from 2,10
-    "blueprint": { x: 0, y: 3 },
-    "Brainstorm": { x: 7, y: 7 },   // Corrected from 2,11
-    "brainstorm": { x: 7, y: 7 },
-    "Showman": { x: 6, y: 5 },      // Corrected from 3,8
-    "showman": { x: 6, y: 5 },
-    "Invisible Joker": { x: 1, y: 7 }, // Corrected from 4,10
-    "invisiblejoker": { x: 1, y: 7 },
-    "Madness": { x: 8, y: 11 },
-    "madness": { x: 8, y: 11 },
-    "Red Seal": { x: 0, y: 0 }, // Placeholder/TODO
-};
-
-// Fallback for unknown jokers to prevent crash
-const DEFAULT_POS = { x: 0, y: 0 };
 
 export interface SpriteProps {
     name: string;
     className?: string;
     width?: number; // Optional override width (height auto-calcs)
     delayClass?: string; // Optional animation delay class
+    edition?: 'Foil' | 'Holographic' | 'Polychrome' | 'Negative' | null;
+    sticker?: 'Eternal' | 'Perishable' | 'Rental' | null;
 }
 
-export function Sprite({ name, className, width, delayClass }: SpriteProps) {
-    // Instant Lookup
-    const pos = JOKER_MAP[name] || JOKER_MAP[name.toLowerCase()] || JOKER_MAP["Joker"];
+// Edition Mapping (assumed based on standard Balatro or generic)
+// BUT we have `Editions.png`. 
+// Typically:
+// Foil: 0,0
+// Holographic: 1,0
+// Polychrome: 2,0
+// Negative: 3,0
+const EDITION_COORDS: Record<string, { x: number; y: number }> = {
+    'Foil': { x: 0, y: 0 },
+    'Holographic': { x: 1, y: 0 },
+    'Polychrome': { x: 2, y: 0 },
+    'Negative': { x: 3, y: 0 }, // Often Negative has its own shader, but if it's on the sheet...
+};
+
+// Sticker Mapping (based on const.ts which says: Eternal 0,0; Rental 1,2; Perishable 0,2)
+const STICKER_COORDS: Record<string, { x: number; y: number }> = {
+    'Eternal': { x: 0, y: 0 },
+    'Perishable': { x: 0, y: 2 },
+    'Rental': { x: 1, y: 2 },
+};
+
+export function Sprite({ name, className, width, delayClass, edition, sticker }: SpriteProps) {
+    // Instant Lookup using the Mapper
+    const { pos, type } = getSpriteData(name);
 
     // Balatro Spritesheet Logic
     // Background Position = -X * Width, -Y * Height
@@ -62,27 +51,85 @@ export function Sprite({ name, className, width, delayClass }: SpriteProps) {
     const finalH = width ? width * (CARD_HEIGHT / CARD_WIDTH) : CARD_HEIGHT;
     const scale = finalW / CARD_WIDTH;
 
+    // Base Texture
+    const texture = `/assets/${type}.png`;
+
+    // Edition Logic
+    const editionPos = edition ? EDITION_COORDS[edition] : null;
+    const editionBgX = editionPos ? -editionPos.x * CARD_WIDTH : 0;
+    const editionBgY = editionPos ? -editionPos.y * CARD_HEIGHT : 0;
+
+    // Sticker Logic
+    const stickerPos = sticker ? STICKER_COORDS[sticker] : null;
+    const stickerBgX = stickerPos ? -stickerPos.x * CARD_WIDTH : 0;
+    const stickerBgY = stickerPos ? -stickerPos.y * CARD_HEIGHT : 0;
+
+    // Negative Shader Effect (CSS Filter)
+    const isNegative = edition === 'Negative';
+    const baseFilter = isNegative ? 'invert(1) brightness(1.2) contrast(1.1)' : 'none';
+
     return (
         <div
-            className={`relative overflow-hidden inline-block juice-pop ${delayClass || ''} ${className}`}
+            className={cn(`relative overflow-hidden inline-block juice-pop select-none`, delayClass, className)}
             style={{
                 width: finalW,
                 height: finalH,
                 imageRendering: 'pixelated'
             }}
-            title={name}
+            title={`${name}${edition ? ` (${edition})` : ''}${sticker ? ` [${sticker}]` : ''}`}
         >
+            {/* Base Card Layer */}
             <div
+                className="absolute inset-0"
                 style={{
-                    backgroundImage: `url(/Assets/Jokers.png)`,
+                    backgroundImage: `url(${texture})`,
                     backgroundPosition: `${bgX}px ${bgY}px`,
-                    width: CARD_WIDTH, // Original Width
-                    height: CARD_HEIGHT, // Original Height
+                    width: CARD_WIDTH,
+                    height: CARD_HEIGHT,
                     transform: `scale(${scale})`,
                     transformOrigin: 'top left',
-                    backgroundRepeat: 'no-repeat'
+                    backgroundRepeat: 'no-repeat',
+                    filter: baseFilter
                 }}
             />
+
+            {/* Edition Overlay Layer */}
+            {edition && edition !== 'Negative' && (
+                <div
+                    className="absolute inset-0 z-10 mix-blend-screen opacity-60 animate-pulse" // Simple animation for now
+                    style={{
+                        backgroundImage: `url(/assets/Editions.png)`,
+                        backgroundPosition: `${editionBgX}px ${editionBgY}px`,
+                        width: CARD_WIDTH,
+                        height: CARD_HEIGHT,
+                        transform: `scale(${scale})`,
+                        transformOrigin: 'top left',
+                        backgroundRepeat: 'no-repeat'
+                    }}
+                />
+            )}
+
+            {/* Sticker Overlay Layer */}
+            {sticker && (
+                <div
+                    className="absolute inset-0 z-20"
+                    style={{
+                        backgroundImage: `url(/assets/stickers.png)`,
+                        backgroundPosition: `${stickerBgX}px ${stickerBgY}px`,
+                        width: CARD_WIDTH,
+                        height: CARD_HEIGHT,
+                        transform: `scale(${scale})`,
+                        transformOrigin: 'top left',
+                        backgroundRepeat: 'no-repeat'
+                    }}
+                />
+            )}
+
+            {/* Negative Overlay (extra contrast/red tint usually) */}
+            {isNegative && (
+                <div className="absolute inset-0 z-10 bg-red-500/10 pointer-events-none mix-blend-overlay" />
+            )}
+
         </div>
     );
 }

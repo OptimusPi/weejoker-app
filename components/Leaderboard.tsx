@@ -31,7 +31,7 @@ export function Leaderboard({ seeds }: LeaderboardProps) {
             {/* List */}
             <div className="space-y-3 relative z-10">
                 {topSeeds.map((entry, i) => (
-                    <div key={i} className="group flex items-center gap-4 bg-[#1F2937] p-3 rounded-lg border-2 border-white/5 hover:border-white/40 transition-colors shadow-sm">
+                    <div key={i} className="group flex items-center gap-4 bg-[var(--color-medium-grey)] p-3 rounded-lg border-2 border-white/5 hover:border-white/40 transition-colors shadow-sm">
                         <div className="w-12 text-center">
                             <span className="font-pixel text-zinc-500 text-lg group-hover:text-white transition-colors">#{i + 1}</span>
                         </div>

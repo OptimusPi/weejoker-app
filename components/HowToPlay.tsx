@@ -1,17 +1,21 @@
+"use client";
 
 import { X, ExternalLink, Gamepad2, Copy, Trophy, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 
 interface HowToPlayProps {
+    isOpen: boolean;
     onClose: () => void;
     onSubmit?: () => void;
     seedId?: string;
 }
 
-export function HowToPlay({ onClose, onSubmit, seedId = "--------" }: HowToPlayProps) {
+export function HowToPlay({ isOpen, onClose, onSubmit, seedId = "--------" }: HowToPlayProps) {
     const [step, setStep] = useState(1);
     const [copied, setCopied] = useState(false);
     const totalSteps = 4;
+
+    if (!isOpen) return null;
 
     const nextStep = () => {
         if (step < totalSteps) setStep(step + 1);
@@ -28,7 +32,7 @@ export function HowToPlay({ onClose, onSubmit, seedId = "--------" }: HowToPlayP
 
                 {/* Header */}
                 <div className="bg-[var(--balatro-blue)] p-4 flex justify-between items-center border-b-[2px] border-black/20">
-                    <h2 className="text-xl md:text-2xl font-header text-white tracking-widest text-shadow-md flex items-center gap-2 uppercase">
+                    <h2 className="text-xl md:text-2xl font-header text-white tracking-widest text-shadow-md flex items-center gap-2">
                         {step === 1 ? 'Step 1' : step === 2 ? 'Step 2' : 'Final Step'}
                     </h2>
                     <div className="flex gap-1">
@@ -41,7 +45,7 @@ export function HowToPlay({ onClose, onSubmit, seedId = "--------" }: HowToPlayP
                 <div className="p-4 flex flex-col items-center text-center gap-3">
                     {step === 1 && (
                         <div className="space-y-3 animate-in slide-in-from-right-4 duration-200">
-                            <h3 className="text-2xl font-header text-white uppercase tracking-wider">Get Balatro</h3>
+                            <h3 className="text-2xl font-header text-white tracking-wider">Get Balatro</h3>
                             <p className="text-zinc-200 font-pixel text-lg leading-none">
                                 You need the game to participate.<br />Available on PC, Console, and Mobile.
                             </p>
@@ -49,7 +53,7 @@ export function HowToPlay({ onClose, onSubmit, seedId = "--------" }: HowToPlayP
                                 <a href="https://www.playbalatro.com/" target="_blank" rel="noopener noreferrer" className="balatro-button balatro-button-red !py-1.5 !text-sm">
                                     <ExternalLink size={14} className="mr-2" /> Buy on Store
                                 </a>
-                                <span className="balatro-button !bg-[#1a4731] !py-1 !text-[10px] !shadow-none cursor-default">
+                                <span className="balatro-button !bg-[var(--color-dark-green)] !py-1 !text-[10px] !shadow-none cursor-default">
                                     Free on GamePass / Arcade
                                 </span>
                             </div>
@@ -58,7 +62,7 @@ export function HowToPlay({ onClose, onSubmit, seedId = "--------" }: HowToPlayP
 
                     {step === 2 && (
                         <div className="space-y-4 animate-in slide-in-from-right-4 duration-200 w-full">
-                            <h3 className="text-2xl font-header text-white uppercase tracking-wider">The Ritual</h3>
+                            <h3 className="text-2xl font-header text-white tracking-wider">The Ritual</h3>
                             <p className="text-zinc-200 font-pixel text-lg leading-tight">
                                 Copy the Daily Seed and enter it in the Balatro <span className="text-[var(--balatro-blue)] font-header">New Run</span> menu.
                             </p>
@@ -84,7 +88,7 @@ export function HowToPlay({ onClose, onSubmit, seedId = "--------" }: HowToPlayP
 
                     {step === 3 && (
                         <div className="space-y-4 animate-in slide-in-from-right-4 duration-200 w-full">
-                            <h3 className="text-2xl font-header text-white uppercase tracking-wider">The Setup</h3>
+                            <h3 className="text-2xl font-header text-white tracking-wider">The Setup</h3>
                             <div className="bg-black/20 p-4 rounded-xl border border-white/10 flex flex-col gap-3 text-left">
                                 <p className="font-pixel text-lg text-white leading-tight flex items-center gap-3">
                                     <span className="w-6 h-6 rounded-full bg-[var(--balatro-blue)] flex items-center justify-center text-[10px] font-header shrink-0">1</span>
@@ -104,7 +108,7 @@ export function HowToPlay({ onClose, onSubmit, seedId = "--------" }: HowToPlayP
 
                     {step === 4 && (
                         <div className="space-y-3 animate-in slide-in-from-right-4 duration-200">
-                            <h3 className="text-2xl font-header text-white uppercase tracking-wider">The Goal</h3>
+                            <h3 className="text-2xl font-header text-white tracking-wider">The Goal</h3>
                             <div className="bg-black/40 p-3 rounded-xl border-2 border-[var(--balatro-gold)] border-dashed flex flex-col gap-2 text-left">
                                 <p className="font-pixel text-md text-white leading-tight">
                                     • Find <span className="text-[var(--balatro-blue)] font-header">Wee Joker</span> and upgrade by playing Rank 2 cards!
@@ -115,7 +119,7 @@ export function HowToPlay({ onClose, onSubmit, seedId = "--------" }: HowToPlayP
                                 <p className="font-pixel text-md text-white leading-tight">
                                     • In Ante 9 shop, select your <span className="text-[var(--balatro-blue)] font-header">Wee Joker</span>.
                                 </p>
-                                <p className="font-pixel text-[var(--balatro-gold)] font-header text-sm tracking-widest uppercase text-center mt-1">
+                                <p className="font-pixel text-[var(--balatro-gold)] font-header text-sm tracking-widest text-center mt-1">
                                     <span className="text-[var(--balatro-blue)] font-header">+Chips</span> is your score to submit!
                                 </p>
                             </div>
@@ -133,7 +137,7 @@ export function HowToPlay({ onClose, onSubmit, seedId = "--------" }: HowToPlayP
                     {/* Back Button */}
                     <button
                         onClick={prevStep}
-                        className="balatro-button balatro-button-orange w-full py-3 text-md"
+                        className="balatro-button balatro-button-orange w-full py-1.5 text-sm"
                     >
                         Back
                     </button>

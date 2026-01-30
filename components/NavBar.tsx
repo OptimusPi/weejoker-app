@@ -36,10 +36,10 @@ export function NavBar() {
                                 key={item.path}
                                 href={item.path}
                                 className={cn(
-                                    "flex items-center gap-2 px-4 py-2 rounded font-header uppercase tracking-wider text-sm transition-all border-2",
+                                    "flex items-center gap-2 px-4 py-2 rounded transition-all font-header uppercase tracking-wider text-sm",
                                     isActive
-                                        ? "bg-[var(--balatro-blue)] border-blue-400 text-white shadow-[0_2px_0_rgba(0,0,0,0.5)] transform translate-y-[1px]"
-                                        : "bg-transparent border-transparent text-white/70 hover:bg-white/5 hover:text-white"
+                                        ? "balatro-button balatro-button-blue text-white shadow-balatro border-none translate-y-[-2px]"
+                                        : "text-white/70 hover:text-white hover:bg-white/5"
                                 )}
                             >
                                 {/* Icon Logic */}
