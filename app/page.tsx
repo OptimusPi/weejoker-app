@@ -1,17 +1,16 @@
-
-import dynamic from "next/dynamic";
-import { PastWeekResults } from "@/components/PastWeekResults";
-import { PageFooter } from "@/components/PageFooter";
-
-// December 12th, 2025 (Project Zero Point)
 import { DailyRitual } from "@/components/DailyRitual";
 
+export default async function Home({
+    searchParams
+}: {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+    const { day } = await searchParams;
+    const initialDay = day ? parseInt(day as string, 10) : 0;
 
-
-export default function Home() {
     return (
-        <main className="min-h-screen">
-            <DailyRitual />
+        <main className="h-full w-full">
+            <DailyRitual initialDay={initialDay} />
         </main>
     );
 }

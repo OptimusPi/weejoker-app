@@ -1,23 +1,15 @@
-import { DeckType, deckNames } from '@Blueprint/enum/Deck';
-import { StakeType } from '@Blueprint/enum/Stake';
-import { Rank } from '@Blueprint/enum/Rank';
-import { Suit } from '@Blueprint/enum/Suit';
-import { Enhancement } from '@Blueprint/enum/Enhancement';
-import { Edition } from '@Blueprint/enum/Edition';
-import { Seal } from '@Blueprint/enum/Seal';
-
-// UI Options derived from Enums
-export const DECK_OPTIONS = Object.values(DeckType).map(type => deckNames[type]);
-export const STAKE_OPTIONS = Object.values(StakeType);
+// UI Options derived from local constants (Blueprint retired)
+export const DECK_OPTIONS = ['Red', 'Blue', 'Yellow', 'Green', 'Black', 'Magic', 'Nebula', 'Ghost', 'Abandoned', 'Checkered', 'Painted', 'Anaglyph', 'Plasma', 'Erratic'];
+export const STAKE_OPTIONS = ['White', 'Red', 'Green', 'Black', 'Blue', 'Purple', 'Orange', 'Gold'];
 
 export const ANTE_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8];
 export const SLOT_OPTIONS = [1, 2, 3, 4, 5];
 
-export const RANK_OPTIONS = Object.values(Rank);
-export const SUIT_OPTIONS = Object.values(Suit);
-export const ENHANCEMENT_OPTIONS = Object.values(Enhancement);
-export const EDITION_OPTIONS = Object.values(Edition);
-export const SEAL_OPTIONS = Object.values(Seal);
+export const RANK_OPTIONS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace'];
+export const SUIT_OPTIONS = ['Spades', 'Hearts', 'Diamonds', 'Clubs'];
+export const ENHANCEMENT_OPTIONS = ['Bonus', 'Mult', 'Wild', 'Glass', 'Steel', 'Lucky', 'Stone', 'Gold'];
+export const EDITION_OPTIONS = ['Foil', 'Holographic', 'Polychrome', 'Negative'];
+export const SEAL_OPTIONS = ['Gold', 'Red', 'Blue', 'Purple'];
 
 export const CLAUSE_TYPES = [
     'Joker', 'Tarot', 'Planet', 'Spectral', 'Voucher', 'Tag', 'Boss', 'PlayingCard', 'StandardCard'

@@ -1,8 +1,9 @@
-# title: The Daily Wee
-# tagline: A curated daily Balatro ritual
-
-# The Core Rule: Must include Wee Joker
-must:
-  - type: Joker
-    value: Wee Joker
-    antes: [1, 2, 3] # Ideally found early
+Rules:
+  - Text: "Must play a Full House every round"
+    Id: full_house_only
+  - Text: "No Flushes allowed"
+    Id: no_flushes
+Scoring:
+  - Type: Full House
+    Points: 100
+    Mult: 10

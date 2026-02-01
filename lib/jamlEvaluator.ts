@@ -22,6 +22,7 @@ export interface AnalyzedItem {
     name: string; // "Wee Joker", "The Soul"
     ante: number;
     source: string; // "shop", "buffoon_pack", "tag"
+    slot?: number;
     edition?: string;
     stickers?: string[];
     // properties for matching
@@ -105,7 +106,7 @@ function flattenAnalyzedSeed(seedData: AnalyzedSeed): AnalyzedItem[] {
     // Helper to push items
     const pushItem = (
         type: string,
-        baseItem: { id: string, name: string, ante: number, source: string, edition?: string }
+        baseItem: { id: string, name: string, ante: number, source: string, edition?: string, slot?: number }
     ) => {
         items.push({
             type,
@@ -113,6 +114,7 @@ function flattenAnalyzedSeed(seedData: AnalyzedSeed): AnalyzedItem[] {
             name: baseItem.name,
             ante: baseItem.ante,
             source: baseItem.source,
+            slot: baseItem.slot,
             edition: baseItem.edition
         });
     };

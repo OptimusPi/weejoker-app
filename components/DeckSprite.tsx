@@ -62,7 +62,7 @@ export function DeckSprite({ deck, stake, size = 50, className = '' }: DeckSprit
                 style={{
                     width: '100%',
                     height: '100%',
-                    backgroundImage: 'url(/Assets/Decks/Enhancers.png)',
+                    backgroundImage: 'url(/assets/Decks/8BitDeck.png)',
                     backgroundPosition: `-${deckPos.x * size}px -${deckPos.y * displayHeight}px`,
                     backgroundSize: `${DECK_COLS * size}px ${DECK_ROWS * displayHeight}px`,
                 }}
@@ -71,7 +71,7 @@ export function DeckSprite({ deck, stake, size = 50, className = '' }: DeckSprit
                 <div
                     className="absolute inset-0"
                     style={{
-                        backgroundImage: 'url(/Assets/Decks/stickers.png)',
+                        backgroundImage: 'url(/assets/Decks/stickers.png)',
                         backgroundPosition: `-${stakePos.x * size}px -${stakePos.y * displayHeight}px`,
                         backgroundSize: `${STICKER_COLS * size}px ${STICKER_ROWS * displayHeight}px`,
                     }}

@@ -79,7 +79,7 @@ export function SeedSnapshotModal({ analysis, onClose }: SeedSnapshotModalProps)
                                 Seed Snapshot
                             </h2>
                             <p className="text-[var(--balatro-gold)] font-pixel text-sm mt-1 uppercase tracking-tighter opacity-80">
-                                {analysis.seed} • {analysis.deck} Deck • {analysis.stake} Stake
+                                {analysis.seed} • {analysis.deck} • {analysis.stake}
                             </p>
                         </div>
                     </div>

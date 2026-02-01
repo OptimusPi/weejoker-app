@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { analyzeSeed } from '@/lib/seedAnalyzer';
+import { motelyApi } from '@/lib/api/motelyApi';
+import { normalizeAnalysis } from '@/lib/seedAnalyzer';
 
 // Run on Cloudflare Workers edge runtime
 export const runtime = 'edge';
@@ -23,7 +24,7 @@ export const runtime = 'edge';
  *   deck: "erratic",
  *   stake: "white",
  *   startingDeck: ["2_C", "A_H", ...],
- *   twos: 14,
+ *   metrics: { ... },
  *   jokers: [{ id: "weejoker", ante: 1, ... }],
  *   ...
  * }
@@ -49,7 +50,8 @@ export async function GET(
     }
 
     try {
-        const analysis = analyzeSeed(seed.toUpperCase(), deck, stake, maxAnte);
+        const rawResult = await motelyApi.analyze(seed.toUpperCase(), deck, stake);
+        const analysis = normalizeAnalysis(rawResult);
 
         return NextResponse.json(analysis, {
             headers: {

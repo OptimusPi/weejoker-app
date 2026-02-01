@@ -10,6 +10,8 @@ interface DayResult {
     seed: string;
 }
 
+import { EPOCH } from "@/lib/config";
+
 export function PastWeekResults() {
     const [results, setResults] = useState<DayResult[]>([]);
     const [loading, setLoading] = useState(true);
@@ -31,9 +33,6 @@ export function PastWeekResults() {
         }
         fetchWeekResults();
     }, []);
-
-    // Calculate day number from epoch
-    const EPOCH = new Date('2025-12-14').getTime();
     const getDayLabel = (dayNum: number) => {
         const dayDate = new Date(EPOCH + (dayNum - 1) * 24 * 60 * 60 * 1000);
         return dayDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });

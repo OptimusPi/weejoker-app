@@ -12,30 +12,38 @@ export function JamlGenie({ onJamlGenerated }: JamlGenieProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const handleGenerate = async () => {
-        if (!prompt.trim()) return;
+    const handleGenerate = async (presetPrompt?: string) => {
+        const text = presetPrompt || prompt;
+        if (!text.trim()) return;
 
         setLoading(true);
         setError('');
 
         try {
-            const response = await fetch('https://jamlgenie.optimuspi.workers.dev', {
+            const response = await fetch('/api/genie', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt })
+                body: JSON.stringify({ prompt: text })
             });
 
             if (!response.ok) throw new Error('Generation failed');
 
             const data = await response.json();
             onJamlGenerated(data.jaml || data.response);
-            setPrompt('');
+            if (!presetPrompt) setPrompt('');
         } catch (err) {
-            setError('Failed to generate JAML. Try being more specific!');
+            setError('The Genie is exhausted. Check your connection or try being more specific!');
         } finally {
             setLoading(false);
         }
     };
+
+    const MAGIC_PRESETS = [
+        { label: 'Soul Hunter', prompt: 'Find a Spectral Soul card in Ante 1 or 2' },
+        { label: 'Blueprints', prompt: 'Multiple Blueprints or Brainstorms early' },
+        { label: 'Mega Tags', prompt: 'A lot of Investment and Double Tags in the first 4 antes' },
+        { label: 'Negative Joker', prompt: 'Find any Negative Joker in the shop' }
+    ];
 
     return (
         <div className="h-full flex flex-col gap-4">
@@ -72,22 +80,23 @@ export function JamlGenie({ onJamlGenerated }: JamlGenieProps) {
                                 disabled={loading}
                             />
                             <button
-                                onClick={handleGenerate}
+                                onClick={() => handleGenerate()}
                                 disabled={loading || !prompt.trim()}
-                                className="balatro-button balatro-button-purple h-12 w-16 !p-0 flex items-center justify-center"
+                                className="balatro-button balatro-button-purple h-12 w-16 !p-0 flex items-center justify-center !text-2xl"
                             >
                                 {loading ? <Loader2 size={24} className="animate-spin" /> : '➤'}
                             </button>
                         </div>
 
-                        <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
-                            {['Blueprint & Brainstorm', 'Legendary Joker', 'Polychrome'].map(tag => (
+                        <div className="flex flex-wrap gap-2 pt-2">
+                            {MAGIC_PRESETS.map(preset => (
                                 <button
-                                    key={tag}
-                                    onClick={() => setPrompt(tag)}
-                                    className="px-3 py-1 rounded bg-[var(--balatro-modal-inner)] border border-[var(--balatro-outline-dark)] text-[var(--balatro-text-dark)] text-xs font-pixel hover:brightness-110 whitespace-nowrap"
+                                    key={preset.label}
+                                    onClick={() => handleGenerate(preset.prompt)}
+                                    disabled={loading}
+                                    className="balatro-button balatro-button-purple !py-1 !px-3 !text-[9px] !shadow-[0_2px_0_var(--balatro-shadow)] active:!translate-y-[2px]"
                                 >
-                                    {tag}
+                                    ✨ {preset.label}
                                 </button>
                             ))}
                         </div>

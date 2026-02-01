@@ -10,8 +10,6 @@ const JamlBuilder = dynamic(() => import('@/components/JamlBuilder'), {
 
 export default function JamlBuilderPage() {
     return (
-        <main className="min-h-screen w-full">
-            <JamlBuilder />
-        </main>
+        <JamlBuilder />
     );
 }

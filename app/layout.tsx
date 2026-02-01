@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { BackgroundShader } from '@/components/BackgroundShader';
 import { NavBar } from '@/components/NavBar';
+import { PageFooter } from '@/components/PageFooter';
 
 import localFont from 'next/font/local';
 
@@ -45,7 +46,7 @@ export default function RootLayout({
             <body
                 suppressHydrationWarning
                 className={cn(
-                    'min-h-screen font-sans antialiased overflow-x-hidden text-white',
+                    'h-screen overflow-hidden font-sans antialiased text-white',
                     fontSans.variable,
                     fontMono.variable,
                     fontHeader.variable,
@@ -54,14 +55,14 @@ export default function RootLayout({
             >
                 <BackgroundShader />
 
-                <div className="relative z-10 min-h-screen flex flex-col">
+                <div className="relative z-10 h-full flex flex-col">
                     <NavBar />
-                    <main className="flex-grow">
+                    <div className="flex-grow flex flex-col min-h-0 relative z-0">
                         {children}
-                    </main>
+                    </div>
 
                     {/* Footer is now rendered client-side for cycling suits */}
-
+                    <PageFooter />
                 </div>
             </body>
         </html>

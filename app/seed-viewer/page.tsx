@@ -10,9 +10,9 @@ export default function SeedViewerPage() {
 
     const handleLoad = () => {
         const seedList = input
-            .split('\n')
+            .split(/[\n,]+/)
             .map(s => s.trim().toUpperCase())
-            .filter(s => s.length > 0);
+            .filter(s => /^[A-Z0-9]{0,8}$/.test(s));
         setSeeds(seedList);
     };
 

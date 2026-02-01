@@ -3,7 +3,7 @@
  * Based on Swagger schema from http://192.168.0.171:3141/swagger/v1/swagger.json
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_MOTELY_API_URL || 'http://192.168.0.171:3141';
+const API_BASE = process.env.NEXT_PUBLIC_MOTELY_API_URL || 'motelyjaml-pi.8pi.me';
 
 // ============================================================================
 // REQUEST TYPES (from Swagger)

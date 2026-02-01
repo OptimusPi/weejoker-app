@@ -25,7 +25,7 @@ export function SeedStrategyModal({ analysis, onClose }: SeedStrategyModalProps)
                             SEED STRATEGY
                         </div>
                         <div className="text-white/50 font-pixel text-xs mt-1">
-                            {analysis.seed} • {analysis.deck} Deck • {analysis.stake} Stake
+                            {analysis.seed} • {analysis.deck} • {analysis.stake}
                         </div>
                     </div>
                     <button

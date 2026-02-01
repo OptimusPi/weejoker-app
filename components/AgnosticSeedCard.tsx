@@ -4,7 +4,8 @@ import { SearchResult } from '@/lib/api/motelyApi';
 import { cn } from '@/lib/utils';
 import { Loader2, ChevronRight, Copy, Check, Info } from 'lucide-react';
 import { DeckSprite } from './DeckSprite';
-import { AnalyzedSeed } from '@/lib/seedAnalyzer';
+import { analyzeSeedWasm } from '@/lib/api/motelyWasm';
+import { normalizeAnalysis, AnalyzedSeed } from '@/lib/seedAnalyzer';
 import { CardFan } from './CardFan';
 import { SeedStrategyModal } from './SeedStrategyModal';
 import { SeedSnapshotModal } from './SeedSnapshotModal';
@@ -12,6 +13,7 @@ import { Sprite } from './Sprite';
 import { evaluateSeed } from '@/lib/jamlEvaluator';
 import { useJamlFilter } from '@/lib/hooks/useJamlFilter';
 import { DeckPanel, TagsPanel, BossPanel } from './cards/SeedComponents';
+import { JamlJourneyMap } from './cards/JamlJourneyMap';
 
 interface AgnosticSeedCardProps {
     // For search results
@@ -55,43 +57,46 @@ export function AgnosticSeedCard({
     const [showBreakdown, setShowBreakdown] = useState(false);
     const [showStrategyModal, setShowStrategyModal] = useState(false);
     const [showSnapshotModal, setShowSnapshotModal] = useState(false);
+    const [source, setSource] = useState<'WASM' | 'API' | null>(null);
 
-    // JAML Evaluation State
-    const [evaluation, setEvaluation] = useState<any>(null); // TODO: Type this properly
+    // analysis/result is already handled above
     const { setFromJaml, filter } = useJamlFilter(jamlConfig || '');
 
-    // Sync analysis prop if it changes
-    useEffect(() => {
-        if (initialAnalysis) {
-            setAnalysis(initialAnalysis);
-            if (jamlConfig) {
-                // Run evaluation immediately if we have both data and rules
-                // Note: filter is async/state based in useJamlFilter, might need to ensure it's ready.
-                // Actually parsing on the fly is safer for this stateless component.
-                // We'll trust the hook to parse jamlConfig into `filter`.
-            }
-        }
-    }, [initialAnalysis, jamlConfig]);
-
-    // Recalculate evaluation when analysis or filter changes
-    useEffect(() => {
+    // Derive evaluation directly during render (modern 2026 pattern, no useEffect smell)
+    const evaluation = React.useMemo(() => {
         if (analysis && filter) {
-            const evalResult = evaluateSeed(analysis, filter);
-            setEvaluation(evalResult);
+            return evaluateSeed(analysis, filter);
+        } else if (result?.tallies && filter) {
+            return {
+                isMatch: true,
+                score: result.score,
+                tallies: result.tallies,
+                matches: [] // Add empty matches for search-level highlights
+            };
         }
-    }, [analysis, filter]);
+        return null;
+    }, [analysis, filter, result?.score, result?.seed]);
 
-    const displaySeed = seed || result?.seed || "UNKNOWN";
+    // Auto-analyze if seed is present but analysis/result is not
+    useEffect(() => {
+        if (seed && !result && !analysis && !isAnalyzing && !error) {
+            handleAnalyze();
+        }
+    }, [seed, !!result, !!analysis, isAnalyzing, !!error]);
+
+    const displaySeed = isLocked ? "LOCKED" : (seed || result?.seed || "UNKNOWN");
     const displayScore = evaluation ? evaluation.score : (result?.score || 0);
     const isMatch = evaluation ? evaluation.isMatch : true; // Default to true if no rules
 
     const handleCopy = () => {
+        if (isLocked) return;
         navigator.clipboard.writeText(displaySeed);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
 
     const handleAnalyze = async () => {
+        if (isLocked) return;
         if (analysis) {
             setShowStrategyModal(true);
             return;
@@ -103,21 +108,44 @@ export function AgnosticSeedCard({
         setIsAnalyzing(true);
         setError(null);
         try {
-            // Wait a tiny bit for UI
-            await new Promise(r => setTimeout(r, 50));
+            const { analyzeSeedWasm } = await import('@/lib/api/motelyWasm');
+            const { normalizeAnalysis } = await import('@/lib/seedAnalyzer');
+            // Remove motelyApi import if not used elsewhere in handleAnalyze
 
-            // Call our TS analyzer
-            const result = (window as any).analyzeSeed ? (window as any).analyzeSeed(targetSeed) : null;
+            let rawResult = null;
+            let currentSource: 'WASM' | 'API' | null = null;
 
-            // Note: Since analyzeSeed is a library function, we might need to import it or ensure it's available.
-            // Actually, we imported it at the top of the file!
-            const { analyzeSeed } = await import('@/lib/seedAnalyzer');
-            const data = analyzeSeed(targetSeed, deckSlug || 'erratic', stakeSlug || 'white', 8);
+            // 1. Try WASM
+            try {
+                console.log("Try WASM:");
+                rawResult = await analyzeSeedWasm(targetSeed, deckSlug || 'erratic', stakeSlug || 'white', 1, 8);
+                if (rawResult) currentSource = 'WASM';
+            } catch (wasmError) {
+                console.warn("WASM analysis failed:", wasmError);
+            }
 
-            setAnalysis(data);
-            setShowStrategyModal(true);
+            // 2. Try API (Removed - WASM First!)
+            /*
+            if (!rawResult) {
+                try {
+                    rawResult = await motelyApi.analyze(targetSeed, deckSlug || 'erratic', stakeSlug || 'white');
+                    if (rawResult) currentSource = 'API';
+                } catch (apiError) {
+                    console.error("API analysis failed:", apiError);
+                }
+            }
+            */
+
+            if (rawResult) {
+                const data = normalizeAnalysis(rawResult);
+                setAnalysis(data);
+                setSource(currentSource);
+                // setShowStrategyModal(true); // User requested NOT to show this by default
+            } else {
+                throw new Error("Analysis failed on all engines.");
+            }
         } catch (err: any) {
-            console.error("Local analysis error:", err);
+            console.error("Manual analysis error:", err);
             setError("Analysis failed: " + (err.message || String(err)));
         } finally {
             setIsAnalyzing(false);
@@ -138,15 +166,18 @@ export function AgnosticSeedCard({
                     </div>
                     <div>
                         <div
-                            className="font-header text-2xl text-white tracking-[0.2em] cursor-pointer hover:text-[var(--balatro-gold)] flex items-center gap-2 group transition-colors"
+                            className={cn(
+                                "font-header text-2xl text-white tracking-[0.2em] flex items-center gap-2 group transition-colors",
+                                !isLocked && "cursor-pointer hover:text-[var(--balatro-gold)]"
+                            )}
                             onClick={handleCopy}
                         >
                             {displaySeed}
-                            {copied ? <Check size={16} className="text-[var(--balatro-green)]" /> : <Copy size={14} className="opacity-20 group-hover:opacity-60" />}
+                            {!isLocked && (copied ? <Check size={16} className="text-[var(--balatro-green)]" /> : <Copy size={14} className="opacity-20 group-hover:opacity-60" />)}
                         </div>
                         <div className="font-pixel text-[11px] text-[var(--balatro-gold)] uppercase flex gap-3 tracking-tighter items-center">
-                            <span>Score: {displayScore.toLocaleString()}</span>
-                            {!isMatch && <span className="text-[var(--balatro-red)] animate-pulse">(MISMATCH)</span>}
+                            {!isLocked && <span>Score: {displayScore.toLocaleString()}</span>}
+                            {!isMatch && !isLocked && <span className="text-[var(--balatro-red)] animate-pulse">(MISMATCH)</span>}
 
                             {/* Help Button Restored */}
                             <button
@@ -161,23 +192,31 @@ export function AgnosticSeedCard({
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <button
-                        onClick={handleAnalyze}
-                        disabled={isAnalyzing}
-                        className={cn(
-                            "balatro-button !py-1 !px-4 text-xs font-header",
-                            analysis ? "balatro-button-green" : "balatro-button-blue"
-                        )}
-                    >
-                        {isAnalyzing ? <Loader2 size={14} className="animate-spin" /> : analysis ? 'DETAILS' : 'ANALYZE'}
-                    </button>
-                    {analysis && (
-                        <button
-                            onClick={() => setShowSnapshotModal(true)}
-                            className="balatro-button balatro-button-gold !py-1 !px-4 text-xs font-header"
-                        >
-                            SNAPSHOT
-                        </button>
+                    {isLocked ? (
+                        <div className="px-3 py-1 bg-white/5 rounded border border-white/10 font-pixel text-[10px] text-white/30 flex items-center gap-2">
+                            <span>HIDDEN</span>
+                        </div>
+                    ) : (
+                        <>
+                            <button
+                                onClick={handleAnalyze}
+                                disabled={isAnalyzing}
+                                className={cn(
+                                    "balatro-button !py-1 !px-4 text-base font-header",
+                                    analysis ? "balatro-button-green" : "balatro-button-blue"
+                                )}
+                            >
+                                {isAnalyzing ? <Loader2 size={14} className="animate-spin" /> : analysis ? 'DETAILS' : 'ANALYZE'}
+                            </button>
+                            {analysis && (
+                                <button
+                                    onClick={() => setShowSnapshotModal(true)}
+                                    className="balatro-button balatro-button-gold !py-1 !px-4 text-base font-header"
+                                >
+                                    SNAPSHOT
+                                </button>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
@@ -204,59 +243,15 @@ export function AgnosticSeedCard({
                         </div>
                     </div>
 
-                    {/* JAML Highlights / Recommendations */}
+                    {/* JAML Highlights / Journey Map */}
                     <div className="p-3 rounded-lg bg-black/30 border border-white/5 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-1 h-full bg-[var(--balatro-blue)]"></div>
-                        <div className="text-[var(--balatro-blue)] font-header text-[11px] uppercase mb-2 tracking-widest pl-1">Strategic Findings</div>
-
-                        <div className="space-y-2">
-                            {evaluation?.matches?.length > 0 ? (
-                                <div className="flex flex-wrap gap-2">
-                                    {evaluation.matches.slice(0, 8).map((match: any, i: number) => (
-                                        <div key={i} className="relative group/card cursor-pointer">
-                                            <Sprite
-                                                name={match.item.name}
-                                                width={48}
-                                                className={cn(
-                                                    "transition-transform hover:scale-110 drop-shadow-md",
-                                                    match.priority === 'mustNot' && "grayscale opacity-50"
-                                                )}
-                                            />
-                                            {/* Ante Badge */}
-                                            <div className="absolute -top-1.5 -right-1.5 bg-black/80 text-white font-pixel text-[8px] w-4 h-4 flex items-center justify-center rounded-sm border border-white/20 shadow-sm z-10">
-                                                A{match.ante}
-                                            </div>
-                                            {/* Name Tooltip (simple) */}
-                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-black/90 text-white text-[9px] font-pixel whitespace-nowrap rounded border border-white/10 opacity-0 group-hover/card:opacity-100 pointer-events-none z-20 transition-opacity">
-                                                {match.item.name}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="flex flex-wrap gap-2">
-                                    {analysis.jokers.filter(j => j.ante <= 4).slice(0, 8).map((j, i) => (
-                                        <div key={i} className="relative group/card cursor-pointer">
-                                            <Sprite
-                                                name={j.name}
-                                                width={48}
-                                                className="transition-transform hover:scale-110 drop-shadow-md"
-                                                edition={j.edition as any}
-                                            />
-                                            {/* Ante Badge */}
-                                            <div className="absolute -top-1.5 -right-1.5 bg-black/80 text-white font-pixel text-[8px] w-4 h-4 flex items-center justify-center rounded-sm border border-white/20 shadow-sm z-10">
-                                                A{j.ante}
-                                            </div>
-                                            {/* Name Tooltip */}
-                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-black/90 text-white text-[9px] font-pixel whitespace-nowrap rounded border border-white/10 opacity-0 group-hover/card:opacity-100 pointer-events-none z-20 transition-opacity">
-                                                {j.name}
-                                                {j.edition && <span className="text-[var(--balatro-gold)] ml-1">({j.edition})</span>}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                        <div className="absolute top-0 left-0 w-1 h-full bg-[var(--balatro-gold)]"></div>
+                        <div className="flex justify-between items-center mb-3 pl-1">
+                            <div className="text-[var(--balatro-gold)] font-header text-[11px] uppercase tracking-widest">Ritual Journey Map</div>
+                            <div className="font-pixel text-[8px] text-white/30 uppercase tracking-tighter">Seed Routing v1.0</div>
                         </div>
+
+                        <JamlJourneyMap evaluation={evaluation} maxMatches={10} />
                     </div>
                 </div>
             )}
@@ -268,8 +263,18 @@ export function AgnosticSeedCard({
                 </div>
             )}
 
-            <div className="absolute bottom-1 right-2 pointer-events-none opacity-20">
-                <span className="font-pixel text-[7px] italic text-white/50">v1.0-TS-BLUEPRINT</span>
+            <div className="absolute bottom-1 right-2 pointer-events-none flex items-center gap-2">
+                {source && (
+                    <span className={cn(
+                        "font-pixel text-[8px] px-1.5 py-0.5 rounded border uppercase",
+                        source === 'WASM'
+                            ? "bg-[var(--balatro-blue)]/20 border-[var(--balatro-blue)]/50 text-[var(--balatro-blue)] shadow-[0_0_5px_var(--balatro-blue)]"
+                            : "bg-[var(--balatro-gold)]/20 border-[var(--balatro-gold)]/50 text-[var(--balatro-gold)]"
+                    )}>
+                        {source}
+                    </span>
+                )}
+                <span className="font-pixel text-[7px] italic text-white/50 opacity-40">v1.1-MOTELY-WASM</span>
             </div>
 
             {showStrategyModal && analysis && (

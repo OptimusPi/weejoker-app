@@ -1,6 +1,18 @@
-// Cloudflare D1 bindings
+// Cloudflare D1 & R2 bindings
 interface CloudflareEnv {
     DB: D1Database;
+    SEED_ASSETS: R2Bucket;
+}
+
+interface R2Bucket {
+    get(key: string): Promise<R2ObjectBody | null>;
+}
+
+interface R2ObjectBody {
+    body: ReadableStream;
+    text(): Promise<string>;
+    json<T>(): Promise<T>;
+    arrayBuffer(): Promise<ArrayBuffer>;
 }
 
 // D1 Database types (simplified)

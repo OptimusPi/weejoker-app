@@ -19,8 +19,8 @@ export function PageFooter() {
     }, []);
 
     return (
-        <footer className="fixed bottom-0 left-0 right-0 z-50 py-2 px-4 bg-black/33 backdrop-blur-sm">
-            <p className="text-center text-white text-xs font-pixel tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+        <footer className="fixed bottom-0 left-0 right-0 z-50 py-2 px-4 bg-black backdrop-blur-sm">
+            <p className="text-center text-white text-sm font-pixel tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                 Not affiliated with LocalThunk or PlayStack •{" "}
                 <a
                     href="https://store.steampowered.com/app/2379780/Balatro/"
