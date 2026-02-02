@@ -74,7 +74,7 @@ export function Sprite({ name, className, width, delayClass, edition, sticker }:
             style={{
                 width: finalW,
                 height: finalH,
-                imageRendering: 'pixelated'
+                imageRendering: 'auto'
             }}
             title={`${name}${edition ? ` (${edition})` : ''}${sticker ? ` [${sticker}]` : ''}`}
         >

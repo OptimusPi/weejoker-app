@@ -7,6 +7,7 @@ import { HowToPlay } from "./HowToPlay";
 import { SubmitScoreModal } from "./SubmitScoreModal";
 import { LeaderboardModal } from "./LeaderboardModal";
 import { Sprite } from "./Sprite";
+import { SwirlBackground } from "./vfx/SwirlBackground";
 import { useSeedAnalyzer } from "@/lib/hooks/useSeedAnalyzer";
 import { cn } from "@/lib/utils";
 
@@ -176,15 +177,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
 
     return (
         <div className="ritual-locked-layout">
-            {/* Floating Help Button */}
-            <div
-                className="floating-help-button"
-                onClick={() => setShowHowTo(true)}
-                title="How to Play"
-            >
-                ?
-            </div>
-
+            <SwirlBackground />
             {/* Header */}
             <header className="w-full max-w-5xl px-4 py-6 z-20 mx-auto">
                 <DayHeader
@@ -199,33 +192,35 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                     <div className="w-full max-w-xl aspect-[4/3] flex flex-col items-center justify-center p-12 text-center">
                         <div className="balatro-panel border-white/10 bg-black/20 p-8">
                             <h3 className="font-header text-3xl text-[var(--balatro-gold)] mb-4">{ritualTitle}</h3>
-                            <p className="font-pixel text-white/40 text-xs mb-8 tracking-[0.2em] uppercase">
+                            <div className="flex justify-between items-center py-1 border-y border-white/10 text-[13px] font-pixel text-white/40 tracking-[0.2em]">
                                 The Weepoch begins {new Date(activeEpoch).toLocaleDateString()}
-                            </p>
+                            </div>
                             <div className="flex flex-col gap-4">
                                 <button
+                                    type="button"
                                     onClick={() => setShowHowTo(true)}
                                     className="balatro-button balatro-button-blue text-sm w-full"
                                 >
-                                    HOW TO PLAY
+                                    How to Play
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() => updateDay(Math.max(1, todayNumber))}
                                     className="balatro-button balatro-button-grey text-sm w-full"
                                 >
-                                    GO TO TODAY (DAY {Math.max(1, todayNumber)})
+                                    Go to Today (Day {Math.max(1, todayNumber)})
                                 </button>
                             </div>
                         </div>
                     </div>
                 ) : (
-                    <div className="w-full px-4 max-w-4xl">
+                    <div className="w-full px-4 max-w-4xl h-full min-h-0 flex flex-col justify-center">
                         {configLoading || analysisLoading ? (
                             <div className="flex flex-col items-center gap-8 py-20 animate-pulse">
                                 <div className="animate-spin text-white/10 grayscale">
                                     <Sprite name="weejoker" width={64} />
                                 </div>
-                                <div className="font-pixel text-white/20 text-xs uppercase tracking-[0.4em]">
+                                <div className="font-pixel text-white/20 text-xs tracking-[0.4em]">
                                     {configLoading ? "Connecting to Ritual Factory..." : "Reading Seed Data..."}
                                 </div>
                             </div>
@@ -237,10 +232,11 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                                     Check your connection or return to today.
                                 </p>
                                 <button
+                                    type="button"
                                     onClick={() => updateDay(todayNumber)}
                                     className="balatro-button balatro-button-blue mt-6 text-sm"
                                 >
-                                    BACK TO TODAY
+                                    Back to Today
                                 </button>
                             </div>
                         ) : (

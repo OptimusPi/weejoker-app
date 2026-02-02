@@ -182,7 +182,7 @@ export function PlayingCard({ suit, rank, enhancement = null, seal = null, editi
             style={{
                 width: finalW,
                 height: finalH,
-                imageRendering: 'pixelated',
+                imageRendering: 'auto',
                 ...style
             }}
             title={`${rank} of ${suit}${enhancement ? ` (${enhancement})` : ''}${seal ? ` [${seal} Seal]` : ''}${edition ? ` [${edition}]` : ''}`}
@@ -199,7 +199,8 @@ export function PlayingCard({ suit, rank, enhancement = null, seal = null, editi
                     transform: `scale(${scale})`,
                     transformOrigin: 'top left',
                     backgroundRepeat: 'no-repeat',
-                    filter: isNegative ? "invert(1)" : "none"
+                    filter: isNegative ? "invert(1)" : "none",
+                    imageRendering: 'auto'
                 }}
             />
 
@@ -215,6 +216,7 @@ export function PlayingCard({ suit, rank, enhancement = null, seal = null, editi
                     transform: `scale(${scale})`,
                     transformOrigin: 'top left',
                     backgroundRepeat: 'no-repeat',
+                    imageRendering: 'auto'
                 }}
             />
 

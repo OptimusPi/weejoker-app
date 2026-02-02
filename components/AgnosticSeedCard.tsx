@@ -175,9 +175,9 @@ export function AgnosticSeedCard({
                             {displaySeed}
                             {!isLocked && (copied ? <Check size={16} className="text-[var(--balatro-green)]" /> : <Copy size={14} className="opacity-20 group-hover:opacity-60" />)}
                         </div>
-                        <div className="font-pixel text-[11px] text-[var(--balatro-gold)] uppercase flex gap-3 tracking-tighter items-center">
+                        <div className="font-pixel text-sm text-[var(--balatro-gold)] flex gap-3 tracking-tighter items-center">
                             {!isLocked && <span>Score: {displayScore.toLocaleString()}</span>}
-                            {!isMatch && !isLocked && <span className="text-[var(--balatro-red)] animate-pulse">(MISMATCH)</span>}
+                            {!isMatch && !isLocked && <span className="text-[var(--balatro-red)] animate-pulse">(Mismatch)</span>}
 
                             {/* Help Button Restored */}
                             <button
@@ -193,8 +193,8 @@ export function AgnosticSeedCard({
 
                 <div className="flex items-center gap-2">
                     {isLocked ? (
-                        <div className="px-3 py-1 bg-white/5 rounded border border-white/10 font-pixel text-[10px] text-white/30 flex items-center gap-2">
-                            <span>HIDDEN</span>
+                        <div className="px-3 py-1 bg-white/5 rounded border border-white/10 font-pixel text-sm text-white/30 flex items-center gap-2">
+                            <span>Locked</span>
                         </div>
                     ) : (
                         <>
@@ -206,14 +206,14 @@ export function AgnosticSeedCard({
                                     analysis ? "balatro-button-green" : "balatro-button-blue"
                                 )}
                             >
-                                {isAnalyzing ? <Loader2 size={14} className="animate-spin" /> : analysis ? 'DETAILS' : 'ANALYZE'}
+                                {isAnalyzing ? <Loader2 size={14} className="animate-spin" /> : analysis ? 'Details' : 'Analyze'}
                             </button>
                             {analysis && (
                                 <button
                                     onClick={() => setShowSnapshotModal(true)}
                                     className="balatro-button balatro-button-gold !py-1 !px-4 text-base font-header"
                                 >
-                                    SNAPSHOT
+                                    Snapshot
                                 </button>
                             )}
                         </>
@@ -247,8 +247,8 @@ export function AgnosticSeedCard({
                     <div className="p-3 rounded-lg bg-black/30 border border-white/5 relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-1 h-full bg-[var(--balatro-gold)]"></div>
                         <div className="flex justify-between items-center mb-3 pl-1">
-                            <div className="text-[var(--balatro-gold)] font-header text-[11px] uppercase tracking-widest">Ritual Journey Map</div>
-                            <div className="font-pixel text-[8px] text-white/30 uppercase tracking-tighter">Seed Routing v1.0</div>
+                            <div className="text-[var(--balatro-gold)] font-header text-sm tracking-widest">Ritual Journey Map</div>
+                            <div className="font-pixel text-sm text-white/30 tracking-tighter">Seed Routing v1.0</div>
                         </div>
 
                         <JamlJourneyMap evaluation={evaluation} maxMatches={10} />
@@ -259,14 +259,14 @@ export function AgnosticSeedCard({
             {!analysis && (
                 <div className="flex flex-col items-center justify-center py-12 opacity-20 group-hover:opacity-40 transition-opacity">
                     <Sprite name="joker" width={48} className="grayscale" />
-                    <span className="font-pixel text-[10px] uppercase mt-4 tracking-widest leading-none">Awaiting Analysis</span>
+                    <span className="font-pixel text-sm mt-4 tracking-widest leading-none">Awaiting analysis</span>
                 </div>
             )}
 
             <div className="absolute bottom-1 right-2 pointer-events-none flex items-center gap-2">
                 {source && (
                     <span className={cn(
-                        "font-pixel text-[8px] px-1.5 py-0.5 rounded border uppercase",
+                        "font-pixel text-sm px-1.5 py-0.5 rounded border capitalize",
                         source === 'WASM'
                             ? "bg-[var(--balatro-blue)]/20 border-[var(--balatro-blue)]/50 text-[var(--balatro-blue)] shadow-[0_0_5px_var(--balatro-blue)]"
                             : "bg-[var(--balatro-gold)]/20 border-[var(--balatro-gold)]/50 text-[var(--balatro-gold)]"
@@ -274,22 +274,26 @@ export function AgnosticSeedCard({
                         {source}
                     </span>
                 )}
-                <span className="font-pixel text-[7px] italic text-white/50 opacity-40">v1.1-MOTELY-WASM</span>
+                <span className="font-pixel text-sm italic text-white/50 opacity-40">v1.1-motely-wasm</span>
             </div>
 
-            {showStrategyModal && analysis && (
-                <SeedStrategyModal
-                    analysis={analysis}
-                    onClose={() => setShowStrategyModal(false)}
-                />
-            )}
+            {
+                showStrategyModal && analysis && (
+                    <SeedStrategyModal
+                        analysis={analysis}
+                        onClose={() => setShowStrategyModal(false)}
+                    />
+                )
+            }
 
-            {showSnapshotModal && analysis && (
-                <SeedSnapshotModal
-                    analysis={analysis}
-                    onClose={() => setShowSnapshotModal(false)}
-                />
-            )}
-        </div>
+            {
+                showSnapshotModal && analysis && (
+                    <SeedSnapshotModal
+                        analysis={analysis}
+                        onClose={() => setShowSnapshotModal(false)}
+                    />
+                )
+            }
+        </div >
     );
 }

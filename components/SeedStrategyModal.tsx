@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { AnalyzedSeed } from '@/lib/seedAnalyzer';
 import { X, ChevronRight, ShoppingCart, PackageOpen, Award, Tag } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -11,12 +12,25 @@ interface SeedStrategyModalProps {
 
 export function SeedStrategyModal({ analysis, onClose }: SeedStrategyModalProps) {
     const [activeAnte, setActiveAnte] = useState(1);
+    const [mounted, setMounted] = useState(false);
+
     const maxAnte = analysis.bosses.length || 8;
     const anteData = analysis.antes?.[activeAnte];
 
-    return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 animate-in fade-in duration-200">
-            <div className="balatro-panel w-full max-w-4xl h-[90vh] flex flex-col relative bg-[var(--balatro-black)] border-2 border-[var(--balatro-blue)]/50 shadow-2xl">
+    useEffect(() => {
+        setMounted(true);
+        // Prevent background scroll
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = '';
+        }
+    }, []);
+
+    if (!mounted) return null;
+
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95 animate-in fade-in duration-200" onClick={onClose}>
+            <div className="balatro-panel w-full max-w-4xl h-[90vh] flex flex-col relative bg-[var(--balatro-black)] border-2 border-[var(--balatro-blue)]/50 shadow-2xl" onClick={e => e.stopPropagation()}>
 
                 {/* Header */}
                 <div className="shrink-0 p-4 border-b border-white/10 flex justify-between items-center bg-[var(--balatro-light-black)]">
@@ -169,18 +183,18 @@ export function SeedStrategyModal({ analysis, onClose }: SeedStrategyModalProps)
                                 </div>
 
                                 {/* Deck Draws */}
-                                {anteData.deckDraws && (
+                                {(anteData as any).deckDraws && (
                                     <div>
                                         <div className="font-pixel text-[10px] uppercase text-white/40 mb-2 tracking-widest flex items-center gap-2">
                                             <Award size={12} className="rotate-180" />
                                             Deck draws
                                         </div>
                                         <div className="space-y-4">
-                                            {Object.entries(anteData.deckDraws).map(([round, cards]) => (
+                                            {Object.entries((anteData as any).deckDraws).map(([round, cards]: [string, any]) => (
                                                 <div key={round} className="balatro-panel p-3 border-[var(--balatro-blue)]/20 bg-[var(--balatro-blue)]/5">
                                                     <div className="font-header text-lg text-[var(--balatro-blue)] mb-2 uppercase tracking-wider">{round} Sequence</div>
                                                     <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
-                                                        {cards.map((card, i) => (
+                                                        {cards.map((card: any, i: number) => (
                                                             <div key={i} className="shrink-0 w-16 h-24 bg-black/60 border border-white/10 rounded flex flex-col items-center justify-center p-1 text-center hover:border-[var(--balatro-blue)]/50 transition-colors">
                                                                 <div className="font-pixel text-[8px] text-white/60 mb-1">#{i + 1}</div>
                                                                 <div className="font-pixel text-[10px] text-white break-words w-full">{card.name}</div>
@@ -202,6 +216,7 @@ export function SeedStrategyModal({ analysis, onClose }: SeedStrategyModalProps)
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

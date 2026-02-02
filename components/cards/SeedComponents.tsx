@@ -1,6 +1,7 @@
 import React from 'react';
 import { CardFan } from '../CardFan';
 import { Sprite } from '../Sprite';
+import { PlayingCard } from '../PlayingCard';
 import { AnalyzedSeed } from '@/lib/seedAnalyzer';
 
 interface PanelProps {
@@ -8,18 +9,46 @@ interface PanelProps {
 }
 
 export function DeckPanel({ analysis }: PanelProps) {
+    const deck = analysis.startingDeck || [];
+    const twos = deck.filter(c => c.startsWith('2_'));
+    const others = deck.filter(c => !c.startsWith('2_'));
+
+    // Rank Order: A K Q J 10 9 8 7 6 5 4 3
+    const rankValue: Record<string, number> = {
+        'A': 14, 'K': 13, 'Q': 12, 'J': 11, '10': 10, '9': 9, '8': 8, '7': 7, '6': 6, '5': 5, '4': 4, '3': 3, '2': 2
+    };
+
+    const sortedOthers = [...others].sort((a, b) => {
+        const rankA = a.split('_')[0];
+        const rankB = b.split('_')[0];
+        return (rankValue[rankB] || 0) - (rankValue[rankA] || 0);
+    });
+
     return (
-        <div className="flex w-full min-h-[100px] bg-[var(--balatro-light-black)]/40 rounded-xl overflow-hidden border-2 border-black/30 relative shadow-inner group">
-            <div className="w-10 flex items-center justify-center relative shrink-0 border-r border-white/5 bg-black/20">
-                <span className="font-header text-[12px] text-white/40 tracking-[0.3em] whitespace-nowrap -rotate-90 absolute uppercase">
-                    Deck
-                </span>
+        <div className="flex flex-col w-full bg-black/40 rounded-xl relative group p-6 gap-2">
+            <div className="absolute top-2 left-6 text-[10px] text-white/20 tracking-[0.2em]">
+                Starting Deck: {deck.length} Cards
             </div>
-            <div className="flex-1 flex items-center justify-center p-3">
+
+            {/* Non-2s Section: Ranked and Greyed */}
+            <div className="flex flex-wrap justify-center gap-1 opacity-40 grayscale scale-75 origin-top">
+                {sortedOthers.map((card, i) => (
+                    <div key={i} className="hover:opacity-100 transition-opacity">
+                        <PlayingCard
+                            rank={card.split('_')[0] as any}
+                            suit={card.split('_')[1] as any}
+                            size={32}
+                        />
+                    </div>
+                ))}
+            </div>
+
+            {/* The 2s: Big arced hand */}
+            <div className="flex items-center justify-center pt-8 pb-4">
                 <CardFan
-                    count={analysis.startingDeck.length}
-                    cards={analysis.startingDeck}
-                    className="scale-[0.85] origin-center"
+                    count={twos.length}
+                    cards={twos}
+                    className="scale-[1.5] origin-center"
                     showLabel={false}
                 />
             </div>
@@ -29,20 +58,18 @@ export function DeckPanel({ analysis }: PanelProps) {
 
 export function TagsPanel({ analysis }: PanelProps) {
     return (
-        <div className="flex bg-[var(--balatro-light-black)]/40 rounded-xl overflow-hidden border-2 border-black/30 relative shadow-inner h-24">
-            <div className="w-8 flex items-center justify-center relative shrink-0 border-r border-white/5 bg-black/20">
-                <span className="font-header text-[10px] text-white/40 tracking-[0.2em] whitespace-nowrap -rotate-90 absolute uppercase">
-                    Tags
-                </span>
+        <div className="flex flex-col bg-black/40 rounded-xl relative p-4 h-28">
+            <div className="text-[10px] text-white/20 tracking-[0.2em] mb-2">
+                Tags
             </div>
-            <div className="flex-1 p-2 flex flex-wrap content-center gap-1.5 overflow-hidden">
-                {analysis.tags.slice(0, 3).map((t, i) => (
+            <div className="flex-1 flex flex-wrap content-start gap-2 overflow-hidden">
+                {analysis.tags.slice(0, 6).map((t, i) => (
                     <div key={i} className="relative group/tag">
                         <Sprite name={t.tag} width={28} className="drop-shadow-sm group-hover/tag:scale-110" />
-                        <div className="absolute -top-1 -right-1 bg-black/60 text-white font-pixel text-[7px] w-3 h-3 flex items-center justify-center rounded-sm">A{t.ante}</div>
+                        <div className="absolute -top-1 -right-1 bg-black/60 text-white font-pixel text-[7px] w-3 h-3 flex items-center justify-center rounded-sm">a{t.ante}</div>
                     </div>
                 ))}
-                {analysis.tags.length === 0 && <span className="font-pixel text-[8px] text-white/10 uppercase italic">None</span>}
+                {analysis.tags.length === 0 && <span className="font-pixel text-[8px] text-white/10 italic">None</span>}
             </div>
         </div>
     );
@@ -50,20 +77,18 @@ export function TagsPanel({ analysis }: PanelProps) {
 
 export function BossPanel({ analysis }: PanelProps) {
     return (
-        <div className="flex bg-[var(--balatro-light-black)]/40 rounded-xl overflow-hidden border-2 border-black/30 relative shadow-inner h-24">
-            <div className="w-8 flex items-center justify-center relative shrink-0 border-r border-white/5 bg-black/20">
-                <span className="font-header text-[10px] text-white/40 tracking-[0.2em] whitespace-nowrap -rotate-90 absolute uppercase">
-                    Boss
-                </span>
+        <div className="flex flex-col bg-black/40 rounded-xl relative p-4 h-28">
+            <div className="text-[10px] text-white/20 tracking-[0.2em] mb-2">
+                Boss
             </div>
-            <div className="flex-1 p-2 flex flex-wrap content-center gap-1.5 overflow-hidden">
-                {analysis.bosses.slice(1, 4).map((b, i) => (
+            <div className="flex-1 flex flex-wrap content-start gap-2 overflow-hidden">
+                {analysis.bosses.slice(1, 5).map((b, i) => (
                     <div key={i} className="relative group/boss">
                         <Sprite name={b.boss} width={32} className="drop-shadow-sm group-hover/boss:scale-110" />
-                        <div className="absolute -top-1 -right-1 bg-black/60 text-white font-pixel text-[7px] w-3 h-3 flex items-center justify-center rounded-sm">A{b.ante}</div>
+                        <div className="absolute -top-1 -right-1 bg-black/60 text-white font-pixel text-[7px] w-3 h-3 flex items-center justify-center rounded-sm">a{b.ante}</div>
                     </div>
                 ))}
-                {analysis.bosses.length === 0 && <span className="font-pixel text-[8px] text-white/10 uppercase italic">None</span>}
+                {analysis.bosses.length === 0 && <span className="font-pixel text-[8px] text-white/10 italic">None</span>}
             </div>
         </div>
     );
