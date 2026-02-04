@@ -7,7 +7,8 @@ export const runtime = 'edge';
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
-    const ritualId = searchParams.get('ritualId') || 'the-daily-wee';
+    const rawRitualId = searchParams.get('ritualId') || 'the-daily-wee';
+    const ritualId = rawRitualId.toLowerCase();
     const seed = searchParams.get('seed');
     const week = searchParams.get('week');
 
@@ -74,7 +75,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json() as { ritualId?: string; seed?: string; playerName?: string; score?: string };
-        const { ritualId = 'the-daily-wee', seed, playerName, score } = body;
+        const { ritualId: rawRitualId = 'the-daily-wee', seed, playerName, score } = body;
+        const ritualId = rawRitualId.toLowerCase();
 
         if (!seed || !playerName || !score) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -96,6 +98,19 @@ export async function POST(request: NextRequest) {
         if (!db) {
             return NextResponse.json({ error: 'Database not available' }, { status: 500 });
         }
+
+        // Ensure table exists (for first-time submissions)
+        await db.prepare(`
+            CREATE TABLE IF NOT EXISTS scores (
+                ritual_id TEXT NOT NULL,
+                seed TEXT NOT NULL,
+                player_name TEXT NOT NULL,
+                score_display TEXT NOT NULL,
+                score_value REAL NOT NULL,
+                submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (ritual_id, seed, player_name)
+            )
+        `).run();
 
         // Insert or Replace (Update score if same player submits for same seed/ritual)
         await db.prepare(`

@@ -243,7 +243,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
 
                                                     return (
                                                         <div key={`${item.id}-${idx}`} className="relative group/item shrink-0">
-                                                            <Sprite name={item.id} width={finalWidth} className="drop-shadow-md transition-transform hover:scale-110 active:scale-95 duration-200" />
+                                                            <Sprite name={item.id} width={finalWidth} className="drop-shadow-md transition-transform hover:scale-110 active:scale-95 duration-75 ease-out" />
 
                                                             {/* Ante Badge */}
                                                             {item.ante && (

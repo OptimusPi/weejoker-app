@@ -1,7 +1,7 @@
 export const ritualConfig = {
     title: "The Daily Wee",
     tagline: "A curated daily Balatro ritual",
-    id: "weejoker",
+    id: "TheDailyWee",
     /**
      * The Weepoch (Jan 30, 2026)
      * This is the canonical start date for Day 1.

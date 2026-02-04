@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const runtime = 'edge';
+
 /**
  * GET /api/rituals/[id]/seeds/[day]
  * Fetch a specific seed by ritual ID and day number

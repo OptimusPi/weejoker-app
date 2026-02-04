@@ -57,12 +57,19 @@ export default function RootLayout({
 
                 <div className="relative z-10 h-full flex flex-col">
                     <NavBar />
+                    import ClientProviders from '@/components/ClientProviders';
+
+                    // ... (imports)
+
+                    // ... (RootLayout)
                     <div className="flex-grow flex flex-col min-h-0 relative z-0">
-                        {children}
+                        <ClientProviders>
+                            {children}
+                        </ClientProviders>
                     </div>
 
                     {/* Footer is now rendered client-side for cycling suits */}
-                    <PageFooter />
+                    {/* <PageFooter /> */}
                 </div>
             </body>
         </html>

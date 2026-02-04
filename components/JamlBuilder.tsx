@@ -11,7 +11,6 @@ import { X, Edit2, Loader2, Search, Square, Copy, RotateCcw, Flame, Sparkles } f
 import { SearchResult } from '@/lib/api/motelyApi';
 import { AgnosticSeedCard } from './AgnosticSeedCard';
 import { WasmStatus } from './WasmStatus';
-import { searchSeedsWasm, cancelSearch, addSearchListener } from '@/lib/api/motelyWasm';
 import { JAML_PRESETS } from '@/lib/jaml/presets';
 
 export default function JamlBuilder() {
@@ -38,7 +37,7 @@ export default function JamlBuilder() {
     useEffect(() => {
         return () => {
             if (searchCleanupRef.current) searchCleanupRef.current();
-            cancelSearch();
+            // cancelSearch();
         };
     }, []);
     const pollRef = useRef<NodeJS.Timeout | null>(null);
@@ -56,52 +55,21 @@ export default function JamlBuilder() {
         stopRef.current = false;
 
         try {
-            // Subscribe to results
-            const cleanup = addSearchListener((event) => {
-                if (event.type === 'result') {
-                    setSearchResults(prev => {
-                        // Prevent duplicates
-                        if (prev.some(r => r.seed === event.data.seed)) return prev;
-                        return [...prev, {
-                            seed: event.data.seed,
-                            score: event.data.score,
-                            tallies: event.data.tallies || []
-                        } as any];
-                    });
-                } else if (event.type === 'progress') {
-                    setSeedsProcessed(event.data.SearchedCount || 0);
-                } else if (event.type === 'complete') {
-                    setIsSearching(false);
-                    if (searchCleanupRef.current) {
-                        searchCleanupRef.current();
-                        searchCleanupRef.current = null;
-                    }
-                } else if (event.type === 'error') {
-                    setSearchError(event.message);
-                    setIsSearching(false);
-                }
-            });
-
-            searchCleanupRef.current = cleanup;
-
-            // Start the search (returns as soon as starts)
-            await searchSeedsWasm(jamlText, 50, '');
-
+            // WASM REMOVED
+            console.warn("WASM Engine Removed");
+            setSearchError('WASM Engine Removed');
+            setIsSearching(false);
         } catch (e: any) {
             console.error("Local search error:", e);
             setSearchError(e.message || 'Local search failed');
             setIsSearching(false);
-            if (searchCleanupRef.current) {
-                searchCleanupRef.current();
-                searchCleanupRef.current = null;
-            }
         }
     };
 
     const handleStop = () => {
         stopRef.current = true;
         setIsSearching(false);
-        cancelSearch(); // Ensure WASM search is cancelled
+        // cancelSearch(); // Removed
         if (searchCleanupRef.current) {
             searchCleanupRef.current(); // Unsubscribe listener
             searchCleanupRef.current = null;

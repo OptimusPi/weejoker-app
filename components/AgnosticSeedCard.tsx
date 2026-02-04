@@ -4,7 +4,6 @@ import { SearchResult } from '@/lib/api/motelyApi';
 import { cn } from '@/lib/utils';
 import { Loader2, ChevronRight, Copy, Check, Info } from 'lucide-react';
 import { DeckSprite } from './DeckSprite';
-import { analyzeSeedWasm } from '@/lib/api/motelyWasm';
 import { normalizeAnalysis, AnalyzedSeed } from '@/lib/seedAnalyzer';
 import { CardFan } from './CardFan';
 import { SeedStrategyModal } from './SeedStrategyModal';
@@ -31,6 +30,7 @@ interface AgnosticSeedCardProps {
     onShowHowTo?: () => void;
     onOpenSubmit?: () => void;
     canSubmit?: boolean;
+    style?: React.CSSProperties; // Allow dynamic styles (animation delay)
 
     className?: string;
 }
@@ -48,7 +48,8 @@ export function AgnosticSeedCard({
     onShowHowTo,
     onOpenSubmit,
     canSubmit,
-    className
+    className,
+    style
 }: AgnosticSeedCardProps) {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [analysis, setAnalysis] = useState<AnalyzedSeed | null>(initialAnalysis || null);
@@ -58,6 +59,13 @@ export function AgnosticSeedCard({
     const [showStrategyModal, setShowStrategyModal] = useState(false);
     const [showSnapshotModal, setShowSnapshotModal] = useState(false);
     const [source, setSource] = useState<'WASM' | 'API' | null>(null);
+
+    // Sync prop changes to state (Fixes "Missing Deck" bug when async data loads)
+    useEffect(() => {
+        if (initialAnalysis) {
+            setAnalysis(initialAnalysis);
+        }
+    }, [initialAnalysis]);
 
     // analysis/result is already handled above
     const { setFromJaml, filter } = useJamlFilter(jamlConfig || '');
@@ -96,7 +104,7 @@ export function AgnosticSeedCard({
     };
 
     const handleAnalyze = async () => {
-        if (isLocked) return;
+        if (isLocked || displaySeed === 'LOCKED') return;
         if (analysis) {
             setShowStrategyModal(true);
             return;
@@ -108,45 +116,12 @@ export function AgnosticSeedCard({
         setIsAnalyzing(true);
         setError(null);
         try {
-            const { analyzeSeedWasm } = await import('@/lib/api/motelyWasm');
-            const { normalizeAnalysis } = await import('@/lib/seedAnalyzer');
-            // Remove motelyApi import if not used elsewhere in handleAnalyze
+            // WASM REMOVED
+            throw new Error("WASM Analysis engine is currently disabled/removed.");
 
-            let rawResult = null;
-            let currentSource: 'WASM' | 'API' | null = null;
-
-            // 1. Try WASM
-            try {
-                console.log("Try WASM:");
-                rawResult = await analyzeSeedWasm(targetSeed, deckSlug || 'erratic', stakeSlug || 'white', 1, 8);
-                if (rawResult) currentSource = 'WASM';
-            } catch (wasmError) {
-                console.warn("WASM analysis failed:", wasmError);
-            }
-
-            // 2. Try API (Removed - WASM First!)
-            /*
-            if (!rawResult) {
-                try {
-                    rawResult = await motelyApi.analyze(targetSeed, deckSlug || 'erratic', stakeSlug || 'white');
-                    if (rawResult) currentSource = 'API';
-                } catch (apiError) {
-                    console.error("API analysis failed:", apiError);
-                }
-            }
-            */
-
-            if (rawResult) {
-                const data = normalizeAnalysis(rawResult);
-                setAnalysis(data);
-                setSource(currentSource);
-                // setShowStrategyModal(true); // User requested NOT to show this by default
-            } else {
-                throw new Error("Analysis failed on all engines.");
-            }
         } catch (err: any) {
             console.error("Manual analysis error:", err);
-            setError("Analysis failed: " + (err.message || String(err)));
+            setError("Analysis unavailable");
         } finally {
             setIsAnalyzing(false);
         }
@@ -154,12 +129,15 @@ export function AgnosticSeedCard({
 
     return (
         <div className={cn(
-            "balatro-panel border-white/10 flex flex-col gap-3 p-4 transition-all hover:border-white/20 bg-[var(--balatro-black)] shadow-balatro relative overflow-visible",
+            "flex flex-col gap-3 transition-all relative overflow-visible",
+            !isMatch && "opacity-60 grayscale-[0.3]", // Dim fail matches
             !isMatch && "opacity-60 grayscale-[0.3]", // Dim fail matches
             className
-        )}>
-            {/* Header: Seed & Basic Info */}
-            <div className="flex justify-between items-center bg-black/20 -m-4 p-4 mb-2 border-b-2 border-black/40 rounded-t-xl">
+        )}
+            style={style}
+        >
+            {/* Header: Seed & Basic Info - Simplified */}
+            <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/5 mb-2">
                 <div className="flex items-center gap-4">
                     <div className="relative shrink-0 filter drop-shadow-md">
                         <DeckSprite deck={deckSlug as any} stake={stakeSlug as any} size={42} />
@@ -216,6 +194,14 @@ export function AgnosticSeedCard({
                                     Snapshot
                                 </button>
                             )}
+                            {canSubmit && (
+                                <button
+                                    onClick={onOpenSubmit}
+                                    className="balatro-button balatro-button-purple !py-1 !px-4 text-base font-header"
+                                >
+                                    Submit Score
+                                </button>
+                            )}
                         </>
                     )}
                 </div>
@@ -244,14 +230,14 @@ export function AgnosticSeedCard({
                     </div>
 
                     {/* JAML Highlights / Journey Map */}
-                    <div className="p-3 rounded-lg bg-black/30 border border-white/5 relative overflow-hidden">
+                    <div className="p-4 rounded-xl bg-black/20 border border-white/5 relative">
                         <div className="absolute top-0 left-0 w-1 h-full bg-[var(--balatro-gold)]"></div>
                         <div className="flex justify-between items-center mb-3 pl-1">
                             <div className="text-[var(--balatro-gold)] font-header text-sm tracking-widest">Ritual Journey Map</div>
                             <div className="font-pixel text-sm text-white/30 tracking-tighter">Seed Routing v1.0</div>
                         </div>
 
-                        <JamlJourneyMap evaluation={evaluation} maxMatches={10} />
+                        <JamlJourneyMap evaluation={evaluation} maxMatches={200} />
                     </div>
                 </div>
             )}

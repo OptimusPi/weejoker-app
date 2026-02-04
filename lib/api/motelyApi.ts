@@ -44,7 +44,7 @@ export interface FilterInfo {
 export interface SearchResult {
     seed: string;
     score: number;
-    [key: string]: string | number;
+    [key: string]: string | number | number[];
 }
 
 export interface SearchStatus {
@@ -143,10 +143,15 @@ class MotelyApi {
     }
 
     // --- Seed Sources ---
-    async getSeedSources(): Promise<string[]> {
-        const res = await fetch(`${this.baseUrl}/seed-sources`);
-        if (!res.ok) throw new Error(`Get seed sources failed: ${res.statusText}`);
-        return res.json();
+    async searchSeedsRemote(jaml: string, seedCount = 50): Promise<SearchResult[]> {
+        // 1. Save filter
+        const { filterId } = await this.saveFilter({ filterJaml: jaml, createNew: true });
+        // 2. Start search
+        const { searchId } = await this.startSearch({ filterId, seedCount });
+
+        // 3. For now, since this is async on the server, we return an empty array 
+        // and let the caller poll or use SignalR via SearchChat.
+        return [];
     }
 }
 

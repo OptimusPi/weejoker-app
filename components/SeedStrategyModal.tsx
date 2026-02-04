@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { AnalyzedSeed } from '@/lib/seedAnalyzer';
-import { X, ChevronRight, ShoppingCart, PackageOpen, Award, Tag } from 'lucide-react';
+import { Award, ShoppingCart, PackageOpen, Tag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SeedStrategyModalProps {

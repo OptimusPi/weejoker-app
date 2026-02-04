@@ -56,101 +56,45 @@ export async function GET(
     config.today = todayNumber;
 
     try {
-        // R2 Only Approach - safely wrapped for local dev
         let allSeeds: string[] = [];
         let r2Jaml: string | null = null;
 
-        try {
-            const { getRequestContext } = await import('@cloudflare/next-on-pages');
-            const { env } = getRequestContext();
+        const { getRequestContext } = await import('@cloudflare/next-on-pages');
+        const context = getRequestContext();
+        const env = context?.env;
 
-            if (env && env.SEED_ASSETS) {
-                // Try to fetch '[ritualId].csv'
-                const csvKey = `${id}.csv`;
-                const object = await env.SEED_ASSETS.get(csvKey);
-
-                if (object) {
-                    const text = await object.text();
-                    // Parse CSV (First column is seed)
-                    allSeeds = text
-                        .split('\n')
-                        .map(line => line.trim())
-                        .filter(line => line.length > 0)
-                        .map(line => line.split(',')[0].trim()); // Take first column
-                } else {
-                    console.warn(`R2 '${csvKey}' not found. Is it uploaded?`);
-                }
-
-                // Try to fetch '[ritualId].jaml'
-                const jamlKey = `${id}.jaml`;
-                const jamlObj = await env.SEED_ASSETS.get(jamlKey);
-
-                if (jamlObj) {
-                    r2Jaml = await jamlObj.text();
-                } else {
-                    console.warn(`R2 '${jamlKey}' not found.`);
-                }
-
-            } else {
-                console.warn("No SEED_ASSETS binding found in environment.");
+        if (env && env.SEED_ASSETS) {
+            // ... as before ...
+            const csvKey = `${id}.csv`;
+            const object = await env.SEED_ASSETS.get(csvKey);
+            if (object) {
+                const text = await object.text();
+                allSeeds = text.split('\n').map(l => l.trim()).filter(l => l.length > 0).map(l => l.split(',')[0].trim());
             }
-        } catch (ctxError) {
-            // This is expected in local 'npm run dev' without wrangler
-            console.warn("Could not get R2 Context (Local Dev?):", ctxError);
+
+            const jamlKey = `${id}.jaml`;
+            const jamlObj = await env.SEED_ASSETS.get(jamlKey);
+            if (jamlObj) r2Jaml = await jamlObj.text();
         }
 
-        // Fallback: Fetch from public folder if in dev AND we didn't find seeds in R2
-        if (process.env.NODE_ENV === 'development' && allSeeds.length === 0) {
-            try {
-                const origin = new URL(request.url).origin;
-
-                // Try to load seeds
-                const seedRes = await fetch(`${origin}/${id}.csv`);
-                if (seedRes.ok) {
-                    const text = await seedRes.text();
-                    // CRITICAL FIX: Next.js dev server might return index.html for missing files (200 OK)
-                    // If the content looks like HTML, it is NOT our CSV.
-                    if (!text.trim().startsWith("<")) {
-                        allSeeds = text
-                            .split('\n')
-                            .map(line => line.trim())
-                            .filter(line => line.length > 0)
-                            .map(line => line.split(',')[0].trim());
-                        console.log(`✅ Loaded ${allSeeds.length} seeds from public/${id}.csv (Local Fallback)`);
-                    } else {
-                        console.warn(`⚠️ Local fallback found HTML instead of CSV at ${id}.csv (File missing?)`);
-                    }
-                }
-
-                // Try to load JAML (if not found in R2)
-                if (!r2Jaml) {
-                    const jamlRes = await fetch(`${origin}/${id}.jaml`);
-                    if (jamlRes.ok) {
-                        r2Jaml = await jamlRes.text();
-                        console.log(`✅ Loaded JAML from public/${id}.jaml (Local Fallback)`);
-                    }
-                }
-
-            } catch (fallbackError) {
-                console.error("Local seeds fallback failed:", fallbackError);
-            }
+        // DEV FALLBACK: If still empty (fetch failed or no binding), mock it
+        if (allSeeds.length === 0 && (process.env.NODE_ENV === 'development' || !env)) {
+            console.log("⚠️ [DEV] Using Fallback Seeds (Empty Result)");
+            allSeeds = Array(50).fill("WEEJOKER");
         }
 
-        // Apply R2 Data to Config
+        // Apply Data to Config
         if (allSeeds.length > 0) {
             config.seeds = allSeeds.slice(0, todayNumber);
         }
 
         if (r2Jaml) {
-            // Inject the JAML string for the frontend
             config.jamlConfig = r2Jaml;
         }
 
-        // Set current seed
+        // Set current seed strictly
         if (config.seeds.length >= targetDay) {
             config.currentSeed = config.seeds[targetDay - 1];
-        } else if (config.seeds.length > 0) {
-            config.currentSeed = config.seeds[config.seeds.length - 1];
         } else {
             config.currentSeed = "LOCKED";
         }

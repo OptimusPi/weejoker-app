@@ -7,7 +7,7 @@ interface DeckSpriteProps {
     className?: string;
 }
 
-const DECK_MAP: Record<string, { x: number; y: number }> = {
+export const DECK_MAP: Record<string, { x: number; y: number }> = {
     'red': { x: 0, y: 0 },
     'nebula': { x: 3, y: 0 },
     'blue': { x: 0, y: 2 },
@@ -27,7 +27,7 @@ const DECK_MAP: Record<string, { x: number; y: number }> = {
     'locked': { x: 4, y: 0 },
 };
 
-const STAKE_MAP: Record<string, { x: number; y: number }> = {
+export const STAKE_MAP: Record<string, { x: number; y: number }> = {
     'white': { x: 1, y: 0 },
     'red': { x: 2, y: 0 },
     'green': { x: 3, y: 0 },

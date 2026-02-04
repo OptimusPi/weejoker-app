@@ -1,6 +1,8 @@
 import { Suspense } from 'react';
 import { DailyRitual } from "@/components/DailyRitual";
 
+export const runtime = 'edge';
+
 export default async function DynamicRitualPage({
     params,
     searchParams

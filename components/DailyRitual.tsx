@@ -7,7 +7,6 @@ import { HowToPlay } from "./HowToPlay";
 import { SubmitScoreModal } from "./SubmitScoreModal";
 import { LeaderboardModal } from "./LeaderboardModal";
 import { Sprite } from "./Sprite";
-import { SwirlBackground } from "./vfx/SwirlBackground";
 import { useSeedAnalyzer } from "@/lib/hooks/useSeedAnalyzer";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +34,9 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
     const [ritualTitle, setRitualTitle] = useState(ritualConfig.title);
     const [ritualTagline, setRitualTagline] = useState(ritualConfig.tagline);
     const [activeEpoch, setActiveEpoch] = useState(ritualConfig.epoch);
+
+    // Simplified: always use serverToday if available, or compute locally (as backup)
+    const todayNumber = serverToday || getDayNumber(activeEpoch);
 
     // Cache to prevent redundant re-fetches
     const [ritualCache, setRitualCache] = useState<Record<number, { seed: string, jaml: string }>>({});
@@ -106,7 +108,12 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                 if (config.currentSeed && config.dayNumber) {
                     setRitualCache(prev => ({
                         ...prev,
-                        [config.dayNumber]: { seed: config.currentSeed, jaml: config.jamlConfig }
+                        [config.dayNumber]: {
+                            seed: config.currentSeed,
+                            jaml: config.jamlConfig,
+                            title: config.title,
+                            tagline: config.tagline
+                        }
                     }));
                 }
 
@@ -130,11 +137,12 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
             return seedsList[viewingDay - 1] || null;
         }
         // Fallback for single-seed mode
-        return seedsList[0] || null;
-    }, [seedsList, viewingDay]);
+        return seedsList[0] || (viewingDay <= todayNumber ? (seedsList.length > 0 ? seedsList[0] : null) : null);
+    }, [seedsList, viewingDay, todayNumber]);
 
-    // Run Analyzer
-    const { data: analysisData, loading: analysisLoading, error: analysisError } = useSeedAnalyzer(currentSeedId);
+    // Run Analyzer - Guard against LOCKED
+    const analyzerSeed = currentSeedId === 'LOCKED' ? null : currentSeedId;
+    const { data: analysisData, loading: analysisLoading, error: analysisError } = useSeedAnalyzer(analyzerSeed);
 
     // Objectives Parsing
     const objectives = useMemo(() => {
@@ -158,7 +166,6 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
     }, [currentSeedId]);
 
     // Simplified: always use serverToday if available, or compute locally (as backup)
-    const todayNumber = serverToday || getDayNumber(activeEpoch);
     const canGoBack = viewingDay > 0;
     const canGoForward = viewingDay < todayNumber + 1;
 
@@ -176,10 +183,9 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
 
 
     return (
-        <div className="ritual-locked-layout">
-            <SwirlBackground />
+        <div className="ritual-locked-layout h-[100svh] overflow-hidden flex flex-col">
             {/* Header */}
-            <header className="w-full max-w-5xl px-4 py-6 z-20 mx-auto">
+            <header className="w-full max-w-5xl px-4 py-4 shrink-0 z-20 mx-auto">
                 <DayHeader
                     dayNumber={viewingDay}
                     displayDate={displayDate}
@@ -187,7 +193,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
             </header>
 
             {/* Main Content Areas */}
-            <main className="match-height-content z-10">
+            <main className="match-height-content z-10 flex-1 min-h-0 relative">
                 {viewingDay <= 0 && !configLoading ? (
                     <div className="w-full max-w-xl aspect-[4/3] flex flex-col items-center justify-center p-12 text-center">
                         <div className="balatro-panel border-white/10 bg-black/20 p-8">
@@ -222,6 +228,19 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                                 </div>
                                 <div className="font-pixel text-white/20 text-xs tracking-[0.4em]">
                                     {configLoading ? "Connecting to Ritual Factory..." : "Reading Seed Data..."}
+                                </div>
+                            </div>
+                        ) : viewingDay > todayNumber + 1 ? (
+                            // HYPE CARD: Day 3+ (Future Preview)
+                            <div className="balatro-panel border-blue-500/20 bg-blue-950/10 p-12 text-center max-w-md mx-auto">
+                                <div className="mb-6 opacity-50"><Sprite name="eternal" width={64} /></div>
+                                <h3 className="font-header text-blue-400 text-2xl uppercase mb-3 tracking-[0.2em]">Future Vision</h3>
+                                <p className="font-pixel text-blue-300/40 text-xs leading-relaxed mb-6">
+                                    The spirits are still gathering energy for Day {viewingDay}.<br />
+                                    This ritual has not yet manifested in our timeline.
+                                </p>
+                                <div className="font-pixel text-[10px] text-white/20 uppercase tracking-[0.3em]">
+                                    Coming Soon
                                 </div>
                             </div>
                         ) : analysisError || !currentSeedId ? (
@@ -272,7 +291,10 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                     seed={currentSeedId}
                     ritualId={ritualId}
                     onClose={() => setShowSubmit(false)}
-                    onSuccess={() => { }}
+                    onSuccess={() => {
+                        setShowSubmit(false);
+                        setShowLeaderboard(true);
+                    }}
                 />
             )}
 

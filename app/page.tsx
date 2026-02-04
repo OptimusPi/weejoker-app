@@ -1,5 +1,7 @@
 import { DailyRitual } from "@/components/DailyRitual";
 
+export const runtime = 'edge';
+
 export default async function Home({
     searchParams
 }: {
@@ -10,7 +12,7 @@ export default async function Home({
 
     return (
         <main className="h-full w-full">
-            <DailyRitual initialDay={initialDay} />
+            <DailyRitual ritualId="TheDailyWee" initialDay={initialDay} />
         </main>
     );
 }

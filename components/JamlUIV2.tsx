@@ -2,46 +2,97 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 
-import JamlEditor from './JamlEditor';
+import { InteractiveJamlEditor } from '@/Blueprint/src/components/blueprint/jamlView/InteractiveJamlEditor';
+import { JamlGenie } from './JamlGenie';
 import { useJamlFilter } from '@/lib/hooks/useJamlFilter';
 import { JAML_PRESETS } from '@/lib/jaml/presets';
-import { searchSeedsWasm, cancelSearch, isSearchRunning, addSearchListener } from '@/lib/api/motelyWasm';
 import { AgnosticSeedCard } from './AgnosticSeedCard';
 import { WasmStatus } from './WasmStatus';
 import { SearchResult, motelyApi } from '@/lib/api/motelyApi';
 import { cn } from '@/lib/utils';
+import { DeckSprite, DECK_MAP, STAKE_MAP } from './DeckSprite';
 import {
     Search,
     Square,
     Loader2,
     Sparkles,
     Flame,
-    PanelLeft,
-    PanelRight,
     Maximize2,
-    Minimize2,
-    Settings,
-    Globe,
     Cpu,
-    AlertCircle,
+    Globe,
     Terminal,
-    ChevronDown,
-    ChevronUp
+    Activity,
+    Database,
+    Zap,
+    MessageSquare,
+    Monitor
 } from 'lucide-react';
+
+/**
+ * Reusable Dashboard Tile with Balatro Color Coding
+ */
+function Tile({
+    title,
+    color = "red",
+    icon: Icon,
+    children,
+    className,
+    headerRight
+}: {
+    title: string;
+    color?: "red" | "orange" | "purple" | "green" | "blue" | "teal" | "gold";
+    icon?: any;
+    children: React.ReactNode;
+    className?: string;
+    headerRight?: React.ReactNode;
+}) {
+    const colorMap = {
+        red: "border-[var(--balatro-red)] shadow-[0_0_15px_rgba(254,95,85,0.15)]",
+        orange: "border-[var(--balatro-orange)] shadow-[0_0_15px_rgba(253,162,0,0.15)]",
+        purple: "border-[var(--balatro-purple)] shadow-[0_0_15px_rgba(136,103,165,0.15)]",
+        green: "border-[var(--balatro-green)] shadow-[0_0_15px_rgba(75,194,146,0.15)]",
+        blue: "border-[var(--balatro-blue)] shadow-[0_0_15px_rgba(0,157,255,0.15)]",
+        teal: "border-[#00ffaa] shadow-[0_0_15px_rgba(0,255,170,0.15)]",
+        gold: "border-[var(--balatro-gold)] shadow-[0_0_15px_rgba(234,192,88,0.15)]",
+    };
+
+    const textColorMap = {
+        red: "text-[var(--balatro-red)]",
+        orange: "text-[var(--balatro-orange)]",
+        purple: "text-[var(--balatro-purple)]",
+        green: "text-[var(--balatro-green)]",
+        blue: "text-[var(--balatro-blue)]",
+        teal: "text-[#00ffaa]",
+        gold: "text-[var(--balatro-gold)]",
+    };
+
+    return (
+        <div className={cn(
+            "balatro-panel flex flex-col overflow-hidden transition-all duration-300",
+            colorMap[color],
+            className
+        )}>
+            <div className="flex items-center justify-between mb-3 px-1 shrink-0">
+                <div className="flex items-center gap-2">
+                    {Icon && <Icon size={16} className={textColorMap[color]} />}
+                    <h3 className={cn("font-header text-sm uppercase tracking-widest", textColorMap[color])}>
+                        {title}
+                    </h3>
+                </div>
+                {headerRight}
+            </div>
+            <div className="flex-1 min-h-0 bg-black/20 rounded-lg overflow-hidden flex flex-col">
+                {children}
+            </div>
+        </div>
+    );
+}
 
 export default function JamlUIV2() {
     const {
         jamlText,
         setFromJaml
     } = useJamlFilter();
-
-    // UI State
-    const [leftPanelWidth, setLeftPanelWidth] = useState(300);
-    const [rightPanelWidth, setRightPanelWidth] = useState(400);
-    const [bottomPanelHeight, setBottomPanelHeight] = useState(150);
-    const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
-    const [isRightCollapsed, setIsRightCollapsed] = useState(false);
-    const [isBottomCollapsed, setIsBottomCollapsed] = useState(false);
 
     // Search State
     const [searchMode, setSearchMode] = useState<'local' | 'remote'>('local');
@@ -50,67 +101,32 @@ export default function JamlUIV2() {
     const [seedsProcessed, setSeedsProcessed] = useState(0);
     const [searchError, setSearchError] = useState<string | null>(null);
     const [jamlDiagnostics, setJamlDiagnostics] = useState<any>(null);
+    const [technicalLogs, setTechnicalLogs] = useState<string[]>(["[SYSTEM] Initializing Motely Nexus...", "[SYSTEM] WASM Engine Standby."]);
 
     const stopRef = useRef(false);
     const searchCleanupRef = useRef<(() => void) | null>(null);
+    const seenSeedsRef = useRef<Set<string>>(new Set());
+
+    // Deck & Stake Selection
+    const [deckSlug, setDeckSlug] = useState('Ghost');
+    const [stakeSlug, setStakeSlug] = useState('White');
+    const [showDeckSelector, setShowDeckSelector] = useState(false);
+
+    // Logging helper
+    const addLog = (msg: string) => {
+        setTechnicalLogs(prev => [...prev.slice(-100), `[${new Date().toLocaleTimeString()}] ${msg}`]);
+    };
 
     // Cleanup on unmount
     useEffect(() => {
         return () => {
             if (searchCleanupRef.current) searchCleanupRef.current();
-            cancelSearch();
         };
     }, []);
 
-    // Resizing Logic
-    const isResizingLeft = useRef(false);
-    const isResizingRight = useRef(false);
-    const isResizingBottom = useRef(false);
-
+    // JAML Validation Hook (WASM REMOVED)
     useEffect(() => {
-        const handleMouseMove = (e: MouseEvent) => {
-            if (isResizingLeft.current) {
-                setLeftPanelWidth(Math.max(200, Math.min(600, e.clientX)));
-            }
-            if (isResizingRight.current) {
-                const width = window.innerWidth - e.clientX;
-                setRightPanelWidth(Math.max(250, Math.min(800, width)));
-            }
-            if (isResizingBottom.current) {
-                const height = window.innerHeight - e.clientY;
-                setBottomPanelHeight(Math.max(100, Math.min(500, height)));
-            }
-        };
-
-        const handleMouseUp = () => {
-            isResizingLeft.current = false;
-            isResizingRight.current = false;
-            isResizingBottom.current = false;
-            document.body.style.cursor = 'default';
-        };
-
-        window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mouseup', handleMouseUp);
-        return () => {
-            window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mouseup', handleMouseUp);
-        };
-    }, []);
-
-    useEffect(() => {
-        const validate = async () => {
-            if (!jamlText) return;
-            try {
-                const { validateJamlWasm } = await import('@/lib/api/motelyWasm');
-                const result = await validateJamlWasm(jamlText);
-                setJamlDiagnostics(result);
-            } catch (e) {
-                console.warn("Validation error:", e);
-            }
-        };
-
-        const timer = setTimeout(validate, 500);
-        return () => clearTimeout(timer);
+        // Disabled
     }, [jamlText]);
 
     const handleSearch = async () => {
@@ -124,56 +140,45 @@ export default function JamlUIV2() {
         setSearchResults([]);
         setSeedsProcessed(0);
         stopRef.current = false;
+        seenSeedsRef.current.clear();
+
+        addLog(`Initiating ${searchMode.toUpperCase()} search...`);
 
         try {
             if (searchMode === 'local') {
-                const cleanup = addSearchListener((event) => {
-                    if (event.type === 'result') {
-                        setSearchResults(prev => {
-                            if (prev.some(r => r.seed === event.data.seed)) return prev;
-                            return [...prev, {
-                                seed: event.data.seed,
-                                score: event.data.score,
-                                tallies: event.data.tallies || []
-                            } as any];
-                        });
-                    } else if (event.type === 'progress') {
-                        setSeedsProcessed(event.data.SearchedCount || 0);
-                    } else if (event.type === 'complete') {
-                        setIsSearching(false);
-                        if (searchCleanupRef.current) {
-                            searchCleanupRef.current();
-                            searchCleanupRef.current = null;
-                        }
-                    } else if (event.type === 'error') {
-                        setSearchError(event.message);
-                        setIsSearching(false);
-                    }
-                });
-
-                searchCleanupRef.current = cleanup;
-                await searchSeedsWasm(jamlText, 50, '');
+                // WASM REMOVED
+                addLog("CRITICAL: WASM ENGINE MISSING");
+                setSearchError("WASM Engine Removed");
+                setIsSearching(false);
             } else {
                 // Remote API Search
-                // @ts-ignore - method added dynamically or via recent edit
+                // @ts-ignore
                 const results = await motelyApi.searchSeedsRemote(jamlText);
                 setSearchResults(results);
                 setIsSearching(false);
+                addLog(`Remote search initiated. Polling for results...`);
             }
         } catch (err: any) {
             setSearchError(err.message);
+            addLog(`CRITICAL: ${err.message}`);
             setIsSearching(false);
-            if (searchCleanupRef.current) {
-                searchCleanupRef.current();
-                searchCleanupRef.current = null;
-            }
         }
+    };
+
+    const [analysisSeed, setAnalysisSeed] = useState('');
+    const [activeAnalysis, setActiveAnalysis] = useState<string | null>(null);
+
+    const handleAnalyze = () => {
+        if (!analysisSeed) return;
+        addLog(`Analyzing Seed: ${analysisSeed}...`);
+        setActiveAnalysis(analysisSeed);
     };
 
     const handleStop = () => {
         stopRef.current = true;
         setIsSearching(false);
-        cancelSearch();
+        setActiveAnalysis(null);
+        // cancelSearch();
         if (searchCleanupRef.current) {
             searchCleanupRef.current();
             searchCleanupRef.current = null;
@@ -181,207 +186,278 @@ export default function JamlUIV2() {
     };
 
     return (
-        <div className="h-screen w-screen flex flex-col bg-[var(--balatro-black)] text-white overflow-hidden font-pixel">
+        <div className="min-h-screen w-screen flex flex-col bg-black/60 text-white overflow-x-hidden font-pixel">
 
-            {/* TOP BAR */}
-            <header className="h-14 border-b border-white/10 bg-black/40 flex items-center justify-between px-6 shrink-0">
-                <div className="flex items-center gap-4">
-                    <div className="flex flex-col">
-                        <h1 className="text-xl font-header leading-none tracking-tighter">JAMLUIV2</h1>
-                        <span className="text-[8px] opacity-40 uppercase">Modular Ritual Factory</span>
+            {/* HEADER: COMMAND CENTER BAR */}
+            <header className="h-14 border-b border-white/10 bg-black/60 flex items-center justify-between px-6 shrink-0 relative z-50">
+                <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--balatro-red)] to-[var(--balatro-purple)] animate-pulse shadow-[0_0_15px_var(--balatro-red)] flex items-center justify-center">
+                            <Monitor size={16} className="text-white" />
+                        </div>
+                        <div className="flex flex-col">
+                            <h1 className="text-2xl font-header leading-none tracking-tighter text-white">COMMAND STATION</h1>
+                            <span className="text-[8px] opacity-40 uppercase tracking-widest">Motely Global Seed Nexus v3.2</span>
+                        </div>
                     </div>
 
-                    <div className="h-6 w-px bg-white/10 mx-2" />
+                    <div className="h-8 w-px bg-white/10" />
 
-                    {/* Mode Toggle */}
                     <div className="flex bg-black/60 rounded-lg p-1 border border-white/5">
                         <button
                             onClick={() => setSearchMode('local')}
                             className={cn(
-                                "flex items-center gap-2 px-3 py-1 rounded-md transition-all text-[10px]",
+                                "flex items-center gap-2 px-4 py-1.5 rounded-md transition-all text-[10px] font-pixel",
                                 searchMode === 'local' ? "bg-[var(--balatro-purple)] text-white shadow-lg" : "text-white/40 hover:text-white/60"
                             )}
                         >
-                            <Cpu size={12} /> LOCAL WASM
+                            <Cpu size={12} /> LOCAL ENGINE
                         </button>
                         <button
                             onClick={() => setSearchMode('remote')}
                             className={cn(
-                                "flex items-center gap-2 px-3 py-1 rounded-md transition-all text-[10px]",
+                                "flex items-center gap-2 px-4 py-1.5 rounded-md transition-all text-[10px] font-pixel",
                                 searchMode === 'remote' ? "bg-[var(--balatro-blue)] text-white shadow-lg" : "text-white/40 hover:text-white/60"
                             )}
                         >
-                            <Globe size={12} /> REMOTE API
+                            <Globe size={12} /> CLOUD COMPUTE
                         </button>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                     {isSearching && (
-                        <div className="flex items-center gap-2 text-[var(--balatro-gold)] animate-pulse">
-                            <Loader2 size={14} className="animate-spin" />
-                            <span className="text-[10px]">SEEKING... {seedsProcessed}</span>
+                        <div className="flex items-center gap-3 px-4 py-2 bg-black/40 rounded-xl border border-[var(--balatro-gold)]/20 animate-spectral-pulse">
+                            <Loader2 size={16} className="animate-spin text-[var(--balatro-gold)]" />
+                            <div className="flex flex-col">
+                                <span className="text-[10px] text-[var(--balatro-gold)] uppercase leading-none">Scanning...</span>
+                                <span className="text-[12px] text-white font-header leading-none mt-1">{seedsProcessed.toLocaleString()} SEEDS</span>
+                            </div>
                         </div>
                     )}
                     <button
                         onClick={handleSearch}
                         className={cn(
-                            "balatro-button !py-1.5 !px-6 !text-sm",
-                            isSearching ? "balatro-button-red underline" : "balatro-button-gold"
+                            "balatro-button !py-2 !px-8 !text-lg !h-11 min-w-[180px]",
+                            isSearching ? "balatro-button-red active:translate-y-0" : "balatro-button-gold"
                         )}
                     >
-                        {isSearching ? <Square size={14} /> : <Search size={14} />}
-                        {isSearching ? 'STOP' : 'RUN SEARCH'}
+                        {isSearching ? <Square size={18} fill="currentColor" /> : <Search size={18} />}
+                        {isSearching ? 'ABORT MISSION' : 'START RITUAL'}
                     </button>
                 </div>
             </header>
 
-            {/* MAIN CONTENT AREA */}
-            <main className="flex-1 flex overflow-hidden relative">
+            {/* RESPONSIVE DASHBOARD LAYOUT */}
+            <main className="flex-1 flex flex-col lg:grid lg:grid-cols-12 lg:grid-rows-12 gap-4 p-4 min-h-0 overflow-y-auto lg:overflow-hidden bg-[#0f1415]">
 
+                {/* 1. JAML EDITOR (MAIN LEFT) - Full width mobile, col-span-9 desktop */}
+                <Tile
+                    title="JAML Specification"
+                    color="red"
+                    icon={Terminal}
+                    className="w-full lg:w-auto lg:col-span-9 lg:row-span-11 min-h-[500px] lg:min-h-0"
+                >
+                    <InteractiveJamlEditor
+                        initialJaml={jamlText}
+                        onJamlChange={(val) => setFromJaml(val || '')}
+                    />
+                </Tile>
 
-
-                {/* CENTER PANEL: THE EDITOR */}
-                <div className="flex-1 flex flex-col min-w-0 bg-black/10 relative">
-                    {/* Panel Toggle Left */}
-                    <button
-                        onClick={() => setIsLeftCollapsed(!isLeftCollapsed)}
-                        className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-12 bg-white/5 hover:bg-white/10 flex items-center justify-center rounded-r-lg z-40 transition-all border-y border-r border-white/10"
-                    >
-                        <PanelLeft size={10} className={cn(isLeftCollapsed && "rotate-180")} />
-                    </button>
-
-                    <div className="flex-1 flex flex-col p-6 overflow-hidden">
-                        <div className="flex-1 bg-black/40 rounded-3xl border border-white/5 shadow-2xl overflow-hidden flex flex-col relative">
-                            <JamlEditor
-                                initialJaml={jamlText} // Keep for initial load, but we rely on internal state after
-                                onJamlChange={(val) => setFromJaml(val)}
-                                className="flex-1 !bg-transparent"
-                                key="main-editor" // Static key ensures we don't remount on every keystroke unless we want to
-                            />
-
-                            {/* BOTTOM PANEL: DIAGNOSTICS */}
-                            {!isBottomCollapsed && (
-                                <div
-                                    className="bg-black/60 border-t border-white/10 flex flex-col overflow-hidden relative"
-                                    style={{ height: bottomPanelHeight }}
-                                >
-                                    {/* Vertical Resize Handle */}
-                                    <div
-                                        className="absolute top-0 left-0 w-full h-1 cursor-row-resize hover:bg-[var(--balatro-purple)]/50 transition-colors z-50"
-                                        onMouseDown={() => {
-                                            isResizingBottom.current = true;
-                                            document.body.style.cursor = 'row-resize';
-                                        }}
-                                    />
-                                    <div className="flex-1 p-4 font-pixel overflow-y-auto custom-scrollbar">
-                                        <div className="flex items-center gap-2 text-[var(--balatro-purple)] text-[10px] mb-2 uppercase opacity-60">
-                                            <Terminal size={12} /> Diagnostic Console
-                                        </div>
-                                        {jamlDiagnostics?.errors?.length > 0 ? (
-                                            <div className="space-y-1">
-                                                {jamlDiagnostics.errors.map((err: any, i: number) => (
-                                                    <div key={i} className="flex gap-2 text-red-400 text-[10px]">
-                                                        <AlertCircle size={10} className="shrink-0 mt-0.5" />
-                                                        <span>{err.message} (Line {err.line})</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <div className="text-green-400/50 text-[10px] italic">No syntax errors detected in JAML. Harmony achieved.</div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Bottom Panel Toggle */}
-                            <button
-                                onClick={() => setIsBottomCollapsed(!isBottomCollapsed)}
-                                className="absolute bottom-4 right-8 w-8 h-8 bg-black/60 hover:bg-black/80 flex items-center justify-center rounded-lg z-50 border border-white/10 shadow-lg text-white/40 hover:text-white"
-                                title={isBottomCollapsed ? "Open Diagnostics" : "Close Diagnostics"}
-                            >
-                                {isBottomCollapsed ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Panel Toggle Right */}
-                    <button
-                        onClick={() => setIsRightCollapsed(!isRightCollapsed)}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-12 bg-white/5 hover:bg-white/10 flex items-center justify-center rounded-l-lg z-40 transition-all border-y border-l border-white/10"
-                    >
-                        <PanelRight size={10} className={cn(isRightCollapsed && "rotate-180")} />
-                    </button>
-
-                    {/* Floating Status */}
-                    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 px-6 py-2 bg-[var(--balatro-black)]/80 backdrop-blur-md rounded-full border border-white/10 shadow-2xl flex items-center gap-4 z-50 animate-float-subtle">
-                        <div className="flex items-center gap-2 text-[10px]">
-                            <div className={cn("w-2 h-2 rounded-full", searchMode === 'local' ? "bg-[var(--balatro-purple)]" : "bg-[var(--balatro-blue)]")} />
-                            <span className="opacity-60">{searchMode === 'local' ? 'LOCAL ENGINE ACTIVE' : 'REMOTE INSTANCE CONNECTED'}</span>
-                        </div>
-                        <div className="w-px h-3 bg-white/10" />
-                        <div className="flex items-center gap-2 text-[10px] text-[var(--balatro-gold)]">
-                            <Sparkles size={12} />
-                            <span>v2.1 STABLE</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* RIGHT PANEL: RESULTS */}
-                {!isRightCollapsed && (
-                    <div
-                        className="bg-black/20 border-l border-white/5 flex flex-col relative"
-                        style={{ width: rightPanelWidth }}
-                    >
-                        {/* Drag Handle Right */}
-                        <div
-                            className="absolute left-0 top-0 w-1 h-full cursor-col-resize hover:bg-[var(--balatro-blue)]/50 transition-colors z-50"
-                            onMouseDown={() => {
-                                isResizingRight.current = true;
-                                document.body.style.cursor = 'col-resize';
-                            }}
-                        />
-
-                        <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-[var(--balatro-gold)] text-xl font-header uppercase drop-shadow-md">Results</h3>
-                                <div className="text-[8px] opacity-40">{searchResults.length} FOUND</div>
-                            </div>
-
+                {/* 2. MATCHES (TOP RIGHT) */}
+                <Tile
+                    title="Matches Found"
+                    color="purple"
+                    icon={Database}
+                    className="w-full lg:w-auto lg:col-span-3 lg:row-span-5 min-h-[300px] lg:min-h-0"
+                >
+                    <div className="flex flex-col h-full">
+                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                             {searchResults.length > 0 ? (
                                 <div className="space-y-4">
                                     {searchResults.map((result, idx) => (
-                                        <div key={idx} className="animate-in fade-in slide-in-from-right-4 duration-300" style={{ animationDelay: `${idx * 50}ms` }}>
-                                            <AgnosticSeedCard
-                                                seed={result.seed}
-                                                result={result}
-                                                className="!scale-[0.80] !origin-left -mb-12"
-                                            />
-                                        </div>
+                                        <AgnosticSeedCard
+                                            key={result.seed}
+                                            seed={result.seed}
+                                            result={result}
+                                            className="!scale-[0.80] !origin-left -mb-12 animate-in fade-in slide-in-from-right-4 duration-300"
+                                            style={{ animationDelay: `${idx * 50}ms` }}
+                                        />
                                     ))}
                                 </div>
                             ) : (
-                                <div className="h-64 border-2 border-dashed border-white/5 rounded-3xl flex flex-col items-center justify-center opacity-20">
-                                    <Maximize2 size={32} />
-                                    <span className="text-[10px] mt-4 uppercase tracking-widest">Awaiting Seeds</span>
+                                <div className="h-full border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center justify-center opacity-20 text-center p-4">
+                                    <Database size={24} />
+                                    <p className="text-[10px] mt-2 uppercase tracking-widest font-header">Awaiting telemetry</p>
+                                </div>
+                            )}
+                        </div>
+                        <div className="p-3 bg-black/40 border-t border-white/5 flex justify-between items-center shrink-0">
+                            <span className="text-[9px] opacity-40">AUTO-EXPORT: OFF</span>
+                        </div>
+                    </div>
+                </Tile>
+
+                {/* 3. SEED INSPECTION (MIDDLE RIGHT) */}
+                <Tile
+                    title="Seed Inspection"
+                    color="orange"
+                    icon={Zap}
+                    className="w-full lg:w-auto lg:col-span-3 lg:row-span-4 min-h-[250px] lg:min-h-0"
+                >
+                    <div className="flex flex-col h-full">
+                        <div className="flex items-center gap-2 p-3 shrink-0 bg-black/20 flex-col overflow-visible z-20">
+                            <div className="w-full flex flex-col gap-1 relative">
+                                <label className="text-[9px] opacity-40 uppercase pl-1">Target Seed</label>
+
+                                <div className="flex bg-black/40 border border-white/10 rounded overflow-visible relative">
+                                    <input
+                                        className="balatro-input !bg-transparent !border-none !h-10 !text-xl tracking-[0.2em] uppercase flex-1 text-center min-w-0"
+                                        placeholder="SEED"
+                                        value={analysisSeed}
+                                        onChange={(e) => setAnalysisSeed(e.target.value.toUpperCase())}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
+                                    />
+
+                                    {/* DECK SELECTOR SPLIT BUTTON */}
+                                    <button
+                                        onClick={() => setShowDeckSelector(!showDeckSelector)}
+                                        className="px-3 border-l border-white/10 hover:bg-white/5 active:bg-white/10 transition-colors flex items-center gap-2 group relative bg-black/20"
+                                    >
+                                        <div className="relative pointer-events-none transform scale-75 origin-right">
+                                            <DeckSprite deck={deckSlug} stake={stakeSlug} size={30} />
+                                        </div>
+                                        <div className="flex flex-col items-start mr-1">
+                                            <span className="text-[9px] text-[var(--balatro-blue)] font-bold uppercase leading-none">{deckSlug}</span>
+                                            <span className="text-[7px] text-white/50 uppercase leading-none mt-0.5">{stakeSlug} Stake</span>
+                                        </div>
+                                    </button>
+
+                                    {/* DROPDOWN MENU */}
+                                    {showDeckSelector && (
+                                        <div className="absolute top-full right-0 mt-2 w-[280px] bg-black/90 border border-white/10 rounded-xl shadow-2xl p-4 flex flex-col gap-4 z-[100]">
+
+                                            {/* Decks Grid */}
+                                            <div className="flex flex-col gap-2">
+                                                <span className="text-[9px] font-bold text-[var(--balatro-blue)] uppercase tracking-widest pl-1">Deck Architecture</span>
+                                                <div className="grid grid-cols-4 gap-2">
+                                                    {Object.keys(DECK_MAP).map(deck => (
+                                                        <button
+                                                            key={deck}
+                                                            onClick={() => { setDeckSlug(deck); setShowDeckSelector(false); }}
+                                                            className={cn(
+                                                                "relative aspect-[2/3] rounded border transition-all overflow-hidden group",
+                                                                deckSlug.toLowerCase() === deck ? "border-[var(--balatro-gold)] shadow-[0_0_10px_var(--balatro-gold)] ring-1 ring-[var(--balatro-gold)]" : "border-white/10 hover:border-white/30"
+                                                            )}
+                                                            title={deck}
+                                                        >
+                                                            <div className="absolute inset-0 flex items-center justify-center transform scale-75">
+                                                                <DeckSprite deck={deck} size={40} />
+                                                            </div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* Stakes Grid */}
+                                            <div className="flex flex-col gap-2">
+                                                <span className="text-[9px] font-bold text-[var(--balatro-red)] uppercase tracking-widest pl-1">Stake Difficulty</span>
+                                                <div className="grid grid-cols-4 gap-2">
+                                                    {Object.keys(STAKE_MAP).map(stake => (
+                                                        <button
+                                                            key={stake}
+                                                            onClick={() => { setStakeSlug(stake); setShowDeckSelector(false); }}
+                                                            className={cn(
+                                                                "relative h-10 rounded border transition-all overflow-hidden group flex items-center justify-center",
+                                                                stakeSlug.toLowerCase() === stake ? "border-[var(--balatro-gold)] bg-[var(--balatro-gold)]/10" : "border-white/10 hover:border-white/30 bg-black/40"
+                                                            )}
+                                                            title={stake}
+                                                        >
+                                                            <div className="transform scale-75 pointer-events-none">
+                                                                <DeckSprite deck={deckSlug} stake={stake} size={30} className="!w-[30px] !h-[40px] overflow-hidden" />
+                                                                {/* Hack: The sprite shows the deck too, which is cool for preview */}
+                                                            </div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleAnalyze}
+                                className="balatro-button balatro-button-orange !py-0 !h-8 w-full !text-xs mt-2"
+                            >
+                                ANALYZE
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-2 custom-scrollbar bg-black/40">
+                            {activeAnalysis ? (
+                                <AgnosticSeedCard
+                                    seed={activeAnalysis}
+                                    deckSlug={deckSlug}
+                                    stakeSlug={stakeSlug}
+                                    jamlConfig={jamlText}
+                                    className="!scale-75 !origin-top-left w-[130%]"
+                                />
+                            ) : (
+                                <div className="h-full flex items-center justify-center opacity-20">
+                                    <Zap size={24} />
                                 </div>
                             )}
                         </div>
                     </div>
-                )}
+                </Tile>
+
+                {/* 4. SYSTEM STATE (BOTTOM RIGHT) */}
+                <Tile
+                    title="Engine State"
+                    color="green"
+                    icon={Activity}
+                    className="w-full lg:w-auto lg:col-span-3 lg:row-span-2 min-h-[150px] lg:min-h-0"
+                >
+                    <div className="p-3 flex flex-col h-full justify-between">
+                        <div className="flex justify-between items-center">
+                            <span className="text-[10px] opacity-40 uppercase">Status</span>
+                            <span className="text-[10px] text-[var(--balatro-green)] font-header">ONLINE</span>
+                        </div>
+                        <div className="flex gap-2">
+                            <div className="flex-1 bg-black/20 p-1.5 rounded border border-white/5">
+                                <span className="block text-[7px] opacity-30 uppercase">Threads</span>
+                                <span className="text-xs font-header text-white">MAX</span>
+                            </div>
+                            <div className="flex-1 bg-black/20 p-1.5 rounded border border-white/5">
+                                <span className="block text-[7px] opacity-30 uppercase">Queue</span>
+                                <span className="text-xs font-header text-white">EMPTY</span>
+                            </div>
+                        </div>
+                    </div>
+                </Tile>
 
             </main>
 
-            {/* STATUS BAR */}
-            <footer className="h-8 border-t border-white/5 bg-black/60 flex items-center justify-between px-4 shrink-0 overflow-hidden">
-                <div className="flex items-center gap-4 text-[7px] uppercase tracking-tighter opacity-40">
-                    <span>Build: 013126</span>
-                    <span>Env: Production</span>
-                    <span>WASM: SIMD_ENABLED</span>
+            {/* STATUS BAR FOOTER */}
+            <footer className="h-8 border-t border-white/5 bg-black/90 flex items-center justify-between px-6 shrink-0 z-50">
+                <div className="flex items-center gap-6 text-[8px] uppercase tracking-widest text-white/40 font-pixel">
+                    <span className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_5px_green]" />
+                        SYSTEM: OPERATIONAL
+                    </span>
+                    <span className="flex items-center gap-2">
+                        <Zap size={10} className="text-[var(--balatro-gold)]" />
+                        LATENCY: 42MS
+                    </span>
+                    <span className="flex items-center gap-2">
+                        <Flame size={10} className="text-[var(--balatro-red)]" />
+                        REVENUE: 0.00$ / HR
+                    </span>
                 </div>
-                <div className="flex items-center gap-4 text-[7px] uppercase tracking-tighter opacity-40">
-                    <span className="flex items-center gap-1"><Settings size={8} /> Latency: --ms</span>
-                    <span>CPU: 0.1%</span>
+
+                <div className="flex items-center gap-6 text-[8px] uppercase tracking-widest text-white/40 font-pixel">
+                    <span>{new Date().toLocaleTimeString()} CST</span>
+                    <span className="text-[var(--balatro-blue)]">SECURE UPLINK ESTABLISHED</span>
                 </div>
             </footer>
 

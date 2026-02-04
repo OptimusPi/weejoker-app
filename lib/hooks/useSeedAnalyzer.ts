@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { AnalyzedSeed, normalizeAnalysis } from '../seedAnalyzer';
-import { analyzeSeedWasm } from '../api/motelyWasm';
 
 
 export function useSeedAnalyzer(seed: string | null) {
@@ -23,23 +22,10 @@ export function useSeedAnalyzer(seed: string | null) {
                 // Yield to main thread
                 await new Promise(resolve => setTimeout(resolve, 10));
 
-                let rawResult = null;
+                // WASM ENGINE REMOVED
+                console.warn("[useSeedAnalyzer] WASM Engine has been removed.");
+                throw new Error("WASM Engine Removed");
 
-                // 1. Try WASM (Canonical Engine)
-                try {
-                    console.log(`[useSeedAnalyzer] Analyzing ${seed} via WASM...`);
-                    rawResult = await analyzeSeedWasm(seed, "erratic", "white", 1, 8);
-                } catch (wasmError) {
-                    console.error("[useSeedAnalyzer] WASM Analysis failed:", wasmError);
-                    throw wasmError; // Stop here, don't fallback to broken API
-                }
-
-                if (rawResult) {
-                    const normalized = normalizeAnalysis(rawResult);
-                    setData(normalized);
-                } else {
-                    throw new Error("Could not analyze seed with any available engine.");
-                }
             } catch (err) {
                 console.error("[useSeedAnalyzer] Final analysis error:", err);
                 setError(err instanceof Error ? err.message : String(err));

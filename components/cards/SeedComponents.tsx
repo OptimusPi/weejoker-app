@@ -25,8 +25,8 @@ export function DeckPanel({ analysis }: PanelProps) {
     });
 
     return (
-        <div className="flex flex-col w-full bg-black/40 rounded-xl relative group p-6 gap-2">
-            <div className="absolute top-2 left-6 text-[10px] text-white/20 tracking-[0.2em]">
+        <div className="flex flex-col w-full relative group py-4 gap-2">
+            <div className="absolute top-0 left-0 text-[10px] text-white/40 tracking-[0.2em] uppercase">
                 Starting Deck: {deck.length} Cards
             </div>
 
@@ -58,8 +58,8 @@ export function DeckPanel({ analysis }: PanelProps) {
 
 export function TagsPanel({ analysis }: PanelProps) {
     return (
-        <div className="flex flex-col bg-black/40 rounded-xl relative p-4 h-28">
-            <div className="text-[10px] text-white/20 tracking-[0.2em] mb-2">
+        <div className="flex flex-col bg-black/20 border border-white/5 rounded-lg relative p-4 h-28">
+            <div className="text-[10px] text-white/40 tracking-[0.2em] mb-2 uppercase">
                 Tags
             </div>
             <div className="flex-1 flex flex-wrap content-start gap-2 overflow-hidden">
@@ -77,8 +77,8 @@ export function TagsPanel({ analysis }: PanelProps) {
 
 export function BossPanel({ analysis }: PanelProps) {
     return (
-        <div className="flex flex-col bg-black/40 rounded-xl relative p-4 h-28">
-            <div className="text-[10px] text-white/20 tracking-[0.2em] mb-2">
+        <div className="flex flex-col bg-black/20 border border-white/5 rounded-lg relative p-4 h-28">
+            <div className="text-[10px] text-white/40 tracking-[0.2em] mb-2 uppercase">
                 Boss
             </div>
             <div className="flex-1 flex flex-wrap content-start gap-2 overflow-hidden">

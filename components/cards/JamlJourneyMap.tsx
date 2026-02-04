@@ -1,8 +1,9 @@
 "use client";
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { cn } from '../../lib/utils';
 import { Sprite } from '../Sprite';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface JamlJourneyMapProps {
     evaluation: {
@@ -24,8 +25,30 @@ interface JamlJourneyMapProps {
 /**
  * JamlJourneyMap
  * Visualizes the JAML routing for a seed.
+ * Refactored to "One Ante Per Page" with 5-card grid.
  */
-export function JamlJourneyMap({ evaluation, className, maxMatches = 20, compact = false }: JamlJourneyMapProps) {
+export function JamlJourneyMap({ evaluation, className, maxMatches = 50, compact = false }: JamlJourneyMapProps) {
+    const [page, setPage] = useState(0);
+
+    const groupedData = useMemo(() => {
+        if (!evaluation || !evaluation.matches) return [];
+
+        // key: ante number, value: matches
+        const groups = new Map<number, typeof evaluation.matches>();
+
+        evaluation.matches.forEach(match => {
+            const list = groups.get(match.ante) || [];
+            list.push(match);
+            groups.set(match.ante, list);
+        });
+
+        // Convert to array of { ante: number, items: [...] } sorted by ante
+        return Array.from(groups.entries())
+            .sort((a, b) => a[0] - b[0])
+            .map(([ante, items]) => ({ ante, items }));
+
+    }, [evaluation]);
+
     if (!evaluation || !evaluation.matches || evaluation.matches.length === 0) {
         return (
             <div className={cn(
@@ -38,63 +61,95 @@ export function JamlJourneyMap({ evaluation, className, maxMatches = 20, compact
         );
     }
 
-    const matches = evaluation.matches.slice(0, maxMatches);
+    if (groupedData.length === 0) return null;
+
+    // Ensure page is valid
+    const safePage = Math.min(Math.max(0, page), groupedData.length - 1);
+    const currentAnteGroup = groupedData[safePage];
+
+    const canPrev = safePage > 0;
+    const canNext = safePage < groupedData.length - 1;
 
     return (
-        <div className={cn("space-y-3 relative", className)}>
-            {/* Vertical Line for Journey */}
-            <div className="absolute left-[34px] top-6 bottom-6 w-0.5 bg-white/5 z-0"></div>
+        <div className={cn("flex flex-col gap-2", className)}>
+            {/* Header / Navigation */}
+            <div className="flex items-center justify-between bg-black/40 rounded-lg p-1 border border-white/5">
+                <button
+                    onClick={() => setPage(p => p - 1)}
+                    disabled={!canPrev}
+                    className="p-1 hover:bg-white/10 rounded disabled:opacity-20 transition-colors"
+                >
+                    <ChevronLeft size={14} />
+                </button>
 
-            <div className="flex flex-col gap-4">
-                {matches.map((match, i) => (
-                    <div key={i} className="flex items-center gap-4 group/match relative z-10">
-                        {/* Step Number / Ante */}
-                        <div className="w-10 flex flex-col items-center">
-                            <div className="font-header text-sm text-[var(--balatro-blue)]">A{match.ante}</div>
-                            {!compact && <div className="h-4 w-px bg-white/10 my-1"></div>}
+                <div className="flex flex-col items-center">
+                    <span className="font-header text-[var(--balatro-blue)] tracking-widest text-sm">
+                        ANTE {currentAnteGroup.ante}
+                    </span>
+                    <span className="text-[8px] font-pixel uppercase text-white/40 tracking-tighter">
+                        {currentAnteGroup.items.length} Items Found
+                    </span>
+                </div>
+
+                <button
+                    onClick={() => setPage(p => p + 1)}
+                    disabled={!canNext}
+                    className="p-1 hover:bg-white/10 rounded disabled:opacity-20 transition-colors"
+                >
+                    <ChevronRight size={14} />
+                </button>
+            </div>
+
+            {/* Grid Content: 5 Cards Wide (Mobile optimized) */}
+            <div className="grid grid-cols-5 gap-2 p-2 bg-black/20 rounded-xl border border-white/5 min-h-[120px]">
+                {currentAnteGroup.items.map((match, i) => (
+                    <div key={i} className="flex flex-col items-center gap-1 group/card relative">
+                        {/* Source Label (Shop/Pack) */}
+                        <div className="bottom-0 left-0 right-0 text-[6px] text-center font-pixel uppercase text-white/30 truncate px-0.5 pb-0.5">
+                            {match.source.replace('Shop', '').replace('Pack', 'Pk').trim() || 'Shop'}
                         </div>
 
-                        {/* Item Sprite */}
-                        <div className="relative group/card cursor-pointer shrink-0">
+                        {/* Card Sprite */}
+                        <div className="relative cursor-pointer transition-transform hover:scale-110 z-10">
                             <Sprite
                                 name={match.item.name}
-                                width={compact ? 32 : 40}
+                                width={compact ? 36 : 48} // Slightly larger for grid view
                                 className={cn(
-                                    "transition-transform group-hover/match:scale-110 drop-shadow-md",
+                                    "drop-shadow-md",
                                     match.priority === 'mustNot' && "grayscale opacity-50"
                                 )}
                             />
+                            {/* Slot Indicator */}
+                            {match.item.slot && (
+                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-black/80 rounded-full border border-white/20 flex items-center justify-center text-[8px] font-pixel text-[var(--balatro-gold)]">
+                                    {match.item.slot}
+                                </div>
+                            )}
                         </div>
 
-                        {/* Location Info */}
-                        <div className="flex-1 flex flex-col justify-center">
-                            <div className={cn(
-                                "font-header text-white leading-tight uppercase group-hover/match:text-[var(--balatro-gold)] transition-colors",
-                                compact ? "text-[11px]" : "text-[13px]"
-                            )}>
-                                {match.item.name}
-                            </div>
-                            <div className="font-pixel text-[9px] text-white/40 flex items-center gap-2 mt-0.5">
-                                <span className="text-[var(--balatro-blue)]/60">{match.source.replace(/_/g, ' ')}</span>
-                                {match.item.slot && (
-                                    <>
-                                        <span className="w-1 h-1 rounded-full bg-white/10"></span>
-                                        <span className="text-[var(--balatro-gold)]/60">Slot {match.item.slot}</span>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* MUST/SHOULD Indicator */}
+                        {/* Priority Dot */}
                         <div className={cn(
-                            "px-1.5 py-0.5 rounded border text-[7px] font-pixel shrink-0 uppercase tracking-tighter",
-                            match.priority === 'must' ? "border-[var(--balatro-green)] text-[var(--balatro-green)] bg-green-900/10" :
-                                match.priority === 'should' ? "border-[var(--balatro-blue)] text-[var(--balatro-blue)] bg-blue-900/10" :
-                                    "border-[var(--balatro-red)] text-[var(--balatro-red)] bg-red-900/10"
-                        )}>
-                            {match.priority}
-                        </div>
+                            "w-1.5 h-1.5 rounded-full mt-1",
+                            match.priority === 'must' ? "bg-[var(--balatro-green)] shadow-[0_0_5px_green]" :
+                                match.priority === 'should' ? "bg-[var(--balatro-blue)] shadow-[0_0_5px_blue]" :
+                                    "bg-[var(--balatro-red)]"
+                        )} />
                     </div>
+                ))}
+
+                {/* Fill empty cells if needed for perfect grid look? Optional */}
+            </div>
+
+            {/* Pagination Dots */}
+            <div className="flex justify-center gap-1 mt-1">
+                {groupedData.map((_, idx) => (
+                    <div
+                        key={idx}
+                        className={cn(
+                            "w-1 h-1 rounded-full transition-all",
+                            idx === safePage ? "bg-white w-2" : "bg-white/20"
+                        )}
+                    />
                 ))}
             </div>
         </div>

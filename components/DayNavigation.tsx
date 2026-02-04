@@ -18,7 +18,7 @@ export function DayNavigation({ onPrev, onNext, canPrev, canNext, children }: Da
             <button
                 onClick={onPrev}
                 disabled={!canPrev}
-                className="balatro-button balatro-button-red balatro-nav-button !rounded-md h-12 w-12 !p-0 flex items-center justify-center shrink-0"
+                className="balatro-button balatro-button-red balatro-nav-button !rounded-md w-12 !p-0 flex items-center justify-center shrink-0 self-stretch"
                 aria-label="Previous Day"
                 title="Previous Day"
             >
@@ -34,7 +34,7 @@ export function DayNavigation({ onPrev, onNext, canPrev, canNext, children }: Da
             <button
                 onClick={onNext}
                 disabled={!canNext}
-                className="balatro-button balatro-button-red balatro-nav-button !rounded-md h-12 w-12 !p-0 flex items-center justify-center shrink-0"
+                className="balatro-button balatro-button-red balatro-nav-button !rounded-md w-12 !p-0 flex items-center justify-center shrink-0 self-stretch"
                 aria-label="Next Day"
                 title="Next Day"
             >

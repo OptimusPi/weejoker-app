@@ -1,5 +1,6 @@
 "use client";
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { AnalyzedSeed } from '@/lib/seedAnalyzer';
 import { Sprite } from './Sprite';
 import { X, Trophy, ShoppingCart, Award, Hash } from 'lucide-react';
@@ -62,7 +63,19 @@ export function SeedSnapshotModal({ analysis, onClose }: SeedSnapshotModalProps)
         });
     }, [analysis]);
 
-    return (
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = '';
+        }
+    }, []);
+
+    if (!mounted) return null;
+
+    return createPortal(
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-8 bg-black/95 animate-in fade-in duration-300" onClick={onClose}>
             <div
                 className="balatro-panel w-full max-w-5xl max-h-[90vh] flex flex-col relative bg-[var(--balatro-black)] border-4 border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden"
@@ -187,14 +200,8 @@ export function SeedSnapshotModal({ analysis, onClose }: SeedSnapshotModalProps)
                     </section>
 
                 </div>
-
-                {/* Footer */}
-                <div className="shrink-0 p-4 border-t-2 border-white/5 bg-black/40 flex justify-center">
-                    <div className="text-[var(--balatro-gold)] font-pixel text-[10px] uppercase tracking-[0.2em] animate-pulse">
-                        Powered by Antigravity Engine
-                    </div>
-                </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

@@ -98,12 +98,35 @@ export function normalizeAnalysis(wasm: any): AnalyzedSeed {
         return obj[key] !== undefined ? obj[key] : obj[pascal];
     };
 
+    // 1. Resolve the core analysis object (sometimes it's nested under 'analysis' or 'Analysis')
+    const core = get(wasm, 'analysis') || wasm;
+
+    // 2. Extract Starting Deck with extreme prejudice
+    let deckCards: string[] = [];
+
+    // Check direct properties
+    const directDeck = get(core, 'startingDeck') || get(core, 'deck') || get(core, 'initialDeck') || get(core, 'fullDeck') || get(core, 'cards') || get(core, 'hand');
+    if (Array.isArray(directDeck)) deckCards = directDeck;
+
+    // Check Metrics fallback
+    if (deckCards.length === 0) {
+        const metrics = get(core, 'metrics');
+        if (metrics) {
+            const metricsDeck = get(metrics, 'startingDeck') || get(metrics, 'deck') || get(metrics, 'initialDeck');
+            if (Array.isArray(metricsDeck)) deckCards = metricsDeck;
+        }
+    }
+
+    // 3. Extract Deck Name
+    const deckNameVal = get(core, 'deck');
+    const deckName = typeof deckNameVal === 'string' ? deckNameVal : (get(core, 'deckType') || get(core, 'deck_type') || "Red");
+
     const output: AnalyzedSeed = {
-        seed: get(wasm, 'seed') || "",
-        deck: get(wasm, 'deck') || "Red",
-        stake: get(wasm, 'stake') || "White",
-        startingDeck: get(wasm, 'startingDeck') || [],
-        metrics: get(wasm, 'metrics') || {},
+        seed: get(wasm, 'seed') || get(core, 'seed') || "",
+        deck: deckName,
+        stake: get(core, 'stake') || "White",
+        startingDeck: deckCards,
+        metrics: get(core, 'metrics') || {},
         jokers: [],
         consumables: [],
         vouchers: [],

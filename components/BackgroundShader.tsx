@@ -168,8 +168,7 @@ export function BackgroundShader() {
     return (
         <canvas
             ref={canvasRef}
-            className="fixed inset-0 w-full h-full -z-10"
-            style={{ width: "100%", height: "100%", pointerEvents: 'none' }}
+            className="fixed inset-0 w-full h-full -z-10 pointer-events-none"
         />
     );
 }

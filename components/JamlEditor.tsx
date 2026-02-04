@@ -1,30 +1,34 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import yaml from 'js-yaml';
 import { Plus, Minus, Check, ChevronRight, X } from 'lucide-react';
 import { CLAUSE_TYPES, ARRAY_KEYS } from '@/lib/jaml/data';
 import { JamlCompletionService, YamlCompletionContext, CompletionData } from '@/lib/jaml/completion';
 
-// Balatro Colors (Tailwind mappings in globals.css, but we use strict hex for canvas-like elements)
+
+
+// Balatro Colors - Dark Theme (matching Blueprint)
 const COLORS = {
     white: '#FFFFFF',
-    black: '#1a1a1a', // Soft black (Ink)
-    red: '#d93025',   // Vintage Red (Red Pen)
-    darkRed: '#a50e0e',
+    black: '#000000',
+    red: '#ff4c40',
+    darkRed: '#a02721',
     darkestRed: '#70150f',
-    blue: '#1a0dab',  // Hyperlink Blue (90s Web)
-    darkBlue: '#0f0870',
-    orange: '#e37400', // Manilla Folder Orange
-    darkOrange: '#b05000',
-    darkGold: '#b8883a', // unchanged
-    green: '#1e8e3e', // Bank Ledger Green
-    darkGreen: '#0d652d',
-    purple: '#673ab7', // Dried Stamp Purple
-    darkPurple: '#4527a0',
-    editorBg: '#FDFBF7', // Cream Paper
-    editorBgAlt: '#f4f1ea', // Manilla
+    blue: '#0093ff',
+    darkBlue: '#0057a1',
+    orange: '#ff9800',
+    darkOrange: '#a05b00',
+    darkGold: '#b8883a',
+    green: '#429f79',
+    darkGreen: '#215f46',
+    purple: '#7d60e0',
+    darkPurple: '#292189',
+    // Editor background - matching Balatro dark theme
+    editorBg: '#1e2b2d',
+    editorBgAlt: '#33464b',
 };
 
-const MONO_FONT = '"Courier New", Courier, "Lucida Sans Typewriter", "Lucida Console", monospace';
+const MONO_FONT = '"JetBrains Mono", "Fira Code", "SF Mono", Consolas, monospace';
 
 // Styles for the block-based editor elements
 const BLOCK_STYLE: React.CSSProperties = {
@@ -92,7 +96,7 @@ function SuggestionList({ suggestions, selectedIndex, onSelect, onHover }: {
 }) {
     if (suggestions.length === 0) {
         return (
-            <div className="p-2 text-xs text-stone-500 italic">No suggestions...</div>
+            <div className="p-2 text-xs text-white/40 italic">No suggestions...</div>
         );
     }
 
@@ -107,7 +111,7 @@ function SuggestionList({ suggestions, selectedIndex, onSelect, onHover }: {
                         onMouseEnter={() => onHover(idx)}
                         className={`
               flex items-center justify-between px-3 py-1.5 cursor-pointer font-mono text-[13px] transition-colors
-              ${isSelected ? 'bg-[#0057a1] text-white font-semibold' : 'text-stone-800 hover:bg-stone-100'}
+              ${isSelected ? 'bg-[#0093ff] text-white font-semibold' : 'text-white/80 hover:bg-white/10'}
             `}
                     >
                         <span>{s.displayText}</span>
@@ -198,22 +202,44 @@ function AntesToggle({ values, onToggle, onStartEdit, color, darkColor }: {
     );
 }
 
-// Custom Hook for Smart Popover Position
-function useSmartPopoverPosition(targetRef: React.RefObject<HTMLElement | null>, isOpen: boolean) {
-    const [position, setPosition] = useState<'top' | 'right'>('top');
+// Custom Hook for Floating Position (Viewport-aware)
+function useFloatingPosition(targetRef: React.RefObject<HTMLElement | null>, isOpen: boolean) {
+    const [coords, setCoords] = useState<{ top: number; left: number; position: 'top' | 'bottom' } | null>(null);
 
     useEffect(() => {
-        if (!isOpen || !targetRef.current) return;
-        const rect = targetRef.current.getBoundingClientRect();
-        // If closes to top, show on right
-        if (rect.top < 200) {
-            setPosition('right');
-        } else {
-            setPosition('top');
+        if (!isOpen || !targetRef.current) {
+            setCoords(null);
+            return;
         }
+
+        const updatePosition = () => {
+            if (!targetRef.current) return;
+            const rect = targetRef.current.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const spaceAbove = rect.top;
+
+            // Prefer bottom, unless too close to edge
+            const showBelow = spaceBelow > 220 || spaceBelow > spaceAbove;
+
+            setCoords({
+                left: rect.left,
+                top: showBelow ? rect.bottom + 4 : rect.top - 4,
+                position: showBelow ? 'bottom' : 'top'
+            });
+        };
+
+        updatePosition();
+        // Update on scroll/resize to keep pinned
+        window.addEventListener('scroll', updatePosition, true);
+        window.addEventListener('resize', updatePosition);
+
+        return () => {
+            window.removeEventListener('scroll', updatePosition, true);
+            window.removeEventListener('resize', updatePosition);
+        };
     }, [isOpen, targetRef]);
 
-    return position;
+    return coords;
 }
 
 
@@ -419,7 +445,7 @@ export default function JamlEditor({ initialJaml, onJamlChange, className }: Int
     return (
         <div
             ref={editorRef}
-            className={`flex flex-col bg-[#fef9f3] font-mono text-[13px] leading-[1.8] outline-none rounded-md p-4 overflow-auto min-h-[500px] ${className}`}
+            className={`flex flex-col bg-[#1e2b2d] text-white font-mono text-[13px] leading-[1.8] outline-none rounded-md p-4 overflow-auto min-h-[500px] ${className}`}
             tabIndex={0}
         >
             <div className="flex flex-col gap-0.5">
@@ -451,12 +477,12 @@ export default function JamlEditor({ initialJaml, onJamlChange, className }: Int
                     />
                 ))}
             </div>
-            <div className="mt-4 p-2 bg-[#fff5eb] rounded border border-[#b8883a40] flex flex-wrap gap-4 text-[12px] text-stone-600 font-mono">
+            <div className="mt-4 p-2 bg-[#33464b] rounded border border-white/10 flex flex-wrap gap-4 text-[12px] text-white/70 font-mono">
                 <span><span style={{ color: COLORS.red }}>●</span> required</span>
                 <span><span style={{ color: COLORS.blue }}>●</span> optional</span>
                 <span><span style={{ color: COLORS.green }}>●</span> complete</span>
                 <span><span style={{ color: COLORS.purple }}>●</span> metadata</span>
-                <span className="text-stone-400 ml-auto">Click to edit • Tab to navigate</span>
+                <span className="text-white/40 ml-auto">Click to edit • Tab to navigate</span>
             </div>
         </div>
     );
@@ -502,7 +528,7 @@ function JamlLine({
     const inputRef = useRef<HTMLInputElement>(null);
     const targetRef = useRef<HTMLDivElement>(null);
 
-    const popoverPosition = useSmartPopoverPosition(targetRef, isEditing && suggestions.length > 0);
+    const floatingCoords = useFloatingPosition(targetRef, isEditing && suggestions.length > 0);
 
     // Colors
     const getBaseColor = () => {
@@ -642,13 +668,21 @@ function JamlLine({
                         ) : line.key}
                     </div>
                     {/* Popover */}
-                    {isEditing && editingPart === 'key' && suggestions.length > 0 && (
-                        <div className={`absolute z-50 bg-white shadow-xl border border-stone-200 rounded p-1 min-w-[200px] ${popoverPosition === 'top' ? 'bottom-full mb-1' : 'left-full ml-1 top-0'}`}>
+                    {isEditing && editingPart === 'key' && suggestions.length > 0 && floatingCoords && createPortal(
+                        <div
+                            className="fixed z-[9999] bg-white shadow-xl border border-stone-200 rounded p-1 min-w-[200px]"
+                            style={{
+                                top: floatingCoords.top,
+                                left: floatingCoords.left,
+                                transform: floatingCoords.position === 'top' ? 'translateY(-100%)' : 'none'
+                            }}
+                        >
                             <SuggestionList suggestions={suggestions} selectedIndex={selectedIndex} onHover={setSelectedIndex} onSelect={(val) => {
                                 onChange('key', val);
                                 onEndEdit();
                             }} />
-                        </div>
+                        </div>,
+                        document.body
                     )}
                 </div>
             )}
@@ -737,13 +771,21 @@ function JamlLine({
                                 />
                             ) : (line.isInvalidValue ? line.value?.replace(/~/g, '') : (line.value || '???'))}
                         </div>
-                        {isEditing && editingPart === 'value' && suggestions.length > 0 && (
-                            <div className={`absolute z-50 bg-white shadow-xl border border-stone-200 rounded p-1 min-w-[200px] ${popoverPosition === 'top' ? 'bottom-full mb-1' : 'left-full ml-1 top-0'}`}>
+                        {isEditing && editingPart === 'value' && suggestions.length > 0 && floatingCoords && createPortal(
+                            <div
+                                className="fixed z-[9999] bg-white shadow-xl border border-stone-200 rounded p-1 min-w-[200px]"
+                                style={{
+                                    top: floatingCoords.top,
+                                    left: floatingCoords.left,
+                                    transform: floatingCoords.position === 'top' ? 'translateY(-100%)' : 'none'
+                                }}
+                            >
                                 <SuggestionList suggestions={suggestions} selectedIndex={selectedIndex} onHover={setSelectedIndex} onSelect={(val) => {
                                     onChange('value', val);
                                     onEndEdit();
                                 }} />
-                            </div>
+                            </div>,
+                            document.body
                         )}
                     </div>
                 )

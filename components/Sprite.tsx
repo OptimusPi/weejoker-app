@@ -74,7 +74,9 @@ export function Sprite({ name, className, width, delayClass, edition, sticker }:
             style={{
                 width: finalW,
                 height: finalH,
-                imageRendering: 'auto'
+                imageRendering: 'pixelated', // Critical for Balatro sprites
+                // @ts-ignore - Webkit property
+                WebkitFontSmoothing: 'none'
             }}
             title={`${name}${edition ? ` (${edition})` : ''}${sticker ? ` [${sticker}]` : ''}`}
         >
