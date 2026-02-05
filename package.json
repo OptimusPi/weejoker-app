@@ -29,6 +29,7 @@
     "js-yaml": "^4.1.1",
     "lucide-react": "^0.561.0",
     "monaco-editor": "^0.55.1",
+    "motely-wasm": "^1.0.10",
     "next": "^16.2.0-canary.8",
     "papaparse": "^5.5.3",
     "react": "19.2.3",

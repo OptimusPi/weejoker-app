@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AnalyzedSeed, normalizeAnalysis } from '../seedAnalyzer';
+import { analyzeSeedWasm } from '../api/motelyWasm';
 
 
 export function useSeedAnalyzer(seed: string | null) {
@@ -22,12 +23,17 @@ export function useSeedAnalyzer(seed: string | null) {
                 // Yield to main thread
                 await new Promise(resolve => setTimeout(resolve, 10));
 
-                // WASM ENGINE REMOVED
-                console.warn("[useSeedAnalyzer] WASM Engine has been removed.");
-                throw new Error("WASM Engine Removed");
+                console.log(`[useSeedAnalyzer] Analyzing ${seed} via WASM...`);
+                const rawResult = await analyzeSeedWasm(seed, "erratic", "white", 1, 8);
 
+                if (rawResult) {
+                    const normalized = normalizeAnalysis(rawResult);
+                    setData(normalized);
+                } else {
+                    throw new Error("No analysis result returned");
+                }
             } catch (err) {
-                console.error("[useSeedAnalyzer] Final analysis error:", err);
+                console.error("[useSeedAnalyzer] Analysis error:", err);
                 setError(err instanceof Error ? err.message : String(err));
             } finally {
                 setLoading(false);
@@ -39,3 +45,4 @@ export function useSeedAnalyzer(seed: string | null) {
 
     return { data, loading, error };
 }
+
