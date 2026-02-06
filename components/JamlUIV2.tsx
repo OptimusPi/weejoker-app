@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 
-import { InteractiveJamlEditor } from '@/Blueprint/src/components/blueprint/jamlView/InteractiveJamlEditor';
+import InteractiveJamlEditor from '@/components/JamlEditor';
 import { JamlGenie } from './JamlGenie';
 import { useJamlFilter } from '@/lib/hooks/useJamlFilter';
 import { JAML_PRESETS } from '@/lib/jaml/presets';
@@ -146,10 +146,44 @@ export default function JamlUIV2() {
 
         try {
             if (searchMode === 'local') {
-                // WASM REMOVED
-                addLog("CRITICAL: WASM ENGINE MISSING");
-                setSearchError("WASM Engine Removed");
-                setIsSearching(false);
+                const { searchSeedsWasm, addSearchListener, cancelSearch } = await import('@/lib/api/motelyWasm');
+
+                const cleanup = addSearchListener((event) => {
+                    if (event.type === 'result') {
+                        // O(1) Duplicate Check
+                        if (seenSeedsRef.current.has(event.data.seed)) return;
+                        seenSeedsRef.current.add(event.data.seed);
+
+                        setSearchResults((prev: SearchResult[]) => {
+                            const newResult: SearchResult = {
+                                seed: event.data.seed,
+                                score: event.data.score,
+                                tallies: event.data.tallies || []
+                            };
+                            return [newResult, ...prev];
+                        });
+                        addLog(`MATCH: ${event.data.seed}`);
+                    } else if (event.type === 'progress') {
+                        const count = event.data.SearchedCount;
+                        const total = typeof count === 'number' ? count : 0;
+                        setSeedsProcessed(total);
+                    } else if (event.type === 'complete') {
+                        addLog(`WASM Search Complete. Scanned ${seedsProcessed.toLocaleString()} seeds.`);
+                        setIsSearching(false);
+                        if (searchCleanupRef.current) {
+                            searchCleanupRef.current();
+                            searchCleanupRef.current = null;
+                        }
+                    } else if (event.type === 'error') {
+                        setSearchError(event.message || 'Unknown error');
+                        addLog(`ERROR: ${event.message}`);
+                        setIsSearching(false);
+                    }
+                });
+
+                searchCleanupRef.current = cleanup;
+                addLog(`WASM Threads Spawned: ${typeof navigator !== 'undefined' ? (navigator.hardwareConcurrency || 4) : 4}`);
+                await searchSeedsWasm(jamlText, 1000, '');
             } else {
                 // Remote API Search
                 // @ts-ignore
@@ -174,11 +208,16 @@ export default function JamlUIV2() {
         setActiveAnalysis(analysisSeed);
     };
 
-    const handleStop = () => {
+    const handleStop = async () => {
         stopRef.current = true;
         setIsSearching(false);
         setActiveAnalysis(null);
-        // cancelSearch();
+
+        try {
+            const { cancelSearch } = await import('@/lib/api/motelyWasm');
+            cancelSearch();
+        } catch { }
+
         if (searchCleanupRef.current) {
             searchCleanupRef.current();
             searchCleanupRef.current = null;

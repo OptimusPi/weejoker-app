@@ -1,5 +1,5 @@
-/** @type {import('next').NextConfig} */
 import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev';
+import withMotelyWasm from 'motely-wasm/next-plugin';
 
 if (process.env.NODE_ENV === 'development') {
     await setupDevPlatform({
@@ -17,17 +17,16 @@ const nextConfig = {
     typescript: {
         ignoreBuildErrors: true,
     },
-    async headers() {
-        return [
-            {
-                source: '/(.*)',
-                headers: [
-                    { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
-                    { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-                ],
-            },
-        ];
+    // Exclude motely-wasm from SSR bundling - it's browser-only
+    serverExternalPackages: ['motely-wasm'],
+    // Turbopack config to skip analyzing motely-wasm's dynamic dotnet.js import
+    turbopack: {
+        resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
     },
 };
 
-export default nextConfig;
+export default withMotelyWasm(nextConfig);
+
+
+
+

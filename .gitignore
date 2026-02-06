@@ -14,6 +14,7 @@
 
 # production
 /build
+/public/_framework
 
 # misc
 .DS_Store
@@ -41,4 +42,7 @@ next-env.d.ts
 /.agent
 /.claude
 /.cursor
-/public/_framework
+
+
+# large data
+public/seeds.txt

@@ -116,12 +116,22 @@ export function AgnosticSeedCard({
         setIsAnalyzing(true);
         setError(null);
         try {
-            // WASM REMOVED
-            throw new Error("WASM Analysis engine is currently disabled/removed.");
+            const { analyzeSeedWasm } = await import('@/lib/api/motelyWasm');
+            const { normalizeAnalysis } = await import('@/lib/seedAnalyzer');
 
+            console.log(`[AgnosticSeedCard] Analyzing ${targetSeed} via WASM...`);
+            const rawResult = await analyzeSeedWasm(targetSeed, deckSlug || 'erratic', stakeSlug || 'white', 1, 8);
+
+            if (rawResult) {
+                const data = normalizeAnalysis(rawResult);
+                setAnalysis(data);
+                setSource('WASM');
+            } else {
+                throw new Error("No analysis result returned");
+            }
         } catch (err: any) {
-            console.error("Manual analysis error:", err);
-            setError("Analysis unavailable");
+            console.error("Analysis error:", err);
+            setError("Analysis failed: " + (err.message || String(err)));
         } finally {
             setIsAnalyzing(false);
         }

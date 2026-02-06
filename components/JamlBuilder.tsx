@@ -55,10 +55,38 @@ export default function JamlBuilder() {
         stopRef.current = false;
 
         try {
-            // WASM REMOVED
-            console.warn("WASM Engine Removed");
-            setSearchError('WASM Engine Removed');
-            setIsSearching(false);
+            const { searchSeedsWasm, addSearchListener } = await import('@/lib/api/motelyWasm');
+
+            // Subscribe to results
+            const cleanup = addSearchListener((event) => {
+                if (event.type === 'result') {
+                    setSearchResults(prev => {
+                        // Prevent duplicates
+                        if (prev.some(r => r.seed === event.data.seed)) return prev;
+                        return [...prev, {
+                            seed: event.data.seed,
+                            score: event.data.score,
+                            tallies: event.data.tallies || []
+                        } as any];
+                    });
+                } else if (event.type === 'progress') {
+                    setSeedsProcessed(event.data.SearchedCount || 0);
+                } else if (event.type === 'complete') {
+                    setIsSearching(false);
+                    if (searchCleanupRef.current) {
+                        searchCleanupRef.current();
+                        searchCleanupRef.current = null;
+                    }
+                } else if (event.type === 'error') {
+                    setSearchError(event.message || 'Unknown error');
+                    setIsSearching(false);
+                }
+            });
+
+            searchCleanupRef.current = cleanup;
+
+            // Start the search
+            await searchSeedsWasm(jamlText, 50, '');
         } catch (e: any) {
             console.error("Local search error:", e);
             setSearchError(e.message || 'Local search failed');
@@ -66,12 +94,17 @@ export default function JamlBuilder() {
         }
     };
 
-    const handleStop = () => {
+    const handleStop = async () => {
         stopRef.current = true;
         setIsSearching(false);
-        // cancelSearch(); // Removed
+
+        try {
+            const { cancelSearch } = await import('@/lib/api/motelyWasm');
+            cancelSearch();
+        } catch { }
+
         if (searchCleanupRef.current) {
-            searchCleanupRef.current(); // Unsubscribe listener
+            searchCleanupRef.current();
             searchCleanupRef.current = null;
         }
     };

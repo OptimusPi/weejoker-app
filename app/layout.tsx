@@ -8,6 +8,7 @@ import { NavBar } from '@/components/NavBar';
 import { PageFooter } from '@/components/PageFooter';
 
 import localFont from 'next/font/local';
+import ClientProviders from '@/components/ClientProviders';
 
 const fontHeader = localFont({
     src: '../public/fonts/m6x11plusplus.otf',
@@ -57,11 +58,6 @@ export default function RootLayout({
 
                 <div className="relative z-10 h-full flex flex-col">
                     <NavBar />
-                    import ClientProviders from '@/components/ClientProviders';
-
-                    // ... (imports)
-
-                    // ... (RootLayout)
                     <div className="flex-grow flex flex-col min-h-0 relative z-0">
                         <ClientProviders>
                             {children}
