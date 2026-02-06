@@ -39,8 +39,6 @@
   ],
   "exclude": [
     "node_modules",
-    "**/*.test.ts",
-    "Blueprint",
-    "Blueprint/**/*"
+    "**/*.test.ts"
   ]
 }

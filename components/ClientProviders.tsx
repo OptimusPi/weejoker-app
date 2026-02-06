@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { MantineProvider } from '@mantine/core';
-import { BalatroTheme } from '@/Blueprint/src/themes/Balatro';
+import { JamlTheme } from '@/Blueprint/src/themes/JamlTheme';
 
 export default function ClientProviders({ children }: { children: React.ReactNode }) {
     return (
-        <MantineProvider theme={BalatroTheme} forceColorScheme="dark">
+        <MantineProvider theme={JamlTheme} forceColorScheme="dark">
             {children}
         </MantineProvider>
     );

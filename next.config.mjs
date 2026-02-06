@@ -19,6 +19,10 @@ const nextConfig = {
     },
     // Exclude motely-wasm from SSR bundling - it's browser-only
     serverExternalPackages: ['motely-wasm'],
+    // Turbopack config to skip analyzing motely-wasm's dynamic dotnet.js import
+    turbopack: {
+        resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
+    },
 };
 
 export default withMotelyWasm(nextConfig);
