@@ -2,14 +2,17 @@
 
 import dynamic from 'next/dynamic';
 
-// Dynamic import to avoid SSR issues with circular dependencies
-const JamlBuilder = dynamic(() => import('@/components/JamlBuilder'), {
-    ssr: false,
-    loading: () => <div className="w-full h-screen flex items-center justify-center text-white/50">Loading JAML Builder...</div>
+const JamlUIV2 = dynamic(() => import('@/components/JamlUIV2'), {
+    loading: () => (
+        <div className="flex-1 flex items-center justify-center bg-[var(--balatro-black)]">
+            <div className="animate-pulse font-header text-2xl text-[var(--balatro-gold)]">
+                BOOTING COMMAND CENTER...
+            </div>
+        </div>
+    ),
+    ssr: false
 });
 
 export default function JamlBuilderPage() {
-    return (
-        <JamlBuilder />
-    );
+    return <JamlUIV2 />;
 }

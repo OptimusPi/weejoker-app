@@ -45,3 +45,4 @@ next-env.d.ts
 
 # large data
 public/seeds.txt
+/public/_framework

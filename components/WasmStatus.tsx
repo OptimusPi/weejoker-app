@@ -1,30 +1,42 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { initMotelyWasm, getVersion } from '@/lib/api/motelyWasm';
+import { getCapabilities, getVersion } from '@/lib/api/motelyWasm';
 import { Cpu, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function WasmStatus() {
     const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
     const [version, setVersion] = useState<string | null>(null);
+    const [threads, setThreads] = useState<boolean | null>(null);
+    const [simd, setSimd] = useState<boolean | null>(null);
+    const [processors, setProcessors] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        let cancelled = false;
         const load = async () => {
             setStatus('loading');
             try {
-                await initMotelyWasm();
-                const info = await getVersion();
+                const [info, caps] = await Promise.all([getVersion(), getCapabilities()]);
+                if (cancelled) return;
                 setVersion(info.version);
+                setThreads(caps.threads);
+                setSimd(caps.simd);
+                setProcessors(caps.processorCount);
                 setStatus('ready');
             } catch (err: any) {
                 console.error("WASM Status Error:", err);
+                if (cancelled) return;
                 setStatus('error');
                 setError(err.message || String(err));
             }
         };
         load();
+
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     return (
@@ -40,11 +52,18 @@ export function WasmStatus() {
                         <Cpu size={16} />}
 
             <div className="flex flex-col">
-                <span className="text-[10px] font-bold uppercase tracking-widest leading-none">
+                <span className="text-[12px] uppercase tracking-widest leading-tight">
                     WASM: {status.toUpperCase()}
                 </span>
-                {version && <span className="text-[8px] opacity-70">v{version}</span>}
-                {error && <span className="text-[8px] opacity-70 truncate max-w-[200px]">{error}</span>}
+                {version && (
+                    <span className="text-[11px] opacity-70 leading-tight">
+                        v{version}
+                        {threads !== null ? ` • threads:${threads ? 'on' : 'off'}` : ''}
+                        {simd !== null ? ` • simd:${simd ? 'on' : 'off'}` : ''}
+                        {processors !== null ? ` • cpu:${processors}` : ''}
+                    </span>
+                )}
+                {error && <span className="text-[11px] opacity-70 truncate max-w-[200px] leading-tight">{error}</span>}
             </div>
         </div>
     );

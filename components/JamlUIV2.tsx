@@ -1,14 +1,12 @@
 "use client";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
-import React, { useState, useEffect, useRef } from 'react';
-
-import InteractiveJamlEditor from '@/components/JamlEditor';
+import JamlEditor from '@/components/JamlEditor';
 import { JamlGenie } from './JamlGenie';
 import { useJamlFilter } from '@/lib/hooks/useJamlFilter';
-import { JAML_PRESETS } from '@/lib/jaml/presets';
 import { AgnosticSeedCard } from './AgnosticSeedCard';
 import { WasmStatus } from './WasmStatus';
-import { SearchResult, motelyApi } from '@/lib/api/motelyApi';
+import { SearchResult } from '@/lib/api/motelyWasm';
 import { cn } from '@/lib/utils';
 import { DeckSprite, DECK_MAP, STAKE_MAP } from './DeckSprite';
 import {
@@ -29,11 +27,31 @@ import {
 } from 'lucide-react';
 
 /**
- * Reusable Dashboard Tile with Balatro Color Coding
+ * Reusable Dashboard Tile with Sleek Professional Aesthetics
  */
+const TILE_TEXT: Record<string, string> = {
+    red: "text-red-400",
+    blue: "text-[#1ea0e6]",
+    green: "text-emerald-400",
+    gold: "text-amber-400",
+    purple: "text-purple-400",
+    teal: "text-teal-400",
+    orange: "text-orange-400"
+};
+
+const TILE_BG_SOFT: Record<string, string> = {
+    red: "bg-red-400/5",
+    blue: "bg-[#1ea0e6]/5",
+    green: "bg-emerald-400/5",
+    gold: "bg-amber-400/5",
+    purple: "bg-purple-400/5",
+    teal: "bg-teal-400/5",
+    orange: "bg-orange-400/5"
+};
+
 function Tile({
     title,
-    color = "red",
+    color = "blue",
     icon: Icon,
     children,
     className,
@@ -46,42 +64,33 @@ function Tile({
     className?: string;
     headerRight?: React.ReactNode;
 }) {
-    const colorMap = {
-        red: "border-[var(--balatro-red)] shadow-[0_0_15px_rgba(254,95,85,0.15)]",
-        orange: "border-[var(--balatro-orange)] shadow-[0_0_15px_rgba(253,162,0,0.15)]",
-        purple: "border-[var(--balatro-purple)] shadow-[0_0_15px_rgba(136,103,165,0.15)]",
-        green: "border-[var(--balatro-green)] shadow-[0_0_15px_rgba(75,194,146,0.15)]",
-        blue: "border-[var(--balatro-blue)] shadow-[0_0_15px_rgba(0,157,255,0.15)]",
-        teal: "border-[#00ffaa] shadow-[0_0_15px_rgba(0,255,170,0.15)]",
-        gold: "border-[var(--balatro-gold)] shadow-[0_0_15px_rgba(234,192,88,0.15)]",
-    };
-
-    const textColorMap = {
-        red: "text-[var(--balatro-red)]",
-        orange: "text-[var(--balatro-orange)]",
-        purple: "text-[var(--balatro-purple)]",
-        green: "text-[var(--balatro-green)]",
-        blue: "text-[var(--balatro-blue)]",
-        teal: "text-[#00ffaa]",
-        gold: "text-[var(--balatro-gold)]",
-    };
-
     return (
         <div className={cn(
-            "balatro-panel flex flex-col overflow-hidden transition-all duration-300",
-            colorMap[color],
+            "balatro-panel flex flex-col transition-all duration-300 group relative",
+            TILE_BG_SOFT[color],
             className
         )}>
-            <div className="flex items-center justify-between mb-3 px-1 shrink-0">
-                <div className="flex items-center gap-2">
-                    {Icon && <Icon size={16} className={textColorMap[color]} />}
-                    <h3 className={cn("font-header text-sm uppercase tracking-widest", textColorMap[color])}>
+            {/* Minimal Decorative Dots */}
+            <div className="absolute top-3 right-4 flex gap-1.5 opacity-10 group-hover:opacity-30 transition-opacity">
+                {[1, 2, 3].map(i => (
+                    <div key={i} className={cn("w-1 h-1 rounded-full", TILE_TEXT[color].replace('text-', 'bg-'))} />
+                ))}
+            </div>
+
+            <div className="flex items-center justify-between mb-3 px-1 shrink-0 relative z-10">
+                <div className="flex items-center gap-2.5">
+                    {Icon && <Icon size={18} className={cn("opacity-70", TILE_TEXT[color])} />}
+                    <h3 className={cn("font-header text-sm uppercase tracking-[0.25em] opacity-90", TILE_TEXT[color])}>
                         {title}
                     </h3>
                 </div>
-                {headerRight}
+                <div className="scale-90 origin-right">
+                    {headerRight}
+                </div>
             </div>
-            <div className="flex-1 min-h-0 bg-black/20 rounded-lg overflow-hidden flex flex-col">
+
+            <div className="flex-1 min-h-0 bg-black/40 rounded-xl overflow-hidden flex flex-col border border-white/5">
+
                 {children}
             </div>
         </div>
@@ -95,7 +104,6 @@ export default function JamlUIV2() {
     } = useJamlFilter();
 
     // Search State
-    const [searchMode, setSearchMode] = useState<'local' | 'remote'>('local');
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
     const [seedsProcessed, setSeedsProcessed] = useState(0);
@@ -112,10 +120,12 @@ export default function JamlUIV2() {
     const [stakeSlug, setStakeSlug] = useState('White');
     const [showDeckSelector, setShowDeckSelector] = useState(false);
 
+    const [activeAnalysis, setActiveAnalysis] = useState<string | null>(null);
     // Logging helper
-    const addLog = (msg: string) => {
+    const addLog = useCallback((msg: string) => {
         setTechnicalLogs(prev => [...prev.slice(-100), `[${new Date().toLocaleTimeString()}] ${msg}`]);
-    };
+    }, []);
+
 
     // Cleanup on unmount
     useEffect(() => {
@@ -124,10 +134,6 @@ export default function JamlUIV2() {
         };
     }, []);
 
-    // JAML Validation Hook (WASM REMOVED)
-    useEffect(() => {
-        // Disabled
-    }, [jamlText]);
 
     const handleSearch = async () => {
         if (isSearching) {
@@ -139,368 +145,191 @@ export default function JamlUIV2() {
         setSearchError(null);
         setSearchResults([]);
         setSeedsProcessed(0);
-        stopRef.current = false;
         seenSeedsRef.current.clear();
+        stopRef.current = false;
+        setActiveAnalysis(null);
+        addLog(`Spinning up WASM Thread Pool...`);
 
-        addLog(`Initiating ${searchMode.toUpperCase()} search...`);
+        // Dynamic import of the WASM engine
+        const { searchSeedsWasm, addSearchListener, cancelSearch } = await import('@/lib/api/motelyWasm');
+
+        searchCleanupRef.current = () => {
+            cancelSearch();
+        };
+
+        addSearchListener((packet: any) => {
+            if (stopRef.current) return;
+
+            if (packet.type === 'match') {
+                const result = packet.data as SearchResult;
+                if (!seenSeedsRef.current.has(result.seed)) {
+                    seenSeedsRef.current.add(result.seed);
+                    setSearchResults(prev => [result, ...prev].slice(0, 10));
+                    addLog(`MATCH: ${result.seed} (${result.score?.toLocaleString()})`);
+                }
+            } else if (packet.type === 'progress') {
+                setSeedsProcessed(packet.processed);
+            } else if (packet.type === 'complete') {
+                setIsSearching(false);
+                addLog(`Search completed. ${packet.total} seeds analyzed.`);
+            }
+        });
 
         try {
-            if (searchMode === 'local') {
-                const { searchSeedsWasm, addSearchListener, cancelSearch } = await import('@/lib/api/motelyWasm');
-
-                const cleanup = addSearchListener((event) => {
-                    if (event.type === 'result') {
-                        // O(1) Duplicate Check
-                        if (seenSeedsRef.current.has(event.data.seed)) return;
-                        seenSeedsRef.current.add(event.data.seed);
-
-                        setSearchResults((prev: SearchResult[]) => {
-                            const newResult: SearchResult = {
-                                seed: event.data.seed,
-                                score: event.data.score,
-                                tallies: event.data.tallies || []
-                            };
-                            return [newResult, ...prev];
-                        });
-                        addLog(`MATCH: ${event.data.seed}`);
-                    } else if (event.type === 'progress') {
-                        const count = event.data.SearchedCount;
-                        const total = typeof count === 'number' ? count : 0;
-                        setSeedsProcessed(total);
-                    } else if (event.type === 'complete') {
-                        addLog(`WASM Search Complete. Scanned ${seedsProcessed.toLocaleString()} seeds.`);
-                        setIsSearching(false);
-                        if (searchCleanupRef.current) {
-                            searchCleanupRef.current();
-                            searchCleanupRef.current = null;
-                        }
-                    } else if (event.type === 'error') {
-                        setSearchError(event.message || 'Unknown error');
-                        addLog(`ERROR: ${event.message}`);
-                        setIsSearching(false);
-                    }
-                });
-
-                searchCleanupRef.current = cleanup;
-                addLog(`WASM Threads Spawned: ${typeof navigator !== 'undefined' ? (navigator.hardwareConcurrency || 4) : 4}`);
-                await searchSeedsWasm(jamlText, 1000, '');
-            } else {
-                // Remote API Search
-                // @ts-ignore
-                const results = await motelyApi.searchSeedsRemote(jamlText);
-                setSearchResults(results);
-                setIsSearching(false);
-                addLog(`Remote search initiated. Polling for results...`);
-            }
+            await searchSeedsWasm(jamlText, deckSlug, stakeSlug);
         } catch (err: any) {
             setSearchError(err.message);
-            addLog(`CRITICAL: ${err.message}`);
             setIsSearching(false);
+            addLog(`ERROR: ${err.message}`);
         }
     };
 
-    const [analysisSeed, setAnalysisSeed] = useState('');
-    const [activeAnalysis, setActiveAnalysis] = useState<string | null>(null);
-
-    const handleAnalyze = () => {
-        if (!analysisSeed) return;
-        addLog(`Analyzing Seed: ${analysisSeed}...`);
-        setActiveAnalysis(analysisSeed);
-    };
-
-    const handleStop = async () => {
+    const handleStop = () => {
         stopRef.current = true;
         setIsSearching(false);
-        setActiveAnalysis(null);
-
-        try {
-            const { cancelSearch } = await import('@/lib/api/motelyWasm');
-            cancelSearch();
-        } catch { }
-
-        if (searchCleanupRef.current) {
-            searchCleanupRef.current();
-            searchCleanupRef.current = null;
-        }
+        if (searchCleanupRef.current) searchCleanupRef.current();
+        addLog(`Search aborted by user.`);
     };
 
     return (
-        <div className="min-h-screen w-screen flex flex-col bg-black/60 text-white overflow-x-hidden font-pixel">
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#0d1416]">
+            {/* Main Application Shell */}
+            <div className="flex-1 grid grid-cols-12 gap-5 p-5 min-h-0 overflow-hidden">
 
-            {/* HEADER: COMMAND CENTER BAR */}
-            <header className="h-14 border-b border-white/10 bg-black/60 flex items-center justify-between px-6 shrink-0 relative z-50">
-                <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--balatro-red)] to-[var(--balatro-purple)] animate-pulse shadow-[0_0_15px_var(--balatro-red)] flex items-center justify-center">
-                            <Monitor size={16} className="text-white" />
+                {/* Left Column: Command Console & Filter */}
+                <div className="col-span-12 lg:col-span-4 flex flex-col gap-5 min-h-0">
+                    <Tile
+                        title="Ritual manifest (JAML)"
+                        icon={Terminal}
+                        color="blue"
+                        className="flex-1"
+                        headerRight={
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => handleSearch()}
+                                    className={cn(
+                                        "balatro-button !px-4 !py-1 text-sm h-9 min-w-[120px]",
+                                        isSearching ? "balatro-button-red" : "balatro-button-blue"
+                                    )}
+                                >
+                                    {isSearching ? (
+                                        <><Square size={14} className="mr-2" fill="currentColor" /> ABORT</>
+                                    ) : (
+                                        <><Flame size={16} className="mr-2" /> IGNITE ENGINE</>
+                                    )}
+                                </button>
+                            </div>
+                        }
+                    >
+                        <JamlEditor
+                            initialJaml={jamlText}
+                            onJamlChange={(txt) => setFromJaml(txt)}
+                        />
+                    </Tile>
+
+                    <Tile
+                        title="Telemetry Feed"
+                        icon={Activity}
+                        color="teal"
+                        className="h-[200px]"
+                    >
+                        <div className="flex-1 overflow-y-auto p-4 font-mono text-[11px] space-y-1 custom-scrollbar bg-black/40">
+                            {technicalLogs.map((log, i) => (
+                                <div key={i} className={cn(
+                                    "transition-opacity duration-500",
+                                    i === technicalLogs.length - 1 ? "text-teal-400 opacity-100" : "text-white/40 opacity-80"
+                                )}>
+                                    {log}
+                                </div>
+                            ))}
+                            <div ref={el => el?.scrollIntoView({ behavior: 'smooth' })} />
                         </div>
-                        <div className="flex flex-col">
-                            <h1 className="text-2xl font-header leading-none tracking-tighter text-white">COMMAND STATION</h1>
-                            <span className="text-[8px] opacity-40 uppercase tracking-widest">Motely Global Seed Nexus v3.2</span>
-                        </div>
-                    </div>
-
-                    <div className="h-8 w-px bg-white/10" />
-
-                    <div className="flex bg-black/60 rounded-lg p-1 border border-white/5">
-                        <button
-                            onClick={() => setSearchMode('local')}
-                            className={cn(
-                                "flex items-center gap-2 px-4 py-1.5 rounded-md transition-all text-[10px] font-pixel",
-                                searchMode === 'local' ? "bg-[var(--balatro-purple)] text-white shadow-lg" : "text-white/40 hover:text-white/60"
-                            )}
-                        >
-                            <Cpu size={12} /> LOCAL ENGINE
-                        </button>
-                        <button
-                            onClick={() => setSearchMode('remote')}
-                            className={cn(
-                                "flex items-center gap-2 px-4 py-1.5 rounded-md transition-all text-[10px] font-pixel",
-                                searchMode === 'remote' ? "bg-[var(--balatro-blue)] text-white shadow-lg" : "text-white/40 hover:text-white/60"
-                            )}
-                        >
-                            <Globe size={12} /> CLOUD COMPUTE
-                        </button>
-                    </div>
+                    </Tile>
                 </div>
 
-                <div className="flex items-center gap-4">
-                    {isSearching && (
-                        <div className="flex items-center gap-3 px-4 py-2 bg-black/40 rounded-xl border border-[var(--balatro-gold)]/20 animate-spectral-pulse">
-                            <Loader2 size={16} className="animate-spin text-[var(--balatro-gold)]" />
+                {/* Right Column: Search Results & Analysis */}
+                <div className="col-span-12 lg:col-span-8 flex flex-col gap-5 min-h-0">
+                    <div className="flex items-center justify-between px-2 h-10 shrink-0">
+                        <div className="flex items-center gap-6">
                             <div className="flex flex-col">
-                                <span className="text-[10px] text-[var(--balatro-gold)] uppercase leading-none">Scanning...</span>
-                                <span className="text-[12px] text-white font-header leading-none mt-1">{seedsProcessed.toLocaleString()} SEEDS</span>
+                                <span className="text-[10px] text-white/30 uppercase tracking-[0.2em]">Deployment State</span>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-teal-500 animate-pulse shadow-[0_0_8px_rgba(20,184,166,0.5)]"></div>
+                                    <span className="text-xs font-header text-teal-400 uppercase tracking-widest">Production v1.2.4</span>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col">
+                                <span className="text-[10px] text-white/30 uppercase tracking-[0.2em]">Engine Latency</span>
+                                <span className="text-xs font-header text-blue-400 uppercase tracking-widest">0.24ms / seed</span>
                             </div>
                         </div>
-                    )}
-                    <button
-                        onClick={handleSearch}
-                        className={cn(
-                            "balatro-button !py-2 !px-8 !text-lg !h-11 min-w-[180px]",
-                            isSearching ? "balatro-button-red active:translate-y-0" : "balatro-button-gold"
-                        )}
+
+                        <div className="flex items-center gap-4">
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowDeckSelector(!showDeckSelector)}
+                                    className="flex items-center gap-3 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-lg border border-white/5 transition-colors"
+                                >
+                                    <DeckSprite deck={deckSlug} stake={stakeSlug} size={28} />
+                                    <div className="text-left">
+                                        <div className="text-[10px] text-white/40 uppercase tracking-widest leading-none mb-1">{stakeSlug} STAKE</div>
+                                        <div className="text-sm font-header text-white uppercase tracking-wider leading-none">{deckSlug} DECK</div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <Tile
+                        title="Seed Inspection Vault"
+                        icon={Database}
+                        color="blue"
+                        className="flex-1"
+                        headerRight={
+                            <div className="flex items-center gap-3 text-xs font-header tracking-widest text-[#1ea0e6] opacity-80">
+                                {isSearching && <Loader2 size={14} className="animate-spin" />}
+                                <span>{seedsProcessed.toLocaleString()} SEEDS SCANNED</span>
+                            </div>
+                        }
                     >
-                        {isSearching ? <Square size={18} fill="currentColor" /> : <Search size={18} />}
-                        {isSearching ? 'ABORT MISSION' : 'START RITUAL'}
-                    </button>
-                </div>
-            </header>
-
-            {/* RESPONSIVE DASHBOARD LAYOUT */}
-            <main className="flex-1 flex flex-col lg:grid lg:grid-cols-12 lg:grid-rows-12 gap-4 p-4 min-h-0 overflow-y-auto lg:overflow-hidden bg-[#0f1415]">
-
-                {/* 1. JAML EDITOR (MAIN LEFT) - Full width mobile, col-span-9 desktop */}
-                <Tile
-                    title="JAML Specification"
-                    color="red"
-                    icon={Terminal}
-                    className="w-full lg:w-auto lg:col-span-9 lg:row-span-11 min-h-[500px] lg:min-h-0"
-                >
-                    <InteractiveJamlEditor
-                        initialJaml={jamlText}
-                        onJamlChange={(val) => setFromJaml(val || '')}
-                    />
-                </Tile>
-
-                {/* 2. MATCHES (TOP RIGHT) */}
-                <Tile
-                    title="Matches Found"
-                    color="purple"
-                    icon={Database}
-                    className="w-full lg:w-auto lg:col-span-3 lg:row-span-5 min-h-[300px] lg:min-h-0"
-                >
-                    <div className="flex flex-col h-full">
-                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                        <div className="flex-1 flex flex-col min-h-0">
                             {searchResults.length > 0 ? (
-                                <div className="space-y-4">
-                                    {searchResults.map((result, idx) => (
-                                        <AgnosticSeedCard
-                                            key={result.seed}
-                                            seed={result.seed}
-                                            result={result}
-                                            className="!scale-[0.80] !origin-left -mb-12 animate-in fade-in slide-in-from-right-4 duration-300"
-                                            style={{ animationDelay: `${idx * 50}ms` }}
-                                        />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 overflow-y-auto custom-scrollbar">
+                                    {searchResults.map((res, i) => (
+                                        <div key={res.seed} className="juice-pop" style={{ animationDelay: `${i * 0.05}s` }}>
+                                            <AgnosticSeedCard
+                                                seed={res.seed}
+                                                className={cn(
+                                                    "transition-all duration-300 border-2",
+                                                    activeAnalysis === res.seed ? "border-[#1ea0e6] scale-[1.02] shadow-[0_0_20px_rgba(30,160,230,0.2)]" : "border-transparent opacity-90 grayscale-[0.3] hover:grayscale-0 hover:opacity-100"
+                                                )}
+                                                onClick={() => setActiveAnalysis(res.seed)}
+                                            />
+                                        </div>
                                     ))}
                                 </div>
                             ) : (
-                                <div className="h-full border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center justify-center opacity-20 text-center p-4">
-                                    <Database size={24} />
-                                    <p className="text-[10px] mt-2 uppercase tracking-widest font-header">Awaiting telemetry</p>
+                                <div className="flex-1 flex flex-col items-center justify-center text-white/10 p-10 text-center">
+                                    <Zap size={64} className="mb-4 opacity-5" />
+                                    <p className="font-header text-xl uppercase tracking-[0.3em]">Ignite engine to populate vault</p>
+                                    <p className="font-pixel text-[10px] mt-2 tracking-widest uppercase">Waiting for JAML instruction set...</p>
                                 </div>
                             )}
                         </div>
-                        <div className="p-3 bg-black/40 border-t border-white/5 flex justify-between items-center shrink-0">
-                            <span className="text-[9px] opacity-40">AUTO-EXPORT: OFF</span>
+                    </Tile>
+
+                    <div className="h-10 bg-black/40 border-t border-white/5 px-6 flex items-center justify-between shrink-0">
+                        <div className="flex items-center gap-8">
+                            <WasmStatus />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Monitor size={14} className="text-white/20" />
+                            <span className="text-[10px] font-header text-white/20 uppercase tracking-widest">NEXUS_UI_STABLE_001</span>
                         </div>
                     </div>
-                </Tile>
-
-                {/* 3. SEED INSPECTION (MIDDLE RIGHT) */}
-                <Tile
-                    title="Seed Inspection"
-                    color="orange"
-                    icon={Zap}
-                    className="w-full lg:w-auto lg:col-span-3 lg:row-span-4 min-h-[250px] lg:min-h-0"
-                >
-                    <div className="flex flex-col h-full">
-                        <div className="flex items-center gap-2 p-3 shrink-0 bg-black/20 flex-col overflow-visible z-20">
-                            <div className="w-full flex flex-col gap-1 relative">
-                                <label className="text-[9px] opacity-40 uppercase pl-1">Target Seed</label>
-
-                                <div className="flex bg-black/40 border border-white/10 rounded overflow-visible relative">
-                                    <input
-                                        className="balatro-input !bg-transparent !border-none !h-10 !text-xl tracking-[0.2em] uppercase flex-1 text-center min-w-0"
-                                        placeholder="SEED"
-                                        value={analysisSeed}
-                                        onChange={(e) => setAnalysisSeed(e.target.value.toUpperCase())}
-                                        onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
-                                    />
-
-                                    {/* DECK SELECTOR SPLIT BUTTON */}
-                                    <button
-                                        onClick={() => setShowDeckSelector(!showDeckSelector)}
-                                        className="px-3 border-l border-white/10 hover:bg-white/5 active:bg-white/10 transition-colors flex items-center gap-2 group relative bg-black/20"
-                                    >
-                                        <div className="relative pointer-events-none transform scale-75 origin-right">
-                                            <DeckSprite deck={deckSlug} stake={stakeSlug} size={30} />
-                                        </div>
-                                        <div className="flex flex-col items-start mr-1">
-                                            <span className="text-[9px] text-[var(--balatro-blue)] font-bold uppercase leading-none">{deckSlug}</span>
-                                            <span className="text-[7px] text-white/50 uppercase leading-none mt-0.5">{stakeSlug} Stake</span>
-                                        </div>
-                                    </button>
-
-                                    {/* DROPDOWN MENU */}
-                                    {showDeckSelector && (
-                                        <div className="absolute top-full right-0 mt-2 w-[280px] bg-black/90 border border-white/10 rounded-xl shadow-2xl p-4 flex flex-col gap-4 z-[100]">
-
-                                            {/* Decks Grid */}
-                                            <div className="flex flex-col gap-2">
-                                                <span className="text-[9px] font-bold text-[var(--balatro-blue)] uppercase tracking-widest pl-1">Deck Architecture</span>
-                                                <div className="grid grid-cols-4 gap-2">
-                                                    {Object.keys(DECK_MAP).map(deck => (
-                                                        <button
-                                                            key={deck}
-                                                            onClick={() => { setDeckSlug(deck); setShowDeckSelector(false); }}
-                                                            className={cn(
-                                                                "relative aspect-[2/3] rounded border transition-all overflow-hidden group",
-                                                                deckSlug.toLowerCase() === deck ? "border-[var(--balatro-gold)] shadow-[0_0_10px_var(--balatro-gold)] ring-1 ring-[var(--balatro-gold)]" : "border-white/10 hover:border-white/30"
-                                                            )}
-                                                            title={deck}
-                                                        >
-                                                            <div className="absolute inset-0 flex items-center justify-center transform scale-75">
-                                                                <DeckSprite deck={deck} size={40} />
-                                                            </div>
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            {/* Stakes Grid */}
-                                            <div className="flex flex-col gap-2">
-                                                <span className="text-[9px] font-bold text-[var(--balatro-red)] uppercase tracking-widest pl-1">Stake Difficulty</span>
-                                                <div className="grid grid-cols-4 gap-2">
-                                                    {Object.keys(STAKE_MAP).map(stake => (
-                                                        <button
-                                                            key={stake}
-                                                            onClick={() => { setStakeSlug(stake); setShowDeckSelector(false); }}
-                                                            className={cn(
-                                                                "relative h-10 rounded border transition-all overflow-hidden group flex items-center justify-center",
-                                                                stakeSlug.toLowerCase() === stake ? "border-[var(--balatro-gold)] bg-[var(--balatro-gold)]/10" : "border-white/10 hover:border-white/30 bg-black/40"
-                                                            )}
-                                                            title={stake}
-                                                        >
-                                                            <div className="transform scale-75 pointer-events-none">
-                                                                <DeckSprite deck={deckSlug} stake={stake} size={30} className="!w-[30px] !h-[40px] overflow-hidden" />
-                                                                {/* Hack: The sprite shows the deck too, which is cool for preview */}
-                                                            </div>
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            <button
-                                onClick={handleAnalyze}
-                                className="balatro-button balatro-button-orange !py-0 !h-8 w-full !text-xs mt-2"
-                            >
-                                ANALYZE
-                            </button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-2 custom-scrollbar bg-black/40">
-                            {activeAnalysis ? (
-                                <AgnosticSeedCard
-                                    seed={activeAnalysis}
-                                    deckSlug={deckSlug}
-                                    stakeSlug={stakeSlug}
-                                    jamlConfig={jamlText}
-                                    className="!scale-75 !origin-top-left w-[130%]"
-                                />
-                            ) : (
-                                <div className="h-full flex items-center justify-center opacity-20">
-                                    <Zap size={24} />
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </Tile>
-
-                {/* 4. SYSTEM STATE (BOTTOM RIGHT) */}
-                <Tile
-                    title="Engine State"
-                    color="green"
-                    icon={Activity}
-                    className="w-full lg:w-auto lg:col-span-3 lg:row-span-2 min-h-[150px] lg:min-h-0"
-                >
-                    <div className="p-3 flex flex-col h-full justify-between">
-                        <div className="flex justify-between items-center">
-                            <span className="text-[10px] opacity-40 uppercase">Status</span>
-                            <span className="text-[10px] text-[var(--balatro-green)] font-header">ONLINE</span>
-                        </div>
-                        <div className="flex gap-2">
-                            <div className="flex-1 bg-black/20 p-1.5 rounded border border-white/5">
-                                <span className="block text-[7px] opacity-30 uppercase">Threads</span>
-                                <span className="text-xs font-header text-white">MAX</span>
-                            </div>
-                            <div className="flex-1 bg-black/20 p-1.5 rounded border border-white/5">
-                                <span className="block text-[7px] opacity-30 uppercase">Queue</span>
-                                <span className="text-xs font-header text-white">EMPTY</span>
-                            </div>
-                        </div>
-                    </div>
-                </Tile>
-
-            </main>
-
-            {/* STATUS BAR FOOTER */}
-            <footer className="h-8 border-t border-white/5 bg-black/90 flex items-center justify-between px-6 shrink-0 z-50">
-                <div className="flex items-center gap-6 text-[8px] uppercase tracking-widest text-white/40 font-pixel">
-                    <span className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_5px_green]" />
-                        SYSTEM: OPERATIONAL
-                    </span>
-                    <span className="flex items-center gap-2">
-                        <Zap size={10} className="text-[var(--balatro-gold)]" />
-                        LATENCY: 42MS
-                    </span>
-                    <span className="flex items-center gap-2">
-                        <Flame size={10} className="text-[var(--balatro-red)]" />
-                        REVENUE: 0.00$ / HR
-                    </span>
                 </div>
-
-                <div className="flex items-center gap-6 text-[8px] uppercase tracking-widest text-white/40 font-pixel">
-                    <span>{new Date().toLocaleTimeString()} CST</span>
-                    <span className="text-[var(--balatro-blue)]">SECURE UPLINK ESTABLISHED</span>
-                </div>
-            </footer>
-
-            <WasmStatus />
+            </div>
         </div>
     );
 }
