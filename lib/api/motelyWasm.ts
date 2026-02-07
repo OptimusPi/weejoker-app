@@ -2,44 +2,51 @@
 
 /**
  * Motely WASM Bridge
- * 
- * This module provides a clean API for interacting with the motely-wasm package.
- * It handles lazy initialization and provides typed wrappers around the WASM API.
+ *
+ * Uses the published motely-wasm npm package. Provides analyzeSeedWasm() and
+ * searchSeedsWasm() for analyzer and JAML search.
+ *
+ * Recommended: call preloadWasm() on app mount (e.g. in ClientProviders) so
+ * the first Analyze or JAML search doesn't wait on the full runtime load.
  */
 
-import type { MotelyWasmApi, SeedAnalysisInfo, SearchStatusInfo, VersionInfo, CapabilitiesInfo } from 'motely-wasm';
+import type {
+    MotelyWasmApi,
+    SeedAnalysisInfo,
+    SearchStatusInfo,
+    ValidateResult,
+    VersionInfo,
+    CapabilitiesInfo,
+    SearchOptions,
+} from 'motely-wasm';
 
 let wasmApi: MotelyWasmApi | null = null;
 let initPromise: Promise<MotelyWasmApi> | null = null;
 
-// Check if we're in a browser environment
-const isBrowser = typeof window !== 'undefined';
-
 /**
- * Initialize the Motely WASM runtime.
- * Returns the cached API if already initialized.
- * NOTE: This ONLY works in the browser, not in SSR or Edge.
+ * Initialize the WASM engine using the published npm package loader.
+ * Call once; subsequent calls return the cached instance.
  */
-export async function initMotelyWasm(): Promise<MotelyWasmApi> {
-    if (!isBrowser) {
-        throw new Error('[MotelyWasm] WASM only available in browser environment');
-    }
-
+async function initMotelyWasm(): Promise<MotelyWasmApi> {
     if (wasmApi) return wasmApi;
-
     if (initPromise) return initPromise;
 
     initPromise = (async () => {
         try {
-            // Dynamic import - motely-wasm is excluded from SSR via next.config.mjs
-            const motelyModule = await import('motely-wasm');
-            const { loadMotely } = motelyModule;
-            console.log('[MotelyWasm] Loading WASM runtime...');
+            // Dynamic import so Next.js doesn't try to bundle this server-side
+            const { loadMotely } = await import('motely-wasm');
+            // The next-plugin-motely-wasm transforms .wasm/.dat imports at copy time,
+            // so static files in public/_framework are browser-safe. No API route needed.
             wasmApi = await loadMotely();
-            const version = wasmApi.GetVersion();
+
+            const version = wasmApi.getVersion();
+            const capabilities = wasmApi.getCapabilities();
             console.log(`[MotelyWasm] Loaded v${version.version} (${version.runtime})`);
+            console.log(`[MotelyWasm] Capabilities: SIMD=${capabilities.simd}, Threads=${capabilities.threads}, Processors=${capabilities.processorCount}`);
+
             return wasmApi;
         } catch (error) {
+            console.error("[MotelyWasm] Failed to load:", error);
             initPromise = null;
             throw error;
         }
@@ -56,11 +63,20 @@ export async function getWasmApi(): Promise<MotelyWasmApi> {
 }
 
 /**
+ * Start loading the WASM runtime in the background (e.g. on app mount).
+ * Call from a top-level client component so the first Analyze click doesn't wait on the full load.
+ */
+export function preloadWasm(): void {
+    if (wasmApi || initPromise) return;
+    initMotelyWasm().catch(() => { /* ignore; getWasmApi() will retry */ });
+}
+
+/**
  * Get version info from the WASM engine.
  */
 export async function getVersion(): Promise<VersionInfo> {
     const api = await getWasmApi();
-    return api.GetVersion();
+    return api.getVersion();
 }
 
 /**
@@ -68,25 +84,34 @@ export async function getVersion(): Promise<VersionInfo> {
  */
 export async function getCapabilities(): Promise<CapabilitiesInfo> {
     const api = await getWasmApi();
-    return api.GetCapabilities();
+    return api.getCapabilities();
 }
 
 /**
  * Analyze a seed using the WASM engine.
+ * @param seed - Balatro seed string (e.g. "TACO1111")
+ * @param deck - Deck name (e.g. "Red", "Erratic")
+ * @param stake - Stake name (e.g. "White", "Gold")
  */
 export async function analyzeSeedWasm(
     seed: string,
-    deck: string = 'erratic',
-    stake: string = 'white',
-    ante: number = 1,
-    shop: number = 8,
-    config: string = '{}'
+    deck: string = 'Red',
+    stake: string = 'White',
 ): Promise<SeedAnalysisInfo> {
     const api = await getWasmApi();
-    return api.AnalyzeSeed(seed, deck, stake, ante, shop, config);
+    return api.analyzeSeed(seed, deck, stake);
 }
 
-// Search state management
+/**
+ * Validate JAML content using the WASM engine.
+ */
+export async function validateJamlWasm(jamlContent: string): Promise<ValidateResult> {
+    const api = await getWasmApi();
+    return api.validateJaml(jamlContent);
+}
+
+// ──────────────────────────────── Search ────────────────────────────────
+
 let activeSearchId: string | null = null;
 type SearchListener = (event: SearchEvent) => void;
 const searchListeners: Set<SearchListener> = new Set();
@@ -119,103 +144,112 @@ function notifyListeners(event: SearchEvent) {
 /**
  * Start a JAML search using the WASM engine.
  * Search results are emitted to listeners.
+ *
+ * @param jamlContent - JAML filter content
+ * @param options - Optional search parameters (threadCount, batchSize, etc.)
+ * @returns searchId string (resolves once searchId is known)
  */
 export async function searchSeedsWasm(
     jamlContent: string,
-    maxResults: number = 1000,
-    deck: string = '',
-    stake: string = '',
-    threads?: number
+    options?: SearchOptions,
 ): Promise<string> {
     const api = await getWasmApi();
 
     // Stop any existing search
     if (activeSearchId) {
         try {
-            api.StopSearch(activeSearchId);
-        } catch { }
+            api.stopSearch(activeSearchId);
+            await api.disposeSearch(activeSearchId);
+        } catch { /* ignore */ }
     }
 
     // Start new search
-    const threadCount = threads ?? (typeof navigator !== 'undefined' ? navigator.hardwareConcurrency : 4);
-    const searchId = api.StartJamlSearch(
-        jamlContent,
-        deck || undefined,
-        stake || undefined,
-        threadCount,
-        1000,   // batchSize
-        0,      // startBatch
-        100000, // endBatch (~100M seeds)
-        maxResults
-    );
+    const defaults: SearchOptions = {
+        threadCount: typeof navigator !== 'undefined' ? Math.max(1, navigator.hardwareConcurrency - 1) : 4,
+    };
+    activeSearchId = null;
 
-    activeSearchId = searchId;
+    // Track already-seen seeds to avoid duplicate result events
+    const seenSeeds = new Set<string>();
 
-    // Poll for results
-    const pollInterval = setInterval(() => {
-        if (activeSearchId !== searchId) {
-            clearInterval(pollInterval);
-            return;
+    let resolveSearchId: ((id: string) => void) | null = null;
+    const searchIdPromise = new Promise<string>((resolve) => {
+        resolveSearchId = resolve;
+    });
+
+    const ensureSearchId = (id: string) => {
+        if (!activeSearchId) {
+            activeSearchId = id;
+            if (resolveSearchId) {
+                resolveSearchId(id);
+                resolveSearchId = null;
+            }
         }
+    };
 
-        try {
-            const status = api.GetSearchStatus(searchId, 100);
+    const onProgress = (
+        searchId: string,
+        totalSeedsSearched: number,
+        matchingSeeds: number,
+        elapsedMs: number,
+        resultCount: number,
+    ) => {
+        ensureSearchId(searchId);
+        notifyListeners({
+            type: 'progress',
+            data: {
+                SearchedCount: totalSeedsSearched,
+                MatchingSeeds: matchingSeeds,
+                ElapsedMs: elapsedMs,
+                ResultCount: resultCount,
+                progress: 'Running',
+            },
+        });
+    };
 
-            // Emit progress
-            notifyListeners({
-                type: 'progress',
-                data: {
-                    SearchedCount: status.totalSeedsSearched,
-                    progress: status.progressPercent
-                }
-            });
+    const onResult = (searchId: string, seed: string, score: number) => {
+        ensureSearchId(searchId);
+        if (seenSeeds.has(seed)) return;
+        seenSeeds.add(seed);
+        notifyListeners({
+            type: 'result',
+            data: { seed, score },
+        });
+    };
 
-            // Emit new results
-            if (status.results && status.results.length > 0) {
-                for (const result of status.results) {
-                    notifyListeners({
-                        type: 'result',
-                        data: {
-                            seed: result.seed,
-                            score: result.score,
-                            tallies: result.tallies
-                        }
-                    });
-                }
+    api.startJamlSearch(jamlContent, { ...defaults, ...options, onProgress, onResult })
+        .then(async (status) => {
+            ensureSearchId(status.searchId);
+            if (status.error) {
+                notifyListeners({ type: 'error', message: status.error });
+            } else {
+                notifyListeners({ type: 'complete', data: status });
             }
-
-            // Check if complete
-            if (!status.isRunning) {
-                clearInterval(pollInterval);
-                if (status.error) {
-                    notifyListeners({ type: 'error', message: status.error });
-                } else {
-                    notifyListeners({ type: 'complete', data: status });
-                }
-                if (activeSearchId === searchId) {
-                    activeSearchId = null;
-                }
-            }
-        } catch (e: any) {
-            clearInterval(pollInterval);
-            notifyListeners({ type: 'error', message: e.message || String(e) });
-            if (activeSearchId === searchId) {
+            if (activeSearchId === status.searchId) {
                 activeSearchId = null;
             }
-        }
-    }, 250);
+            try {
+                await api.disposeSearch(status.searchId);
+            } catch { /* ignore */ }
+        })
+        .catch((e: any) => {
+            notifyListeners({ type: 'error', message: e?.message || String(e) });
+            activeSearchId = null;
+        });
 
-    return searchId;
+    return searchIdPromise;
 }
 
 /**
  * Cancel the active search.
  */
-export function cancelSearch(): void {
+export async function cancelSearch(): Promise<void> {
     if (activeSearchId && wasmApi) {
         try {
-            wasmApi.StopSearch(activeSearchId);
-        } catch { }
+            const id = activeSearchId;
+            wasmApi.stopSearch(id);
+            await wasmApi.disposeSearch(id);
+        } catch { /* ignore */ }
         activeSearchId = null;
     }
 }
@@ -233,19 +267,17 @@ export function isSearchRunning(): boolean {
 export async function getSearchProgress(): Promise<SearchStatusInfo | null> {
     if (!activeSearchId || !wasmApi) return null;
     try {
-        return wasmApi.GetSearchStatus(activeSearchId, 0);
+        return wasmApi.getSearchStatus(activeSearchId, 0);
     } catch {
         return null;
     }
 }
 
-/**
- * Validate JAML syntax (placeholder - needs WASM support).
- */
-export async function validateJamlWasm(jamlContent: string): Promise<{ errors: string[], warnings: string[] }> {
-    // TODO: Add validation when available in WASM API
-    return { errors: [], warnings: [] };
+// Simple result type used by UI components
+export interface SearchResult {
+    seed: string;
+    score: number;
 }
 
 // Re-export types for convenience
-export type { MotelyWasmApi, SeedAnalysisInfo, SearchStatusInfo, VersionInfo, CapabilitiesInfo };
+export type { MotelyWasmApi, SeedAnalysisInfo, SearchStatusInfo, ValidateResult, VersionInfo, CapabilitiesInfo, SearchOptions };

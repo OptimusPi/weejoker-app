@@ -8,7 +8,7 @@ import JamlEditor from './JamlEditor';
 
 import { cn } from '@/lib/utils';
 import { X, Edit2, Loader2, Search, Square, Copy, RotateCcw, Flame, Sparkles } from 'lucide-react';
-import { SearchResult } from '@/lib/api/motelyApi';
+import { SearchResult } from '@/lib/api/motelyWasm';
 import { AgnosticSeedCard } from './AgnosticSeedCard';
 import { WasmStatus } from './WasmStatus';
 import { JAML_PRESETS } from '@/lib/jaml/presets';
@@ -86,7 +86,7 @@ export default function JamlBuilder() {
             searchCleanupRef.current = cleanup;
 
             // Start the search
-            await searchSeedsWasm(jamlText, 50, '');
+            await searchSeedsWasm(jamlText);
         } catch (e: any) {
             console.error("Local search error:", e);
             setSearchError(e.message || 'Local search failed');
@@ -100,7 +100,7 @@ export default function JamlBuilder() {
 
         try {
             const { cancelSearch } = await import('@/lib/api/motelyWasm');
-            cancelSearch();
+            await cancelSearch();
         } catch { }
 
         if (searchCleanupRef.current) {

@@ -16,15 +16,13 @@ export function useSeedAnalyzer(seed: string | null) {
             return;
         }
 
+        const abortController = new AbortController();
         const runAnalysis = async () => {
             setLoading(true);
             setError(null);
             try {
-                // Yield to main thread
-                await new Promise(resolve => setTimeout(resolve, 10));
-
-                console.log(`[useSeedAnalyzer] Analyzing ${seed} via WASM...`);
-                const rawResult = await analyzeSeedWasm(seed, "erratic", "white", 1, 8);
+                const rawResult = await analyzeSeedWasm(seed, "Erratic", "White");
+                if (abortController.signal.aborted) return;
 
                 if (rawResult) {
                     const normalized = normalizeAnalysis(rawResult);
@@ -33,14 +31,16 @@ export function useSeedAnalyzer(seed: string | null) {
                     throw new Error("No analysis result returned");
                 }
             } catch (err) {
+                if (abortController.signal.aborted) return;
                 console.error("[useSeedAnalyzer] Analysis error:", err);
                 setError(err instanceof Error ? err.message : String(err));
             } finally {
-                setLoading(false);
+                if (!abortController.signal.aborted) setLoading(false);
             }
         };
 
         runAnalysis();
+        return () => abortController.abort();
     }, [seed]);
 
     return { data, loading, error };

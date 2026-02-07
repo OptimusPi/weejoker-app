@@ -56,15 +56,20 @@ export function DeckSprite({ deck, stake, size = 50, className = '' }: DeckSprit
     return (
         <div
             className={`relative ${className}`}
-            style={{ width: `${size}px`, height: `${displayHeight}px` }}
+            style={{
+                width: `${size}px`,
+                height: `${displayHeight}px`,
+                imageRendering: 'pixelated'
+            }}
         >
             <div
                 style={{
                     width: '100%',
                     height: '100%',
-                    backgroundImage: 'url(/assets/Decks/8BitDeck.png)',
-                    backgroundPosition: `-${deckPos.x * size}px -${deckPos.y * displayHeight}px`,
-                    backgroundSize: `${DECK_COLS * size}px ${DECK_ROWS * displayHeight}px`,
+                    backgroundImage: 'url(/assets/Enhancers.png)',
+                    backgroundSize: `${DECK_COLS * 100}% ${DECK_ROWS * 100}%`,
+                    backgroundPosition: `${(deckPos.x / (DECK_COLS - 1)) * 100}% ${(deckPos.y / (DECK_ROWS - 1)) * 100}%`,
+                    backgroundRepeat: 'no-repeat',
                 }}
             />
             {stakePos && (
@@ -72,8 +77,9 @@ export function DeckSprite({ deck, stake, size = 50, className = '' }: DeckSprit
                     className="absolute inset-0"
                     style={{
                         backgroundImage: 'url(/assets/Decks/stickers.png)',
-                        backgroundPosition: `-${stakePos.x * size}px -${stakePos.y * displayHeight}px`,
-                        backgroundSize: `${STICKER_COLS * size}px ${STICKER_ROWS * displayHeight}px`,
+                        backgroundSize: `${STICKER_COLS * 100}% ${STICKER_ROWS * 100}%`,
+                        backgroundPosition: `${(stakePos.x / (STICKER_COLS - 1)) * 100}% ${(stakePos.y / (STICKER_ROWS - 1)) * 100}%`,
+                        backgroundRepeat: 'no-repeat',
                     }}
                 />
             )}

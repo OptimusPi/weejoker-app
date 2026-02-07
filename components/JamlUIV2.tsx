@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import InteractiveJamlEditor from '@/components/JamlEditor';
 import { JamlGenie } from './JamlGenie';
 import { useJamlFilter } from '@/lib/hooks/useJamlFilter';
-import { JAML_PRESETS } from '@/lib/jaml/presets';
+import { JAML_PRESETS } from '@/lib/jaml/jamlPresets';
 import { AgnosticSeedCard } from './AgnosticSeedCard';
 import { WasmStatus } from './WasmStatus';
-import { SearchResult, motelyApi } from '@/lib/api/motelyApi';
+import { SearchResult } from '@/lib/api/motelyWasm';
 import { cn } from '@/lib/utils';
 import { DeckSprite, DECK_MAP, STAKE_MAP } from './DeckSprite';
 import {
@@ -31,6 +31,26 @@ import {
 /**
  * Reusable Dashboard Tile with Balatro Color Coding
  */
+// rendering-hoist-jsx: static lookup tables hoisted outside component to avoid re-creation
+const TILE_BORDER: Record<string, string> = {
+    red: "border-[var(--balatro-red)] shadow-[0_0_15px_rgba(254,95,85,0.15)]",
+    orange: "border-[var(--balatro-orange)] shadow-[0_0_15px_rgba(253,162,0,0.15)]",
+    purple: "border-[var(--balatro-purple)] shadow-[0_0_15px_rgba(136,103,165,0.15)]",
+    green: "border-[var(--balatro-green)] shadow-[0_0_15px_rgba(75,194,146,0.15)]",
+    blue: "border-[var(--balatro-blue)] shadow-[0_0_15px_rgba(0,157,255,0.15)]",
+    teal: "border-[#00ffaa] shadow-[0_0_15px_rgba(0,255,170,0.15)]",
+    gold: "border-[var(--balatro-gold)] shadow-[0_0_15px_rgba(234,192,88,0.15)]",
+};
+const TILE_TEXT: Record<string, string> = {
+    red: "text-[var(--balatro-red)]",
+    orange: "text-[var(--balatro-orange)]",
+    purple: "text-[var(--balatro-purple)]",
+    green: "text-[var(--balatro-green)]",
+    blue: "text-[var(--balatro-blue)]",
+    teal: "text-[#00ffaa]",
+    gold: "text-[var(--balatro-gold)]",
+};
+
 function Tile({
     title,
     color = "red",
@@ -46,42 +66,22 @@ function Tile({
     className?: string;
     headerRight?: React.ReactNode;
 }) {
-    const colorMap = {
-        red: "border-[var(--balatro-red)] shadow-[0_0_15px_rgba(254,95,85,0.15)]",
-        orange: "border-[var(--balatro-orange)] shadow-[0_0_15px_rgba(253,162,0,0.15)]",
-        purple: "border-[var(--balatro-purple)] shadow-[0_0_15px_rgba(136,103,165,0.15)]",
-        green: "border-[var(--balatro-green)] shadow-[0_0_15px_rgba(75,194,146,0.15)]",
-        blue: "border-[var(--balatro-blue)] shadow-[0_0_15px_rgba(0,157,255,0.15)]",
-        teal: "border-[#00ffaa] shadow-[0_0_15px_rgba(0,255,170,0.15)]",
-        gold: "border-[var(--balatro-gold)] shadow-[0_0_15px_rgba(234,192,88,0.15)]",
-    };
-
-    const textColorMap = {
-        red: "text-[var(--balatro-red)]",
-        orange: "text-[var(--balatro-orange)]",
-        purple: "text-[var(--balatro-purple)]",
-        green: "text-[var(--balatro-green)]",
-        blue: "text-[var(--balatro-blue)]",
-        teal: "text-[#00ffaa]",
-        gold: "text-[var(--balatro-gold)]",
-    };
-
     return (
         <div className={cn(
-            "balatro-panel flex flex-col overflow-hidden transition-all duration-300",
-            colorMap[color],
+            "balatro-panel flex flex-col overflow-hidden transition-shadow duration-300",
+            TILE_BORDER[color],
             className
         )}>
-            <div className="flex items-center justify-between mb-3 px-1 shrink-0">
+            <div className="flex items-center justify-between mb-4 px-1 shrink-0">
                 <div className="flex items-center gap-2">
-                    {Icon && <Icon size={16} className={textColorMap[color]} />}
-                    <h3 className={cn("font-header text-sm uppercase tracking-widest", textColorMap[color])}>
+                    {Icon && <Icon size={18} className={TILE_TEXT[color]} />}
+                    <h3 className={cn("font-header text-base uppercase tracking-[0.2em]", TILE_TEXT[color])}>
                         {title}
                     </h3>
                 </div>
                 {headerRight}
             </div>
-            <div className="flex-1 min-h-0 bg-black/20 rounded-lg overflow-hidden flex flex-col">
+            <div className="flex-1 min-h-0 bg-black/10 rounded-lg overflow-hidden flex flex-col border border-white/5 shadow-inner">
                 {children}
             </div>
         </div>
@@ -112,10 +112,10 @@ export default function JamlUIV2() {
     const [stakeSlug, setStakeSlug] = useState('White');
     const [showDeckSelector, setShowDeckSelector] = useState(false);
 
-    // Logging helper
-    const addLog = (msg: string) => {
+    // rerender-functional-setstate: stable callback that never triggers re-renders of children
+    const addLog = useCallback((msg: string) => {
         setTechnicalLogs(prev => [...prev.slice(-100), `[${new Date().toLocaleTimeString()}] ${msg}`]);
-    };
+    }, []);
 
     // Cleanup on unmount
     useEffect(() => {
@@ -158,7 +158,6 @@ export default function JamlUIV2() {
                             const newResult: SearchResult = {
                                 seed: event.data.seed,
                                 score: event.data.score,
-                                tallies: event.data.tallies || []
                             };
                             return [newResult, ...prev];
                         });
@@ -183,14 +182,10 @@ export default function JamlUIV2() {
 
                 searchCleanupRef.current = cleanup;
                 addLog(`WASM Threads Spawned: ${typeof navigator !== 'undefined' ? (navigator.hardwareConcurrency || 4) : 4}`);
-                await searchSeedsWasm(jamlText, 1000, '');
+                await searchSeedsWasm(jamlText);
             } else {
-                // Remote API Search
-                // @ts-ignore
-                const results = await motelyApi.searchSeedsRemote(jamlText);
-                setSearchResults(results);
-                setIsSearching(false);
-                addLog(`Remote search initiated. Polling for results...`);
+                // Remote API search not yet implemented
+                throw new Error('Remote search mode is not available. Use local WASM search.');
             }
         } catch (err: any) {
             setSearchError(err.message);
@@ -215,7 +210,7 @@ export default function JamlUIV2() {
 
         try {
             const { cancelSearch } = await import('@/lib/api/motelyWasm');
-            cancelSearch();
+            await cancelSearch();
         } catch { }
 
         if (searchCleanupRef.current) {
@@ -288,7 +283,7 @@ export default function JamlUIV2() {
             </header>
 
             {/* RESPONSIVE DASHBOARD LAYOUT */}
-            <main className="flex-1 flex flex-col lg:grid lg:grid-cols-12 lg:grid-rows-12 gap-4 p-4 min-h-0 overflow-y-auto lg:overflow-hidden bg-[#0f1415]">
+            <main className="flex-1 flex flex-col lg:grid lg:grid-cols-12 lg:grid-rows-12 gap-4 p-4 min-h-0 overflow-y-auto lg:overflow-hidden bg-[var(--balatro-black)]">
 
                 {/* 1. JAML EDITOR (MAIN LEFT) - Full width mobile, col-span-9 desktop */}
                 <Tile
@@ -361,37 +356,39 @@ export default function JamlUIV2() {
                                     {/* DECK SELECTOR SPLIT BUTTON */}
                                     <button
                                         onClick={() => setShowDeckSelector(!showDeckSelector)}
-                                        className="px-3 border-l border-white/10 hover:bg-white/5 active:bg-white/10 transition-colors flex items-center gap-2 group relative bg-black/20"
+                                        className="px-4 border-l border-white/10 hover:bg-white/10 active:bg-white/5 transition-colors flex items-center gap-3 group relative bg-black/30"
                                     >
-                                        <div className="relative pointer-events-none transform scale-75 origin-right">
+                                        <div className="relative pointer-events-none transform scale-90">
                                             <DeckSprite deck={deckSlug} stake={stakeSlug} size={30} />
                                         </div>
-                                        <div className="flex flex-col items-start mr-1">
-                                            <span className="text-[9px] text-[var(--balatro-blue)] font-bold uppercase leading-none">{deckSlug}</span>
-                                            <span className="text-[7px] text-white/50 uppercase leading-none mt-0.5">{stakeSlug} Stake</span>
+                                        <div className="flex flex-col items-start pr-1">
+                                            <span className="text-[10px] text-[var(--balatro-gold)] font-bold uppercase leading-none tracking-wider">{deckSlug} Deck</span>
+                                            <span className="text-[8px] text-white/60 uppercase leading-none mt-1 tracking-tighter">{stakeSlug} Stake</span>
                                         </div>
                                     </button>
 
                                     {/* DROPDOWN MENU */}
                                     {showDeckSelector && (
-                                        <div className="absolute top-full right-0 mt-2 w-[280px] bg-black/90 border border-white/10 rounded-xl shadow-2xl p-4 flex flex-col gap-4 z-[100]">
+                                        <div className="absolute top-full right-0 mt-2 w-[320px] bg-[var(--balatro-black)] border-2 border-[var(--balatro-outline-light)] rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] p-4 flex flex-col gap-6 z-[100] animate-in fade-in zoom-in-95 duration-200">
 
                                             {/* Decks Grid */}
-                                            <div className="flex flex-col gap-2">
-                                                <span className="text-[9px] font-bold text-[var(--balatro-blue)] uppercase tracking-widest pl-1">Deck Architecture</span>
-                                                <div className="grid grid-cols-4 gap-2">
+                                            <div className="flex flex-col gap-3">
+                                                <div className="flex items-center justify-between border-b border-white/10 pb-1">
+                                                    <span className="text-[10px] font-bold text-[var(--balatro-blue)] uppercase tracking-[0.2em]">Deck Architecture</span>
+                                                </div>
+                                                <div className="grid grid-cols-4 gap-3">
                                                     {Object.keys(DECK_MAP).map(deck => (
                                                         <button
                                                             key={deck}
-                                                            onClick={() => { setDeckSlug(deck); setShowDeckSelector(false); }}
+                                                            onClick={() => { setDeckSlug(deck); }}
                                                             className={cn(
-                                                                "relative aspect-[2/3] rounded border transition-all overflow-hidden group",
-                                                                deckSlug.toLowerCase() === deck ? "border-[var(--balatro-gold)] shadow-[0_0_10px_var(--balatro-gold)] ring-1 ring-[var(--balatro-gold)]" : "border-white/10 hover:border-white/30"
+                                                                "relative aspect-[2/3] rounded-lg border-2 transition-all overflow-hidden group bg-black/40",
+                                                                deckSlug.toLowerCase() === deck ? "border-[var(--balatro-gold)] shadow-[0_0_15px_var(--balatro-gold)] ring-1 ring-[var(--balatro-gold)] scale-105 z-10" : "border-white/10 hover:border-white/30 hover:scale-105"
                                                             )}
                                                             title={deck}
                                                         >
-                                                            <div className="absolute inset-0 flex items-center justify-center transform scale-75">
-                                                                <DeckSprite deck={deck} size={40} />
+                                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                                <DeckSprite deck={deck} size={45} className="transition-transform group-hover:scale-110" />
                                                             </div>
                                                         </button>
                                                     ))}
@@ -399,27 +396,35 @@ export default function JamlUIV2() {
                                             </div>
 
                                             {/* Stakes Grid */}
-                                            <div className="flex flex-col gap-2">
-                                                <span className="text-[9px] font-bold text-[var(--balatro-red)] uppercase tracking-widest pl-1">Stake Difficulty</span>
-                                                <div className="grid grid-cols-4 gap-2">
+                                            <div className="flex flex-col gap-3">
+                                                <div className="flex items-center justify-between border-b border-white/10 pb-1">
+                                                    <span className="text-[10px] font-bold text-[var(--balatro-red)] uppercase tracking-[0.2em]">Stake Difficulty</span>
+                                                </div>
+                                                <div className="grid grid-cols-4 gap-3">
                                                     {Object.keys(STAKE_MAP).map(stake => (
                                                         <button
                                                             key={stake}
-                                                            onClick={() => { setStakeSlug(stake); setShowDeckSelector(false); }}
+                                                            onClick={() => { setStakeSlug(stake); }}
                                                             className={cn(
-                                                                "relative h-10 rounded border transition-all overflow-hidden group flex items-center justify-center",
-                                                                stakeSlug.toLowerCase() === stake ? "border-[var(--balatro-gold)] bg-[var(--balatro-gold)]/10" : "border-white/10 hover:border-white/30 bg-black/40"
+                                                                "relative aspect-square rounded-lg border-2 transition-all overflow-hidden group flex items-center justify-center bg-black/40",
+                                                                stakeSlug.toLowerCase() === stake ? "border-[var(--balatro-gold)] bg-[var(--balatro-gold)]/20 shadow-[0_0_15px_var(--balatro-gold)] ring-1 ring-[var(--balatro-gold)] scale-105 z-10" : "border-white/10 hover:border-white/30 hover:scale-105"
                                                             )}
                                                             title={stake}
                                                         >
-                                                            <div className="transform scale-75 pointer-events-none">
-                                                                <DeckSprite deck={deckSlug} stake={stake} size={30} className="!w-[30px] !h-[40px] overflow-hidden" />
-                                                                {/* Hack: The sprite shows the deck too, which is cool for preview */}
+                                                            <div className="pointer-events-none">
+                                                                <DeckSprite deck={deckSlug} stake={stake} size={30} className="transition-transform group-hover:scale-110" />
                                                             </div>
                                                         </button>
                                                     ))}
                                                 </div>
                                             </div>
+
+                                            <button
+                                                onClick={() => setShowDeckSelector(false)}
+                                                className="balatro-button balatro-button-blue !py-1 !text-xs mt-2"
+                                            >
+                                                CONFIRM
+                                            </button>
 
                                         </div>
                                     )}

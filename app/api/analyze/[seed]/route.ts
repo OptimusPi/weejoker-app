@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { motelyApi } from '@/lib/api/motelyApi';
+import { analyzeSeedWasm } from '@/lib/api/motelyWasm';
 import { normalizeAnalysis } from '@/lib/seedAnalyzer';
 
 // Run on Cloudflare Workers edge runtime
@@ -50,7 +50,7 @@ export async function GET(
     }
 
     try {
-        const rawResult = await motelyApi.analyze(seed.toUpperCase(), deck, stake);
+        const rawResult = await analyzeSeedWasm(seed.toUpperCase(), deck, stake);
         const analysis = normalizeAnalysis(rawResult);
 
         return NextResponse.json(analysis, {

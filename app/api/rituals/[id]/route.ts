@@ -63,24 +63,19 @@ export async function GET(
         const context = getRequestContext();
         const env = context?.env;
 
-        if (env && env.SEED_ASSETS) {
-            // ... as before ...
+        // Data only from Cloudflare: R2 binding SEED_ASSETS (e.g. {id}.csv, {id}.jaml). No local fallbacks.
+        if (env?.SEED_ASSETS) {
             const csvKey = `${id}.csv`;
-            const object = await env.SEED_ASSETS.get(csvKey);
-            if (object) {
-                const text = await object.text();
+            const jamlKey = `${id}.jaml`;
+            const [csvObject, jamlObj] = await Promise.all([
+                env.SEED_ASSETS.get(csvKey),
+                env.SEED_ASSETS.get(jamlKey),
+            ]);
+            if (csvObject) {
+                const text = await csvObject.text();
                 allSeeds = text.split('\n').map(l => l.trim()).filter(l => l.length > 0).map(l => l.split(',')[0].trim());
             }
-
-            const jamlKey = `${id}.jaml`;
-            const jamlObj = await env.SEED_ASSETS.get(jamlKey);
             if (jamlObj) r2Jaml = await jamlObj.text();
-        }
-
-        // DEV FALLBACK: If still empty (fetch failed or no binding), mock it
-        if (allSeeds.length === 0 && (process.env.NODE_ENV === 'development' || !env)) {
-            console.log("⚠️ [DEV] Using Fallback Seeds (Empty Result)");
-            allSeeds = Array(50).fill("WEEJOKER");
         }
 
         // Apply Data to Config

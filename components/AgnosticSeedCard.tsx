@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { SearchResult } from '@/lib/api/motelyApi';
+import { SearchResult } from '@/lib/api/motelyWasm';
 import { cn } from '@/lib/utils';
 import { Loader2, ChevronRight, Copy, Check, Info } from 'lucide-react';
 import { DeckSprite } from './DeckSprite';
@@ -9,7 +9,7 @@ import { CardFan } from './CardFan';
 import { SeedStrategyModal } from './SeedStrategyModal';
 import { SeedSnapshotModal } from './SeedSnapshotModal';
 import { Sprite } from './Sprite';
-import { evaluateSeed } from '@/lib/jamlEvaluator';
+import { evaluateSeed } from '@/lib/jaml/jamlEvaluator';
 import { useJamlFilter } from '@/lib/hooks/useJamlFilter';
 import { DeckPanel, TagsPanel, BossPanel } from './cards/SeedComponents';
 import { JamlJourneyMap } from './cards/JamlJourneyMap';
@@ -116,11 +116,14 @@ export function AgnosticSeedCard({
         setIsAnalyzing(true);
         setError(null);
         try {
-            const { analyzeSeedWasm } = await import('@/lib/api/motelyWasm');
-            const { normalizeAnalysis } = await import('@/lib/seedAnalyzer');
+            // async-parallel: load both modules simultaneously
+            const [{ analyzeSeedWasm }, { normalizeAnalysis }] = await Promise.all([
+                import('@/lib/api/motelyWasm'),
+                import('@/lib/seedAnalyzer'),
+            ]);
 
             console.log(`[AgnosticSeedCard] Analyzing ${targetSeed} via WASM...`);
-            const rawResult = await analyzeSeedWasm(targetSeed, deckSlug || 'erratic', stakeSlug || 'white', 1, 8);
+            const rawResult = await analyzeSeedWasm(targetSeed, deckSlug || 'Erratic', stakeSlug || 'White');
 
             if (rawResult) {
                 const data = normalizeAnalysis(rawResult);
@@ -140,7 +143,6 @@ export function AgnosticSeedCard({
     return (
         <div className={cn(
             "flex flex-col gap-3 transition-all relative overflow-visible",
-            !isMatch && "opacity-60 grayscale-[0.3]", // Dim fail matches
             !isMatch && "opacity-60 grayscale-[0.3]", // Dim fail matches
             className
         )}
@@ -270,7 +272,7 @@ export function AgnosticSeedCard({
                         {source}
                     </span>
                 )}
-                <span className="font-pixel text-sm italic text-white/50 opacity-40">v1.1-motely-wasm</span>
+                <span className="font-pixel text-sm italic text-white/50 opacity-40">v1.2-motely-wasm</span>
             </div>
 
             {

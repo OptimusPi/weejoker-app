@@ -95,11 +95,3 @@ export async function GET(request: Request) {
 
     return NextResponse.json(config);
 }
-
-/**
- * POST /api/rituals
- * (Keeping the stub for potential future use, but simplified)
- */
-export async function POST(request: Request) {
-    return NextResponse.json({ error: "Deprecated. Use direct R2 uploads." }, { status: 410 });
-}
