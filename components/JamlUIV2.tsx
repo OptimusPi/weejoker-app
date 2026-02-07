@@ -33,13 +33,13 @@ import {
  */
 // rendering-hoist-jsx: static lookup tables hoisted outside component to avoid re-creation
 const TILE_BORDER: Record<string, string> = {
-    red: "border-[var(--balatro-red)] shadow-[0_0_15px_rgba(254,95,85,0.15)]",
-    orange: "border-[var(--balatro-orange)] shadow-[0_0_15px_rgba(253,162,0,0.15)]",
-    purple: "border-[var(--balatro-purple)] shadow-[0_0_15px_rgba(136,103,165,0.15)]",
-    green: "border-[var(--balatro-green)] shadow-[0_0_15px_rgba(75,194,146,0.15)]",
-    blue: "border-[var(--balatro-blue)] shadow-[0_0_15px_rgba(0,157,255,0.15)]",
-    teal: "border-[#00ffaa] shadow-[0_0_15px_rgba(0,255,170,0.15)]",
-    gold: "border-[var(--balatro-gold)] shadow-[0_0_15px_rgba(234,192,88,0.15)]",
+    red: "border-[var(--balatro-red)]",
+    orange: "border-[var(--balatro-orange)]",
+    purple: "border-[var(--balatro-purple)]",
+    green: "border-[var(--balatro-green)]",
+    blue: "border-[var(--balatro-blue)]",
+    teal: "border-[#00ffaa]",
+    gold: "border-[var(--balatro-gold)]",
 };
 const TILE_TEXT: Record<string, string> = {
     red: "text-[var(--balatro-red)]",
@@ -49,6 +49,15 @@ const TILE_TEXT: Record<string, string> = {
     blue: "text-[var(--balatro-blue)]",
     teal: "text-[#00ffaa]",
     gold: "text-[var(--balatro-gold)]",
+};
+const TILE_BG_SOFT: Record<string, string> = {
+    red: "bg-[var(--balatro-red)]/5",
+    orange: "bg-[var(--balatro-orange)]/5",
+    purple: "bg-[var(--balatro-purple)]/5",
+    green: "bg-[var(--balatro-green)]/5",
+    blue: "bg-[var(--balatro-blue)]/5",
+    teal: "bg-[#00ffaa]/5",
+    gold: "bg-[var(--balatro-gold)]/5",
 };
 
 function Tile({
@@ -68,20 +77,28 @@ function Tile({
 }) {
     return (
         <div className={cn(
-            "balatro-panel flex flex-col overflow-hidden transition-shadow duration-300",
+            "balatro-panel !border-[6px] flex flex-col overflow-hidden transition-all duration-300",
             TILE_BORDER[color],
+            TILE_BG_SOFT[color],
             className
         )}>
-            <div className="flex items-center justify-between mb-4 px-1 shrink-0">
-                <div className="flex items-center gap-2">
-                    {Icon && <Icon size={18} className={TILE_TEXT[color]} />}
-                    <h3 className={cn("font-header text-base uppercase tracking-[0.2em]", TILE_TEXT[color])}>
+            {/* Modular Grab Indicator Adornment */}
+            <div className="absolute top-2 right-4 flex gap-1 opacity-20 group-hover:opacity-40 transition-opacity">
+                {[1, 2, 3].map(i => (
+                    <div key={i} className={cn("w-1.5 h-1.5 rounded-full", TILE_TEXT[color].replace('text-', 'bg-'))} />
+                ))}
+            </div>
+
+            <div className="flex items-center justify-between mb-3 px-1 shrink-0 relative z-10">
+                <div className="flex items-center gap-3">
+                    {Icon && <Icon size={20} className={TILE_TEXT[color]} opacity={0.8} />}
+                    <h3 className={cn("font-header text-lg uppercase tracking-[0.2em]", TILE_TEXT[color])}>
                         {title}
                     </h3>
                 </div>
                 {headerRight}
             </div>
-            <div className="flex-1 min-h-0 bg-black/10 rounded-lg overflow-hidden flex flex-col border border-white/5 shadow-inner">
+            <div className="flex-1 min-h-0 bg-black/30 rounded-xl overflow-hidden flex flex-col border-t-2 border-white/5 shadow-inner">
                 {children}
             </div>
         </div>
@@ -226,12 +243,12 @@ export default function JamlUIV2() {
             <header className="h-14 border-b border-white/10 bg-black/60 flex items-center justify-between px-6 shrink-0 relative z-50">
                 <div className="flex items-center gap-6">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--balatro-red)] to-[var(--balatro-purple)] animate-pulse shadow-[0_0_15px_var(--balatro-red)] flex items-center justify-center">
-                            <Monitor size={16} className="text-white" />
+                        <div className="w-8 h-8 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center">
+                            <Monitor size={16} className="text-white/60" />
                         </div>
-                        <div className="flex flex-col">
-                            <h1 className="text-2xl font-header leading-none tracking-tighter text-white">COMMAND STATION</h1>
-                            <span className="text-[8px] opacity-40 uppercase tracking-widest">Motely Global Seed Nexus v3.2</span>
+                        <div>
+                            <h2 className="text-white text-2xl font-header mb-1 uppercase tracking-widest leading-none">COMMAND CENTER</h2>
+                            <p className="text-white/60 font-pixel text-[12px] uppercase tracking-wide">Ritual Factory v2.4</p>
                         </div>
                     </div>
 
@@ -283,14 +300,14 @@ export default function JamlUIV2() {
             </header>
 
             {/* RESPONSIVE DASHBOARD LAYOUT */}
-            <main className="flex-1 flex flex-col lg:grid lg:grid-cols-12 lg:grid-rows-12 gap-4 p-4 min-h-0 overflow-y-auto lg:overflow-hidden bg-[var(--balatro-black)]">
+            <main className="flex-1 flex flex-col lg:grid lg:grid-cols-12 lg:grid-rows-12 gap-3 p-4 min-h-0 overflow-y-auto lg:overflow-hidden bg-[var(--balatro-black)]">
 
                 {/* 1. JAML EDITOR (MAIN LEFT) - Full width mobile, col-span-9 desktop */}
                 <Tile
                     title="JAML Specification"
                     color="red"
                     icon={Terminal}
-                    className="w-full lg:w-auto lg:col-span-9 lg:row-span-11 min-h-[500px] lg:min-h-0"
+                    className="w-full lg:w-auto lg:col-span-9 lg:row-span-12 min-h-[500px] lg:min-h-0"
                 >
                     <InteractiveJamlEditor
                         initialJaml={jamlText}
@@ -303,7 +320,7 @@ export default function JamlUIV2() {
                     title="Matches Found"
                     color="purple"
                     icon={Database}
-                    className="w-full lg:w-auto lg:col-span-3 lg:row-span-5 min-h-[300px] lg:min-h-0"
+                    className="w-full lg:w-auto lg:col-span-3 lg:row-span-6 min-h-[300px] lg:min-h-0"
                 >
                     <div className="flex flex-col h-full">
                         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
@@ -464,17 +481,17 @@ export default function JamlUIV2() {
                 >
                     <div className="p-3 flex flex-col h-full justify-between">
                         <div className="flex justify-between items-center">
-                            <span className="text-[10px] opacity-40 uppercase">Status</span>
-                            <span className="text-[10px] text-[var(--balatro-green)] font-header">ONLINE</span>
+                            <span className="text-[12px] opacity-40 uppercase">Status</span>
+                            <span className="text-[12px] text-[var(--balatro-green)] font-header">ONLINE</span>
                         </div>
                         <div className="flex gap-2">
-                            <div className="flex-1 bg-black/20 p-1.5 rounded border border-white/5">
-                                <span className="block text-[7px] opacity-30 uppercase">Threads</span>
-                                <span className="text-xs font-header text-white">MAX</span>
+                            <div className="flex-1 bg-black/20 p-2 rounded border border-white/5">
+                                <span className="block text-[11px] opacity-30 uppercase">Threads</span>
+                                <span className="text-sm font-header text-white">MAX</span>
                             </div>
-                            <div className="flex-1 bg-black/20 p-1.5 rounded border border-white/5">
-                                <span className="block text-[7px] opacity-30 uppercase">Queue</span>
-                                <span className="text-xs font-header text-white">EMPTY</span>
+                            <div className="flex-1 bg-black/20 p-2 rounded border border-white/5">
+                                <span className="block text-[11px] opacity-30 uppercase">Queue</span>
+                                <span className="text-sm font-header text-white">EMPTY</span>
                             </div>
                         </div>
                     </div>
@@ -483,23 +500,15 @@ export default function JamlUIV2() {
             </main>
 
             {/* STATUS BAR FOOTER */}
-            <footer className="h-8 border-t border-white/5 bg-black/90 flex items-center justify-between px-6 shrink-0 z-50">
-                <div className="flex items-center gap-6 text-[8px] uppercase tracking-widest text-white/40 font-pixel">
+            <footer className="h-10 border-t border-white/5 bg-black/90 flex items-center justify-between px-6 shrink-0 z-50">
+                <div className="flex items-center gap-6 text-[11px] uppercase tracking-widest text-white/40 font-pixel">
                     <span className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_5px_green]" />
+                        <div className="w-2 h-2 rounded-full bg-green-500/50 shadow-[0_0_8px_rgba(34,197,94,0.3)]" />
                         SYSTEM: OPERATIONAL
-                    </span>
-                    <span className="flex items-center gap-2">
-                        <Zap size={10} className="text-[var(--balatro-gold)]" />
-                        LATENCY: 42MS
-                    </span>
-                    <span className="flex items-center gap-2">
-                        <Flame size={10} className="text-[var(--balatro-red)]" />
-                        REVENUE: 0.00$ / HR
                     </span>
                 </div>
 
-                <div className="flex items-center gap-6 text-[8px] uppercase tracking-widest text-white/40 font-pixel">
+                <div className="flex items-center gap-6 text-[11px] uppercase tracking-widest text-white/40 font-pixel">
                     <span>{new Date().toLocaleTimeString()} CST</span>
                     <span className="text-[var(--balatro-blue)]">SECURE UPLINK ESTABLISHED</span>
                 </div>

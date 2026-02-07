@@ -51,18 +51,18 @@ export function WasmStatus() {
                         <Cpu size={16} />}
 
             <div className="flex flex-col">
-                <span className="text-[10px] font-bold uppercase tracking-widest leading-none">
+                <span className="text-[12px] uppercase tracking-widest leading-tight">
                     WASM: {status.toUpperCase()}
                 </span>
                 {version && (
-                    <span className="text-[8px] opacity-70">
+                    <span className="text-[11px] opacity-70 leading-tight">
                         v{version}
                         {threads !== null ? ` • threads:${threads ? 'on' : 'off'}` : ''}
                         {simd !== null ? ` • simd:${simd ? 'on' : 'off'}` : ''}
                         {processors !== null ? ` • cpu:${processors}` : ''}
                     </span>
                 )}
-                {error && <span className="text-[8px] opacity-70 truncate max-w-[200px]">{error}</span>}
+                {error && <span className="text-[11px] opacity-70 truncate max-w-[200px] leading-tight">{error}</span>}
             </div>
         </div>
     );

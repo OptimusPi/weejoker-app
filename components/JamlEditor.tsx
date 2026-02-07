@@ -7,37 +7,31 @@ import { JamlCompletionService, YamlCompletionContext, CompletionData } from '@/
 
 
 
-// Balatro Colors - Dark Theme (matching Blueprint)
+// Balatro Colors - High Contrast Theme
 const COLORS = {
     white: '#FFFFFF',
     black: '#000000',
-    red: '#ff4c40',
-    darkRed: '#a02721',
-    darkestRed: '#70150f',
-    blue: '#0093ff',
-    darkBlue: '#0057a1',
-    orange: '#ff9800',
-    darkOrange: '#a05b00',
-    darkGold: '#b8883a',
-    green: '#429f79',
-    darkGreen: '#215f46',
-    purple: '#7d60e0',
-    darkPurple: '#292189',
-    // Editor background - matching Balatro dark theme
-    editorBg: '#1e2b2d',
-    editorBgAlt: '#33464b',
+    red: '#ff5e5e',      // Balatro Red
+    blue: '#4bb1ff',     // Balatro Blue
+    green: '#46bc77',    // Balatro Green
+    purple: '#9074ff',   // Balatro Purple
+    orange: '#ff9d4d',   // Balatro Orange
+    yellow: '#ffcf4d',   // Balatro Yellow
+    gold: '#efb82d',
+    // Editor background
+    editorBg: '#0f1416',
+    editorBgAlt: '#1c2629',
 };
 
 const MONO_FONT = '"JetBrains Mono", "Fira Code", "SF Mono", Consolas, monospace';
 
 // Styles for the block-based editor elements
 const BLOCK_STYLE: React.CSSProperties = {
-    height: '28px',
-    minWidth: '28px',
-    padding: '0 8px',
+    height: '24px',
+    minWidth: '24px',
+    padding: '0 6px',
     borderRadius: '3px',
     fontSize: '13px',
-    fontWeight: 600,
     fontFamily: MONO_FONT,
     display: 'inline-flex',
     alignItems: 'center',
@@ -111,11 +105,11 @@ function SuggestionList({ suggestions, selectedIndex, onSelect, onHover }: {
                         onMouseEnter={() => onHover(idx)}
                         className={`
               flex items-center justify-between px-3 py-1.5 cursor-pointer font-mono text-[13px] transition-colors
-              ${isSelected ? 'bg-[#0093ff] text-white font-semibold' : 'text-white/80 hover:bg-white/10'}
+              ${isSelected ? 'bg-[var(--balatro-gold)] text-black' : 'text-white hover:bg-white/10'}
             `}
                     >
                         <span>{s.displayText}</span>
-                        {isSelected && <span className="opacity-50 text-[10px] ml-2">↵</span>}
+                        {isSelected && <span className="opacity-50 text-[11px] ml-2">↵</span>}
                     </div>
                 );
             })}
@@ -147,10 +141,11 @@ function AntesToggle({ values, onToggle, onStartEdit, color, darkColor }: {
                 onClick={() => setExpanded(true)}
                 style={{
                     ...BLOCK_STYLE,
-                    backgroundColor: selectedAntes.size > 0 ? `${darkColor}15` : `${COLORS.red}10`,
-                    border: `1px solid ${selectedAntes.size > 0 ? darkColor : COLORS.red}40`,
-                    color: selectedAntes.size > 0 ? darkColor : COLORS.darkRed,
+                    backgroundColor: selectedAntes.size > 0 ? `${color}20` : `${COLORS.red}15`,
+                    border: `1px solid ${selectedAntes.size > 0 ? color : COLORS.red}`,
+                    color: selectedAntes.size > 0 ? color : COLORS.red,
                     minWidth: '100px',
+                    boxShadow: selectedAntes.size > 0 ? `0 0 10px ${color}20` : 'none',
                 }}
             >
                 {getDisplayText()}
@@ -172,12 +167,11 @@ function AntesToggle({ values, onToggle, onStartEdit, color, darkColor }: {
                         style={{
                             ...BLOCK_STYLE,
                             minWidth: '28px',
-                            backgroundColor: isSelected ? `${darkColor}30` : 'transparent',
-                            border: `1px solid ${isSelected ? darkColor : '#ccc'}`,
-                            borderRight: ante < maxAnte ? 'none' : `1px solid ${isSelected ? darkColor : '#ccc'}`,
+                            backgroundColor: isSelected ? `${color}40` : 'transparent',
+                            border: `1px solid ${isSelected ? color : 'rgba(255,255,255,0.2)'}`,
+                            borderRight: ante < maxAnte ? 'none' : `1px solid ${isSelected ? color : 'rgba(255,255,255,0.2)'}`,
                             borderRadius: ante === 0 ? '3px 0 0 3px' : ante === maxAnte ? '0 3px 3px 0' : '0',
-                            color: isSelected ? darkColor : '#999',
-                            fontWeight: isSelected ? 700 : 500,
+                            color: isSelected ? color : 'rgba(255,255,255,0.4)',
                         }}
                     >
                         {ante}
@@ -190,13 +184,13 @@ function AntesToggle({ values, onToggle, onStartEdit, color, darkColor }: {
                     ...BLOCK_STYLE,
                     minWidth: '24px',
                     marginLeft: '4px',
-                    backgroundColor: `${COLORS.green}20`,
-                    border: `1px solid ${COLORS.green}`,
-                    borderRadius: '3px',
-                    color: COLORS.darkGreen,
+                    backgroundColor: `${COLORS.green}30`,
+                    border: `2px solid ${COLORS.green}`,
+                    borderRadius: '4px',
+                    color: COLORS.green,
                 }}
             >
-                <Check size={14} />
+                <Check size={16} strokeWidth={3} />
             </div>
         </div>
     );
@@ -436,7 +430,8 @@ export default function JamlEditor({ initialJaml, onJamlChange, className }: Int
         const byIndent: Record<number, number> = {};
         for (const line of lines) {
             if (line.key) {
-                byIndent[line.indent] = Math.max(byIndent[line.indent] || 0, line.key.length);
+                // Cap the alignment width at 12 characters to prevent huge gaps
+                byIndent[line.indent] = Math.min(Math.max(byIndent[line.indent] || 0, line.key.length), 12);
             }
         }
         return byIndent;
@@ -445,7 +440,7 @@ export default function JamlEditor({ initialJaml, onJamlChange, className }: Int
     return (
         <div
             ref={editorRef}
-            className={`flex flex-col bg-[#1e2b2d] text-white font-mono text-[13px] leading-[1.8] outline-none rounded-md p-4 overflow-auto min-h-[500px] ${className}`}
+            className={`flex flex-col bg-[#0f1416] text-white font-mono text-[13px] leading-[1.8] outline-none rounded-md p-4 overflow-auto min-h-[500px] border border-white/5 ${className}`}
             tabIndex={0}
         >
             <div className="flex flex-col gap-0.5">
@@ -477,12 +472,12 @@ export default function JamlEditor({ initialJaml, onJamlChange, className }: Int
                     />
                 ))}
             </div>
-            <div className="mt-4 p-2 bg-[#33464b] rounded border border-white/10 flex flex-wrap gap-4 text-[12px] text-white/70 font-mono">
-                <span><span style={{ color: COLORS.red }}>●</span> required</span>
-                <span><span style={{ color: COLORS.blue }}>●</span> optional</span>
-                <span><span style={{ color: COLORS.green }}>●</span> complete</span>
-                <span><span style={{ color: COLORS.purple }}>●</span> metadata</span>
-                <span className="text-white/40 ml-auto">Click to edit • Tab to navigate</span>
+            <div className="mt-4 p-2 bg-black/40 rounded border border-white/5 flex flex-wrap gap-4 text-[12px] text-white/50 font-mono">
+                <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS.red }}></span> required</span>
+                <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS.blue }}></span> optional</span>
+                <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS.green }}></span> complete</span>
+                <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS.purple }}></span> metadata</span>
+                <span className="ml-auto opacity-40">Click to edit • Tab to navigate</span>
             </div>
         </div>
     );
@@ -533,12 +528,12 @@ function JamlLine({
     // Colors
     const getBaseColor = () => {
         switch (line.validationState) {
-            case 'required-incomplete': return COLORS.darkRed;
-            case 'optional-incomplete': return COLORS.darkBlue;
-            case 'complete': return COLORS.darkGreen;
-            case 'invalid': return COLORS.darkRed;
-            case 'metadata': return COLORS.darkPurple;
-            default: return '#555';
+            case 'required-incomplete': return COLORS.red;
+            case 'optional-incomplete': return COLORS.blue;
+            case 'complete': return COLORS.green;
+            case 'invalid': return COLORS.red;
+            case 'metadata': return COLORS.purple;
+            default: return '#888';
         }
     };
 
@@ -549,18 +544,14 @@ function JamlLine({
             case 'complete': return COLORS.green;
             case 'invalid': return COLORS.red;
             case 'metadata': return COLORS.purple;
-            default: return '#888';
+            default: return '#FFF';
         }
     };
 
     // Suggestions Logic
     useEffect(() => {
         if (isEditing && editingPart) {
-            // Create a synthetic context string for the completion service
-            // This assumes 'localValue' is what we are typing
-            // We construct "key: value" or just "key" based on what we edit
             let textContext = line.raw;
-            // Crude approximation: if editing value, take key and add separator
             if (editingPart === 'value' && line.key) {
                 textContext = `${line.key}: ${localValue}`;
             } else if (editingPart === 'key') {
@@ -568,7 +559,7 @@ function JamlLine({
             }
 
             const sugs = JamlCompletionService.getCompletions(textContext);
-            setSuggestions(sugs.slice(0, 10)); // Limit to 10
+            setSuggestions(sugs.slice(0, 10));
             setSelectedIndex(0);
         }
     }, [isEditing, editingPart, localValue, line.raw, line.key]);
@@ -618,18 +609,15 @@ function JamlLine({
         return <div className="h-5" />;
     }
     if ((line.key === 'must' || line.key === 'should' || line.key === 'mustNot') && !line.value) {
-        const color = line.key === 'must' ? COLORS.darkRed : COLORS.darkBlue;
-        return <div className="pl-8 py-1 font-bold text-[13px] border-b border-opacity-20 mt-2" style={{ color, borderColor: color }}>{line.raw}</div>
+        const color = line.key === 'must' ? COLORS.red : COLORS.blue;
+        return <div className="pl-8 py-1 text-[16px] border-b border-white/10 mt-4 mb-2 uppercase tracking-widest" style={{ color }}>{line.raw}</div>
     }
 
-    const indentSpaces = ' '.repeat(line.indent); // In HTML we might need &nbsp; or pre-wrap
+    const indentSpaces = ' '.repeat(line.indent);
     const prefix = line.isArrayItem ? '- ' : '';
 
     return (
-        <div
-            className="relative flex items-center py-0.5 group"
-            onMouseLeave={() => { }}
-        >
+        <div className="relative flex items-center py-0.5 group" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
             {/* Delete Zone */}
             <div
                 className="w-6 h-full flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
@@ -662,7 +650,7 @@ function JamlLine({
                                 onChange={e => setLocalValue(e.target.value)}
                                 onKeyDown={handleKeyDown}
                                 onBlur={() => setTimeout(onEndEdit, 200)}
-                                className="bg-transparent border-none outline-none p-0 m-0 w-full font-inherit font-semibold"
+                                className="bg-transparent border-none outline-none p-0 m-0 w-full font-inherit"
                                 style={{ color: getBrightColor() }}
                             />
                         ) : line.key}
@@ -670,11 +658,12 @@ function JamlLine({
                     {/* Popover */}
                     {isEditing && editingPart === 'key' && suggestions.length > 0 && floatingCoords && createPortal(
                         <div
-                            className="fixed z-[9999] bg-white shadow-xl border border-stone-200 rounded p-1 min-w-[200px]"
+                            className="fixed z-[9999] bg-[#1a1a1a] shadow-2xl border border-white/10 rounded-lg p-1 min-w-[240px] overflow-hidden"
                             style={{
                                 top: floatingCoords.top,
                                 left: floatingCoords.left,
-                                transform: floatingCoords.position === 'top' ? 'translateY(-100%)' : 'none'
+                                transform: floatingCoords.position === 'top' ? 'translateY(-100%)' : 'none',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
                             }}
                         >
                             <SuggestionList suggestions={suggestions} selectedIndex={selectedIndex} onHover={setSelectedIndex} onSelect={(val) => {
@@ -718,7 +707,6 @@ function JamlLine({
                                         color: getBaseColor()
                                     }}
                                 >
-                                    {/* Edit logic for array item */}
                                     {isEditing && editingPart === 'arrayItem' && editingArrayIndex === idx ? (
                                         <input
                                             ref={inputRef}
@@ -753,7 +741,7 @@ function JamlLine({
                             style={{
                                 ...BLOCK_STYLE,
                                 minWidth: line.value ? undefined : '60px',
-                                color: line.isInvalidValue ? COLORS.red : (line.value ? getBaseColor() : COLORS.darkRed),
+                                color: line.isInvalidValue ? COLORS.red : (line.value ? getBaseColor() : COLORS.red),
                                 backgroundColor: line.isInvalidValue ? `${COLORS.red}15` : (line.value ? `${getBaseColor()}10` : `${COLORS.red}08`),
                                 border: `1px solid ${line.isInvalidValue ? `${COLORS.red}60` : (line.value ? `${getBaseColor()}40` : `${COLORS.red}40`)}`,
                                 textDecoration: line.isInvalidValue ? 'line-through' : 'none'
@@ -766,18 +754,19 @@ function JamlLine({
                                     onChange={e => setLocalValue(e.target.value)}
                                     onKeyDown={handleKeyDown}
                                     onBlur={() => setTimeout(onEndEdit, 200)}
-                                    className="bg-transparent border-none outline-none p-0 m-0 w-full font-inherit font-semibold min-w-[4ch]"
+                                    className="bg-transparent border-none outline-none p-0 m-0 w-full font-inherit min-w-[4ch]"
                                     style={{ color: getBaseColor(), width: `${Math.max(localValue.length, 4)}ch` }}
                                 />
                             ) : (line.isInvalidValue ? line.value?.replace(/~/g, '') : (line.value || '???'))}
                         </div>
                         {isEditing && editingPart === 'value' && suggestions.length > 0 && floatingCoords && createPortal(
                             <div
-                                className="fixed z-[9999] bg-white shadow-xl border border-stone-200 rounded p-1 min-w-[200px]"
+                                className="fixed z-[9999] bg-[#1a1a1a] shadow-2xl border border-white/10 rounded-lg p-1 min-w-[240px] overflow-hidden"
                                 style={{
                                     top: floatingCoords.top,
                                     left: floatingCoords.left,
-                                    transform: floatingCoords.position === 'top' ? 'translateY(-100%)' : 'none'
+                                    transform: floatingCoords.position === 'top' ? 'translateY(-100%)' : 'none',
+                                    boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
                                 }}
                             >
                                 <SuggestionList suggestions={suggestions} selectedIndex={selectedIndex} onHover={setSelectedIndex} onSelect={(val) => {
@@ -793,3 +782,4 @@ function JamlLine({
         </div>
     );
 }
+

@@ -47,7 +47,7 @@ export default function RootLayout({
             <body
                 suppressHydrationWarning
                 className={cn(
-                    'h-screen overflow-hidden font-sans antialiased text-white',
+                    'h-[100svh] overflow-hidden font-sans antialiased text-white',
                     fontSans.variable,
                     fontMono.variable,
                     fontHeader.variable,
@@ -56,8 +56,11 @@ export default function RootLayout({
             >
                 <BackgroundShader />
 
-                <div className="relative z-10 h-full flex flex-col">
-                    <NavBar />
+                <div className="ritual-locked-layout h-full overflow-hidden flex flex-col">
+                    {/* Header */}
+                    <header className="w-full max-w-5xl px-4 py-2 md:py-4 shrink-0 z-20 mx-auto">
+                        <NavBar />
+                    </header>
                     <div className="flex-grow flex flex-col min-h-0 relative z-0">
                         <ClientProviders>
                             {children}

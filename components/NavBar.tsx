@@ -14,7 +14,7 @@ export function NavBar() {
         // Erratic Deck is now the home page, so let's remove the redundant link or repurpose it?
         // User said: "default page SHOULD BE THE RITUAL".
         // Let's keep JAML Builder and others.
-        { name: "JAML Builder", path: "/jaml-builder", icon: "brain" },
+        { name: "Command Station", path: "/jaml-uiv2", icon: "brain" },
         { name: "Curator Review", path: "/analyzer-review", icon: "clipboard" },
         { name: "Seed Viewer", path: "/seed-viewer", icon: "magnify" },
     ];

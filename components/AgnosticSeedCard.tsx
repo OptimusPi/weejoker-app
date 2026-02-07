@@ -149,7 +149,7 @@ export function AgnosticSeedCard({
             style={style}
         >
             {/* Header: Seed & Basic Info - Simplified */}
-            <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/5 mb-2">
+            <div className="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5 mb-1">
                 <div className="flex items-center gap-4">
                     <div className="relative shrink-0 filter drop-shadow-md">
                         <DeckSprite deck={deckSlug as any} stake={stakeSlug as any} size={42} />
@@ -244,9 +244,9 @@ export function AgnosticSeedCard({
                     {/* JAML Highlights / Journey Map */}
                     <div className="p-4 rounded-xl bg-black/20 border border-white/5 relative">
                         <div className="absolute top-0 left-0 w-1 h-full bg-[var(--balatro-gold)]"></div>
-                        <div className="flex justify-between items-center mb-3 pl-1">
+                        <div className="flex justify-between items-center mb-2 pl-1">
                             <div className="text-[var(--balatro-gold)] font-header text-sm tracking-widest">Ritual Journey Map</div>
-                            <div className="font-pixel text-sm text-white/30 tracking-tighter">Seed Routing v1.0</div>
+                            <div className="font-pixel text-sm text-white/30 tracking-tighter">Seed Routing v1.2.4</div>
                         </div>
 
                         <JamlJourneyMap evaluation={evaluation} maxMatches={200} />
@@ -272,7 +272,7 @@ export function AgnosticSeedCard({
                         {source}
                     </span>
                 )}
-                <span className="font-pixel text-sm italic text-white/50 opacity-40">v1.2-motely-wasm</span>
+                <span className="font-pixel text-sm italic text-white/50 opacity-40">v1.2.4-motely-wasm</span>
             </div>
 
             {

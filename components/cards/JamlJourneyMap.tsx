@@ -101,7 +101,7 @@ export function JamlJourneyMap({ evaluation, className, maxMatches = 50, compact
             </div>
 
             {/* Grid Content: 5 Cards Wide (Mobile optimized) */}
-            <div className="grid grid-cols-5 gap-2 p-2 bg-black/20 rounded-xl border border-white/5 min-h-[120px]">
+            <div className="grid grid-cols-5 gap-2 p-1.5 md:p-2 bg-black/20 rounded-xl border border-white/5 min-h-[100px] md:min-h-[120px]">
                 {currentAnteGroup.items.map((match, i) => (
                     <div key={i} className="flex flex-col items-center gap-1 group/card relative">
                         {/* Source Label (Shop/Pack) */}
