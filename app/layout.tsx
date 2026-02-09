@@ -1,14 +1,13 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Outfit, JetBrains_Mono } from 'next/font/google';
-import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { BackgroundShader } from '@/components/BackgroundShader';
-import { NavBar } from '@/components/NavBar';
-import { PageFooter } from '@/components/PageFooter';
 
 import localFont from 'next/font/local';
 import ClientProviders from '@/components/ClientProviders';
+import NavBar from '@/components/NavBar';
+import { PageFooter } from '@/components/PageFooter';
 
 const fontHeader = localFont({
     src: '../public/fonts/m6x11plusplus.otf',
@@ -65,7 +64,7 @@ export default function RootLayout({
                     </div>
 
                     {/* Footer is now rendered client-side for cycling suits */}
-                    {/* <PageFooter /> */}
+                    <PageFooter />
                 </div>
             </body>
         </html>

@@ -157,26 +157,30 @@ export default function JamlUIV2() {
             cancelSearch();
         };
 
-        addSearchListener((packet: any) => {
+        addSearchListener((event: any) => {
             if (stopRef.current) return;
 
-            if (packet.type === 'match') {
-                const result = packet.data as SearchResult;
+            if (event.type === 'result') {
+                const result = event.data as SearchResult;
                 if (!seenSeedsRef.current.has(result.seed)) {
                     seenSeedsRef.current.add(result.seed);
                     setSearchResults(prev => [result, ...prev].slice(0, 10));
                     addLog(`MATCH: ${result.seed} (${result.score?.toLocaleString()})`);
                 }
-            } else if (packet.type === 'progress') {
-                setSeedsProcessed(packet.processed);
-            } else if (packet.type === 'complete') {
+            } else if (event.type === 'progress') {
+                setSeedsProcessed(event.data?.SearchedCount || 0);
+            } else if (event.type === 'complete') {
                 setIsSearching(false);
-                addLog(`Search completed. ${packet.total} seeds analyzed.`);
+                addLog(`Search completed. ${event.data?.totalSeedsSearched || 0} seeds analyzed.`);
+            } else if (event.type === 'error') {
+                setSearchError(event.message || 'Unknown error');
+                setIsSearching(false);
+                addLog(`ERROR: ${event.message}`);
             }
         });
 
         try {
-            await searchSeedsWasm(jamlText, deckSlug, stakeSlug);
+            await searchSeedsWasm(jamlText);
         } catch (err: any) {
             setSearchError(err.message);
             setIsSearching(false);
