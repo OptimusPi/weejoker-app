@@ -6,22 +6,7 @@ if (process.env.NODE_ENV === 'development') {
     });
 }
 
-import fs from 'fs';
-import path from 'path';
-
-// Read motely-wasm version from its package.json
-let motelyVersion = 'unknown';
-try {
-    const motelyPackageJson = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'node_modules', 'motely-wasm', 'package.json'), 'utf8'));
-    motelyVersion = motelyPackageJson.version;
-} catch (e) {
-    console.warn('Failed to read motely-wasm version:', e);
-}
-
 const baseConfig = {
-    env: {
-        MOTELY_WASM_VERSION: motelyVersion,
-    },
     allowedDevOrigins: [
         'localhost',
         'weejoker.app',

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { analyzeSeedWasm } from '@/lib/api/motelyWasm';
 import { cn } from '@/lib/utils';
 import { DeckSprite } from './DeckSprite';
+import { MotelyVersionBadge } from './MotelyVersionBadge';
 import { Search, Loader2, Sparkles, ChevronRight, Calculator } from 'lucide-react';
 
 interface AgnosticSeedCardProps {
@@ -84,7 +85,7 @@ export function AgnosticSeedCard({
             </div>
 
             <div className="flex items-center justify-between mt-2 pt-4 border-t border-white/5">
-                <span className="font-pixel text-[10px] text-white/20 uppercase">v1.2.8-motely-wasm</span>
+                <MotelyVersionBadge minimal />
                 <button className="flex items-center gap-2 font-header text-xs text-[var(--balatro-gold)] hover:brightness-125 transition-all">
                     VIEW STRATEGY <ChevronRight size={14} />
                 </button>

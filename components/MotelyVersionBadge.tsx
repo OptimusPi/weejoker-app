@@ -1,43 +1,72 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { getVersion } from '@/lib/api/motelyWasm';
-import { Loader2 } from 'lucide-react';
+import { getCapabilities, type CapabilitiesInfo } from '@/lib/api/motelyWasm';
+import { Loader2, Cpu, Zap } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-export function MotelyVersionBadge() {
-    const [version, setVersion] = useState<string | null>(null);
+interface MotelyVersionBadgeProps {
+    className?: string;
+    minimal?: boolean;
+}
+
+export function MotelyVersionBadge({ className, minimal = false }: MotelyVersionBadgeProps) {
+    const [caps, setCaps] = useState<CapabilitiesInfo | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         let mounted = true;
-        const fetchVersion = async () => {
+        const fetchCaps = async () => {
             try {
-                const info = await getVersion();
+                const info = await getCapabilities();
                 if (mounted) {
-                    setVersion(info.version);
+                    setCaps(info);
                 }
             } catch (e) {
-                console.error("Failed to get WASM version", e);
+                console.error("Failed to get WASM capabilities", e);
             } finally {
                 if (mounted) setLoading(false);
             }
         };
-        fetchVersion();
+        fetchCaps();
         return () => { mounted = false; };
     }, []);
 
-    // Display package version if available, otherwise fallback to WASM version
-    // The user prefers the package version (e.g. 1.2.8) over the assembly version (1.0.0.0)
-    // but forbids hardcoded mapping. We read MOTELY_WASM_VERSION from env at build time.
-    const packageVersion = process.env.MOTELY_WASM_VERSION;
-    const displayVersion = packageVersion || version || 'Unknown';
+    const version = caps?.version || '...';
+
+    if (minimal) {
+        if (loading) return <span className={cn("font-pixel text-[10px] text-white/10 animate-pulse", className)}>Initializing...</span>;
+        
+        return (
+            <span className={cn("font-pixel text-[10px] text-white/20 flex items-center gap-2", className)}>
+                <span>v{version}</span>
+                {caps?.simd && <span title="SIMD Enabled" className="text-[var(--balatro-blue)]">⚡</span>}
+                {caps?.threads && <span title="Multi-threaded" className="text-[var(--balatro-green)]">🧵</span>}
+            </span>
+        );
+    }
 
     return (
-        <div className="px-3 py-1 rounded bg-black/40 border border-white/5 text-[10px] font-pixel text-white/30 uppercase tracking-widest flex items-center gap-2">
+        <div className={cn("px-3 py-1 rounded bg-black/40 border border-white/5 text-[10px] font-pixel text-white/30 tracking-widest flex items-center gap-3", className)}>
             {loading ? (
                 <Loader2 size={10} className="animate-spin" />
             ) : (
-                <span>Motely v{displayVersion}</span>
+                <>
+                    <span>Motely v{version}</span>
+                    <div className="h-3 w-px bg-white/10" />
+                    <div className="flex items-center gap-2">
+                        {caps?.simd && (
+                            <span title="SIMD Active">
+                                <Zap size={10} className="text-[var(--balatro-blue)]" />
+                            </span>
+                        )}
+                        {caps?.threads && (
+                            <span title={`Multi-threaded (${caps.processorCount} cores)`}>
+                                <Cpu size={10} className="text-[var(--balatro-green)]" />
+                            </span>
+                        )}
+                    </div>
+                </>
             )}
         </div>
     );

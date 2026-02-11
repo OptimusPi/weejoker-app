@@ -129,137 +129,213 @@ export function RitualChallengeBoard({
     };
 
     return (
-        <div className="w-full h-full min-h-0 flex items-center justify-center select-none relative py-2 overflow-hidden">
+        <div className="w-full h-full flex flex-col md:flex-row items-center justify-center select-none relative overflow-hidden md:py-8">
             <div className="absolute inset-0 pointer-events-none" />
 
-            {/* Central Layout Container */}
-            <div className="flex items-center justify-center gap-4 h-full w-full max-w-6xl mx-auto px-4">
+            {/* Mobile Header Nav (Day Navigation) */}
+            <div className="md:hidden w-full flex items-center justify-between px-4 py-2 bg-black/40 border-b border-white/5 shrink-0 z-20">
+                 <button
+                    type="button"
+                    onClick={onPrevDay}
+                    disabled={!canGoBack}
+                    className="p-2 text-white/60 disabled:opacity-20 active:text-white"
+                >
+                    <ChevronLeft size={24} />
+                </button>
+                <div className="font-header text-xl text-[var(--balatro-gold)]">
+                    Day {dayNumber}
+                </div>
+                <button
+                    type="button"
+                    onClick={onNextDay}
+                    disabled={!canGoForward}
+                    className="p-2 text-white/60 disabled:opacity-20 active:text-white"
+                >
+                    <ChevronRight size={24} />
+                </button>
+            </div>
 
-                {/* Left Nav Button */}
-                <div className="flex items-center justify-center z-20 self-stretch">
-                    <button
-                        type="button"
-                        onClick={onPrevDay}
-                        disabled={!canGoBack}
-                        className="balatro-button balatro-button-red w-12 md:w-14 flex items-center justify-center rounded-lg shadow-[0_4px_0_#9e2b21] active:shadow-none active:translate-y-[4px] disabled:opacity-50 disabled:shadow-none disabled:translate-y-0 text-3xl font-header h-full"
-                        title="Previous Day"
+            {/* Desktop Left Nav Button */}
+            <div className="hidden md:flex items-center justify-center z-20 h-full px-4">
+                <button
+                    type="button"
+                    onClick={onPrevDay}
+                    disabled={!canGoBack}
+                    className="balatro-button balatro-button-red w-12 flex items-center justify-center rounded-lg shadow-[0_4px_0_#9e2b21] active:shadow-none active:translate-y-[4px] disabled:opacity-50 disabled:shadow-none disabled:translate-y-0 text-3xl font-header h-16"
+                    title="Previous Day"
+                >
+                    &lt;
+                </button>
+            </div>
+
+            {/* Main Cabinet Card */}
+            <div className="flex-1 w-full md:max-w-md lg:max-w-xl h-full md:h-auto md:aspect-[9/16] max-h-[900px] flex flex-col bg-[#111818] border-x md:border border-white/10 relative md:rounded-xl shadow-2xl z-10 overflow-hidden">
+                
+                {/* Header / Seed Info */}
+                <div className="bg-black/80 p-4 flex items-center justify-between border-b border-white/10 shrink-0 backdrop-blur-md">
+                    <div 
+                        className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-lg border border-white/5 group cursor-pointer hover:bg-white/10 transition-all active:scale-95" 
+                        onClick={handleCopy}
                     >
-                        &lt;
-                    </button>
+                        {copied ? (
+                            <span className="font-pixel text-[10px] text-green-400 uppercase tracking-widest animate-pulse">Copied!</span>
+                        ) : (
+                            <Copy size={14} className="text-white/40 group-hover:text-white transition-colors" />
+                        )}
+                        <span className="font-header text-xl md:text-2xl text-[var(--balatro-blue)] tracking-[0.15em]">{seed}</span>
+                    </div>
+                    
+                    <div className="flex flex-col items-end">
+                         {/* Deck Icon */}
+                        <div className="flex items-center gap-2">
+                            <span className="font-pixel text-[10px] text-white/30 uppercase tracking-widest hidden sm:block">Erratic Deck</span>
+                            <div className="w-8 h-10 bg-white/10 rounded border border-white/5 flex items-center justify-center relative overflow-hidden">
+                                <Sprite name="8BitDeck" width={24} className="opacity-80" />
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Main Cabinet Card */}
-                <div className="flex-1 max-w-2xl w-full h-full max-h-full flex flex-col bg-[#111818]/60 border-x border-white/10 relative shadow-[0_0_50px_rgba(0,0,0,0.5)] z-10 backdrop-blur-sm">
-
-                    <div className="bg-black/90 p-5 flex items-center justify-between border-b border-white/10 shrink-0">
-                        <div className="flex items-center gap-3 bg-white/5 px-5 py-3 rounded-xl border border-white/5 group cursor-pointer hover:bg-white/10 transition-all shadow-inner active:scale-95" onClick={handleCopy}>
-                            <Copy size={12} className="text-white/20 group-hover:text-white transition-colors" />
-                            <span className="font-header text-2xl text-[var(--balatro-blue)] tracking-[0.25em]">{seed}</span>
-                        </div>
-                        <div className="flex flex-col items-end">
-                            <div className="w-8 h-10 bg-white/10 rounded flex items-center justify-center mb-1">
-                                <Sprite name="8BitDeck" width={24} />
-                            </div>
-                            <span className="font-pixel text-sm text-white/30 tracking-widest">Erratic Deck</span>
-                        </div>
-                    </div>
-
-                    {/* Tabs */}
-                    <div className="flex justify-center gap-2 py-4 border-b border-black/20 bg-black/10 shrink-0">
-                        {['Details', 'Strategy', 'Scores'].map((tab) => (
-                            <button
-                                type="button"
-                                key={tab}
-                                onClick={() => setActiveTab(tab.toUpperCase() as any)}
-                                className={cn(
-                                    "balatro-button px-6 py-2 min-h-0 h-auto text-lg normal-case tracking-normal",
-                                    activeTab === tab.toUpperCase()
-                                        ? "balatro-button-red shadow-inner translate-y-[2px]"
-                                        : "balatro-button-grey opacity-80 hover:opacity-100"
-                                )}
-                                style={{
-                                    boxShadow: activeTab === tab.toUpperCase() ? 'inset 0 2px 4px rgba(0,0,0,0.3)' : undefined
-                                }}
-                            >
-                                {tab}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Content Body */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar bg-[var(--balatro-modal-inner)] min-h-0">
-                        {activeTab === 'DETAILS' && (
-                            <div className="p-4 flex flex-col items-center gap-4">
-                                <AgnosticSeedCard
-                                    seed={seed}
-                                    analysis={analysis}
-                                    dayNumber={dayNumber}
-                                    ritualId={ritualId}
-                                    jamlConfig={jamlConfig}
-                                    isLocked={isLocked}
-                                    onShowHowTo={onShowHowTo}
-                                    onOpenSubmit={onOpenSubmit}
-                                    canSubmit={!isLocked}
-                                    className="border-none shadow-none bg-transparent p-0 w-full"
-                                />
-
-                                {/* Command Station Link */}
-                                <div className="w-full">
-                                    <Link
-                                        href="/jaml-uiv2"
-                                        className="balatro-button balatro-button-purple w-full py-3 flex items-center justify-center gap-2 group transition-all hover:scale-[1.02]"
-                                    >
-                                        <Sprite name="Brainstorm" width={24} className="opacity-70 group-hover:opacity-100 transition-opacity" />
-                                        <span className="font-header text-xl">Command Station</span>
-                                    </Link>
-                                </div>
-                            </div>
-                        )}
-                        {activeTab === 'STRATEGY' && (
-                            <div className="p-4 bg-[var(--balatro-modal-inner)]">
-                                <JamlJourneyMap evaluation={evaluation} />
-                            </div>
-                        )}
-                        {activeTab === 'SCORES' && (
-                            <div className="p-4 bg-[var(--balatro-modal-inner)] min-h-full">
-                                <LeaderboardComponent ritualId={ritualId || ritualConfig.id} seed={seed} />
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Big Blue Play Button */}
-                    <div className="p-6 bg-[#0f1a1a] border-t border-white/5 shrink-0">
+                {/* Navigation Tabs */}
+                <div className="flex w-full bg-black/40 border-b border-white/5 shrink-0">
+                    {['Details', 'Strategy', 'Scores'].map((tab) => (
                         <button
                             type="button"
-                            onClick={onOpenSubmit}
-                            disabled={isLocked}
-                            className="balatro-button balatro-button-green w-full text-2xl py-6 tracking-[0.2em] flex items-center justify-center gap-2"
+                            key={tab}
+                            onClick={() => setActiveTab(tab.toUpperCase() as any)}
+                            className={cn(
+                                "flex-1 py-3 text-sm font-header uppercase tracking-wider transition-colors relative",
+                                activeTab === tab.toUpperCase()
+                                    ? "text-[var(--balatro-gold)] bg-white/5"
+                                    : "text-white/40 hover:text-white/70 hover:bg-white/5"
+                            )}
                         >
-                            {isLocked ? (
-                                <span className="opacity-80">Ritual locked</span>
-                            ) : (
-                                <>Play Ritual No. {dayNumber}</>
+                            {tab}
+                            {activeTab === tab.toUpperCase() && (
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--balatro-gold)] shadow-[0_-2px_8px_rgba(253,231,0,0.5)]" />
                             )}
                         </button>
-                    </div>
-
+                    ))}
                 </div>
 
-                {/* Right Nav Button */}
-                <div className="flex items-center justify-center z-20 self-stretch">
+                {/* Content Body */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#1a2323] relative">
+                    {activeTab === 'DETAILS' && (
+                        <div className="p-4 space-y-6">
+                            {/* Card Fan / Deck Visualization */}
+                            <div className="flex flex-col gap-2">
+                                <div className="flex items-center justify-between px-1">
+                                    <span className="font-pixel text-[10px] text-white/40 uppercase tracking-widest">Starting Deck</span>
+                                    <span className="font-pixel text-[10px] text-white/20 uppercase">{analysis?.deck?.length || 52} Cards</span>
+                                </div>
+                                <div className="bg-black/20 rounded-xl p-4 border border-white/5 min-h-[160px] flex items-center justify-center relative overflow-hidden">
+                                    {analysis?.deck ? (
+                                        <div className="scale-75 origin-top w-full flex justify-center -mb-8">
+                                            <CardFan 
+                                                count={analysis.deck.length} 
+                                                cards={analysis.deck} 
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center gap-2 animate-pulse">
+                                            <Loader2 className="text-white/10" />
+                                            <span className="font-pixel text-[10px] text-white/20">Analyzing Deck...</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Stats Grid */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="bg-black/20 rounded-lg p-3 border border-white/5">
+                                    <div className="font-pixel text-[10px] text-white/30 uppercase mb-1">Archetype</div>
+                                    <div className="font-header text-lg text-[var(--balatro-blue)]">
+                                        {analysis?.matches?.[0]?.name || "Unknown"}
+                                    </div>
+                                </div>
+                                <div className="bg-black/20 rounded-lg p-3 border border-white/5">
+                                    <div className="font-pixel text-[10px] text-white/30 uppercase mb-1">Potential</div>
+                                    <div className="font-header text-lg text-[var(--balatro-green)]">
+                                        {analysis?.score?.toLocaleString() || "0"}
+                                    </div>
+                                </div>
+                            </div>
+
+                             {/* Mobile Submit CTA */}
+                            <div className="md:hidden pt-4">
+                                <button
+                                    onClick={onOpenSubmit}
+                                    disabled={isLocked}
+                                    className="balatro-button balatro-button-green w-full py-4 text-xl flex items-center justify-center gap-2"
+                                >
+                                    {isLocked ? "Ritual Locked" : "Submit Score"}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'STRATEGY' && (
+                        <div className="p-4 min-h-full">
+                            {evaluation ? (
+                                <JamlJourneyMap evaluation={evaluation} />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-12 text-center opacity-50">
+                                    <MapIcon size={48} className="mb-4 text-white/20" />
+                                    <p className="font-header text-xl text-white/40">Consulting the Spirits...</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'SCORES' && (
+                        <div className="flex flex-col min-h-full">
+                            <div className="p-4 space-y-4 flex-1">
+                                {/* Submit CTA in Scores tab too */}
+                                {!isLocked && (
+                                    <button
+                                        onClick={onOpenSubmit}
+                                        className="balatro-button balatro-button-blue w-full py-3 text-lg flex items-center justify-center gap-2 mb-4"
+                                    >
+                                        <Trophy size={18} />
+                                        Submit Your Run
+                                    </button>
+                                )}
+                                <LeaderboardComponent ritualId={ritualId || ritualConfig.id} seed={seed} />
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Desktop Footer Action */}
+                <div className="hidden md:block p-4 bg-black/40 border-t border-white/5 shrink-0">
                     <button
                         type="button"
-                        onClick={onNextDay}
-                        disabled={!canGoForward}
-                        className="balatro-button balatro-button-red w-12 md:w-14 flex items-center justify-center rounded-lg shadow-[0_4px_0_#9e2b21] active:shadow-none active:translate-y-[4px] disabled:opacity-50 disabled:shadow-none disabled:translate-y-0 text-3xl font-header h-full"
-                        title="Next Day"
+                        onClick={onOpenSubmit}
+                        disabled={isLocked}
+                        className="balatro-button balatro-button-green w-full text-xl py-4 tracking-[0.2em] flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
                     >
-                        &gt;
+                        {isLocked ? (
+                            <span className="opacity-80">Ritual Locked</span>
+                        ) : (
+                            <>Submit Score</>
+                        )}
                     </button>
                 </div>
 
             </div>
-        </div>
 
+            {/* Desktop Right Nav Button */}
+            <div className="hidden md:flex items-center justify-center z-20 h-full px-4">
+                <button
+                    type="button"
+                    onClick={onNextDay}
+                    disabled={!canGoForward}
+                    className="balatro-button balatro-button-red w-12 flex items-center justify-center rounded-lg shadow-[0_4px_0_#9e2b21] active:shadow-none active:translate-y-[4px] disabled:opacity-50 disabled:shadow-none disabled:translate-y-0 text-3xl font-header h-16"
+                    title="Next Day"
+                >
+                    &gt;
+                </button>
+            </div>
+        </div>
     );
 }

@@ -39,10 +39,7 @@ export function WasmStatus() {
         };
     }, []);
 
-    // Read package version from build env
-    const packageVersion = process.env.MOTELY_WASM_VERSION;
-    // Prefer package version for top-level display if available
-    const displayVersion = packageVersion || version;
+    const displayVersion = version;
 
     return (
         <div className={cn(

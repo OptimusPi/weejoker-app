@@ -7,6 +7,15 @@
  * Handles lazy initialization and provides typed APIs for consumers.
  */
 
+export type {
+    MotelyWasmApi,
+    SeedAnalysisInfo,
+    SearchStatusInfo,
+    SearchResultInfo,
+    VersionInfo,
+    CapabilitiesInfo,
+} from 'motely-wasm';
+
 import type {
     MotelyWasmApi,
     SeedAnalysisInfo,
