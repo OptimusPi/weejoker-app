@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import JamlEditor from '@/components/JamlEditor';
-import { JamlGenie } from './JamlGenie';
 import { useJamlFilter } from '@/lib/hooks/useJamlFilter';
 import { AgnosticSeedCard } from './AgnosticSeedCard';
 import { WasmStatus } from './WasmStatus';
@@ -259,7 +258,7 @@ export default function JamlUIV2() {
                                 <span className="text-[10px] text-white/30 uppercase tracking-[0.2em]">Deployment State</span>
                                 <div className="flex items-center gap-2">
                                     <div className="w-2 h-2 rounded-full bg-teal-500 animate-pulse shadow-[0_0_8px_rgba(20,184,166,0.5)]"></div>
-                                    <span className="text-xs font-header text-teal-400 uppercase tracking-widest">Production v1.2.4</span>
+                                    <span className="text-xs font-header text-teal-400 uppercase tracking-widest">Production v1.2.8</span>
                                 </div>
                             </div>
 

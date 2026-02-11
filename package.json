@@ -1,5 +1,5 @@
 {
-  "name": "weejoker-app",
+  "name": "seed-finder-app",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "pages:build": "npx @cloudflare/next-on-pages",
+    "pages:build": "npx @cloudflare/next-on-pages && node scripts/optimize-wasm.js",
     "pages:preview": "npm run pages:build && npx wrangler pages dev .vercel/output/static",
     "deploy": "npm run pages:build && npx wrangler pages deploy .vercel/output/static",
     "cf-typegen": "npx wrangler types --env-interface CloudflareEnv env.d.ts"
@@ -31,7 +31,7 @@
     "js-yaml": "^4.1.1",
     "lucide-react": "^0.561.0",
     "monaco-editor": "^0.55.1",
-    "motely-wasm": "^1.2.4",
+    "motely-wasm": "^1.2.8",
     "next": "^16.2.0-canary.8",
     "papaparse": "^5.5.3",
     "postcss-preset-mantine": "^1.18.0",

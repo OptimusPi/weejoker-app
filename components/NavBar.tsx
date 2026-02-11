@@ -3,13 +3,16 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Search, Eye, BookOpen } from 'lucide-react';
+import { BookOpen, Users, PenTool, Database } from 'lucide-react';
 
 const navItems = [
-    { name: 'Daily Ritual', href: '/', icon: BookOpen },
-    { name: 'Command Center', href: '/jaml-builder', icon: LayoutDashboard },
-    { name: 'Seed Analytics', href: '/seed-viewer', icon: Search },
+    { name: 'Wee Joker', href: '/', icon: BookOpen, description: 'Daily Ritual' },
+    { name: 'We Joker', href: '/we', icon: Users, description: 'Community' },
+    { name: 'Me Joker', href: '/create', icon: PenTool, description: 'Create', special: true },
+    { name: 'Ice Lake', href: '/ice-lake', icon: Database, description: 'Seed DB' },
 ];
+
+import { MotelyVersionBadge } from './MotelyVersionBadge';
 
 export default function NavBar() {
     const pathname = usePathname();
@@ -28,28 +31,35 @@ export default function NavBar() {
             <div className="flex items-center gap-1 h-full">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href));
+                    const isSpecial = item.special;
+                    
                     return (
                         <Link
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                "flex items-center gap-2 px-4 h-10 rounded-lg transition-all font-header text-sm tracking-widest uppercase",
+                                "flex items-center gap-2 px-4 h-10 rounded-lg transition-all font-header text-sm tracking-widest uppercase relative group",
                                 isActive
                                     ? "bg-white/10 text-white"
-                                    : "text-white/40 hover:text-white/80 hover:bg-white/5"
+                                    : "text-white/40 hover:text-white/80 hover:bg-white/5",
+                                isSpecial && "hover:text-[var(--balatro-gold)]"
                             )}
                         >
-                            <item.icon size={16} />
+                            <item.icon size={16} className={cn(isSpecial && "group-hover:text-[var(--balatro-gold)]")} />
                             <span>{item.name}</span>
+                            
+                            {isSpecial && (
+                                <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] text-[var(--balatro-gold)] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap animate-bounce font-pixel bg-black/90 px-2 py-1 rounded border border-[var(--balatro-gold)]/30 pointer-events-none">
+                                    Create your own
+                                </span>
+                            )}
                         </Link>
                     );
                 })}
             </div>
 
             <div className="ml-auto flex items-center gap-4">
-                <div className="px-3 py-1 rounded bg-black/40 border border-white/5 text-[10px] font-pixel text-white/30 uppercase tracking-widest">
-                    Build v2.4.0
-                </div>
+                <MotelyVersionBadge />
             </div>
         </nav>
     );

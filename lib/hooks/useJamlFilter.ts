@@ -254,7 +254,7 @@ function createBlankFilter(): JamlFilter {
         },
         must: [],
         should: [
-            { type: 'Joker', value: 'Joker' }
+            { type: 'joker', value: 'Joker' }
         ],
         mustNot: []
     };

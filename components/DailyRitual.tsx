@@ -34,6 +34,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
     const [ritualTitle, setRitualTitle] = useState(ritualConfig.title);
     const [ritualTagline, setRitualTagline] = useState(ritualConfig.tagline);
     const [activeEpoch, setActiveEpoch] = useState(ritualConfig.epoch);
+    const [defaultObjective, setDefaultObjective] = useState(ritualConfig.defaultObjective);
 
     // Simplified: always use serverToday if available, or compute locally (as backup)
     const todayNumber = serverToday || getDayNumber(activeEpoch);
@@ -284,6 +285,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                 isOpen={showHowTo}
                 onClose={() => setShowHowTo(false)}
                 seedId={currentSeedId || undefined}
+                objectiveName={defaultObjective}
             />
 
             {showSubmit && currentSeedId && (

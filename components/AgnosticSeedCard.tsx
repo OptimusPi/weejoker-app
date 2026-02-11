@@ -12,17 +12,35 @@ interface AgnosticSeedCardProps {
     stakeSlug?: string;
     className?: string;
     onClick?: () => void;
+    analysis?: any;
+    dayNumber?: number;
+    ritualId?: string;
+    jamlConfig?: string | null;
+    isLocked?: boolean;
+    onShowHowTo?: () => void;
+    onOpenSubmit?: () => void;
+    canSubmit?: boolean;
 }
 
-export function AgnosticSeedCard({ seed, deckSlug = 'Ghost', stakeSlug = 'White', className, onClick }: AgnosticSeedCardProps) {
+export function AgnosticSeedCard({ 
+    seed, 
+    deckSlug = 'Erratic', 
+    stakeSlug = 'White', 
+    className, 
+    onClick,
+    analysis: propAnalysis 
+}: AgnosticSeedCardProps) {
     const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState<any>(null);
+    const [fetchedAnalysis, setFetchedAnalysis] = useState<any>(null);
+
+    const result = propAnalysis || fetchedAnalysis;
 
     const handleAnalyze = async () => {
+        if (propAnalysis) return; // Skip if provided
         setLoading(true);
         try {
             const data = await analyzeSeedWasm(seed, deckSlug, stakeSlug);
-            setResult(data);
+            setFetchedAnalysis(data);
         } catch (err) {
             console.error(err);
         } finally {
@@ -32,7 +50,7 @@ export function AgnosticSeedCard({ seed, deckSlug = 'Ghost', stakeSlug = 'White'
 
     useEffect(() => {
         handleAnalyze();
-    }, [seed, deckSlug, stakeSlug]);
+    }, [seed, deckSlug, stakeSlug, propAnalysis]);
 
     return (
         <div
@@ -66,7 +84,7 @@ export function AgnosticSeedCard({ seed, deckSlug = 'Ghost', stakeSlug = 'White'
             </div>
 
             <div className="flex items-center justify-between mt-2 pt-4 border-t border-white/5">
-                <span className="font-pixel text-[10px] text-white/20 uppercase">v1.2.4-motely-wasm</span>
+                <span className="font-pixel text-[10px] text-white/20 uppercase">v1.2.8-motely-wasm</span>
                 <button className="flex items-center gap-2 font-header text-xs text-[var(--balatro-gold)] hover:brightness-125 transition-all">
                     VIEW STRATEGY <ChevronRight size={14} />
                 </button>

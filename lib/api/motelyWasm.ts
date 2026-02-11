@@ -75,7 +75,28 @@ export async function analyzeSeedWasm(
     _shop?: number
 ): Promise<SeedAnalysisInfo> {
     const api = await getWasmApi();
-    return api.analyzeSeed(seed, deck, stake);
+    
+    // Normalize deck name to handle special cases
+    let normalizedDeck = deck.toLowerCase();
+    
+    // Default to 'erratic' if empty or invalid
+    if (!normalizedDeck || normalizedDeck === '') {
+        normalizedDeck = 'erratic';
+    }
+    
+    // Ensure we don't accidentally pass 'blueprint' or other non-deck strings
+    // unless they are valid deck names in Motely
+    const VALID_DECKS = [
+        'red', 'blue', 'yellow', 'green', 'black', 'magic', 'nebula', 'ghost', 
+        'abandoned', 'checkered', 'zodiac', 'painted', 'anaglyph', 'plasma', 'erratic'
+    ];
+    
+    if (!VALID_DECKS.includes(normalizedDeck)) {
+        console.warn(`[MotelyWasm] Unknown deck '${deck}', defaulting to 'erratic'`);
+        normalizedDeck = 'erratic';
+    }
+
+    return api.analyzeSeed(seed, normalizedDeck, stake);
 }
 
 // --- Search event system ---

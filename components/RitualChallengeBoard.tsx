@@ -6,12 +6,12 @@ import { ChevronLeft, ChevronRight, Copy, Map as MapIcon, Info, Trophy, Crown, M
 import { AgnosticSeedCard } from "./AgnosticSeedCard";
 import { Sprite } from "./Sprite";
 import { CardFan } from "./CardFan";
-import { WeeWisdom } from "./WeeWisdom";
 import { useSeedAnalyzer } from "@/lib/hooks/useSeedAnalyzer";
 import { evaluateSeed } from "@/lib/jamlEvaluator";
 import { useJamlFilter } from "@/lib/hooks/useJamlFilter";
 import { JamlJourneyMap } from "./cards/JamlJourneyMap";
 import { cn } from "@/lib/utils";
+import { ritualConfig } from "@/lib/config";
 
 interface RitualChallengeBoardProps {
     seed: string;
@@ -105,6 +105,8 @@ export function RitualChallengeBoard({
     const [activeTab, setActiveTab] = useState<'DETAILS' | 'STRATEGY' | 'SCORES'>('DETAILS');
     const [copied, setCopied] = useState(false);
     const [showWisdom, setShowWisdom] = useState(false);
+
+    // JAML Filter[showWisdom, setShowWisdom] = useState(false);
 
     // JAML Filter
     const { filter } = useJamlFilter(jamlConfig || '');
@@ -211,10 +213,6 @@ export function RitualChallengeBoard({
                                         <span className="font-header text-xl">Command Station</span>
                                     </Link>
                                 </div>
-                                {/* Banner Ad / Wee Wisdom - REMOVED PER USER REQUEST */}
-                                {showWisdom && (
-                                    <WeeWisdom onBack={() => setShowWisdom(false)} />
-                                )}
                             </div>
                         )}
                         {activeTab === 'STRATEGY' && (
@@ -224,7 +222,7 @@ export function RitualChallengeBoard({
                         )}
                         {activeTab === 'SCORES' && (
                             <div className="p-4 bg-[var(--balatro-modal-inner)] min-h-full">
-                                <LeaderboardComponent ritualId={ritualId || 'the-daily-wee'} seed={seed} />
+                                <LeaderboardComponent ritualId={ritualId || ritualConfig.id} seed={seed} />
                             </div>
                         )}
                     </div>

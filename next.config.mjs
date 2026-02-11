@@ -1,5 +1,4 @@
 import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev';
-import withMotelyWasm from 'motely-wasm/next-plugin';
 
 if (process.env.NODE_ENV === 'development') {
     await setupDevPlatform({
@@ -7,7 +6,7 @@ if (process.env.NODE_ENV === 'development') {
     });
 }
 
-const nextConfig = {
+const baseConfig = {
     allowedDevOrigins: [
         'localhost',
         'weejoker.app',
@@ -23,9 +22,26 @@ const nextConfig = {
     turbopack: {
         resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
     },
+    async headers() {
+        return [
+            {
+                source: '/:path*',
+                headers: [
+                    {
+                        key: 'Cross-Origin-Opener-Policy',
+                        value: 'same-origin',
+                    },
+                    {
+                        key: 'Cross-Origin-Embedder-Policy',
+                        value: 'require-corp',
+                    },
+                ],
+            },
+        ];
+    },
 };
 
-export default withMotelyWasm(nextConfig);
+export default baseConfig;
 
 
 

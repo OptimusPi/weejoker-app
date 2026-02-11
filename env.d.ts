@@ -6,6 +6,16 @@ interface CloudflareEnv {
 
 interface R2Bucket {
     get(key: string): Promise<R2ObjectBody | null>;
+    put(key: string, value: string | ArrayBuffer | ReadableStream): Promise<R2Object>;
+}
+
+interface R2Object {
+    key: string;
+    version: string;
+    size: number;
+    etag: string;
+    httpEtag: string;
+    uploaded: Date;
 }
 
 interface R2ObjectBody {
