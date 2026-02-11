@@ -40,7 +40,7 @@ function LeaderboardComponent({ ritualId, seed }: { ritualId: string; seed: stri
             try {
                 const res = await fetch(`/api/scores?seed=${seed}&ritualId=${ritualId.toLowerCase()}`);
                 if (!res.ok) throw new Error("Failed");
-                const data = await res.json();
+                const data = await res.json() as { scores: any[] };
                 if (data.scores) setScores(data.scores);
             } catch (err) {
                 console.error("Score load fail", err);
@@ -226,14 +226,14 @@ export function RitualChallengeBoard({
                             <div className="flex flex-col gap-2">
                                 <div className="flex items-center justify-between px-1">
                                     <span className="font-pixel text-[10px] text-white/40 uppercase tracking-widest">Starting Deck</span>
-                                    <span className="font-pixel text-[10px] text-white/20 uppercase">{analysis?.deck?.length || 52} Cards</span>
+                                    <span className="font-pixel text-[10px] text-white/20 uppercase">{analysis?.startingDeck?.length || 52} Cards</span>
                                 </div>
                                 <div className="bg-black/20 rounded-xl p-4 border border-white/5 min-h-[160px] flex items-center justify-center relative overflow-hidden">
-                                    {analysis?.deck ? (
+                                    {analysis?.startingDeck ? (
                                         <div className="scale-75 origin-top w-full flex justify-center -mb-8">
                                             <CardFan 
-                                                count={analysis.deck.length} 
-                                                cards={analysis.deck} 
+                                                count={analysis.startingDeck.length} 
+                                                cards={analysis.startingDeck} 
                                             />
                                         </div>
                                     ) : (
@@ -250,13 +250,13 @@ export function RitualChallengeBoard({
                                 <div className="bg-black/20 rounded-lg p-3 border border-white/5">
                                     <div className="font-pixel text-[10px] text-white/30 uppercase mb-1">Archetype</div>
                                     <div className="font-header text-lg text-[var(--balatro-blue)]">
-                                        {analysis?.matches?.[0]?.name || "Unknown"}
+                                        {evaluation?.matches?.[0]?.item.name || "Unknown"}
                                     </div>
                                 </div>
                                 <div className="bg-black/20 rounded-lg p-3 border border-white/5">
                                     <div className="font-pixel text-[10px] text-white/30 uppercase mb-1">Potential</div>
                                     <div className="font-header text-lg text-[var(--balatro-green)]">
-                                        {analysis?.score?.toLocaleString() || "0"}
+                                        {evaluation?.score?.toLocaleString() || "0"}
                                     </div>
                                 </div>
                             </div>

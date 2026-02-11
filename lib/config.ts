@@ -12,3 +12,5 @@ export const ritualConfig = {
         return new Date(this.epochDate).getTime();
     }
 };
+
+export const EPOCH = ritualConfig.epoch;

@@ -49,11 +49,16 @@ export function SeedExplorer() {
         try {
             // Example Filter: Just find valid seeds (Motley will run analysis)
             // In a real app, we'd pass a complex JAML filter here
-            const filter = {
+            const filter: any = {
+                name: 'Deep Scan',
+                description: 'Ice Lake Scan',
+                author: 'WeeJoker',
+                defaults: { deck: 'Erratic', stake: 'White' },
                 deck: 'Erratic',
                 stake: 'White',
-                // This is a "pass-all" filter effectively, relying on the partition selection
-                // But we could add "requirements" here like "has_rare_joker"
+                must: [],
+                should: [],
+                mustNot: []
             };
 
             await scanIceLake(

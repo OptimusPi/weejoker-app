@@ -8,9 +8,10 @@ interface HowToPlayProps {
     onClose: () => void;
     onSubmit?: () => void;
     seedId?: string;
+    objectiveName?: string;
 }
 
-export function HowToPlay({ isOpen, onClose, onSubmit, seedId = "--------" }: HowToPlayProps) {
+export function HowToPlay({ isOpen, onClose, onSubmit, seedId = "--------", objectiveName = "Objective" }: HowToPlayProps) {
     const [step, setStep] = useState(1);
     const [copied, setCopied] = useState(false);
     const totalSteps = 4;

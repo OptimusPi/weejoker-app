@@ -22,7 +22,7 @@ export function PastWeekResults() {
             try {
                 const res = await fetch('/api/scores?week=true');
                 if (!res.ok) throw new Error('Failed to fetch');
-                const data = await res.json();
+                const data = await res.json() as { scores: DayResult[] };
                 setResults(data.scores || []);
             } catch (err) {
                 setError('Could not load past results');

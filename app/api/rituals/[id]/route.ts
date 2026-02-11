@@ -39,7 +39,7 @@ export async function GET(
     // 0. Fetch Ritual Metadata from D1
     if (env && env.DB) {
         try {
-            const ritual = await env.DB.prepare('SELECT * FROM rituals WHERE id = ?').bind(id).first();
+            const ritual = await env.DB.prepare('SELECT * FROM rituals WHERE id = ?').bind(id).first() as any;
             if (ritual) {
                 config = {
                     ...config,
@@ -133,11 +133,8 @@ export async function GET(
         let allSeeds: string[] = [];
         let r2Jaml: string | null = null;
 
-        const { getRequestContext } = await import('@cloudflare/next-on-pages');
-        const context = getRequestContext();
-        const env = context?.env;
-
-        if (env && env.SEED_ASSETS) {
+        // No need to re-import context, we have it above
+        if (env.SEED_ASSETS) {
             // ... as before ...
             const csvKey = config.seedsPath.startsWith('/') ? config.seedsPath.substring(1) : config.seedsPath;
             const object = await env.SEED_ASSETS.get(csvKey);

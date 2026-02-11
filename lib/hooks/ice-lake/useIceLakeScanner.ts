@@ -3,6 +3,7 @@ import { analyzeSeedWasm } from '@/lib/api/motelyWasm';
 import { evaluateSeed } from '@/lib/jamlEvaluator';
 import { useIceLake } from './useIceLake';
 import { JamlFilter } from '../useJamlFilter';
+import { normalizeAnalysis } from '@/lib/seedAnalyzer';
 
 export function useIceLakeScanner() {
     const { query, connectToPartitions, isLoading: isDbLoading } = useIceLake();
@@ -45,7 +46,8 @@ export function useIceLakeScanner() {
                 const seed = row.seed;
                 try {
                     // Analyze with Motely (C# WASM)
-                    const analysis = await analyzeSeedWasm(seed, filter.deck || 'Erratic', filter.stake || 'White');
+                    const rawAnalysis = await analyzeSeedWasm(seed, filter.deck || 'Erratic', filter.stake || 'White');
+                    const analysis = normalizeAnalysis(rawAnalysis);
                     
                     // Evaluate with JAML (TS)
                     const evaluation = evaluateSeed(analysis, filter);

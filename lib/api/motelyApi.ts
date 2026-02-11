@@ -92,7 +92,7 @@ class MotelyApi {
             body: JSON.stringify(request),
         });
         if (!res.ok) {
-            const err = await res.json().catch(() => ({ error: res.statusText }));
+            const err = await res.json().catch(() => ({ error: res.statusText })) as { error?: string };
             throw new Error(err.error || `Save filter failed: ${res.statusText}`);
         }
         return res.json();
@@ -113,16 +113,16 @@ class MotelyApi {
             body: JSON.stringify(request),
         });
         if (!res.ok) {
-            const err = await res.json().catch(() => ({ error: res.statusText }));
+            const err = await res.json().catch(() => ({ error: res.statusText })) as { error?: string };
             throw new Error(err.error || `Start search failed: ${res.statusText}`);
         }
-        return res.json();
+        return res.json() as Promise<{ searchId: string }>;
     }
 
     async getSearchStatus(searchId: string): Promise<SearchStatus> {
         const res = await fetch(`${this.baseUrl}/search/${encodeURIComponent(searchId)}`);
         if (!res.ok) throw new Error(`Get search status failed: ${res.statusText}`);
-        return res.json();
+        return res.json() as Promise<SearchStatus>;
     }
 
     async stopSearch(request: SearchStopRequest): Promise<void> {

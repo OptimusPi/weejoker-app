@@ -27,7 +27,7 @@ export function LeaderboardComponent({ ritualId, seed }: LeaderboardComponentPro
             try {
                 const res = await fetch(`/api/scores?seed=${seed}&ritualId=${ritualId}`);
                 if (!res.ok) throw new Error("Failed to load scores");
-                const data = await res.json();
+                const data = await res.json() as { scores: ScoreEntry[] };
                 if (data.scores) {
                     setScores(data.scores);
                 }

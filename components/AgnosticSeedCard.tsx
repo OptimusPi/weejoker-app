@@ -14,6 +14,7 @@ interface AgnosticSeedCardProps {
     className?: string;
     onClick?: () => void;
     analysis?: any;
+    result?: any;
     dayNumber?: number;
     ritualId?: string;
     jamlConfig?: string | null;
@@ -29,15 +30,16 @@ export function AgnosticSeedCard({
     stakeSlug = 'White', 
     className, 
     onClick,
-    analysis: propAnalysis 
+    analysis: propAnalysis,
+    result: propResult
 }: AgnosticSeedCardProps) {
     const [loading, setLoading] = useState(false);
     const [fetchedAnalysis, setFetchedAnalysis] = useState<any>(null);
 
-    const result = propAnalysis || fetchedAnalysis;
+    const result = propAnalysis || propResult || fetchedAnalysis;
 
     const handleAnalyze = async () => {
-        if (propAnalysis) return; // Skip if provided
+        if (propAnalysis || propResult) return; // Skip if provided
         setLoading(true);
         try {
             const data = await analyzeSeedWasm(seed, deckSlug, stakeSlug);

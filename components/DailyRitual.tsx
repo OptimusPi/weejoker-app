@@ -86,10 +86,19 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                 const url = `/api/rituals/${ritualId}${fetchDay ? `?day=${fetchDay}` : ''}`;
                 const configRes = await fetch(url);
                 if (!configRes.ok) {
-                    const errorData = await configRes.json();
+                    const errorData = await configRes.json() as { error?: string };
                     throw new Error(errorData.error || "Failed to load ritual");
                 }
-                const config = await configRes.json();
+                const config = await configRes.json() as {
+                    title: string;
+                    tagline: string;
+                    epoch: string;
+                    today: number;
+                    jamlConfig: string;
+                    seeds: string[];
+                    currentSeed?: string;
+                    dayNumber?: number;
+                };
 
                 setRitualTitle(config.title);
                 setRitualTagline(config.tagline);
@@ -107,15 +116,31 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
 
                 // Update Cache
                 if (config.currentSeed && config.dayNumber) {
+                    const dayNum = config.dayNumber;
                     setRitualCache(prev => ({
                         ...prev,
-                        [config.dayNumber]: {
-                            seed: config.currentSeed,
+                        [dayNum]: {
+                            seed: config.currentSeed!,
                             jaml: config.jamlConfig,
                             title: config.title,
                             tagline: config.tagline
                         }
                     }));
+                }
+
+                // Cache it for today
+                if (config.dayNumber) {
+                    const dayNum = config.dayNumber;
+                    const cachedStr = localStorage.getItem('ritual_status');
+                    const cached = cachedStr ? JSON.parse(cachedStr) : {};
+                    const newCache = {
+                        ...cached,
+                        [dayNum]: {
+                            score: 0, // Placeholder
+                            status: 'unlocked'
+                        }
+                    };
+                    localStorage.setItem('ritual_status', JSON.stringify(newCache));
                 }
 
             } catch (err: any) {

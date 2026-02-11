@@ -45,6 +45,7 @@
     "zustand": "^5.0.10"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260210.0",
     "@types/node": "^20.19.30",
     "@types/react": "19.2.8",
     "@types/react-dom": "19.2.3",

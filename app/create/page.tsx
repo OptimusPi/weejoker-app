@@ -7,7 +7,9 @@ import JamlEditor from "@/components/JamlEditor";
 import { useJamlFilter } from "@/lib/hooks/useJamlFilter";
 import { analyzeSeedWasm } from "@/lib/api/motelyWasm";
 import { evaluateSeed } from "@/lib/jamlEvaluator";
+import { normalizeAnalysis } from "@/lib/seedAnalyzer";
 import { cn } from "@/lib/utils";
+import type { CreateRitualRequest } from "@/lib/api/types";
 
 export default function CreateRitualPage() {
     const router = useRouter();
@@ -46,7 +48,8 @@ export default function CreateRitualPage() {
         for (const seed of seeds) {
             try {
                 // 1. Analyze
-                const analysis = await analyzeSeedWasm(seed, filter.deck || 'Erratic', filter.stake || 'White');
+                const rawAnalysis = await analyzeSeedWasm(seed, filter.deck || 'Erratic', filter.stake || 'White');
+                const analysis = normalizeAnalysis(rawAnalysis);
                 
                 // 2. Evaluate
                 const evaluation = evaluateSeed(analysis, filter);
@@ -96,7 +99,7 @@ export default function CreateRitualPage() {
 
             if (!res.ok) throw new Error(await res.text());
 
-            const data = await res.json();
+            const data = await res.json() as { id: string };
             router.push(`/${data.id}`);
             
         } catch (err) {
@@ -215,8 +218,8 @@ export default function CreateRitualPage() {
                             </h2>
                             <div className="flex-1 border-2 border-white/10 rounded-lg overflow-hidden bg-black/40 min-h-[400px]">
                                 <JamlEditor 
-                                    value={jamlText} 
-                                    onChange={setFromJaml} 
+                                    initialJaml={jamlText} 
+                                    onJamlChange={(text) => setFromJaml(text)} 
                                 />
                             </div>
                         </div>

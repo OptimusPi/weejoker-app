@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
+import type { CreateRitualRequest } from '@/lib/api/types';
 
 export const runtime = 'edge';
 
 export async function POST(req: Request) {
     try {
-        const { id, title, tagline, author, defaultObjective, epoch, jaml, seeds } = await req.json();
+        const body = await req.json() as CreateRitualRequest;
+        const { id, title, tagline, author, defaultObjective, epoch, jaml, seeds } = body;
 
         // 1. Validate Input
         if (!id || !title || !jaml || !seeds || !Array.isArray(seeds) || seeds.length === 0) {

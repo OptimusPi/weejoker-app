@@ -222,4 +222,4 @@ export async function validateJamlWasm(jamlContent: string) {
 }
 
 // Re-export types for convenience
-export type { MotelyWasmApi, SeedAnalysisInfo, SearchStatusInfo, SearchResultInfo, VersionInfo, CapabilitiesInfo };
+// export type { MotelyWasmApi, SeedAnalysisInfo, SearchStatusInfo, SearchResultInfo, VersionInfo, CapabilitiesInfo };
