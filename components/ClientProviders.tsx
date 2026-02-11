@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { MantineProvider } from '@mantine/core';
-import { JamlTheme } from '@/Blueprint/src/themes/JamlTheme';
+import { JamlTheme } from '@/styles/JamlTheme';
 
 export default function ClientProviders({ children }: { children: React.ReactNode }) {
     return (

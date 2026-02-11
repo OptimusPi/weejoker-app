@@ -39,6 +39,11 @@ export function WasmStatus() {
         };
     }, []);
 
+    // Read package version from build env
+    const packageVersion = process.env.MOTELY_WASM_VERSION;
+    // Prefer package version for top-level display if available
+    const displayVersion = packageVersion || version;
+
     return (
         <div className={cn(
             "fixed bottom-10 right-10 z-[100] flex items-center gap-3 px-4 py-2 rounded-full border shadow-2xl backdrop-blur-md transition-all",
@@ -55,9 +60,9 @@ export function WasmStatus() {
                 <span className="text-[12px] uppercase tracking-widest leading-tight">
                     WASM: {status.toUpperCase()}
                 </span>
-                {version && (
+                {displayVersion && (
                     <span className="text-[11px] opacity-70 leading-tight">
-                        v{version}
+                        v{displayVersion}
                         {threads !== null ? ` • threads:${threads ? 'on' : 'off'}` : ''}
                         {simd !== null ? ` • simd:${simd ? 'on' : 'off'}` : ''}
                         {processors !== null ? ` • cpu:${processors}` : ''}
