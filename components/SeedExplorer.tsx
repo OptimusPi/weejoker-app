@@ -79,24 +79,24 @@ export function SeedExplorer() {
     };
 
     return (
-        <div className="p-6 bg-black/40 rounded-xl border border-white/10 font-pixel">
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-header flex items-center gap-2 text-white">
-                    <Database className="text-[var(--balatro-blue)]" />
-                    Ice Lake Deep Scanner
+        <div className="p-4 md:p-6 bg-black/40 rounded-xl border border-white/10 font-pixel">
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-2">
+                <h2 className="text-xl md:text-2xl font-header flex items-center gap-2 text-white">
+                    <Database className="text-[var(--balatro-blue)]" size={24} />
+                    Deep Scanner
                 </h2>
-                <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-white/60">
-                    <span className={`w-2 h-2 rounded-full ${isScanning ? 'bg-green-500 animate-pulse' : 'bg-white/20'}`} />
-                    {isScanning ? 'Scanning Ice Lake...' : 'Ready'}
+                <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-white/80 bg-black/40 px-3 py-1.5 rounded self-start md:self-auto border border-white/10">
+                    <span className={`w-2 h-2 rounded-full ${isScanning ? 'bg-green-500 animate-pulse' : 'bg-white/40'}`} />
+                    {isScanning ? 'Scanning...' : 'Ready'}
                 </div>
             </div>
 
             {/* Selection Grid */}
-            <div className="grid md:grid-cols-2 gap-6 mb-6">
+            <div className="grid md:grid-cols-2 gap-4 mb-4">
                 <div className="bg-white/5 p-4 rounded-lg border border-white/5">
                     <div className="flex justify-between items-center mb-3">
-                        <label className="text-xs uppercase text-white/40">Ranks</label>
-                        <button onClick={handleFibonacci} className="text-[10px] uppercase text-[var(--balatro-gold)] hover:underline">
+                        <label className="text-xs uppercase text-white/60 tracking-wider">Ranks</label>
+                        <button onClick={handleFibonacci} className="text-[10px] uppercase text-[var(--balatro-gold)] hover:underline tracking-wider font-bold">
                             Select Fibonacci
                         </button>
                     </div>
@@ -106,10 +106,10 @@ export function SeedExplorer() {
                                 key={rank}
                                 onClick={() => toggleSelection(rank, selectedRanks, setSelectedRanks)}
                                 className={cn(
-                                    "px-3 py-1 rounded text-xs transition-all border",
+                                    "px-3 py-1.5 rounded text-xs transition-all border shadow-sm",
                                     selectedRanks.includes(rank)
-                                        ? "bg-[var(--balatro-blue)] border-[var(--balatro-blue)] text-white"
-                                        : "bg-black/40 border-white/10 text-white/40 hover:border-white/30"
+                                        ? "bg-[var(--balatro-blue)] border-[var(--balatro-blue)] text-white shadow-[0_2px_0_rgba(0,0,0,0.3)] transform translate-y-[-1px]"
+                                        : "bg-black/40 border-white/10 text-white/60 hover:border-white/30 hover:text-white"
                                 )}
                             >
                                 {rank}
@@ -119,17 +119,17 @@ export function SeedExplorer() {
                 </div>
 
                 <div className="bg-white/5 p-4 rounded-lg border border-white/5">
-                    <label className="text-xs uppercase text-white/40 block mb-3">Suits</label>
+                    <label className="text-xs uppercase text-white/60 block mb-3 tracking-wider">Suits</label>
                     <div className="flex flex-wrap gap-2">
                         {SUITS.map(suit => (
                             <button
                                 key={suit}
                                 onClick={() => toggleSelection(suit, selectedSuits, setSelectedSuits)}
                                 className={cn(
-                                    "px-3 py-1 rounded text-xs transition-all border",
+                                    "px-3 py-1.5 rounded text-xs transition-all border shadow-sm",
                                     selectedSuits.includes(suit)
-                                        ? "bg-[var(--balatro-red)] border-[var(--balatro-red)] text-white"
-                                        : "bg-black/40 border-white/10 text-white/40 hover:border-white/30"
+                                        ? "bg-[var(--balatro-red)] border-[var(--balatro-red)] text-white shadow-[0_2px_0_rgba(0,0,0,0.3)] transform translate-y-[-1px]"
+                                        : "bg-black/40 border-white/10 text-white/60 hover:border-white/30 hover:text-white"
                                 )}
                             >
                                 {suit}
@@ -140,53 +140,55 @@ export function SeedExplorer() {
             </div>
 
             {/* Action Bar */}
-            <div className="flex items-center justify-between mb-6 p-4 bg-[var(--balatro-black)] rounded-lg border border-white/10">
-                <div className="text-sm text-white/60">
-                    Selected: <span className="text-white">{selectedRanks.length + selectedSuits.length}</span> partitions
+            <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between mb-4 gap-4 p-4 bg-[var(--balatro-black)] rounded-lg border border-white/10 shadow-inner">
+                <div className="text-sm text-white/80 text-center md:text-left">
+                    Selected: <span className="text-white font-bold">{selectedRanks.length + selectedSuits.length}</span> partitions
                 </div>
                 
                 <button 
                     onClick={handleScan}
                     disabled={isScanning || (selectedRanks.length === 0 && selectedSuits.length === 0)}
                     className={cn(
-                        "balatro-button flex items-center gap-2 px-8 py-3 transition-all",
-                        isScanning ? "opacity-50 cursor-wait" : "balatro-button-green hover:scale-105"
+                        "balatro-button flex items-center justify-center gap-2 px-6 py-4 transition-all w-full md:w-auto text-base tracking-widest uppercase shadow-[0_4px_0_rgba(0,0,0,0.4)] active:shadow-none active:translate-y-[4px]",
+                        isScanning ? "opacity-50 cursor-wait bg-gray-600 shadow-none translate-y-[4px]" : "balatro-button-green hover:brightness-110"
                     )}
                 >
-                    {isScanning ? <Loader2 className="animate-spin" /> : <Play size={18} fill="currentColor" />}
+                    {isScanning ? <Loader2 className="animate-spin" size={20} /> : <Play size={20} fill="currentColor" />}
                     {isScanning ? 'Scanning...' : 'Start Deep Scan'}
                 </button>
             </div>
 
             {/* Results Stream */}
-            <div className="space-y-1 max-h-[400px] overflow-y-auto custom-scrollbar">
-                <div className="grid grid-cols-3 text-xs uppercase text-white/40 px-2 mb-2 sticky top-0 bg-[#2C2C2C] py-2 z-10">
+            <div className="space-y-1 max-h-[300px] md:max-h-[400px] overflow-y-auto custom-scrollbar bg-black/20 rounded-lg p-1 border border-white/5">
+                <div className="grid grid-cols-3 text-[10px] md:text-xs uppercase text-white/40 px-3 mb-2 sticky top-0 bg-[#1a1a1a] py-2 z-10 shadow-sm rounded-t border-b border-white/5 tracking-wider">
                     <span>Seed</span>
-                    <span className="text-center">Motley Score</span>
+                    <span className="text-center">Score</span>
                     <span className="text-right">Status</span>
                 </div>
                 
                 {results.map((res, i) => (
-                    <div key={i} className="flex justify-between items-center p-3 bg-white/5 rounded font-mono text-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        <span className="text-[var(--balatro-blue)] font-bold">{res.seed}</span>
-                        <span className="text-center text-white/60">{res.score}</span>
-                        <span className="text-right flex items-center justify-end gap-2 text-green-400">
+                    <div key={i} className="grid grid-cols-3 items-center p-2 mx-1 bg-white/5 hover:bg-white/10 rounded font-mono text-xs md:text-sm animate-in fade-in slide-in-from-bottom-2 duration-300 border border-transparent hover:border-white/10 transition-colors">
+                        <span className="text-[var(--balatro-blue)] font-bold truncate tracking-wide">{res.seed}</span>
+                        <span className="text-center text-white/80">{res.score}</span>
+                        <div className="text-right flex items-center justify-end gap-1.5 text-green-400">
                             <CheckCircle2 size={14} />
-                            Verified
-                        </span>
+                            <span className="hidden sm:inline text-[10px] uppercase tracking-wide">Verified</span>
+                        </div>
                     </div>
                 ))}
                 
                 {results.length === 0 && !isScanning && (
-                    <div className="text-center text-white/20 py-12 italic border-2 border-dashed border-white/5 rounded-lg">
-                        Select partitions and start scanning to find perfect seeds...
+                    <div className="text-center text-white/30 py-12 flex flex-col items-center justify-center gap-2">
+                        <Search size={32} className="opacity-20 mb-2" />
+                        <div className="text-sm">Ready to scan</div>
+                        <div className="text-[10px] opacity-60">Select partitions above to begin</div>
                     </div>
                 )}
             </div>
             
             {scannedCount > 0 && (
-                <div className="mt-4 text-center text-xs text-white/40 uppercase tracking-widest">
-                    Scanned {scannedCount} seeds from Ice Lake
+                <div className="mt-3 text-center text-[10px] text-white/40 uppercase tracking-widest font-mono">
+                    Scanned {scannedCount.toLocaleString()} seeds
                 </div>
             )}
         </div>

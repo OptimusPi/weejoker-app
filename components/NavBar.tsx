@@ -6,7 +6,6 @@ import { cn } from '@/lib/utils';
 import { BookOpen, Users, PenTool, Database } from 'lucide-react';
 
 const navItems = [
-    { name: 'Wee Joker', href: '/', icon: BookOpen, description: 'Daily Ritual' },
     { name: 'We Joker', href: '/we', icon: Users, description: 'Community' },
     { name: 'Me Joker', href: '/create', icon: PenTool, description: 'Create', special: true },
     { name: 'Ice Lake', href: '/ice-lake', icon: Database, description: 'Seed DB' },
@@ -19,14 +18,15 @@ export default function NavBar() {
 
     return (
         <nav className="h-16 border-b border-white/10 bg-black/60 flex items-center px-6 gap-8 shrink-0 z-50">
-            <div className="flex items-center gap-2 mr-4">
-                <div className="w-8 h-8 rounded bg-[var(--balatro-red)] flex items-center justify-center font-header text-xl text-white shadow-[0_2px_0_var(--balatro-shadow)]">
+            {/* Logo / Home Link */}
+            <Link href="/" className="flex items-center gap-2 mr-4 group">
+                <div className="w-8 h-8 rounded bg-[var(--balatro-blue)] flex items-center justify-center font-header text-xl text-white shadow-[0_2px_0_var(--balatro-shadow)] group-hover:brightness-110 transition-all">
                     W
                 </div>
-                <span className="font-header text-xl tracking-widest text-white uppercase hidden sm:block">
-                    WEE<span className="text-[var(--balatro-red)]">JOKER</span>
+                <span className="font-header text-xl tracking-widest text-white hidden sm:block">
+                    Wee<span className="text-[var(--balatro-blue)]">Joker</span>
                 </span>
-            </div>
+            </Link>
 
             <div className="flex items-center gap-1 h-full">
                 {navItems.map((item) => {
@@ -38,14 +38,14 @@ export default function NavBar() {
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                "flex items-center gap-2 px-4 h-10 rounded-lg transition-all font-header text-sm tracking-widest uppercase relative group",
+                                "flex items-center gap-2 px-4 h-10 rounded-lg transition-all font-header text-sm tracking-wide relative group whitespace-nowrap",
                                 isActive
                                     ? "bg-white/10 text-white"
                                     : "text-white/40 hover:text-white/80 hover:bg-white/5",
                                 isSpecial && "hover:text-[var(--balatro-gold)]"
                             )}
                         >
-                            <item.icon size={16} className={cn(isSpecial && "group-hover:text-[var(--balatro-gold)]")} />
+                            <item.icon size={16} className={cn("shrink-0", isSpecial && "group-hover:text-[var(--balatro-gold)]")} />
                             <span>{item.name}</span>
                             
                             {isSpecial && (

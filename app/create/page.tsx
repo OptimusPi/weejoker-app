@@ -111,99 +111,103 @@ export default function CreateRitualPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--balatro-black)] text-white font-pixel p-4 md:p-8">
-            <div className="max-w-4xl mx-auto">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-8 border-b border-white/10 pb-4">
-                    <div>
-                        <h1 className="text-4xl font-header text-[var(--balatro-blue)] drop-shadow-sm">
-                            Ritual Forge
-                        </h1>
-                        <p className="text-white/60">Design your own daily challenge</p>
-                    </div>
-                    <div className="flex gap-2">
-                        {[1, 2, 3, 4].map(i => (
-                            <div 
-                                key={i}
-                                className={cn(
-                                    "w-3 h-3 rounded-full transition-colors",
-                                    step >= i ? "bg-[var(--balatro-gold)]" : "bg-white/10"
-                                )}
-                            />
-                        ))}
-                    </div>
+        <div className="min-h-screen bg-[var(--balatro-black)] text-white font-pixel p-4 md:p-8 flex flex-col items-center">
+            {/* Header - Centered & Compact */}
+            <div className="w-full max-w-xl mx-auto mb-8 text-center">
+                <h1 className="text-4xl md:text-5xl font-header text-[var(--balatro-blue)] drop-shadow-md mb-2">
+                    Ritual Forge
+                </h1>
+                <p className="text-white/60 text-lg">Design your own daily challenge</p>
+                
+                {/* Progress Steps */}
+                <div className="flex justify-center gap-3 mt-4">
+                    {[1, 2, 3, 4].map(i => (
+                        <div 
+                            key={i}
+                            className={cn(
+                                "w-3 h-3 rounded-full transition-all duration-300",
+                                step >= i ? "bg-[var(--balatro-gold)] scale-110 shadow-[0_0_10px_rgba(241,196,15,0.5)]" : "bg-white/10"
+                            )}
+                        />
+                    ))}
                 </div>
+            </div>
 
-                {/* Step Content */}
-                <div className="bg-[var(--balatro-modal-bg)] border-2 border-white/20 rounded-xl p-6 min-h-[500px] flex flex-col">
+            {/* Main Card Container - Scrollable */}
+            <div className="w-full max-w-xl bg-[var(--balatro-modal-bg)] border-4 border-white/10 rounded-xl shadow-2xl relative flex flex-col mb-20">
+                
+                {/* Content Area */}
+                <div className="flex-1 p-6 pb-24">
                     
                     {/* Step 1: Metadata */}
                     {step === 1 && (
-                        <div className="space-y-6 animate-in fade-in">
-                            <h2 className="text-2xl font-header flex items-center gap-2">
-                                <Settings className="text-[var(--balatro-purple)]" />
-                                Ritual Basics
-                            </h2>
+                        <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
+                            <div className="text-center mb-6">
+                                <h2 className="text-2xl font-header text-[var(--balatro-blue)] mb-1">Ritual Basics</h2>
+                                <div className="h-1 w-16 bg-[var(--balatro-blue)] mx-auto rounded-full opacity-50"/>
+                            </div>
                             
-                            <div className="grid gap-4 max-w-lg">
+                            <div className="space-y-4">
                                 <div>
-                                    <label className="block text-sm text-white/60 mb-1">Ritual ID (URL Slug)</label>
+                                    <label className="block text-xs text-[var(--balatro-blue)] mb-1 font-header tracking-wider uppercase">Ritual ID</label>
                                     <input 
                                         type="text" 
-                                        className="w-full bg-black/40 border-2 border-white/10 rounded p-2 focus:border-[var(--balatro-blue)] outline-none transition-colors"
-                                        placeholder="e.g. my-cool-challenge"
+                                        className="w-full bg-black/40 border-2 border-white/10 rounded-lg p-3 text-base focus:border-[var(--balatro-blue)] outline-none transition-all placeholder:text-white/10 focus:bg-black/60"
+                                        placeholder="my-cool-challenge"
                                         value={meta.id}
                                         onChange={e => setMeta({...meta, id: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-')})}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm text-white/60 mb-1">Title</label>
+                                    <label className="block text-xs text-[var(--balatro-blue)] mb-1 font-header tracking-wider uppercase">Title</label>
                                     <input 
                                         type="text" 
-                                        className="w-full bg-black/40 border-2 border-white/10 rounded p-2 focus:border-[var(--balatro-blue)] outline-none transition-colors"
+                                        className="w-full bg-black/40 border-2 border-white/10 rounded-lg p-3 text-base focus:border-[var(--balatro-blue)] outline-none transition-all placeholder:text-white/10 focus:bg-black/60"
                                         placeholder="My Cool Challenge"
                                         value={meta.title}
                                         onChange={e => setMeta({...meta, title: e.target.value})}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm text-white/60 mb-1">Tagline</label>
+                                    <label className="block text-xs text-white/40 mb-1 font-header tracking-wider uppercase">Tagline</label>
                                     <input 
                                         type="text" 
-                                        className="w-full bg-black/40 border-2 border-white/10 rounded p-2 focus:border-[var(--balatro-blue)] outline-none transition-colors"
+                                        className="w-full bg-black/40 border-2 border-white/10 rounded-lg p-3 text-base focus:border-[var(--balatro-blue)] outline-none transition-all placeholder:text-white/10 focus:bg-black/60"
                                         placeholder="Can you beat the heat?"
                                         value={meta.tagline}
                                         onChange={e => setMeta({...meta, tagline: e.target.value})}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm text-white/60 mb-1">Author Name</label>
+                                    <label className="block text-xs text-white/40 mb-1 font-header tracking-wider uppercase">Author</label>
                                     <input 
                                         type="text" 
-                                        className="w-full bg-black/40 border-2 border-white/10 rounded p-2 focus:border-[var(--balatro-blue)] outline-none transition-colors"
+                                        className="w-full bg-black/40 border-2 border-white/10 rounded-lg p-3 text-base focus:border-[var(--balatro-blue)] outline-none transition-all placeholder:text-white/10 focus:bg-black/60"
                                         placeholder="Jimbo"
                                         value={meta.author}
                                         onChange={e => setMeta({...meta, author: e.target.value})}
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm text-white/60 mb-1">Objective Name (Display)</label>
-                                    <input 
-                                        type="text" 
-                                        className="w-full bg-black/40 border-2 border-white/10 rounded p-2 focus:border-[var(--balatro-blue)] outline-none transition-colors"
-                                        placeholder="Wee Joker"
-                                        value={meta.defaultObjective}
-                                        onChange={e => setMeta({...meta, defaultObjective: e.target.value})}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm text-white/60 mb-1">Start Date (Epoch)</label>
-                                    <input 
-                                        type="date" 
-                                        className="w-full bg-black/40 border-2 border-white/10 rounded p-2 focus:border-[var(--balatro-blue)] outline-none transition-colors"
-                                        value={meta.epoch}
-                                        onChange={e => setMeta({...meta, epoch: e.target.value})}
-                                    />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs text-white/40 mb-1 font-header tracking-wider uppercase">Objective Display</label>
+                                        <input 
+                                            type="text" 
+                                            className="w-full bg-black/40 border-2 border-white/10 rounded-lg p-3 text-base focus:border-[var(--balatro-blue)] outline-none transition-all placeholder:text-white/10 focus:bg-black/60"
+                                            placeholder="Wee Joker"
+                                            value={meta.defaultObjective}
+                                            onChange={e => setMeta({...meta, defaultObjective: e.target.value})}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-white/40 mb-1 font-header tracking-wider uppercase">Start Date</label>
+                                        <input 
+                                            type="date" 
+                                            className="w-full bg-black/40 border-2 border-white/10 rounded-lg p-3 text-base focus:border-[var(--balatro-blue)] outline-none transition-all text-white focus:bg-black/60"
+                                            value={meta.epoch}
+                                            onChange={e => setMeta({...meta, epoch: e.target.value})}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -211,8 +215,8 @@ export default function CreateRitualPage() {
 
                     {/* Step 2: JAML */}
                     {step === 2 && (
-                        <div className="flex-1 flex flex-col animate-in fade-in h-full">
-                            <h2 className="text-2xl font-header flex items-center gap-2 mb-4">
+                        <div className="flex-1 flex flex-col animate-in fade-in h-full pb-8">
+                            <h2 className="text-2xl font-header flex items-center gap-2 mb-4 text-[var(--balatro-red)]">
                                 <FileText className="text-[var(--balatro-red)]" />
                                 Define Rules (JAML)
                             </h2>
@@ -227,8 +231,8 @@ export default function CreateRitualPage() {
 
                     {/* Step 3: Seeds & Verify */}
                     {step === 3 && (
-                        <div className="space-y-6 animate-in fade-in">
-                            <h2 className="text-2xl font-header flex items-center gap-2">
+                        <div className="space-y-6 animate-in fade-in pb-8">
+                            <h2 className="text-2xl font-header flex items-center gap-2 text-[var(--balatro-gold)]">
                                 <Upload className="text-[var(--balatro-gold)]" />
                                 Upload & Verify Seeds
                             </h2>
@@ -237,7 +241,7 @@ export default function CreateRitualPage() {
                                 <div className="space-y-4">
                                     <label className="block text-sm text-white/60">Paste Seeds (Comma or Newline separated)</label>
                                     <textarea 
-                                        className="w-full h-64 bg-black/40 border-2 border-white/10 rounded p-4 font-mono text-sm focus:border-[var(--balatro-gold)] outline-none transition-colors resize-none"
+                                        className="w-full h-48 bg-black/40 border-2 border-white/10 rounded p-4 font-mono text-sm focus:border-[var(--balatro-gold)] outline-none transition-colors resize-none"
                                         placeholder="SEED1234, SEED5678..."
                                         value={seedsInput}
                                         onChange={e => setSeedsInput(e.target.value)}
@@ -245,12 +249,12 @@ export default function CreateRitualPage() {
                                     <button 
                                         onClick={handleVerifySeeds}
                                         disabled={isVerifying || !seedsInput.trim()}
-                                        className="balatro-button balatro-button-green w-full flex items-center justify-center gap-2"
+                                        className="balatro-button balatro-button-green w-full flex items-center justify-center gap-2 py-3 text-lg shadow-[0_4px_0_rgba(0,0,0,0.4)] active:shadow-none active:translate-y-[4px]"
                                     >
                                         {isVerifying ? (
                                             <span className="animate-spin">⌛</span> 
                                         ) : (
-                                            <Play size={18} />
+                                            <Play size={18} fill="currentColor" />
                                         )}
                                         Verify Seeds
                                     </button>
@@ -298,7 +302,7 @@ export default function CreateRitualPage() {
 
                     {/* Step 4: Review */}
                     {step === 4 && (
-                        <div className="space-y-6 animate-in fade-in flex flex-col items-center justify-center text-center py-12">
+                        <div className="space-y-6 animate-in fade-in flex flex-col items-center justify-center text-center py-8 pb-16">
                             <div className="w-24 h-24 bg-[var(--balatro-blue)] rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(59,130,246,0.5)]">
                                 <Check size={48} className="text-white" strokeWidth={4} />
                             </div>
@@ -323,37 +327,37 @@ export default function CreateRitualPage() {
                             <button 
                                 onClick={handleSubmit}
                                 disabled={isSubmitting}
-                                className="balatro-button balatro-button-gold px-12 py-4 text-xl flex items-center gap-3 mt-8"
+                                className="balatro-button balatro-button-gold px-12 py-4 text-xl flex items-center gap-3 mt-8 shadow-[0_4px_0_rgba(0,0,0,0.4)] active:shadow-none active:translate-y-[4px]"
                             >
                                 {isSubmitting ? "Forging..." : "Create Ritual"}
                             </button>
                         </div>
                     )}
 
-                    {/* Navigation */}
-                    <div className="mt-auto pt-8 flex justify-between border-t border-white/10">
-                        <button 
-                            onClick={handleBack}
-                            disabled={step === 1}
-                            className="flex items-center gap-2 text-white/60 hover:text-white disabled:opacity-30 transition-colors"
-                        >
-                            <ArrowLeft size={18} />
-                            Back
-                        </button>
-
-                        {step < 4 && (
+                    {/* Navigation - Fixed to bottom */}
+                    <div className="absolute bottom-0 left-0 right-0 p-0 flex flex-col">
+                         {step < 4 && (
                             <button 
                                 onClick={handleNext}
                                 disabled={
                                     (step === 1 && !meta.id) || 
                                     (step === 3 && verificationResults.filter(r => r.passed).length === 0)
                                 }
-                                className="balatro-button balatro-button-blue px-6 py-2 flex items-center gap-2"
+                                className="balatro-button balatro-button-blue w-full py-4 flex items-center justify-center gap-2 text-xl rounded-b-none shadow-[0_-4px_0_rgba(0,0,0,0.2)_inset]"
                             >
-                                Next
-                                <ArrowRight size={18} />
+                                Next Step
+                                <ArrowRight size={24} />
                             </button>
                         )}
+                        
+                        <button 
+                            onClick={handleBack}
+                            disabled={step === 1}
+                            className="balatro-button balatro-button-red w-full py-4 flex items-center justify-center gap-2 text-xl rounded-t-none border-t border-black/20 shadow-none"
+                        >
+                            <ArrowLeft size={24} />
+                            Back
+                        </button>
                     </div>
                 </div>
             </div>
