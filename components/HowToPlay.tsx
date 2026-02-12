@@ -8,9 +8,10 @@ interface HowToPlayProps {
     onClose: () => void;
     onSubmit?: () => void;
     seedId?: string;
+    objectiveName?: string;
 }
 
-export function HowToPlay({ isOpen, onClose, onSubmit, seedId = "--------" }: HowToPlayProps) {
+export function HowToPlay({ isOpen, onClose, onSubmit, seedId = "--------", objectiveName = "Objective" }: HowToPlayProps) {
     const [step, setStep] = useState(1);
     const [copied, setCopied] = useState(false);
     const totalSteps = 4;
@@ -111,13 +112,13 @@ export function HowToPlay({ isOpen, onClose, onSubmit, seedId = "--------" }: Ho
                             <h3 className="text-2xl font-header text-white tracking-wider">The Goal</h3>
                             <div className="bg-black/40 p-3 rounded-xl border-2 border-[var(--balatro-gold)] border-dashed flex flex-col gap-2 text-left">
                                 <p className="font-pixel text-md text-white leading-tight">
-                                    • Find <span className="text-[var(--balatro-blue)] font-header">Wee Joker</span> and upgrade by playing Rank 2 cards!
+                                    • Find <span className="text-[var(--balatro-blue)] font-header">{objectiveName}</span> and upgrade by playing Rank 2 cards!
                                 </p>
                                 <p className="font-pixel text-md text-white leading-tight">
                                     • Win the <span className="text-[var(--balatro-red)] font-header">Ante 8</span> Boss Blind.
                                 </p>
                                 <p className="font-pixel text-md text-white leading-tight">
-                                    • In Ante 9 shop, select your <span className="text-[var(--balatro-blue)] font-header">Wee Joker</span>.
+                                    • In Ante 9 shop, select your <span className="text-[var(--balatro-blue)] font-header">{objectiveName}</span>.
                                 </p>
                                 <p className="font-pixel text-[var(--balatro-gold)] font-header text-sm tracking-widest text-center mt-1">
                                     <span className="text-[var(--balatro-blue)] font-header">+Chips</span> is your score to submit!

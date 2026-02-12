@@ -33,10 +33,13 @@ export function WasmStatus() {
             }
         };
         load();
+
         return () => {
             cancelled = true;
         };
     }, []);
+
+    const displayVersion = version;
 
     return (
         <div className={cn(
@@ -54,9 +57,9 @@ export function WasmStatus() {
                 <span className="text-[12px] uppercase tracking-widest leading-tight">
                     WASM: {status.toUpperCase()}
                 </span>
-                {version && (
+                {displayVersion && (
                     <span className="text-[11px] opacity-70 leading-tight">
-                        v{version}
+                        v{displayVersion}
                         {threads !== null ? ` • threads:${threads ? 'on' : 'off'}` : ''}
                         {simd !== null ? ` • simd:${simd ? 'on' : 'off'}` : ''}
                         {processors !== null ? ` • cpu:${processors}` : ''}

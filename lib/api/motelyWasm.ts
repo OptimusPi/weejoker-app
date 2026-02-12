@@ -3,72 +3,58 @@
 /**
  * Motely WASM Bridge
  *
- * Uses the published motely-wasm npm package. Provides analyzeSeedWasm() and
- * searchSeedsWasm() for analyzer and JAML search.
- *
- * Recommended: call preloadWasm() on app mount (e.g. in ClientProviders) so
- * the first Analyze or JAML search doesn't wait on the full runtime load.
+ * Clean wrapper around the motely-wasm npm package.
+ * Handles lazy initialization and provides typed APIs for consumers.
  */
+
+export type {
+    MotelyWasmApi,
+    SeedAnalysisInfo,
+    SearchStatusInfo,
+    SearchResultInfo,
+    VersionInfo,
+    CapabilitiesInfo,
+} from 'motely-wasm';
 
 import type {
     MotelyWasmApi,
     SeedAnalysisInfo,
     SearchStatusInfo,
-    ValidateResult,
+    SearchResultInfo,
     VersionInfo,
     CapabilitiesInfo,
-    SearchOptions,
 } from 'motely-wasm';
 
+// Singleton WASM API
 let wasmApi: MotelyWasmApi | null = null;
 let initPromise: Promise<MotelyWasmApi> | null = null;
 
 /**
- * Initialize the WASM engine using the published npm package loader.
- * Call once; subsequent calls return the cached instance.
+ * Initialize and return the Motely WASM API (singleton).
+ * Browser-only — throws in SSR/Edge.
  */
-async function initMotelyWasm(): Promise<MotelyWasmApi> {
+async function getWasmApi(): Promise<MotelyWasmApi> {
+    if (typeof window === 'undefined') {
+        throw new Error('[MotelyWasm] WASM only available in browser environment');
+    }
     if (wasmApi) return wasmApi;
     if (initPromise) return initPromise;
 
     initPromise = (async () => {
         try {
-            // Dynamic import so Next.js doesn't try to bundle this server-side
             const { loadMotely } = await import('motely-wasm');
-            // The next-plugin-motely-wasm transforms .wasm/.dat imports at copy time,
-            // so static files in public/_framework are browser-safe. No API route needed.
+            console.log('[MotelyWasm] Loading WASM runtime...');
             wasmApi = await loadMotely();
-
             const version = wasmApi.getVersion();
-            const capabilities = wasmApi.getCapabilities();
             console.log(`[MotelyWasm] Loaded v${version.version} (${version.runtime})`);
-            console.log(`[MotelyWasm] Capabilities: SIMD=${capabilities.simd}, Threads=${capabilities.threads}, Processors=${capabilities.processorCount}`);
-
             return wasmApi;
         } catch (error) {
-            console.error("[MotelyWasm] Failed to load:", error);
             initPromise = null;
             throw error;
         }
     })();
 
     return initPromise;
-}
-
-/**
- * Get the WASM API, initializing if needed.
- */
-export async function getWasmApi(): Promise<MotelyWasmApi> {
-    return initMotelyWasm();
-}
-
-/**
- * Start loading the WASM runtime in the background (e.g. on app mount).
- * Call from a top-level client component so the first Analyze click doesn't wait on the full load.
- */
-export function preloadWasm(): void {
-    if (wasmApi || initPromise) return;
-    initMotelyWasm().catch(() => { /* ignore; getWasmApi() will retry */ });
 }
 
 /**
@@ -89,32 +75,40 @@ export async function getCapabilities(): Promise<CapabilitiesInfo> {
 
 /**
  * Analyze a seed using the WASM engine.
- * @param seed - Balatro seed string (e.g. "TACO1111")
- * @param deck - Deck name (e.g. "Red", "Erratic")
- * @param stake - Stake name (e.g. "White", "Gold")
  */
 export async function analyzeSeedWasm(
     seed: string,
-    deck: string = 'Red',
-    stake: string = 'White',
+    deck: string = 'erratic',
+    stake: string = 'white',
+    _ante?: number,
+    _shop?: number
 ): Promise<SeedAnalysisInfo> {
     const api = await getWasmApi();
-    return api.analyzeSeed(seed, deck, stake);
+    
+    // Normalize deck name to handle special cases
+    let normalizedDeck = deck.toLowerCase();
+    
+    // Default to 'erratic' if empty or invalid
+    if (!normalizedDeck || normalizedDeck === '') {
+        normalizedDeck = 'erratic';
+    }
+    
+    // Ensure we don't accidentally pass 'blueprint' or other non-deck strings
+    // unless they are valid deck names in Motely
+    const VALID_DECKS = [
+        'red', 'blue', 'yellow', 'green', 'black', 'magic', 'nebula', 'ghost', 
+        'abandoned', 'checkered', 'zodiac', 'painted', 'anaglyph', 'plasma', 'erratic'
+    ];
+    
+    if (!VALID_DECKS.includes(normalizedDeck)) {
+        console.warn(`[MotelyWasm] Unknown deck '${deck}', defaulting to 'erratic'`);
+        normalizedDeck = 'erratic';
+    }
+
+    return api.analyzeSeed(seed, normalizedDeck, stake);
 }
 
-/**
- * Validate JAML content using the WASM engine.
- */
-export async function validateJamlWasm(jamlContent: string): Promise<ValidateResult> {
-    const api = await getWasmApi();
-    return api.validateJaml(jamlContent);
-}
-
-// ──────────────────────────────── Search ────────────────────────────────
-
-let activeSearchId: string | null = null;
-type SearchListener = (event: SearchEvent) => void;
-const searchListeners: Set<SearchListener> = new Set();
+// --- Search event system ---
 
 export interface SearchEvent {
     type: 'result' | 'progress' | 'complete' | 'error';
@@ -122,134 +116,92 @@ export interface SearchEvent {
     message?: string;
 }
 
+export interface SearchResult {
+    seed: string;
+    score?: number;
+    tallies?: number[] | null;
+}
+
+type SearchListener = (event: SearchEvent) => void;
+const searchListeners: Set<SearchListener> = new Set();
+let activeSearchId: string | null = null;
+
+function notifyListeners(event: SearchEvent) {
+    searchListeners.forEach(listener => {
+        try { listener(event); } catch (e) { console.error('[MotelyWasm] Listener error:', e); }
+    });
+}
+
 /**
- * Add a listener for search events.
- * Returns a cleanup function.
+ * Add a listener for search events. Returns a cleanup function.
  */
 export function addSearchListener(listener: SearchListener): () => void {
     searchListeners.add(listener);
     return () => searchListeners.delete(listener);
 }
 
-function notifyListeners(event: SearchEvent) {
-    searchListeners.forEach(listener => {
-        try {
-            listener(event);
-        } catch (e) {
-            console.error('[MotelyWasm] Listener error:', e);
-        }
-    });
-}
-
 /**
  * Start a JAML search using the WASM engine.
- * Search results are emitted to listeners.
- *
- * @param jamlContent - JAML filter content
- * @param options - Optional search parameters (threadCount, batchSize, etc.)
- * @returns searchId string (resolves once searchId is known)
+ * Results are emitted to listeners via addSearchListener.
  */
 export async function searchSeedsWasm(
     jamlContent: string,
-    options?: SearchOptions,
+    maxResults: number = 1000,
+    deck: string = '',
 ): Promise<string> {
     const api = await getWasmApi();
 
     // Stop any existing search
     if (activeSearchId) {
-        try {
-            api.stopSearch(activeSearchId);
-            await api.disposeSearch(activeSearchId);
-        } catch { /* ignore */ }
+        try { api.stopSearch(activeSearchId); } catch { /* noop */ }
+        activeSearchId = null;
     }
 
-    // Start new search
-    const defaults: SearchOptions = {
-        threadCount: typeof navigator !== 'undefined' ? Math.max(1, navigator.hardwareConcurrency - 1) : 4,
-    };
-    activeSearchId = null;
+    // Track searchId from first callback
+    let capturedSearchId: string | null = null;
 
-    // Track already-seen seeds to avoid duplicate result events
-    const seenSeeds = new Set<string>();
-
-    let resolveSearchId: ((id: string) => void) | null = null;
-    const searchIdPromise = new Promise<string>((resolve) => {
-        resolveSearchId = resolve;
+    // Start search — promise resolves when search completes
+    const searchPromise = api.startJamlSearch(jamlContent, {
+        onProgress: (searchId, totalSeedsSearched, matchingSeeds, elapsedMs, resultCount) => {
+            if (!capturedSearchId) {
+                capturedSearchId = searchId;
+                activeSearchId = searchId;
+            }
+            notifyListeners({
+                type: 'progress',
+                data: { SearchedCount: totalSeedsSearched, matchingSeeds, elapsedMs, resultCount }
+            });
+        },
+        onResult: (searchId, seed, score) => {
+            notifyListeners({
+                type: 'result',
+                data: { seed, score }
+            });
+        },
     });
 
-    const ensureSearchId = (id: string) => {
-        if (!activeSearchId) {
-            activeSearchId = id;
-            if (resolveSearchId) {
-                resolveSearchId(id);
-                resolveSearchId = null;
-            }
-        }
-    };
-
-    const onProgress = (
-        searchId: string,
-        totalSeedsSearched: number,
-        matchingSeeds: number,
-        elapsedMs: number,
-        resultCount: number,
-    ) => {
-        ensureSearchId(searchId);
-        notifyListeners({
-            type: 'progress',
-            data: {
-                SearchedCount: totalSeedsSearched,
-                MatchingSeeds: matchingSeeds,
-                ElapsedMs: elapsedMs,
-                ResultCount: resultCount,
-                progress: 'Running',
-            },
-        });
-    };
-
-    const onResult = (searchId: string, seed: string, score: number) => {
-        ensureSearchId(searchId);
-        if (seenSeeds.has(seed)) return;
-        seenSeeds.add(seed);
-        notifyListeners({
-            type: 'result',
-            data: { seed, score },
-        });
-    };
-
-    api.startJamlSearch(jamlContent, { ...defaults, ...options, onProgress, onResult })
-        .then(async (status) => {
-            ensureSearchId(status.searchId);
-            if (status.error) {
-                notifyListeners({ type: 'error', message: status.error });
-            } else {
-                notifyListeners({ type: 'complete', data: status });
-            }
-            if (activeSearchId === status.searchId) {
+    // Handle completion asynchronously (don't block the caller)
+    searchPromise
+        .then((status) => {
+            notifyListeners({ type: 'complete', data: status });
+            if (activeSearchId === (capturedSearchId || status.searchId)) {
                 activeSearchId = null;
             }
-            try {
-                await api.disposeSearch(status.searchId);
-            } catch { /* ignore */ }
         })
-        .catch((e: any) => {
-            notifyListeners({ type: 'error', message: e?.message || String(e) });
+        .catch((err) => {
+            notifyListeners({ type: 'error', message: err?.message || String(err) });
             activeSearchId = null;
         });
 
-    return searchIdPromise;
+    return capturedSearchId || 'pending';
 }
 
 /**
  * Cancel the active search.
  */
-export async function cancelSearch(): Promise<void> {
+export function cancelSearch(): void {
     if (activeSearchId && wasmApi) {
-        try {
-            const id = activeSearchId;
-            wasmApi.stopSearch(id);
-            await wasmApi.disposeSearch(id);
-        } catch { /* ignore */ }
+        try { wasmApi.stopSearch(activeSearchId); } catch { /* noop */ }
         activeSearchId = null;
     }
 }
@@ -262,22 +214,12 @@ export function isSearchRunning(): boolean {
 }
 
 /**
- * Get the current search progress.
+ * Validate JAML content.
  */
-export async function getSearchProgress(): Promise<SearchStatusInfo | null> {
-    if (!activeSearchId || !wasmApi) return null;
-    try {
-        return wasmApi.getSearchStatus(activeSearchId, 0);
-    } catch {
-        return null;
-    }
-}
-
-// Simple result type used by UI components
-export interface SearchResult {
-    seed: string;
-    score: number;
+export async function validateJamlWasm(jamlContent: string) {
+    const api = await getWasmApi();
+    return api.validateJaml(jamlContent);
 }
 
 // Re-export types for convenience
-export type { MotelyWasmApi, SeedAnalysisInfo, SearchStatusInfo, ValidateResult, VersionInfo, CapabilitiesInfo, SearchOptions };
+// export type { MotelyWasmApi, SeedAnalysisInfo, SearchStatusInfo, SearchResultInfo, VersionInfo, CapabilitiesInfo };

@@ -232,6 +232,7 @@ export default function JamlBuilder() {
                                     {searchResults.map((result: SearchResult) => (
                                         <AgnosticSeedCard
                                             key={result.seed}
+                                            seed={result.seed}
                                             result={result}
                                             className="!scale-95 !origin-top"
                                         />

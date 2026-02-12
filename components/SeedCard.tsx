@@ -33,8 +33,8 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
         if (dayNumber <= 0) return;
         let isMounted = true;
         fetch(`/api/scores?day=${dayNumber}`)
-            .then(res => res.json())
-            .then(data => {
+            .then(res => res.json() as Promise<{ scores: any[] }>)
+            .then((data) => {
                 if (isMounted) {
                     const scores = data.scores || [];
                     setAllScores(scores);

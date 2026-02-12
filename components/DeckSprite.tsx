@@ -1,12 +1,14 @@
-import React from 'react';
 
-interface DeckSpriteProps {
+"use client";
+import React from 'react';
+import { cn } from '@/lib/utils';
+
+export interface DeckSpriteProps {
     deck: string;
     stake?: string;
     size?: number;
     className?: string;
 }
-
 export const DECK_MAP: Record<string, { x: number; y: number }> = {
     'red': { x: 0, y: 0 },
     'nebula': { x: 3, y: 0 },
@@ -86,5 +88,3 @@ export function DeckSprite({ deck, stake, size = 50, className = '' }: DeckSprit
         </div>
     );
 }
-
-

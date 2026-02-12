@@ -1,5 +1,4 @@
 import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev';
-import withMotelyWasm from 'motely-wasm/next-plugin';
 
 if (process.env.NODE_ENV === 'development') {
     await setupDevPlatform({
@@ -7,24 +6,32 @@ if (process.env.NODE_ENV === 'development') {
     });
 }
 
-const nextConfig = {
+const baseConfig = {
     allowedDevOrigins: [
-        'localhost',
-        'weejoker.app',
-        'www.weejoker.app',
-        '192.168.0.171'
+        'http://localhost:3000',
+        'http://192.168.0.171:3000',
+        'https://*.seed-finder-app.pages.dev'
     ],
-    typescript: {
-        ignoreBuildErrors: true,
-    },
-    // Exclude motely-wasm from SSR bundling - it's browser-only
-    serverExternalPackages: ['motely-wasm'],
-    turbopack: {
-        resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
+    async headers() {
+        return [
+            {
+                source: '/:path*',
+                headers: [
+                    {
+                        key: 'Cross-Origin-Opener-Policy',
+                        value: 'same-origin',
+                    },
+                    {
+                        key: 'Cross-Origin-Embedder-Policy',
+                        value: 'require-corp',
+                    },
+                ],
+            },
+        ];
     },
 };
 
-export default withMotelyWasm(nextConfig);
+export default baseConfig;
 
 
 

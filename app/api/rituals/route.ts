@@ -9,7 +9,16 @@ const ritualPresets: Record<string, any> = {
         tagline: ritualConfig.tagline,
         epoch: ritualConfig.epochDate,
         jamlPath: "/daily_ritual.jaml",
-        seedsPath: "/seeds.txt"
+        seedsPath: "/seeds.txt",
+        defaultObjective: ritualConfig.defaultObjective
+    },
+    'cloud9': {
+        title: "Cloud 9 Daily",
+        tagline: "Float like a butterfly, sting like a Rank 9",
+        epoch: "2026-02-03T00:00:00Z",
+        jamlPath: "/rituals/cloud9.jaml",
+        seedsPath: "/rituals/cloud9.csv",
+        defaultObjective: "Cloud 9"
     }
 };
 

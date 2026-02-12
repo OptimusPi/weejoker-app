@@ -34,14 +34,15 @@ export function SubmitScoreModal({ seed, ritualId, onClose, onSuccess }: SubmitS
             });
 
             if (!res.ok) {
-                const data = await res.json();
+                const data = await res.json() as { error?: string };
                 throw new Error(data.error || 'Failed to submit');
             }
 
             onSuccess();
             onClose();
-        } catch (err: any) {
-            setError(err.message || 'Something went wrong');
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : 'Something went wrong';
+            setError(msg);
         } finally {
             setSubmitting(false);
         }
