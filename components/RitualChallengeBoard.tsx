@@ -7,7 +7,7 @@ import { AgnosticSeedCard } from "./AgnosticSeedCard";
 import { Sprite } from "./Sprite";
 import { CardFan } from "./CardFan";
 import { useSeedAnalyzer } from "@/lib/hooks/useSeedAnalyzer";
-import { evaluateSeed } from "@/lib/jamlEvaluator";
+import { evaluateSeed } from "@/lib/jaml/jamlEvaluator";
 import { useJamlFilter } from "@/lib/hooks/useJamlFilter";
 import { JamlJourneyMap } from "./cards/JamlJourneyMap";
 import { cn } from "@/lib/utils";

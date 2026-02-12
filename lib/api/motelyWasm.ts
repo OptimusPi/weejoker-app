@@ -162,7 +162,7 @@ export async function searchSeedsWasm(
 
     // Start search — promise resolves when search completes
     const searchPromise = api.startJamlSearch(jamlContent, {
-        onProgress: (searchId, totalSeedsSearched, matchingSeeds, elapsedMs, resultCount) => {
+        onProgress: (searchId: string, totalSeedsSearched: number, matchingSeeds: number, elapsedMs: number, resultCount: number) => {
             if (!capturedSearchId) {
                 capturedSearchId = searchId;
                 activeSearchId = searchId;
@@ -172,7 +172,7 @@ export async function searchSeedsWasm(
                 data: { SearchedCount: totalSeedsSearched, matchingSeeds, elapsedMs, resultCount }
             });
         },
-        onResult: (searchId, seed, score) => {
+        onResult: (searchId: string, seed: string, score: number) => {
             notifyListeners({
                 type: 'result',
                 data: { seed, score }
@@ -182,13 +182,13 @@ export async function searchSeedsWasm(
 
     // Handle completion asynchronously (don't block the caller)
     searchPromise
-        .then((status) => {
+        .then((status: SearchStatusInfo) => {
             notifyListeners({ type: 'complete', data: status });
             if (activeSearchId === (capturedSearchId || status.searchId)) {
                 activeSearchId = null;
             }
         })
-        .catch((err) => {
+        .catch((err: any) => {
             notifyListeners({ type: 'error', message: err?.message || String(err) });
             activeSearchId = null;
         });

@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { analyzeSeedWasm } from '@/lib/api/motelyWasm';
-import { evaluateSeed } from '@/lib/jamlEvaluator';
+import { evaluateSeed } from '@/lib/jaml/jamlEvaluator';
 import { useIceLake } from './useIceLake';
 import { JamlFilter } from '../useJamlFilter';
 import { normalizeAnalysis } from '@/lib/seedAnalyzer';

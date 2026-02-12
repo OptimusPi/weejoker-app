@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight, Check, AlertCircle, Upload, FileText, Settings, 
 import JamlEditor from "@/components/JamlEditor";
 import { useJamlFilter } from "@/lib/hooks/useJamlFilter";
 import { analyzeSeedWasm } from "@/lib/api/motelyWasm";
-import { evaluateSeed } from "@/lib/jamlEvaluator";
+import { evaluateSeed } from "@/lib/jaml/jamlEvaluator";
 import { normalizeAnalysis } from "@/lib/seedAnalyzer";
 import { cn } from "@/lib/utils";
 import type { CreateRitualRequest } from "@/lib/api/types";

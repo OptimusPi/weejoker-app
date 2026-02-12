@@ -1,5 +1,5 @@
-import { AnalyzedSeed } from './seedAnalyzer';
-import { JamlClause, JamlFilter } from './hooks/useJamlFilter';
+import { AnalyzedSeed } from '../seedAnalyzer';
+import { JamlClause, JamlFilter } from '../hooks/useJamlFilter';
 
 export interface ClauseMatch {
     clause: JamlClause;

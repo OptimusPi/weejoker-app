@@ -11,7 +11,7 @@ import { X, Edit2, Loader2, Search, Square, Copy, RotateCcw, Flame, Sparkles } f
 import { SearchResult } from '@/lib/api/motelyWasm';
 import { AgnosticSeedCard } from './AgnosticSeedCard';
 import { WasmStatus } from './WasmStatus';
-import { JAML_PRESETS } from '@/lib/jaml/presets';
+import { JAML_PRESETS } from '@/lib/jaml/jamlPresets';
 
 export default function JamlBuilder() {
     const {
