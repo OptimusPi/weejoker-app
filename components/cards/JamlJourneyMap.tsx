@@ -56,7 +56,7 @@ export function JamlJourneyMap({ evaluation, className, maxMatches = 50, compact
                 className
             )}>
                 <span>No JAML Routing Available</span>
-                <span className="text-[8px] mt-1 scale-75 uppercase">Verify filter or check analysis data</span>
+                <span className="text-[8px] mt-1 scale-75">Verify filter or check analysis data</span>
             </div>
         );
     }
@@ -75,6 +75,7 @@ export function JamlJourneyMap({ evaluation, className, maxMatches = 50, compact
             {/* Header / Navigation */}
             <div className="flex items-center justify-between bg-black/40 rounded-lg p-1 border border-white/5">
                 <button
+                    title="Previous Ante"
                     onClick={() => setPage(p => p - 1)}
                     disabled={!canPrev}
                     className="p-1 hover:bg-white/10 rounded disabled:opacity-20 transition-colors"
@@ -84,14 +85,15 @@ export function JamlJourneyMap({ evaluation, className, maxMatches = 50, compact
 
                 <div className="flex flex-col items-center">
                     <span className="font-header text-[var(--balatro-blue)] tracking-widest text-sm">
-                        ANTE {currentAnteGroup.ante}
+                        Ante {currentAnteGroup.ante}
                     </span>
-                    <span className="text-[8px] font-pixel uppercase text-white/40 tracking-tighter">
+                    <span className="text-[8px] font-pixel text-white/40 tracking-tighter">
                         {currentAnteGroup.items.length} Items Found
                     </span>
                 </div>
 
                 <button
+                    title="Next Ante"
                     onClick={() => setPage(p => p + 1)}
                     disabled={!canNext}
                     className="p-1 hover:bg-white/10 rounded disabled:opacity-20 transition-colors"
@@ -105,7 +107,7 @@ export function JamlJourneyMap({ evaluation, className, maxMatches = 50, compact
                 {currentAnteGroup.items.map((match, i) => (
                     <div key={i} className="flex flex-col items-center gap-1 group/card relative">
                         {/* Source Label (Shop/Pack) */}
-                        <div className="bottom-0 left-0 right-0 text-[6px] text-center font-pixel uppercase text-white/30 truncate px-0.5 pb-0.5">
+                        <div className="bottom-0 left-0 right-0 text-[6px] text-center font-pixel text-white/30 truncate px-0.5 pb-0.5">
                             {match.source.replace('Shop', '').replace('Pack', 'Pk').trim() || 'Shop'}
                         </div>
 

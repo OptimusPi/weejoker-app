@@ -59,6 +59,10 @@ export function useJamlFilter(initialJaml?: string) {
     const [filter, setFilter] = useState<JamlFilter>(parseJamlToFilter(initialJaml || ''));
     const [editingClause, setEditingClause] = useState<{ bucket: keyof Pick<JamlFilter, 'must' | 'should' | 'mustNot'>, index: number | null } | null>(null);
 
+    // useEffect removed to restore previous UX behavior
+    // The JAML from server (Rules format) parses to empty clauses,
+    // causing the UI to lose state after load. we want to keep the initial state.
+
     const jamlText = useMemo(() => filterToJaml(filter), [filter]);
 
     const updateFilter = useCallback((updates: Partial<JamlFilter>) => {

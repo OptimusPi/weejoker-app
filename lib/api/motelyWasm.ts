@@ -14,6 +14,8 @@ export type {
     SearchResultInfo,
     VersionInfo,
     CapabilitiesInfo,
+    SearchOptions,
+    ValidateResult,
 } from 'motely-wasm';
 
 import type {
@@ -23,6 +25,8 @@ import type {
     SearchResultInfo,
     VersionInfo,
     CapabilitiesInfo,
+    SearchOptions,
+    ValidateResult,
 } from 'motely-wasm';
 
 // Singleton WASM API
@@ -43,8 +47,10 @@ async function getWasmApi(): Promise<MotelyWasmApi> {
     initPromise = (async () => {
         try {
             const { loadMotely } = await import('motely-wasm');
-            console.log('[MotelyWasm] Loading WASM runtime...');
-            wasmApi = await loadMotely();
+            console.log('[MotelyWasm] Loading WASM runtime (threaded)...');
+            wasmApi = await loadMotely({
+                threads: 'on'
+            });
             const version = wasmApi.getVersion();
             console.log(`[MotelyWasm] Loaded v${version.version} (${version.runtime})`);
             return wasmApi;
@@ -84,22 +90,22 @@ export async function analyzeSeedWasm(
     _shop?: number
 ): Promise<SeedAnalysisInfo> {
     const api = await getWasmApi();
-    
+
     // Normalize deck name to handle special cases
     let normalizedDeck = deck.toLowerCase();
-    
+
     // Default to 'erratic' if empty or invalid
     if (!normalizedDeck || normalizedDeck === '') {
         normalizedDeck = 'erratic';
     }
-    
+
     // Ensure we don't accidentally pass 'blueprint' or other non-deck strings
     // unless they are valid deck names in Motely
     const VALID_DECKS = [
-        'red', 'blue', 'yellow', 'green', 'black', 'magic', 'nebula', 'ghost', 
+        'red', 'blue', 'yellow', 'green', 'black', 'magic', 'nebula', 'ghost',
         'abandoned', 'checkered', 'zodiac', 'painted', 'anaglyph', 'plasma', 'erratic'
     ];
-    
+
     if (!VALID_DECKS.includes(normalizedDeck)) {
         console.warn(`[MotelyWasm] Unknown deck '${deck}', defaulting to 'erratic'`);
         normalizedDeck = 'erratic';
@@ -146,14 +152,14 @@ export function addSearchListener(listener: SearchListener): () => void {
  */
 export async function searchSeedsWasm(
     jamlContent: string,
-    maxResults: number = 1000,
-    deck: string = '',
+    options?: Partial<Pick<SearchOptions, 'cutoff' | 'specificSeed' | 'randomSeeds' | 'palindrome' | 'batchSize' | 'startBatch' | 'endBatch'>>,
 ): Promise<string> {
     const api = await getWasmApi();
 
-    // Stop any existing search
+    // Stop and dispose any existing search
     if (activeSearchId) {
         try { api.stopSearch(activeSearchId); } catch { /* noop */ }
+        try { await api.disposeSearch(activeSearchId); } catch { /* noop */ }
         activeSearchId = null;
     }
 
@@ -161,7 +167,12 @@ export async function searchSeedsWasm(
     let capturedSearchId: string | null = null;
 
     // Start search — promise resolves when search completes
+    const threadCount = typeof navigator !== 'undefined' ? Math.max(1, (navigator.hardwareConcurrency || 4) - 1) : 4;
+    console.log(`[MotelyWasm] Starting search with ${threadCount} threads`);
+
     const searchPromise = api.startJamlSearch(jamlContent, {
+        threadCount,
+        ...options,
         onProgress: (searchId: string, totalSeedsSearched: number, matchingSeeds: number, elapsedMs: number, resultCount: number) => {
             if (!capturedSearchId) {
                 capturedSearchId = searchId;
@@ -182,14 +193,20 @@ export async function searchSeedsWasm(
 
     // Handle completion asynchronously (don't block the caller)
     searchPromise
-        .then((status: SearchStatusInfo) => {
+        .then(async (status: SearchStatusInfo) => {
             notifyListeners({ type: 'complete', data: status });
-            if (activeSearchId === (capturedSearchId || status.searchId)) {
+            const finishedId = capturedSearchId || status.searchId;
+            if (activeSearchId === finishedId) {
                 activeSearchId = null;
             }
+            // Free WASM memory for completed search
+            try { await api.disposeSearch(finishedId); } catch { /* noop */ }
         })
-        .catch((err: any) => {
+        .catch(async (err: any) => {
             notifyListeners({ type: 'error', message: err?.message || String(err) });
+            if (activeSearchId && capturedSearchId) {
+                try { await api.disposeSearch(capturedSearchId); } catch { /* noop */ }
+            }
             activeSearchId = null;
         });
 
@@ -199,10 +216,12 @@ export async function searchSeedsWasm(
 /**
  * Cancel the active search.
  */
-export function cancelSearch(): void {
+export async function cancelSearch(): Promise<void> {
     if (activeSearchId && wasmApi) {
-        try { wasmApi.stopSearch(activeSearchId); } catch { /* noop */ }
+        const id = activeSearchId;
         activeSearchId = null;
+        try { wasmApi.stopSearch(id); } catch { /* noop */ }
+        try { await wasmApi.disposeSearch(id); } catch { /* noop */ }
     }
 }
 

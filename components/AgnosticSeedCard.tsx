@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { analyzeSeedWasm } from '@/lib/api/motelyWasm';
+import { normalizeAnalysis } from '@/lib/seedAnalyzer';
+import { evaluateSeed } from '@/lib/jaml/jamlEvaluator';
 import { cn } from '@/lib/utils';
 import { DeckSprite } from './DeckSprite';
-import { MotelyVersionBadge } from './MotelyVersionBadge';
-import { Search, Loader2, Sparkles, ChevronRight, Calculator } from 'lucide-react';
+
+import { Loader2, Sparkles, ChevronRight } from 'lucide-react';
 
 interface AgnosticSeedCardProps {
     seed: string;
@@ -22,74 +24,90 @@ interface AgnosticSeedCardProps {
     onShowHowTo?: () => void;
     onOpenSubmit?: () => void;
     canSubmit?: boolean;
+    filter?: any;
 }
 
-export function AgnosticSeedCard({ 
-    seed, 
-    deckSlug = 'Erratic', 
-    stakeSlug = 'White', 
-    className, 
+export function AgnosticSeedCard({
+    seed,
+    deckSlug = 'Erratic',
+    stakeSlug = 'White',
+    className,
     onClick,
     analysis: propAnalysis,
-    result: propResult
+    result: propResult,
+    filter
 }: AgnosticSeedCardProps) {
     const [loading, setLoading] = useState(false);
     const [fetchedAnalysis, setFetchedAnalysis] = useState<any>(null);
 
     const result = propAnalysis || propResult || fetchedAnalysis;
 
-    const handleAnalyze = async () => {
-        if (propAnalysis || propResult) return; // Skip if provided
-        setLoading(true);
-        try {
-            const data = await analyzeSeedWasm(seed, deckSlug, stakeSlug);
-            setFetchedAnalysis(data);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
-        handleAnalyze();
-    }, [seed, deckSlug, stakeSlug, propAnalysis]);
+        if (propAnalysis || propResult) return;
+
+        const analyze = async () => {
+            setLoading(true);
+            try {
+                const rawData = await analyzeSeedWasm(seed, deckSlug, stakeSlug);
+                const normalized = normalizeAnalysis(rawData);
+
+                if (filter) {
+                    const evaluation = evaluateSeed(normalized, filter);
+                    setFetchedAnalysis(evaluation);
+                } else {
+                    setFetchedAnalysis({ ...normalized, score: 0, matches: [] });
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        analyze();
+    }, [seed, deckSlug, stakeSlug, propAnalysis, propResult, filter]);
 
     return (
         <div
-            className={cn("balatro-panel flex flex-col gap-4 !p-6 cursor-pointer", className)}
+            className={cn("balatro-panel flex flex-col cursor-pointer", className)}
             onClick={onClick}
         >
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <div className="flex items-center gap-4">
-                    <DeckSprite deck={deckSlug} stake={stakeSlug} size={48} />
-                    <div>
-                        <h3 className="font-header text-2xl text-white leading-none mb-1">{seed}</h3>
-                        <p className="font-pixel text-[11px] text-white/40 uppercase tracking-widest">{deckSlug} Deck • {stakeSlug} Stake</p>
-                    </div>
+            {/* Header - Mobile Optimized */}
+            <div className="flex items-start gap-3 pb-4 border-b border-white/10">
+                <DeckSprite deck={deckSlug} stake={stakeSlug} size={64} />
+                <div className="flex-1 min-w-0">
+                    <h3 className="font-header text-3xl text-white leading-tight mb-1 truncate">{seed}</h3>
+                    <p className="font-pixel text-xs text-white/40 tracking-wider">
+                        {deckSlug} • {stakeSlug}
+                    </p>
                 </div>
-                {loading ? <Loader2 className="animate-spin text-[var(--balatro-gold)]" size={24} /> : <Sparkles className="text-[var(--balatro-gold)]" size={24} />}
+                {loading ? (
+                    <Loader2 className="animate-spin text-[var(--balatro-gold)] shrink-0" size={28} />
+                ) : (
+                    <Sparkles className="text-[var(--balatro-gold)] shrink-0" size={28} />
+                )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-                <div className="bg-black/40 rounded-xl p-4 border border-white/5">
-                    <span className="block text-[10px] font-pixel text-white/30 uppercase mb-2">Primary Match</span>
-                    <div className="font-header text-lg text-[var(--balatro-blue)] uppercase">
+            {/* Stats Grid - Larger Touch Targets */}
+            <div className="grid grid-cols-2 gap-3 py-6">
+                <div className="bg-black/40 rounded-xl p-5 border border-white/5">
+                    <span className="block text-[11px] font-pixel text-white/30 mb-2">PRIMARY MATCH</span>
+                    <div className="font-header text-xl text-[var(--balatro-blue)] leading-tight">
                         {result?.matches?.[0]?.name || "N/A"}
                     </div>
                 </div>
-                <div className="bg-black/40 rounded-xl p-4 border border-white/5">
-                    <span className="block text-[10px] font-pixel text-white/30 uppercase mb-2">Simulated Score</span>
-                    <div className="font-header text-lg text-[var(--balatro-green)] uppercase">
+                <div className="bg-black/40 rounded-xl p-5 border border-white/5">
+                    <span className="block text-[11px] font-pixel text-white/30 mb-2">SIM SCORE</span>
+                    <div className="font-header text-xl text-[var(--balatro-green)] leading-tight">
                         {result?.score?.toLocaleString() || "0"}
                     </div>
                 </div>
             </div>
 
-            <div className="flex items-center justify-between mt-2 pt-4 border-t border-white/5">
-                <MotelyVersionBadge minimal />
-                <button className="flex items-center gap-2 font-header text-xs text-[var(--balatro-gold)] hover:brightness-125 transition-all">
-                    VIEW STRATEGY <ChevronRight size={14} />
+            {/* Footer - Mobile Optimized */}
+            <div className="flex items-center justify-end pt-4 border-t border-white/5">
+                <button className="flex items-center gap-2 font-header text-sm text-[var(--balatro-gold)] hover:brightness-125 transition-all active:scale-95 py-2 px-3 -mr-3">
+                    VIEW STRATEGY <ChevronRight size={16} />
                 </button>
             </div>
         </div>

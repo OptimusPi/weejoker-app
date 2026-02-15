@@ -1,42 +1,28 @@
-import { getRequestContext } from '@cloudflare/next-on-pages';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'edge';
-
-
-
+/**
+ * GET /api/scores?ritualId=...&seed=... or ?ritualId=...&week=true
+ * POST /api/scores { ritualId, seed, playerName, score }
+ * 
+ * Table created via migration, not inline CREATE TABLE.
+ */
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
-    const rawRitualId = searchParams.get('ritualId') || 'the-daily-wee';
-    const ritualId = rawRitualId.toLowerCase();
+    const ritualId = (searchParams.get('ritualId') || 'the-daily-wee').toLowerCase();
     const seed = searchParams.get('seed');
     const week = searchParams.get('week');
 
+    const { env } = await getCloudflareContext();
+
+    if (!env.DB) {
+        return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    }
+
     try {
-        const { env } = getRequestContext();
-        const db = env.DB;
-
-        if (!db) {
-            console.error("CRITICAL: No DB binding found.");
-            return NextResponse.json({ error: 'Database not available' }, { status: 500 });
-        }
-
-        // --- SANE SCHEMA: PK = RITUAL + SEED + PLAYER ---
-        await db.prepare(`
-            CREATE TABLE IF NOT EXISTS scores (
-                ritual_id TEXT NOT NULL,
-                seed TEXT NOT NULL,
-                player_name TEXT NOT NULL,
-                score_display TEXT NOT NULL,
-                score_value REAL NOT NULL,
-                submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                PRIMARY KEY (ritual_id, seed, player_name)
-            )
-        `).run();
-
-
         if (week === 'true') {
-            const result = await db.prepare(`
+            const result = await env.DB.prepare(`
                 SELECT ritual_id, seed, player_name, score_display, submitted_at
                 FROM (
                     SELECT *, ROW_NUMBER() OVER (PARTITION BY ritual_id, seed ORDER BY score_value DESC) as rn
@@ -51,24 +37,20 @@ export async function GET(request: NextRequest) {
         }
 
         if (seed) {
-            const result = await db.prepare(`
+            const result = await env.DB.prepare(`
                 SELECT player_name, score_display as score, submitted_at
                 FROM scores
                 WHERE ritual_id = ? AND seed = ?
                 ORDER BY score_value DESC
                 LIMIT 10
             `).bind(ritualId, seed).all();
-
             return NextResponse.json({ scores: result.results });
         }
 
         return NextResponse.json({ error: 'Missing seed or week parameter' }, { status: 400 });
     } catch (error: any) {
         console.error('D1 Error:', error);
-        return NextResponse.json({
-            error: 'Database error',
-            details: error.message
-        }, { status: 500 });
+        return NextResponse.json({ error: 'Database error', details: error.message }, { status: 500 });
     }
 }
 
@@ -86,34 +68,18 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Name too long (max 20 chars)' }, { status: 400 });
         }
 
-        // Parse numerical value for sorting (handles scientific notation like 1.5e100)
         const numericScore = parseFloat(score);
         if (isNaN(numericScore) || numericScore < 0) {
             return NextResponse.json({ error: 'Invalid score' }, { status: 400 });
         }
 
-        const { env } = getRequestContext();
-        const db = env.DB;
+        const { env } = await getCloudflareContext();
 
-        if (!db) {
+        if (!env.DB) {
             return NextResponse.json({ error: 'Database not available' }, { status: 500 });
         }
 
-        // Ensure table exists (for first-time submissions)
-        await db.prepare(`
-            CREATE TABLE IF NOT EXISTS scores (
-                ritual_id TEXT NOT NULL,
-                seed TEXT NOT NULL,
-                player_name TEXT NOT NULL,
-                score_display TEXT NOT NULL,
-                score_value REAL NOT NULL,
-                submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                PRIMARY KEY (ritual_id, seed, player_name)
-            )
-        `).run();
-
-        // Insert or Replace (Update score if same player submits for same seed/ritual)
-        await db.prepare(`
+        await env.DB.prepare(`
             INSERT OR REPLACE INTO scores (ritual_id, seed, player_name, score_display, score_value)
             VALUES (?, ?, ?, ?, ?)
         `).bind(ritualId, seed, playerName, score, numericScore).run();

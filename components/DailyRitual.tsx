@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { DayHeader } from "./DayHeader";
 import { RitualChallengeBoard } from "./RitualChallengeBoard";
 import { HowToPlay } from "./HowToPlay";
 import { SubmitScoreModal } from "./SubmitScoreModal";
@@ -22,7 +21,7 @@ export const getDayNumber = (epoch: number) => {
 export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: string, initialDay?: number }) {
     const defaultRitualId = propId || ritualConfig.id;
     const [ritualId, setRitualId] = useState(defaultRitualId);
-    const [configLoading, setConfigLoading] = useState(true);
+    const [configLoading, setConfigLoading] = useState(false);
     const [serverToday, setServerToday] = useState(1);
 
     // Initialize specific viewing day from server prop (SSR safe)
@@ -43,9 +42,12 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
     const [ritualCache, setRitualCache] = useState<Record<number, { seed: string, jaml: string }>>({});
 
     // Modals
+    // Modals
     const [showSubmit, setShowSubmit] = useState(false);
     const [showHowTo, setShowHowTo] = useState(false);
     const [showLeaderboard, setShowLeaderboard] = useState(false);
+    const [isStale, setIsStale] = useState(false); // For dimming during transitions
+
 
     // Mount Effect
     useEffect(() => {
@@ -63,9 +65,16 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
         }
     }, [viewingDay, mounted]);
 
-    // Load Ritual Config
+    // Load Ritual Config (with Debounced Loading State)
     useEffect(() => {
-        setConfigLoading(true);
+        // Immediate visual feedback without layout shift (dimming)
+        setIsStale(true);
+
+        let active = true;
+        // Only show full loading spinner if it takes more than 200ms
+        const timer = setTimeout(() => {
+            if (active) setConfigLoading(true);
+        }, 200);
 
         async function loadConfig() {
             try {
@@ -78,7 +87,11 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                     setJamlConfig(cached.jaml);
                     setSeedsList([cached.seed]);
                     // setViewingDay(fetchDay); // Don't self-update if we are already here
-                    setConfigLoading(false);
+                    if (active) {
+                        clearTimeout(timer);
+                        setConfigLoading(false);
+                        setIsStale(false);
+                    }
                     return;
                 }
 
@@ -99,6 +112,8 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                     currentSeed?: string;
                     dayNumber?: number;
                 };
+
+                if (!active) return;
 
                 setRitualTitle(config.title);
                 setRitualTagline(config.tagline);
@@ -149,11 +164,21 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                     setSeedsList([]);
                 }
             } finally {
-                setConfigLoading(false);
+                if (active) {
+                    clearTimeout(timer);
+                    setConfigLoading(false);
+                    setIsStale(false);
+                }
             }
         }
 
         loadConfig();
+
+        return () => {
+            active = false;
+            clearTimeout(timer);
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ritualId, viewingDay]);
 
     // Get Current Seed
@@ -169,6 +194,19 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
     // Run Analyzer - Guard against LOCKED
     const analyzerSeed = currentSeedId === 'LOCKED' ? null : currentSeedId;
     const { data: analysisData, loading: analysisLoading, error: analysisError } = useSeedAnalyzer(analyzerSeed);
+
+    // Debounced loading: only show skeleton after 500ms of sustained loading.
+    // This prevents the flash on fast transitions.
+    const [showLoading, setShowLoading] = useState(false);
+    const isActuallyLoading = configLoading || analysisLoading;
+    useEffect(() => {
+        if (!isActuallyLoading) {
+            setShowLoading(false);
+            return;
+        }
+        const timer = setTimeout(() => setShowLoading(true), 500);
+        return () => clearTimeout(timer);
+    }, [isActuallyLoading]);
 
     // Objectives Parsing
     const objectives = useMemo(() => {
@@ -210,35 +248,27 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
 
     return (
         <div className="ritual-locked-layout h-[100svh] overflow-hidden flex flex-col">
-            {/* Header */}
-            <header className="w-full max-w-5xl px-4 py-4 shrink-0 z-20 mx-auto">
-                <DayHeader
-                    dayNumber={viewingDay}
-                    displayDate={displayDate}
-                />
-            </header>
-
-            {/* Main Content Areas */}
+            {/* Main Content Areas - Mobile First Scaling */}
             <main className="match-height-content z-10 flex-1 min-h-0 relative">
                 {viewingDay <= 0 && !configLoading ? (
-                    <div className="w-full max-w-xl aspect-[4/3] flex flex-col items-center justify-center p-12 text-center">
-                        <div className="balatro-panel border-white/10 bg-black/20 p-8">
-                            <h3 className="font-header text-3xl text-[var(--balatro-gold)] mb-4">{ritualTitle}</h3>
-                            <div className="flex justify-between items-center py-1 border-y border-white/10 text-[13px] font-pixel text-white/40 tracking-[0.2em]">
+                    <div className="w-full max-w-full md:max-w-xl aspect-[4/3] flex flex-col items-center justify-center p-4 md:p-12 text-center">
+                        <div className="balatro-panel border-white/10 bg-black/20 p-4 md:p-8">
+                            <h3 className="font-header text-2xl md:text-3xl text-[var(--balatro-gold)] mb-2 md:mb-4">{ritualTitle}</h3>
+                            <div className="flex justify-between items-center py-1 border-y border-white/10 text-[11px] md:text-[13px] font-pixel text-white/40 tracking-[0.1em] md:tracking-[0.2em]">
                                 The Weepoch begins {new Date(activeEpoch).toLocaleDateString()}
                             </div>
-                            <div className="flex flex-col gap-4">
+                            <div className="flex flex-col gap-2 md:gap-4 mt-4">
                                 <button
                                     type="button"
                                     onClick={() => setShowHowTo(true)}
-                                    className="balatro-button balatro-button-blue text-sm w-full"
+                                    className="balatro-button balatro-button-blue text-xs md:text-sm w-full"
                                 >
                                     How to Play
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => updateDay(Math.max(1, todayNumber))}
-                                    className="balatro-button balatro-button-grey text-sm w-full"
+                                    className="balatro-button balatro-button-grey text-xs md:text-sm w-full"
                                 >
                                     Go to Today (Day {Math.max(1, todayNumber)})
                                 </button>
@@ -246,47 +276,54 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                         </div>
                     </div>
                 ) : (
-                    <div className="w-full px-4 max-w-4xl h-full min-h-0 flex flex-col justify-center">
-                        {configLoading || analysisLoading ? (
-                            <div className="flex flex-col items-center gap-8 py-20 animate-pulse">
-                                <div className="animate-spin text-white/10 grayscale">
-                                    <Sprite name="weejoker" width={64} />
+                    <div className={cn(
+                        "w-full px-1 md:px-4 max-w-[360px] mx-auto h-full min-h-0 flex flex-col justify-center transition-opacity duration-200",
+                        isStale && "opacity-50 pointer-events-none"
+                    )}>
+                        {showLoading ? (
+                            <div className="flex flex-col h-full justify-center w-full">
+                                <div className="jimbo-panel mx-8 md:mx-12 min-h-[500px] animate-pulse relative overflow-hidden">
+                                    {/* Header Skeleton */}
+                                    <div className="jimbo-inner-panel p-2 md:p-3 h-[54px] flex items-center shrink-0 mb-3">
+                                        <div className="w-24 h-6 bg-white/10 rounded" />
+                                    </div>
+
+                                    {/* Body Skeleton */}
+                                    <div className="flex flex-col gap-4 flex-1 w-full">
+                                        {/* Deck Fan */}
+                                        <div className="w-full rounded-lg aspect-[2/1] bg-white/5 border border-white/5" />
+
+                                        {/* Jokers */}
+                                        <div className="w-full rounded-lg h-16 bg-white/5 border border-white/5" />
+
+                                        <div className="flex-1" />
+
+                                        {/* Button */}
+                                        <div className="w-full h-12 rounded-lg bg-[var(--balatro-blue)]/20 border border-[var(--balatro-blue)]/30" />
+                                    </div>
                                 </div>
-                                <div className="font-pixel text-white/20 text-xs tracking-[0.4em]">
+                                <div className="text-center mt-6 font-pixel text-white/20 text-[11px] md:text-xs tracking-[0.2em] md:tracking-[0.4em] animate-pulse absolute bottom-12 left-0 right-0">
                                     {configLoading ? "Connecting to Ritual Factory..." : "Reading Seed Data..."}
                                 </div>
                             </div>
-                        ) : viewingDay > todayNumber + 1 ? (
-                            // HYPE CARD: Day 3+ (Future Preview)
-                            <div className="balatro-panel border-blue-500/20 bg-blue-950/10 p-12 text-center max-w-md mx-auto">
-                                <div className="mb-6 opacity-50"><Sprite name="eternal" width={64} /></div>
-                                <h3 className="font-header text-blue-400 text-2xl uppercase mb-3 tracking-[0.2em]">Future Vision</h3>
-                                <p className="font-pixel text-blue-300/40 text-xs leading-relaxed mb-6">
-                                    The spirits are still gathering energy for Day {viewingDay}.<br />
-                                    This ritual has not yet manifested in our timeline.
-                                </p>
-                                <div className="font-pixel text-[10px] text-white/20 uppercase tracking-[0.3em]">
-                                    Coming Soon
-                                </div>
-                            </div>
-                        ) : analysisError || !currentSeedId ? (
-                            <div className="balatro-panel border-red-500/20 bg-red-950/20 p-12 text-center max-w-md mx-auto">
-                                <h3 className="font-header text-red-400 text-2xl uppercase mb-3">Ritual Lost</h3>
-                                <p className="font-pixel text-red-300/40 text-xs leading-relaxed">
+                        ) : analysisError || (!currentSeedId && viewingDay <= todayNumber) ? (
+                            <div className="balatro-panel border-red-500/20 bg-red-950/20 p-6 md:p-12 text-center max-w-full md:max-w-md mx-auto">
+                                <h3 className="font-header text-red-400 text-xl md:text-2xl uppercase mb-2 md:mb-3">Ritual Lost</h3>
+                                <p className="font-pixel text-red-300/40 text-[11px] md:text-xs leading-relaxed">
                                     The spirits failed to provide data for Day {viewingDay}. <br />
                                     Check your connection or return to today.
                                 </p>
                                 <button
                                     type="button"
                                     onClick={() => updateDay(todayNumber)}
-                                    className="balatro-button balatro-button-blue mt-6 text-sm"
+                                    className="balatro-button balatro-button-blue mt-4 md:mt-6 text-xs md:text-sm"
                                 >
                                     Back to Today
                                 </button>
                             </div>
                         ) : (
                             <RitualChallengeBoard
-                                seed={currentSeedId}
+                                seed={currentSeedId || 'LOCKED'}
                                 objectives={objectives}
                                 onCopy={handleCopySeed}
                                 onShowHowTo={() => setShowHowTo(true)}
@@ -297,8 +334,10 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                                 ritualId={ritualId}
                                 onPrevDay={() => updateDay(Math.max(0, viewingDay - 1))}
                                 onNextDay={() => updateDay(Math.min(todayNumber + 1, viewingDay + 1))}
+                                jamlConfig={jamlConfig || ''}
                                 canGoBack={canGoBack}
                                 canGoForward={canGoForward}
+                                displayDate={displayDate}
                             />
                         )}
                     </div>

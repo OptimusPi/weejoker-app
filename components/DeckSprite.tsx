@@ -48,7 +48,7 @@ const STICKER_COLS = 5;
 const STICKER_ROWS = 3;
 
 export function DeckSprite({ deck, stake, size = 50, className = '' }: DeckSpriteProps) {
-    const deckKey = (deck || 'erratic').toLowerCase();
+    const deckKey = (deck || 'erratic').toLowerCase().replace(' deck', '').trim();
     const deckPos = DECK_MAP[deckKey] || DECK_MAP['erratic'];
     const stakePos = stake ? STAKE_MAP[stake.toLowerCase()] : null;
 
@@ -57,31 +57,33 @@ export function DeckSprite({ deck, stake, size = 50, className = '' }: DeckSprit
 
     return (
         <div
-            className={`relative ${className}`}
-            style={{
-                width: `${size}px`,
-                height: `${displayHeight}px`,
-                imageRendering: 'pixelated'
+            className={cn('deck-sprite', className)}
+            {...{
+                style: {
+                    '--sprite-w': `${size}px`,
+                    '--sprite-h': `${displayHeight}px`,
+                } as React.CSSProperties
             }}
         >
             <div
-                style={{
-                    width: '100%',
-                    height: '100%',
-                    backgroundImage: 'url(/assets/Enhancers.png)',
-                    backgroundSize: `${DECK_COLS * 100}% ${DECK_ROWS * 100}%`,
-                    backgroundPosition: `${(deckPos.x / (DECK_COLS - 1)) * 100}% ${(deckPos.y / (DECK_ROWS - 1)) * 100}%`,
-                    backgroundRepeat: 'no-repeat',
+                className="deck-sprite__layer"
+                {...{
+                    style: {
+                        '--sprite-img': 'url(/assets/Enhancers.png)',
+                        '--sprite-size': `${DECK_COLS * 100}% ${DECK_ROWS * 100}%`,
+                        '--sprite-pos': `${(deckPos.x / (DECK_COLS - 1)) * 100}% ${(deckPos.y / (DECK_ROWS - 1)) * 100}%`,
+                    } as React.CSSProperties
                 }}
             />
             {stakePos && (
                 <div
-                    className="absolute inset-0"
-                    style={{
-                        backgroundImage: 'url(/assets/Decks/stickers.png)',
-                        backgroundSize: `${STICKER_COLS * 100}% ${STICKER_ROWS * 100}%`,
-                        backgroundPosition: `${(stakePos.x / (STICKER_COLS - 1)) * 100}% ${(stakePos.y / (STICKER_ROWS - 1)) * 100}%`,
-                        backgroundRepeat: 'no-repeat',
+                    className="deck-sprite__layer absolute inset-0"
+                    {...{
+                        style: {
+                            '--sprite-img': 'url(/assets/Decks/stickers.png)',
+                            '--sprite-size': `${STICKER_COLS * 100}% ${STICKER_ROWS * 100}%`,
+                            '--sprite-pos': `${(stakePos.x / (STICKER_COLS - 1)) * 100}% ${(stakePos.y / (STICKER_ROWS - 1)) * 100}%`,
+                        } as React.CSSProperties
                     }}
                 />
             )}

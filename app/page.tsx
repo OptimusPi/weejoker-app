@@ -1,6 +1,6 @@
 import { DailyRitual } from "@/components/DailyRitual";
 
-export const runtime = 'edge';
+
 
 export default async function Home({
     searchParams

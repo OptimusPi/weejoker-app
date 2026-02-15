@@ -48,3 +48,8 @@ next-env.d.ts
 public/seeds.txt
 /public/_framework
 /Blueprint
+/.open-next/server-functions/default/node_modules
+/.open-next/.build
+/.open-next/assets/_framework
+/.open-next/assets/_next
+/.open-next

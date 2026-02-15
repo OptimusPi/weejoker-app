@@ -37,9 +37,10 @@ main {
     overflow: hidden;
 }
 
-/* UNIVERSAL NO BOLD POLICY - USER MANDATE */
+/* UNIVERSAL NO BOLD, NO UPPERCASE POLICY - USER MANDATE */
 * {
     font-weight: normal !important;
+    text-transform: none !important;
     image-rendering: auto;
 }
 
@@ -48,42 +49,30 @@ main {
    ============================================================================ */
 :root {
     /* --------------------------------
-       AUTHENTIC BALATRO PALETTE (Source: globals.lua)
+       JIMBO UI COLORS (EYEDROPPED FROM ACTUAL GAME PIXELS)
+       Source: lib/jimbo-ui/types.ts - DO NOT use Lua hex values
        -------------------------------- */
 
     /* Primary Game Colors */
-    --balatro-red: #FE5F55;
-    /* G.C.RED / G.C.MULT */
-    --balatro-blue: #009dff;
-    /* G.C.BLUE / G.C.CHIPS */
-    --balatro-green: #4BC292;
-    /* G.C.GREEN */
-    --balatro-orange: #fda200;
-    /* G.C.ORANGE */
-    --balatro-gold: #eac058;
-    /* G.C.GOLD */
-    --balatro-purple: #8867a5;
-    /* G.C.PURPLE */
+    --balatro-red: #ff4c40;
+    --balatro-blue: #0093ff;
+    --balatro-green: #429f79;
+    --balatro-orange: #ff9800;
+    --balatro-gold: #e4b643;
+    --balatro-purple: #9e74ce;
 
     /* Backgrounds & Panels */
-    --balatro-black: #374244;
-    /* G.C.BLACK (Slate Grey - Main BG) */
-    --balatro-light-black: #4f6367;
-    /* G.C.L_BLACK (Secondary BG) */
-    --balatro-grey: #5f7377;
-    /* G.C.GREY */
+    --balatro-black: #1e2b2d;
+    --balatro-light-black: #3a5055;
+    --balatro-grey: #708386;
+    --balatro-dark-grey: #3a5055;
     --balatro-joker-grey: #bfc7d5;
-    /* G.C.JOKER_GREY */
 
     /* Text & UI */
-    --balatro-text-light: #FFFFFF;
-    /* G.C.UI.TEXT_LIGHT */
-    --balatro-text-dark: #4F6367;
-    /* G.C.UI.TEXT_DARK */
-    --balatro-outline-light: #D8D8D8;
-    /* G.C.UI.OUTLINE_LIGHT */
-    --balatro-outline-dark: #7A9E9F;
-    /* G.C.UI.OUTLINE_DARK */
+    --balatro-text-light: #ffffff;
+    --balatro-text-dark: #3a5055;
+    --balatro-gold-text: #e4b643;
+    --balatro-green-text: #35bd86;
 
     /* Shadows - Actual Pitch Black */
     --balatro-shadow: #000000;
@@ -99,6 +88,27 @@ main {
     --color-green: var(--balatro-green);
     --color-orange: var(--balatro-orange);
     --color-gold: var(--balatro-gold);
+
+    /* --------------------------------
+       JIMBO UI TOKENS (Eyedropped from game pixels)
+       DO NOT replace with Lua HEX values - shader pipeline transforms them
+       -------------------------------- */
+    --jimbo-red: #ff4c40;
+    --jimbo-dark-red: #a02721;
+    --jimbo-blue: #0093ff;
+    --jimbo-dark-blue: #0057a1;
+    --jimbo-gold: #ff9800;
+    --jimbo-dark-gold: #a05b00;
+    --jimbo-green: #429f79;
+    --jimbo-dark-green: #215f46;
+    --jimbo-purple: #9e74ce;
+
+    --jimbo-dark-grey: #3a5055;
+    --jimbo-inner-border: #334461;
+    --jimbo-panel-edge: #1e2e32;
+    --jimbo-border-silver: #b9c2d2;
+    --jimbo-border-south: #777e89;
+    --jimbo-grey: #708386;
 }
 
 /* ============================================================================
@@ -127,6 +137,127 @@ main {
         background-color: var(--balatro-light-black);
         border-radius: 0.5rem;
         box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    /* --- JIMBO UI COMPONENTS --- */
+    /* Eyedropped from game pixels. Structural classes. */
+
+    .jimbo-panel {
+        background-color: var(--jimbo-dark-grey);
+        border: 3px solid var(--jimbo-border-silver);
+        box-shadow: 0 2px 0 0 var(--jimbo-border-south);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .jimbo-inner-panel {
+        background-color: var(--jimbo-inner-border);
+        border: 2px solid var(--jimbo-panel-edge);
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+    }
+
+    .jimbo-input {
+        background-color: var(--jimbo-panel-edge);
+        border: 2px solid var(--jimbo-dark-grey);
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        color: white;
+        width: 100%;
+        outline: none;
+        font-size: 1rem;
+        transition: border-color 0.15s;
+    }
+
+    .jimbo-input::placeholder {
+        color: rgba(255, 255, 255, 0.2);
+    }
+
+    .jimbo-input:focus {
+        border-color: var(--jimbo-blue);
+    }
+
+    /* Jimbo buttons — flat 2D, shadow below, press = translateY + kill shadow */
+    .jimbo-btn {
+        border: none;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        color: white;
+        cursor: pointer;
+        font-size: 1rem;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.3);
+        transition: transform 50ms ease, box-shadow 50ms ease;
+    }
+
+    .jimbo-btn:active {
+        transform: translateY(2px);
+        box-shadow: none;
+    }
+
+    .jimbo-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .jimbo-btn-red {
+        background-color: var(--jimbo-red);
+    }
+
+    .jimbo-btn-red:hover:not(:disabled) {
+        background-color: var(--jimbo-dark-red);
+    }
+
+    .jimbo-btn-blue {
+        background-color: var(--jimbo-blue);
+    }
+
+    .jimbo-btn-blue:hover:not(:disabled) {
+        background-color: var(--jimbo-dark-blue);
+    }
+
+    .jimbo-btn-green {
+        background-color: var(--jimbo-green);
+    }
+
+    .jimbo-btn-green:hover:not(:disabled) {
+        background-color: var(--jimbo-dark-green);
+    }
+
+    .jimbo-btn-gold {
+        background-color: var(--jimbo-gold);
+    }
+
+    .jimbo-btn-gold:hover:not(:disabled) {
+        background-color: var(--jimbo-dark-gold);
+    }
+
+    /* Back button = gold, always full-width — THE way to exit in Balatro */
+    .jimbo-btn-back {
+        background-color: var(--jimbo-gold);
+        font-size: 1.125rem;
+    }
+
+    .jimbo-btn-back:hover:not(:disabled) {
+        background-color: var(--jimbo-dark-gold);
+    }
+
+    .jimbo-version-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 0.25rem;
+        background-color: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.3);
+        letter-spacing: 0.1em;
+        display: flex;
+        align-items: center;
     }
 
     /* --- BUTTONS (2D Flat Style) --- */
@@ -265,6 +396,7 @@ main {
     cursor: pointer;
     z-index: 1000;
     transition: transform 0.1s;
+    -webkit-user-select: none;
     user-select: none;
 }
 
@@ -341,4 +473,252 @@ main {
 
 .animate-float-subtle {
     animation: float-subtle 3s ease-in-out infinite;
+}
+
+/* Jimbo-style subtle bounce for tab indicator triangles */
+@keyframes jimbo-bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+.animate-jimbo-bounce {
+    animation: jimbo-bounce 0.8s ease-in-out infinite;
+}
+
+/* Card sway animation - gentle float per Jimbo UI spec (1-2px max) */
+@keyframes sway {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-1.5px);
+    }
+}
+
+.animate-sway {
+    animation: sway 4s ease-in-out infinite;
+}
+
+/* Juice pop animation for featured/highlighted cards */
+@keyframes juice-pop {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-2px) scale(1.08);
+    }
+}
+
+.animate-juice-pop {
+    animation: juice-pop 2.5s ease-in-out infinite;
+}
+
+/* ============================================================================
+   HERO CARD — Fixed iPhone SE dimensions (320px viewport)
+   Same size on ALL screens. Content scrolls inside if needed.
+   ============================================================================ */
+.hero-card {
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Straddling arrow buttons for day navigation */
+.straddle-arrow {
+    background-color: var(--jimbo-red);
+    color: white;
+    box-shadow: 0 3px 0 0 rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+    width: 28px;
+    height: 60px;
+    border-radius: 0.5rem;
+    align-self: center;
+}
+
+.straddle-arrow:active {
+    transform: translateY(2px);
+    box-shadow: none;
+}
+
+.straddle-arrow:disabled {
+    background-color: var(--jimbo-grey);
+    cursor: not-allowed;
+}
+
+/* Inner nav tabs — always red */
+.jimbo-tab {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    border: none;
+    color: white;
+    background-color: var(--jimbo-red);
+    box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.3);
+}
+
+.jimbo-tab:hover {
+    background-color: var(--jimbo-dark-red);
+}
+
+.jimbo-tab:active {
+    background-color: var(--jimbo-dark-red);
+    transform: translateY(2px);
+    box-shadow: none;
+}
+
+/* Sticky results header in SeedExplorer */
+.results-header-bg {
+    background-color: var(--jimbo-inner-border);
+}
+
+/* ============================================================================
+   7. JAML EDITOR STYLES
+   ============================================================================ */
+
+/* Base block element used for key/value/array-item tokens */
+.jaml-block {
+    height: 24px;
+    min-width: 24px;
+    padding: 0 6px;
+    border-radius: 3px;
+    font-size: 13px;
+    font-family: "JetBrains Mono", "Fira Code", "SF Mono", Consolas, monospace;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.1s, border-color 0.1s;
+    /* Dynamic overrides via CSS custom properties */
+    color: var(--jaml-color, inherit);
+    background-color: var(--jaml-bg, transparent);
+    border: var(--jaml-border, none);
+    min-width: var(--jaml-min-w, 24px);
+    box-shadow: var(--jaml-shadow, none);
+    text-decoration: var(--jaml-text-decoration, none);
+}
+
+.jaml-block--start {
+    justify-content: flex-start;
+}
+
+/* Legend indicator dots */
+.jaml-legend-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+}
+
+.jaml-legend-dot--red {
+    background-color: #ff5e5e;
+}
+
+.jaml-legend-dot--blue {
+    background-color: #4bb1ff;
+}
+
+.jaml-legend-dot--green {
+    background-color: #46bc77;
+}
+
+.jaml-legend-dot--purple {
+    background-color: #9074ff;
+}
+
+/* Clause section headers (must: / should: / mustNot:) */
+.jaml-clause-header {
+    color: var(--jaml-color);
+}
+
+/* Inline editing input within a block */
+.jaml-inline-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    font: inherit;
+    color: var(--jaml-color, inherit);
+}
+
+.jaml-inline-input--sized {
+    width: var(--jaml-input-w, auto);
+}
+
+/* Ante toggle confirm button */
+.jaml-antes-confirm {
+    min-width: 24px;
+    margin-left: 4px;
+    background-color: rgba(70, 188, 119, 0.19);
+    border: 2px solid #46bc77;
+    border-radius: 4px;
+    color: #46bc77;
+}
+
+/* Ante toggle: segmented control borders */
+.jaml-ante-btn {
+    border-radius: 0;
+}
+
+.jaml-ante-btn--first {
+    border-radius: 3px 0 0 3px;
+}
+
+.jaml-ante-btn--last {
+    border-radius: 0 3px 3px 0;
+}
+
+/* Suggestion popover (positioned via JS, but structure in CSS) */
+.jaml-suggestion-popover {
+    position: fixed;
+    z-index: 9999;
+    background-color: #1a1a1a;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.25rem;
+    min-width: 240px;
+    overflow: hidden;
+    top: var(--popover-top);
+    left: var(--popover-left);
+    transform: var(--popover-transform, none);
+}
+
+/* Animation delay via CSS variable for juice-pop items */
+.juice-pop-delay {
+    animation-delay: var(--delay, 0s);
+}
+
+/* ============================================================================
+   8. DECK SPRITE STYLES
+   ============================================================================ */
+
+.deck-sprite {
+    position: relative;
+    image-rendering: pixelated;
+    width: var(--sprite-w);
+    height: var(--sprite-h);
+}
+
+.deck-sprite__layer {
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-image: var(--sprite-img);
+    background-size: var(--sprite-size);
+    background-position: var(--sprite-pos);
 }

@@ -56,17 +56,17 @@ export default function RootLayout({
                 <BackgroundShader />
 
                 <div className="ritual-locked-layout h-full overflow-hidden flex flex-col">
-                    {/* Header */}
-                    <header className="w-full max-w-5xl px-4 py-2 md:py-4 shrink-0 z-20 mx-auto">
+                    {/* Navbar - full width, in normal flow */}
+                    <header className="w-full px-4 py-2 shrink-0 z-20">
                         <NavBar />
                     </header>
+
                     <div className="flex-grow flex flex-col min-h-0 relative z-0">
                         <ClientProviders>
                             {children}
                         </ClientProviders>
                     </div>
 
-                    {/* Footer is now rendered client-side for cycling suits */}
                     <PageFooter />
                 </div>
             </body>

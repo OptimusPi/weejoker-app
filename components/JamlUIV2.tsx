@@ -153,8 +153,8 @@ export default function JamlUIV2() {
         // Dynamic import of the WASM engine
         const { searchSeedsWasm, addSearchListener, cancelSearch } = await import('@/lib/api/motelyWasm');
 
-        searchCleanupRef.current = () => {
-            cancelSearch();
+        searchCleanupRef.current = async () => {
+            await cancelSearch();
         };
 
         addSearchListener((event: any) => {
@@ -264,8 +264,8 @@ export default function JamlUIV2() {
                             </div>
 
                             <div className="flex flex-col">
-                                <span className="text-[10px] text-white/30 uppercase tracking-[0.2em]">Engine Latency</span>
-                                <span className="text-xs font-header text-blue-400 uppercase tracking-widest">0.24ms / seed</span>
+                                <span className="text-[10px] text-white/30 uppercase tracking-[0.2em]">Seeds Processed</span>
+                                <span className="text-xs font-header text-blue-400 uppercase tracking-widest">{seedsProcessed > 0 ? seedsProcessed.toLocaleString() : '--'}</span>
                             </div>
                         </div>
 
@@ -301,7 +301,7 @@ export default function JamlUIV2() {
                             {searchResults.length > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 overflow-y-auto custom-scrollbar">
                                     {searchResults.map((res, i) => (
-                                        <div key={res.seed} className="juice-pop" style={{ animationDelay: `${i * 0.05}s` }}>
+                                        <div key={res.seed} className="juice-pop juice-pop-delay" {...{ style: { '--delay': `${i * 0.05}s` } as React.CSSProperties }}>
                                             <AgnosticSeedCard
                                                 seed={res.seed}
                                                 className={cn(
@@ -323,15 +323,7 @@ export default function JamlUIV2() {
                         </div>
                     </Tile>
 
-                    <div className="h-10 bg-black/40 border-t border-white/5 px-6 flex items-center justify-between shrink-0">
-                        <div className="flex items-center gap-8">
-                            <WasmStatus />
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Monitor size={14} className="text-white/20" />
-                            <span className="text-[10px] font-header text-white/20 uppercase tracking-widest">NEXUS_UI_STABLE_001</span>
-                        </div>
-                    </div>
+
                 </div>
             </div>
         </div>

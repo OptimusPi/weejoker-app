@@ -1,9 +1,0 @@
-Rules:
-  - Text: "Must play a Full House every round"
-    Id: full_house_only
-  - Text: "No Flushes allowed"
-    Id: no_flushes
-Scoring:
-  - Type: Full House
-    Points: 100
-    Mult: 10

@@ -37,7 +37,7 @@ export default function JamlBuilder() {
     useEffect(() => {
         return () => {
             if (searchCleanupRef.current) searchCleanupRef.current();
-            // cancelSearch();
+            import('@/lib/api/motelyWasm').then(({ cancelSearch }) => cancelSearch());
         };
     }, []);
     const pollRef = useRef<NodeJS.Timeout | null>(null);

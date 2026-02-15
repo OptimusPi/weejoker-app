@@ -36,7 +36,7 @@ export function MotelyVersionBadge({ className, minimal = false }: MotelyVersion
 
     if (minimal) {
         if (loading) return <span className={cn("font-pixel text-[10px] text-white/10 animate-pulse", className)}>Initializing...</span>;
-        
+
         return (
             <span className={cn("font-pixel text-[10px] text-white/20 flex items-center gap-2", className)}>
                 <span>v{version}</span>
@@ -47,26 +47,11 @@ export function MotelyVersionBadge({ className, minimal = false }: MotelyVersion
     }
 
     return (
-        <div className={cn("px-3 py-1 rounded bg-black/40 border border-white/5 text-[10px] font-pixel text-white/30 tracking-widest flex items-center gap-3", className)}>
+        <div className={cn("jimbo-version-badge font-pixel", className)}>
             {loading ? (
                 <Loader2 size={10} className="animate-spin" />
             ) : (
-                <>
-                    <span>Motely v{version}</span>
-                    <div className="h-3 w-px bg-white/10" />
-                    <div className="flex items-center gap-2">
-                        {caps?.simd && (
-                            <span title="SIMD Active">
-                                <Zap size={10} className="text-[var(--balatro-blue)]" />
-                            </span>
-                        )}
-                        {caps?.threads && (
-                            <span title={`Multi-threaded (${caps.processorCount} cores)`}>
-                                <Cpu size={10} className="text-[var(--balatro-green)]" />
-                            </span>
-                        )}
-                    </div>
-                </>
+                <span>Motely v{version}</span>
             )}
         </div>
     );

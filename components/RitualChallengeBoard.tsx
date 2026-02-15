@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import { ChevronLeft, ChevronRight, Copy, Map as MapIcon, Info, Trophy, Crown, Medal, Loader2, Play } from "lucide-react";
-import { AgnosticSeedCard } from "./AgnosticSeedCard";
-import { Sprite } from "./Sprite";
+import { Copy, Map as MapIcon, Trophy, Loader2 } from "lucide-react";
+import { DeckSprite } from "./DeckSprite";
+import { DeckFan4Row } from "./DeckFan4Row";
 import { CardFan } from "./CardFan";
+import { Sprite } from "./Sprite";
 import { useSeedAnalyzer } from "@/lib/hooks/useSeedAnalyzer";
 import { evaluateSeed } from "@/lib/jaml/jamlEvaluator";
 import { useJamlFilter } from "@/lib/hooks/useJamlFilter";
@@ -28,22 +28,27 @@ interface RitualChallengeBoardProps {
     canGoBack?: boolean;
     canGoForward?: boolean;
     jamlConfig?: string | null;
+    displayDate?: string;
 }
 
+// ============================================
+// Leaderboard (scores tab)
+// ============================================
 function LeaderboardComponent({ ritualId, seed }: { ritualId: string; seed: string }) {
     const [scores, setScores] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchScores = async () => {
-            setLoading(true);
             try {
-                const res = await fetch(`/api/scores?seed=${seed}&ritualId=${ritualId.toLowerCase()}`);
-                if (!res.ok) throw new Error("Failed");
-                const data = await res.json() as { scores: any[] };
-                if (data.scores) setScores(data.scores);
+                setLoading(true);
+                const res = await fetch(`/api/scores?ritualId=${ritualId}&seed=${seed}`);
+                if (res.ok) {
+                    const data = await res.json() as { scores?: any[] };
+                    setScores(data.scores || []);
+                }
             } catch (err) {
-                console.error("Score load fail", err);
+                console.error('Failed to fetch scores:', err);
             } finally {
                 setLoading(false);
             }
@@ -51,41 +56,41 @@ function LeaderboardComponent({ ritualId, seed }: { ritualId: string; seed: stri
         fetchScores();
     }, [ritualId, seed]);
 
-    if (loading) return (
-        <div className="flex flex-col items-center justify-center p-12 animate-pulse">
-            <Loader2 className="animate-spin text-[var(--balatro-gold)] mb-4" size={32} />
-            <div className="font-pixel text-white/40 text-sm">Synchronizing Scores...</div>
-        </div>
-    );
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-8">
+                <Loader2 className="animate-spin text-white/20" size={24} />
+            </div>
+        );
+    }
 
-    if (scores.length === 0) return (
-        <div className="flex flex-col items-center justify-center p-12 text-center">
-            <Trophy size={48} className="text-white/10 mb-4" />
-            <div className="font-header text-xl text-white/40 mb-2">No Hall of Fame entries yet</div>
-            <div className="font-pixel text-xs text-white/20">Be the first to carve your name here.</div>
-        </div>
-    );
+    if (scores.length === 0) {
+        return (
+            <div className="text-center py-8">
+                <Trophy size={32} className="mx-auto mb-2 text-white/10" />
+                <p className="font-pixel text-[11px] text-white/30">No scores yet. Be the first!</p>
+            </div>
+        );
+    }
 
     return (
-        <div className="space-y-3">
-            {scores.map((entry, idx) => (
-                <div key={idx} className={cn(
-                    "flex items-center justify-between p-3 rounded-lg border-2",
-                    idx === 0 ? "bg-[var(--balatro-gold)] border-[var(--balatro-gold)] text-black" : "bg-black/30 border-white/5 text-white"
-                )}>
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 flex justify-center">
-                            {idx === 0 ? <Crown size={18} /> : idx === 1 ? <Medal size={18} className="text-zinc-400" /> : idx === 2 ? <Medal size={18} className="text-amber-700" /> : <span className="font-header text-zinc-500">{idx + 1}</span>}
-                        </div>
-                        <span className="font-header text-lg">{entry.player_name}</span>
+        <div className="space-y-1">
+            {scores.map((score: any, i: number) => (
+                <div key={i} className="jimbo-inner-panel flex items-center justify-between p-2">
+                    <div className="flex items-center gap-2">
+                        <span className="font-header text-sm text-[var(--jimbo-gold)]">#{i + 1}</span>
+                        <span className="font-pixel text-xs text-white/60">{score.playerName || 'Anonymous'}</span>
                     </div>
-                    <div className="font-header text-xl tracking-wider">{Number(entry.score).toLocaleString()}</div>
+                    <span className="font-header text-sm text-white">{score.score?.toLocaleString()}</span>
                 </div>
             ))}
         </div>
     );
 }
 
+// ============================================
+// Main Hero Card
+// ============================================
 export function RitualChallengeBoard({
     seed,
     objectives,
@@ -100,21 +105,20 @@ export function RitualChallengeBoard({
     onNextDay,
     canGoBack,
     canGoForward,
-    jamlConfig
+    jamlConfig,
+    displayDate,
 }: RitualChallengeBoardProps) {
-    const [activeTab, setActiveTab] = useState<'DETAILS' | 'STRATEGY' | 'SCORES'>('DETAILS');
+    const [activeTab, setActiveTab] = useState<'details' | 'strategy' | 'scores'>('details');
     const [copied, setCopied] = useState(false);
-    const [showWisdom, setShowWisdom] = useState(false);
-
-    // JAML Filter[showWisdom, setShowWisdom] = useState(false);
+    const [viewMode, setViewMode] = useState<'quick' | 'full'>('quick');
 
     // JAML Filter
     const { filter } = useJamlFilter(jamlConfig || '');
 
-    // Get analysis for this seed automatically
+    // Seed analysis (from WASM)
     const { data: analysis } = useSeedAnalyzer(seed);
 
-    // Evaluation
+    // Evaluation against JAML filter
     const evaluation = React.useMemo(() => {
         if (analysis && filter) {
             return evaluateSeed(analysis, filter);
@@ -122,226 +126,374 @@ export function RitualChallengeBoard({
         return null;
     }, [analysis, filter]);
 
+    // Extract found jokers from evaluation
+    const foundJokers = React.useMemo(() => {
+        if (!evaluation?.matches) return [];
+        const seen = new Set<string>();
+        return evaluation.matches
+            .filter(m => m.item.type.toLowerCase() === 'joker' && m.priority !== 'mustNot')
+            .filter(m => {
+                if (seen.has(m.item.id)) return false;
+                seen.add(m.item.id);
+                return true;
+            })
+            .map(m => m.item);
+    }, [evaluation]);
+
+    // Extract found consumables (tarot/spectral)
+    const foundConsumables = React.useMemo(() => {
+        if (!evaluation?.matches) return [];
+        const seen = new Set<string>();
+        return evaluation.matches
+            .filter(m => ['tarot', 'spectral'].includes(m.item.type.toLowerCase()) && m.priority !== 'mustNot')
+            .filter(m => {
+                if (seen.has(m.item.id)) return false;
+                seen.add(m.item.id);
+                return true;
+            })
+            .map(m => m.item);
+    }, [evaluation]);
+
     const handleCopy = () => {
+        if (isLocked) return;
         onCopy();
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
 
+    // Compute starting rank summary (e.g. "14x 2's")
+    const startingRankSummary = React.useMemo(() => {
+        if (!analysis?.startingDeck) return null;
+
+        let featuredRank: string | null = null;
+        if (filter) {
+            const allClauses = [...filter.must, ...filter.should];
+            for (const clause of allClauses) {
+                if (clause.rank) { featuredRank = clause.rank; break; }
+                if (clause.type === 'joker' && clause.value === 'Wee Joker') { featuredRank = '2'; }
+            }
+        }
+        if (!featuredRank && objectives.includes("Wee Joker")) { featuredRank = '2'; }
+
+        const rankCounts: Record<string, number> = {};
+        for (const card of analysis.startingDeck) {
+            const [r] = card.split('_');
+            rankCounts[r] = (rankCounts[r] || 0) + 1;
+        }
+
+        let targetRank = featuredRank;
+        if (!targetRank) {
+            let maxRank = '2';
+            let maxCount = 0;
+            for (const [rank, count] of Object.entries(rankCounts)) {
+                if (count > maxCount) { maxCount = count; maxRank = rank; }
+            }
+            targetRank = maxRank;
+        }
+
+        return { rank: targetRank, count: rankCounts[targetRank] || 0, total: analysis.startingDeck.length };
+    }, [analysis, filter, objectives]);
+
+    const tabs = ['details', 'strategy', 'scores'] as const;
+
     return (
-        <div className="w-full h-full flex flex-col md:flex-row items-center justify-center select-none relative overflow-hidden md:py-8">
-            <div className="absolute inset-0 pointer-events-none" />
+        <div className="w-full h-full flex flex-col items-center justify-center select-none relative">
+            {/* ===== DAY HEADER — anchored to card ===== */}
+            <div className="text-center mb-2 w-[320px]">
+                <div className="font-header text-xl text-white tracking-wider leading-none mb-1 select-none"
+                    style={{ textShadow: '2px 2px 0 rgba(0,0,0,0.8)' }}>
+                    The Daily Wee
+                </div>
+                <div className="flex justify-between items-center py-0.5 border-y border-white/10 text-[11px] font-pixel text-white/40 tracking-[0.1em]">
+                    <span>{displayDate || 'Loading...'}</span>
+                    <span className="text-[var(--jimbo-gold)]">No. {(dayNumber || 0) < 1 ? 1 : dayNumber}</span>
+                    <span>Est. 2026</span>
+                </div>
+            </div>
 
-            {/* Main Content Area with Flanking Nav Buttons */}
-            <div className="flex items-center justify-center w-full max-w-xl md:max-w-2xl lg:max-w-4xl h-full md:h-auto gap-2 md:gap-4 px-2 md:px-0 z-10">
-                
-                {/* Left Nav Button - Desktop & Mobile */}
-                <button
-                    type="button"
-                    onClick={onPrevDay}
-                    disabled={!canGoBack}
-                    className="hidden md:flex balatro-button balatro-button-red w-12 md:w-16 items-center justify-center rounded-lg shadow-[0_4px_0_#9e2b21] active:shadow-none active:translate-y-[4px] disabled:opacity-50 disabled:shadow-none disabled:translate-y-0 text-3xl font-header h-40 shrink-0"
-                    title="Previous Day"
-                >
-                    &lt;
-                </button>
-
-                {/* Main Cabinet Card */}
-                <div className="flex-1 w-full flex flex-col bg-[#111818] border-x md:border border-white/10 relative md:rounded-xl shadow-2xl overflow-hidden max-h-[85vh] md:max-h-[800px]">
-                    
-                    {/* Header / Seed Info */}
-                <div className="bg-black/80 p-2 md:p-3 flex items-center justify-between border-b border-white/10 shrink-0 backdrop-blur-md relative z-20">
-                     {/* Mobile Nav Left */}
+            {/* ===== HERO CARD CONTAINER with arrows ===== */}
+            <div className="flex items-center justify-center gap-2">
+                {viewMode === 'quick' && (
                     <button
                         type="button"
                         onClick={onPrevDay}
                         disabled={!canGoBack}
-                        className="md:hidden balatro-button balatro-button-red w-8 h-8 flex items-center justify-center rounded shadow-[0_2px_0_#9e2b21] active:shadow-none active:translate-y-[2px] disabled:opacity-50"
+                        className="straddle-arrow flex items-center justify-center text-lg disabled:opacity-40 shrink-0"
+                        title="Previous Day"
                     >
-                        <ChevronLeft size={18} />
+                        &lt;
                     </button>
+                )}
 
-                    <div 
-                        className="flex items-center gap-2 md:gap-3 bg-white/5 px-2 py-1 md:px-3 md:py-1.5 rounded border border-white/5 group cursor-pointer hover:bg-white/10 transition-all active:scale-95 mx-auto md:mx-0" 
-                        onClick={handleCopy}
-                    >
-                        {copied ? (
-                            <span className="font-pixel text-[11px] text-green-400 tracking-wider animate-pulse">Copied!</span>
-                        ) : (
-                            <Copy size={14} className="text-white/40 group-hover:text-white transition-colors" />
-                        )}
-                        <span className="font-header text-lg md:text-xl text-[var(--balatro-blue)] tracking-wider">{seed}</span>
-                    </div>
-                    
-                    {/* Mobile Nav Right */}
-                    <button
-                        type="button"
-                        onClick={onNextDay}
-                        disabled={!canGoForward}
-                        className="md:hidden balatro-button balatro-button-red w-8 h-8 flex items-center justify-center rounded shadow-[0_2px_0_#9e2b21] active:shadow-none active:translate-y-[2px] disabled:opacity-50"
-                    >
-                        <ChevronRight size={18} />
-                    </button>
-
-                    <div className="hidden md:flex flex-col items-end">
-                         {/* Deck Icon */}
-                        <div className="flex items-center gap-2">
-                            <span className="font-pixel text-[11px] text-white/30 tracking-wider hidden sm:block">Erratic Deck</span>
-                            <div className="w-6 h-8 bg-white/10 rounded border border-white/5 flex items-center justify-center relative overflow-hidden">
-                                <Sprite name="8BitDeck" width={20} className="opacity-80" />
-                            </div>
+                {/* ===== THE CARD — jimbo-panel, fixed dimensions ===== */}
+                <div className={cn(
+                    "hero-card jimbo-panel overflow-hidden",
+                    viewMode === 'full' && "!w-[480px]"
+                )}>
+                    {/* --- HEADER: Seed + Badge --- */}
+                    <div className="jimbo-inner-panel p-2 flex items-center justify-between shrink-0 mb-1">
+                        <div
+                            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity active:scale-95"
+                            onClick={handleCopy}
+                        >
+                            {copied ? (
+                                <span className="font-pixel text-[11px] text-[var(--jimbo-green)] tracking-wider animate-pulse">Copied!</span>
+                            ) : (
+                                <Copy size={14} className="text-white/40" />
+                            )}
+                            {isLocked ? (
+                                <span className="font-header text-lg text-[var(--jimbo-grey)] tracking-wider">PREVIEW</span>
+                            ) : (
+                                <span className="font-header text-lg text-[var(--jimbo-blue)] tracking-wider">{seed}</span>
+                            )}
                         </div>
-                    </div>
-                </div>
 
-                {/* Navigation Tabs - Balatro Floating Pills Style */}
-                <div className="flex w-full bg-[var(--balatro-black)] shrink-0 px-2 py-2 gap-2 justify-center items-center relative z-10 border-b border-white/5">
-                    {['Details', 'Strategy', 'Scores'].map((tab) => {
-                        const isActive = activeTab === tab.toUpperCase();
-                        return (
-                            <div key={tab} className="relative flex flex-col items-center">
-                                {/* Bouncing Triangle Indicator (Only for Active) */}
-                                {isActive && (
-                                    <div className="absolute -top-3 animate-bounce z-20">
-                                        <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-[var(--balatro-red)]" />
+                        {/* Top-right: starting rank badge OR deck sprite */}
+                        {viewMode === 'quick' && startingRankSummary ? (
+                            <div className="flex items-center gap-1 px-2 py-0.5 rounded text-xs"
+                                style={{ backgroundColor: 'var(--jimbo-inner-border)' }}>
+                                <span className="font-header text-[var(--jimbo-gold)]">{startingRankSummary.count}</span>
+                                <span className="font-pixel text-[10px] text-white/40">Starting</span>
+                                <span className="font-header text-white/60">{startingRankSummary.rank}&apos;s</span>
+                            </div>
+                        ) : viewMode === 'full' ? (
+                            <div className="flex items-center gap-2">
+                                <span className="font-pixel text-[11px] text-white/30 tracking-wider">Erratic Deck</span>
+                                <DeckSprite
+                                    deck={analysis?.deck || 'Erratic Deck'}
+                                    size={36}
+                                    className="shadow-sm"
+                                />
+                            </div>
+                        ) : null}
+                    </div>
+
+                    {/* ===== QUICK VIEW ===== */}
+                    {viewMode === 'quick' && (
+                        <div className="flex-1 flex flex-col gap-1.5 p-1.5 min-h-0">
+                            {/* Compact deck fan */}
+                            <div className="jimbo-inner-panel p-1.5 overflow-hidden">
+                                {analysis?.startingDeck ? (
+                                    <div className="scale-[0.55] origin-top w-full flex justify-center" style={{ marginBottom: '-45px' }}>
+                                        <CardFan
+                                            count={analysis.startingDeck.length}
+                                            cards={analysis.startingDeck}
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center gap-1 animate-pulse py-4">
+                                        <Loader2 className="text-white/10" size={16} />
+                                        <span className="font-pixel text-[10px] text-white/20">Loading Deck...</span>
                                     </div>
                                 )}
-                                
+                            </div>
+
+                            {/* Found Jokers — fanned hand */}
+                            {foundJokers.length > 0 && (
+                                <div className="jimbo-inner-panel p-2">
+                                    <span className="font-pixel text-[9px] text-white/30 tracking-wider block mb-1">JOKERS</span>
+                                    <div className="flex items-center justify-center" style={{ minHeight: '48px' }}>
+                                        <div className="flex items-end" style={{ marginLeft: foundJokers.length > 1 ? '8px' : '0' }}>
+                                            {foundJokers.map((item, i) => (
+                                                <div
+                                                    key={item.id + i}
+                                                    className="relative transition-transform hover:z-20 hover:-translate-y-1"
+                                                    style={{
+                                                        marginLeft: i === 0 ? 0 : '-8px',
+                                                        zIndex: i + 1,
+                                                    }}
+                                                    title={`${item.name}${item.edition ? ` (${item.edition})` : ''} — Ante ${item.ante}`}
+                                                >
+                                                    <Sprite
+                                                        name={item.name}
+                                                        width={38}
+                                                        edition={item.edition as any}
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Found Consumables */}
+                            {foundConsumables.length > 0 && (
+                                <div className="jimbo-inner-panel p-2">
+                                    <span className="font-pixel text-[9px] text-white/30 tracking-wider block mb-1">CONSUMABLES</span>
+                                    <div className="flex items-center justify-center gap-1 flex-wrap">
+                                        {foundConsumables.map((item, i) => (
+                                            <div
+                                                key={item.id + i}
+                                                className="transition-transform hover:-translate-y-1"
+                                                title={`${item.name} (${item.type}) — Ante ${item.ante}`}
+                                            >
+                                                <Sprite
+                                                    name={item.name}
+                                                    width={30}
+                                                    edition={item.edition as any}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* No winner yet placeholder if no jokers/consumables found */}
+                            {foundJokers.length === 0 && foundConsumables.length === 0 && !isLocked && (
+                                <div className="jimbo-inner-panel p-3 flex items-center gap-2">
+                                    <span className="text-lg">🏆</span>
+                                    <span className="font-pixel text-[11px] text-white/30">No Winner Yet!</span>
+                                </div>
+                            )}
+
+                            {/* Spacer */}
+                            <div className="flex-1" />
+
+                            {/* Play / Lock Button */}
+                            {isLocked ? (
                                 <button
                                     type="button"
-                                    onClick={() => setActiveTab(tab.toUpperCase() as any)}
-                                    className={cn(
-                                        "px-4 py-1.5 text-base md:text-lg font-header tracking-wide transition-all rounded-lg shadow-[0_2px_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-[2px]",
-                                        isActive
-                                            ? "bg-[var(--balatro-red)] text-white scale-105 z-10"
-                                            : "bg-[var(--balatro-grey)] text-white/60 hover:bg-[var(--balatro-light-black)] hover:text-white"
-                                    )}
+                                    disabled
+                                    className="jimbo-btn jimbo-btn-gold w-full opacity-60 cursor-not-allowed"
                                 >
-                                    {tab}
+                                    <span className="flex items-center justify-center gap-2">
+                                        <span>Unlocks Tomorrow:</span>
+                                        <span>No. {dayNumber}</span>
+                                    </span>
                                 </button>
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* Content Body */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#1a2323] relative">
-                    {activeTab === 'DETAILS' && (
-                        <div className="p-2 md:p-3 space-y-3">
-                            {/* Card Fan / Deck Visualization */}
-                            <div className="flex flex-col gap-1">
-                                <div className="flex items-center justify-between px-1">
-                                    <span className="font-pixel text-[11px] text-white/40 tracking-wider">Starting Deck</span>
-                                    <span className="font-pixel text-[11px] text-white/20">{analysis?.startingDeck?.length || 52} Cards</span>
-                                </div>
-                                <div className="bg-black/20 rounded-lg p-2 border border-white/5 min-h-[120px] flex items-center justify-center relative overflow-hidden">
-                                    {analysis?.startingDeck ? (
-                                        <div className="scale-75 origin-top w-full flex justify-center -mb-4">
-                                            <CardFan 
-                                                count={analysis.startingDeck.length} 
-                                                cards={analysis.startingDeck} 
-                                            />
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-col items-center gap-2 animate-pulse">
-                                            <Loader2 className="text-white/10" />
-                                            <span className="font-pixel text-[11px] text-white/20">Analyzing Deck...</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Stats Grid */}
-                            <div className="grid grid-cols-2 gap-2">
-                                <div className="bg-black/20 rounded p-2 border border-white/5">
-                                    <div className="font-pixel text-[11px] text-white/30 mb-0.5">Target Hand</div>
-                                    <div className="font-header text-base text-[var(--balatro-blue)]">
-                                        {evaluation?.matches?.[0]?.item.name || "Unknown"}
-                                    </div>
-                                </div>
-                                <div className="bg-black/20 rounded p-2 border border-white/5">
-                                    <div className="font-pixel text-[11px] text-white/30 mb-0.5">Potential</div>
-                                    <div className="font-header text-base text-[var(--balatro-green)]">
-                                        {evaluation?.score?.toLocaleString() || "0"}
-                                    </div>
-                                </div>
-                            </div>
-
-                             {/* Mobile Submit CTA */}
-                            <div className="md:hidden pt-4">
-                                <button
-                                    onClick={onOpenSubmit}
-                                    disabled={isLocked}
-                                    className="balatro-button balatro-button-green w-full py-4 text-xl flex items-center justify-center gap-2"
-                                >
-                                    {isLocked ? "Ritual Locked" : "Submit Score"}
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'STRATEGY' && (
-                        <div className="p-4 min-h-full">
-                            {evaluation ? (
-                                <JamlJourneyMap evaluation={evaluation} />
                             ) : (
-                                <div className="flex flex-col items-center justify-center py-12 text-center opacity-50">
-                                    <MapIcon size={48} className="mb-4 text-white/20" />
-                                    <p className="font-header text-xl text-white/40">Consulting the Spirits...</p>
-                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setViewMode('full')}
+                                    className="jimbo-btn jimbo-btn-blue w-full text-lg"
+                                >
+                                    Play No. {dayNumber}
+                                </button>
                             )}
                         </div>
                     )}
 
-                    {activeTab === 'SCORES' && (
-                        <div className="flex flex-col min-h-full">
-                            <div className="p-4 space-y-4 flex-1">
-                                {/* Submit CTA in Scores tab too */}
-                                {!isLocked && (
-                                    <button
-                                        onClick={onOpenSubmit}
-                                        className="balatro-button balatro-button-blue w-full py-3 text-lg flex items-center justify-center gap-2 mb-4"
-                                    >
-                                        <Trophy size={18} />
-                                        Submit Your Run
-                                    </button>
-                                )}
-                                <LeaderboardComponent ritualId={ritualId || ritualConfig.id} seed={seed} />
+                    {/* ===== FULL (PLAY) VIEW ===== */}
+                    {viewMode === 'full' && (
+                        <>
+                            {/* Tab Bar — always red, tight spacing */}
+                            <div className="flex w-full shrink-0 px-2 pt-2 pb-1 gap-2 justify-center items-end overflow-visible">
+                                {tabs.map((tab) => {
+                                    const isActive = activeTab === tab;
+                                    const label = tab.charAt(0).toUpperCase() + tab.slice(1);
+                                    return (
+                                        <div key={tab} className="relative flex flex-col items-center">
+                                            {/* Bouncing red arrow */}
+                                            <div
+                                                className={cn(
+                                                    'mb-0.5 transition-opacity duration-150',
+                                                    isActive ? 'opacity-100 animate-jimbo-bounce' : 'opacity-0 pointer-events-none'
+                                                )}
+                                            >
+                                                <svg width="12" height="8" viewBox="0 0 14 10" fill="var(--jimbo-red)">
+                                                    <polygon points="7,10 0,0 14,0" />
+                                                </svg>
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => setActiveTab(tab)}
+                                                className="jimbo-tab font-header tracking-wide"
+                                            >
+                                                {label}
+                                            </button>
+                                        </div>
+                                    );
+                                })}
                             </div>
-                        </div>
+
+                            {/* Tab Content — fixed height, scrolls internally */}
+                            <div className="flex-1 overflow-y-auto min-h-0" style={{ backgroundColor: 'var(--jimbo-inner-border)' }}>
+                                {activeTab === 'details' && (
+                                    <div className="p-2 space-y-2">
+                                        {/* 4-Row Deck Fan */}
+                                        <div className="flex flex-col gap-0.5">
+                                            <div className="flex items-center justify-between px-1">
+                                                <span className="font-pixel text-[11px] text-white/40 tracking-wider">Starting Deck</span>
+                                                <span className="font-pixel text-[11px] text-white/20">{analysis?.startingDeck?.length || 52} Cards</span>
+                                            </div>
+                                            <div className="jimbo-inner-panel p-2 flex items-center justify-center relative overflow-visible">
+                                                {analysis?.startingDeck ? (
+                                                    <DeckFan4Row cards={analysis.startingDeck} featuredRank={startingRankSummary?.rank} />
+                                                ) : (
+                                                    <div className="flex flex-col items-center gap-2 animate-pulse py-8">
+                                                        <Loader2 className="text-white/10" />
+                                                        <span className="font-pixel text-[11px] text-white/20">Analyzing Deck...</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Submit CTA */}
+                                        <button
+                                            onClick={onOpenSubmit}
+                                            disabled={isLocked}
+                                            className="jimbo-btn jimbo-btn-green w-full"
+                                        >
+                                            {isLocked ? "Ritual Locked" : "Submit Score"}
+                                        </button>
+                                    </div>
+                                )}
+
+                                {activeTab === 'strategy' && (
+                                    <div className="p-3">
+                                        {evaluation ? (
+                                            <JamlJourneyMap evaluation={evaluation} />
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center py-12 text-center opacity-50">
+                                                <MapIcon size={48} className="mb-4 text-white/20" />
+                                                <p className="font-header text-lg text-white/40">Consulting the Spirits...</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {activeTab === 'scores' && (
+                                    <div className="p-3 space-y-3">
+                                        {!isLocked && (
+                                            <button
+                                                onClick={onOpenSubmit}
+                                                className="jimbo-btn jimbo-btn-blue w-full flex items-center justify-center gap-2"
+                                            >
+                                                <Trophy size={18} />
+                                                Submit Your Run
+                                            </button>
+                                        )}
+                                        <LeaderboardComponent ritualId={ritualId || ritualConfig.id} seed={seed} />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Back button — gold/orange, compact */}
+                            <div className="p-2 shrink-0">
+                                <button
+                                    type="button"
+                                    onClick={() => setViewMode('quick')}
+                                    className="jimbo-btn jimbo-btn-gold w-full"
+                                >
+                                    Back
+                                </button>
+                            </div>
+                        </>
                     )}
                 </div>
 
-                {/* Desktop Footer Action */}
-                <div className="hidden md:block p-4 bg-black/40 border-t border-white/5 shrink-0">
+                {viewMode === 'quick' && (
                     <button
                         type="button"
-                        onClick={onOpenSubmit}
-                        disabled={isLocked}
-                        className="balatro-button balatro-button-green w-full text-xl py-4 tracking-[0.2em] flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
+                        onClick={onNextDay}
+                        disabled={!canGoForward}
+                        className="straddle-arrow flex items-center justify-center text-lg disabled:opacity-40 shrink-0"
+                        title="Next Day"
                     >
-                        {isLocked ? (
-                            <span className="opacity-80">Ritual Locked</span>
-                        ) : (
-                            <>Submit Score</>
-                        )}
+                        &gt;
                     </button>
-                </div>
-
-            </div>
-
-            {/* Desktop Right Nav Button - Now Visible on Mobile too */}
-            <div className="flex items-center justify-center z-20 h-full px-1 md:px-4 shrink-0">
-                <button
-                    type="button"
-                    onClick={onNextDay}
-                    disabled={!canGoForward}
-                    className="balatro-button balatro-button-red w-10 md:w-14 flex items-center justify-center rounded-lg shadow-[0_4px_0_#9e2b21] active:shadow-none active:translate-y-[4px] disabled:opacity-50 disabled:shadow-none disabled:translate-y-0 text-2xl md:text-3xl font-header h-full max-h-[600px] md:max-h-none"
-                    title="Next Day"
-                >
-                    <ChevronRight size={24} className="md:hidden" />
-                    <span className="hidden md:block">&gt;</span>
-                </button>
+                )}
             </div>
         </div>
     );

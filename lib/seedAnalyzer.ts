@@ -104,15 +104,15 @@ export function normalizeAnalysis(wasm: any): AnalyzedSeed {
     // 2. Extract Starting Deck with extreme prejudice
     let deckCards: string[] = [];
 
-    // Check direct properties
-    const directDeck = get(core, 'startingDeck') || get(core, 'deck') || get(core, 'initialDeck') || get(core, 'fullDeck') || get(core, 'cards') || get(core, 'hand');
+    // Check direct properties - erraticDeckComposition is what motely-wasm v1.2.10 actually returns
+    const directDeck = get(core, 'erraticDeckComposition') || get(core, 'startingDeck') || get(core, 'initialDeck') || get(core, 'fullDeck') || get(core, 'cards') || get(core, 'hand');
     if (Array.isArray(directDeck)) deckCards = directDeck;
 
     // Check Metrics fallback
     if (deckCards.length === 0) {
         const metrics = get(core, 'metrics');
         if (metrics) {
-            const metricsDeck = get(metrics, 'startingDeck') || get(metrics, 'deck') || get(metrics, 'initialDeck');
+            const metricsDeck = get(metrics, 'erraticDeckComposition') || get(metrics, 'startingDeck') || get(metrics, 'deck') || get(metrics, 'initialDeck');
             if (Array.isArray(metricsDeck)) deckCards = metricsDeck;
         }
     }

@@ -41,6 +41,8 @@ export default function SeedViewer() {
                         <button
                             onClick={handleAdd}
                             className="balatro-button balatro-button-blue !p-2 !h-11 !w-11"
+                            aria-label="Add Seed"
+                            title="Add Seed"
                         >
                             <Plus size={24} />
                         </button>
@@ -57,6 +59,8 @@ export default function SeedViewer() {
                                 <button
                                     onClick={() => handleRemove(idx)}
                                     className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[var(--balatro-red)] text-white items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity flex"
+                                    aria-label="Remove Seed"
+                                    title="Remove Seed"
                                 >
                                     <Trash2 size={16} />
                                 </button>

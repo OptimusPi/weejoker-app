@@ -24,23 +24,6 @@ const COLORS = {
     editorBgAlt: '#1c2629',
 };
 
-const MONO_FONT = '"JetBrains Mono", "Fira Code", "SF Mono", Consolas, monospace';
-
-// Styles for the block-based editor elements
-const BLOCK_STYLE: React.CSSProperties = {
-    height: '24px',
-    minWidth: '24px',
-    padding: '0 6px',
-    borderRadius: '3px',
-    fontSize: '13px',
-    fontFamily: MONO_FONT,
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    transition: 'background-color 0.1s, border-color 0.1s',
-};
-
 interface InteractiveJamlEditorProps {
     initialJaml?: string;
     onJamlChange?: (jamlYaml: string, parsed: unknown, isValid: boolean) => void;
@@ -136,28 +119,31 @@ function AntesToggle({ values, onToggle, onStartEdit, color, darkColor }: {
         return `Antes ${sorted.join(', ')}`;
     };
 
+
     if (!expanded) {
         return (
             <div
                 onClick={() => setExpanded(true)}
+                className="jaml-block"
                 style={{
-                    ...BLOCK_STYLE,
-                    backgroundColor: selectedAntes.size > 0 ? `${color}20` : `${COLORS.red}15`,
-                    border: `1px solid ${selectedAntes.size > 0 ? color : COLORS.red}`,
-                    color: selectedAntes.size > 0 ? color : COLORS.red,
-                    minWidth: '100px',
-                    boxShadow: selectedAntes.size > 0 ? `0 0 10px ${color}20` : 'none',
-                }}
+                    '--jaml-bg': selectedAntes.size > 0 ? `${color}20` : `${COLORS.red}15`,
+                    '--jaml-border': `1px solid ${selectedAntes.size > 0 ? color : COLORS.red}`,
+                    '--jaml-color': selectedAntes.size > 0 ? color : COLORS.red,
+                    '--jaml-min-w': '100px',
+                    '--jaml-shadow': selectedAntes.size > 0 ? `0 0 10px ${color}20` : 'none',
+                } as React.CSSProperties}
             >
                 {getDisplayText()}
             </div>
         );
     }
 
+
     return (
         <div className="flex flex-row items-center">
             {Array.from({ length: maxAnte + 1 }, (_, i) => i).map((ante) => {
                 const isSelected = selectedAntes.has(ante);
+                const borderRadiusClass = ante === 0 ? 'jaml-ante-btn--first' : ante === maxAnte ? 'jaml-ante-btn--last' : 'jaml-ante-btn';
                 return (
                     <div
                         key={ante}
@@ -165,14 +151,15 @@ function AntesToggle({ values, onToggle, onStartEdit, color, darkColor }: {
                             e.stopPropagation();
                             onToggle(ante.toString());
                         }}
-                        style={{
-                            ...BLOCK_STYLE,
-                            minWidth: '28px',
-                            backgroundColor: isSelected ? `${color}40` : 'transparent',
-                            border: `1px solid ${isSelected ? color : 'rgba(255,255,255,0.2)'}`,
-                            borderRight: ante < maxAnte ? 'none' : `1px solid ${isSelected ? color : 'rgba(255,255,255,0.2)'}`,
-                            borderRadius: ante === 0 ? '3px 0 0 3px' : ante === maxAnte ? '0 3px 3px 0' : '0',
-                            color: isSelected ? color : 'rgba(255,255,255,0.4)',
+                        className={`jaml-block ${borderRadiusClass}`}
+                        {...{
+                            style: {
+                                '--jaml-min-w': '28px',
+                                '--jaml-bg': isSelected ? `${color}40` : 'transparent',
+                                '--jaml-border': `1px solid ${isSelected ? color : 'rgba(255,255,255,0.2)'}`,
+                                '--jaml-color': isSelected ? color : 'rgba(255,255,255,0.4)',
+                                borderRight: ante < maxAnte ? 'none' : undefined,
+                            } as React.CSSProperties
                         }}
                     >
                         {ante}
@@ -181,15 +168,7 @@ function AntesToggle({ values, onToggle, onStartEdit, color, darkColor }: {
             })}
             <div
                 onClick={() => setExpanded(false)}
-                style={{
-                    ...BLOCK_STYLE,
-                    minWidth: '24px',
-                    marginLeft: '4px',
-                    backgroundColor: `${COLORS.green}30`,
-                    border: `2px solid ${COLORS.green}`,
-                    borderRadius: '4px',
-                    color: COLORS.green,
-                }}
+                className="jaml-block jaml-antes-confirm"
             >
                 <Check size={16} strokeWidth={3} />
             </div>
@@ -474,10 +453,10 @@ export default function JamlEditor({ initialJaml, onJamlChange, className }: Int
                 ))}
             </div>
             <div className="mt-4 p-2 bg-black/40 rounded border border-white/5 flex flex-wrap gap-4 text-[12px] text-white/50 font-mono">
-                <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS.red }}></span> required</span>
-                <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS.blue }}></span> optional</span>
-                <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS.green }}></span> complete</span>
-                <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS.purple }}></span> metadata</span>
+                <span className="flex items-center gap-1.5"><span className="jaml-legend-dot jaml-legend-dot--red"></span> required</span>
+                <span className="flex items-center gap-1.5"><span className="jaml-legend-dot jaml-legend-dot--blue"></span> optional</span>
+                <span className="flex items-center gap-1.5"><span className="jaml-legend-dot jaml-legend-dot--green"></span> complete</span>
+                <span className="flex items-center gap-1.5"><span className="jaml-legend-dot jaml-legend-dot--purple"></span> metadata</span>
                 <span className="ml-auto opacity-40">Click to edit • Tab to navigate</span>
             </div>
         </div>
@@ -611,11 +590,18 @@ function JamlLine({
     }
     if ((line.key === 'must' || line.key === 'should' || line.key === 'mustNot') && !line.value) {
         const color = line.key === 'must' ? COLORS.red : COLORS.blue;
-        return <div className="pl-8 py-1 text-[16px] border-b border-white/10 mt-4 mb-2 uppercase tracking-widest" style={{ color }}>{line.raw}</div>
+        return <div className="jaml-clause-header pl-8 py-1 text-[16px] border-b border-white/10 mt-4 mb-2 uppercase tracking-widest" {...{ style: { '--jaml-color': color } as React.CSSProperties }}>{line.raw}</div>
     }
 
     const indentSpaces = ' '.repeat(line.indent);
     const prefix = line.isArrayItem ? '- ' : '';
+
+    // Helper: popover CSS vars from floating coords
+    const popoverVars = floatingCoords ? {
+        '--popover-top': `${floatingCoords.top}px`,
+        '--popover-left': `${floatingCoords.left}px`,
+        '--popover-transform': floatingCoords.position === 'top' ? 'translateY(-100%)' : 'none',
+    } as React.CSSProperties : {};
 
     return (
         <div className="relative flex items-center py-0.5 group" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
@@ -636,37 +622,31 @@ function JamlLine({
                     <div
                         ref={editingPart === 'key' ? targetRef : null}
                         onClick={(e) => { e.stopPropagation(); onStartEdit('key'); }}
-                        style={{
-                            ...BLOCK_STYLE,
-                            minWidth: `${keyWidth}ch`,
-                            justifyContent: 'flex-start',
-                            color: (isEditing && editingPart === 'key') ? getBrightColor() : getBaseColor(),
-                            backgroundColor: (isEditing && editingPart === 'key') ? `${getBrightColor()}15` : 'transparent',
+                        className="jaml-block jaml-block--start"
+                        {...{
+                            style: {
+                                '--jaml-min-w': `${keyWidth}ch`,
+                                '--jaml-color': (isEditing && editingPart === 'key') ? getBrightColor() : getBaseColor(),
+                                '--jaml-bg': (isEditing && editingPart === 'key') ? `${getBrightColor()}15` : 'transparent',
+                            } as React.CSSProperties
                         }}
                     >
                         {isEditing && editingPart === 'key' ? (
                             <input
                                 ref={inputRef}
+                                title="Edit key"
                                 value={localValue}
                                 onChange={e => setLocalValue(e.target.value)}
                                 onKeyDown={handleKeyDown}
                                 onBlur={() => setTimeout(onEndEdit, 200)}
-                                className="bg-transparent border-none outline-none p-0 m-0 w-full font-inherit"
-                                style={{ color: getBrightColor() }}
+                                className="jaml-inline-input"
+                                {...{ style: { '--jaml-color': getBrightColor() } as React.CSSProperties }}
                             />
                         ) : line.key}
                     </div>
                     {/* Popover */}
                     {isEditing && editingPart === 'key' && suggestions.length > 0 && floatingCoords && createPortal(
-                        <div
-                            className="fixed z-[9999] bg-[#1a1a1a] shadow-2xl border border-white/10 rounded-lg p-1 min-w-[240px] overflow-hidden"
-                            style={{
-                                top: floatingCoords.top,
-                                left: floatingCoords.left,
-                                transform: floatingCoords.position === 'top' ? 'translateY(-100%)' : 'none',
-                                boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
-                            }}
-                        >
+                        <div className="jaml-suggestion-popover" {...{ style: popoverVars }}>
                             <SuggestionList suggestions={suggestions} selectedIndex={selectedIndex} onHover={setSelectedIndex} onSelect={(val) => {
                                 onChange('key', val);
                                 onEndEdit();
@@ -700,17 +680,20 @@ function JamlLine({
                                 <div
                                     key={idx}
                                     onClick={(e) => { e.stopPropagation(); onStartEdit('arrayItem', idx); }}
-                                    style={{
-                                        ...BLOCK_STYLE,
-                                        minWidth: '24px',
-                                        backgroundColor: `${getBaseColor()}15`,
-                                        border: `1px solid ${getBaseColor()}40`,
-                                        color: getBaseColor()
+                                    className="jaml-block"
+                                    {...{
+                                        style: {
+                                            '--jaml-min-w': '24px',
+                                            '--jaml-bg': `${getBaseColor()}15`,
+                                            '--jaml-border': `1px solid ${getBaseColor()}40`,
+                                            '--jaml-color': getBaseColor(),
+                                        } as React.CSSProperties
                                     }}
                                 >
                                     {isEditing && editingPart === 'arrayItem' && editingArrayIndex === idx ? (
                                         <input
                                             ref={inputRef}
+                                            title="Edit array item"
                                             value={localValue}
                                             onChange={e => setLocalValue(e.target.value)}
                                             onKeyDown={handleKeyDown}
@@ -722,12 +705,14 @@ function JamlLine({
                             ))}
                             <div
                                 onClick={(e) => { e.stopPropagation(); onStartEdit('arrayItem', line.arrayValues!.length); }}
-                                style={{
-                                    ...BLOCK_STYLE,
-                                    minWidth: '24px',
-                                    backgroundColor: `${COLORS.green}15`,
-                                    border: `1px solid ${COLORS.green}40`,
-                                    color: COLORS.green,
+                                className="jaml-block"
+                                {...{
+                                    style: {
+                                        '--jaml-min-w': '24px',
+                                        '--jaml-bg': `${COLORS.green}15`,
+                                        '--jaml-border': `1px solid ${COLORS.green}40`,
+                                        '--jaml-color': COLORS.green,
+                                    } as React.CSSProperties
                                 }}
                             >
                                 <Plus size={12} />
@@ -739,37 +724,37 @@ function JamlLine({
                         <div
                             ref={editingPart === 'value' ? targetRef : null}
                             onClick={(e) => { e.stopPropagation(); onStartEdit('value'); }}
-                            style={{
-                                ...BLOCK_STYLE,
-                                minWidth: line.value ? undefined : '60px',
-                                color: line.isInvalidValue ? COLORS.red : (line.value ? getBaseColor() : COLORS.red),
-                                backgroundColor: line.isInvalidValue ? `${COLORS.red}15` : (line.value ? `${getBaseColor()}10` : `${COLORS.red}08`),
-                                border: `1px solid ${line.isInvalidValue ? `${COLORS.red}60` : (line.value ? `${getBaseColor()}40` : `${COLORS.red}40`)}`,
-                                textDecoration: line.isInvalidValue ? 'line-through' : 'none'
+                            className="jaml-block"
+                            {...{
+                                style: {
+                                    '--jaml-min-w': line.value ? undefined : '60px',
+                                    '--jaml-color': line.isInvalidValue ? COLORS.red : (line.value ? getBaseColor() : COLORS.red),
+                                    '--jaml-bg': line.isInvalidValue ? `${COLORS.red}15` : (line.value ? `${getBaseColor()}10` : `${COLORS.red}08`),
+                                    '--jaml-border': `1px solid ${line.isInvalidValue ? `${COLORS.red}60` : (line.value ? `${getBaseColor()}40` : `${COLORS.red}40`)}`,
+                                    '--jaml-text-decoration': line.isInvalidValue ? 'line-through' : 'none',
+                                } as React.CSSProperties
                             }}
                         >
                             {isEditing && editingPart === 'value' ? (
                                 <input
                                     ref={inputRef}
+                                    title="Edit value"
                                     value={localValue}
                                     onChange={e => setLocalValue(e.target.value)}
                                     onKeyDown={handleKeyDown}
                                     onBlur={() => setTimeout(onEndEdit, 200)}
-                                    className="bg-transparent border-none outline-none p-0 m-0 w-full font-inherit min-w-[4ch]"
-                                    style={{ color: getBaseColor(), width: `${Math.max(localValue.length, 4)}ch` }}
+                                    className="jaml-inline-input jaml-inline-input--sized"
+                                    {...{
+                                        style: {
+                                            '--jaml-color': getBaseColor(),
+                                            '--jaml-input-w': `${Math.max(localValue.length, 4)}ch`,
+                                        } as React.CSSProperties
+                                    }}
                                 />
                             ) : (line.isInvalidValue ? line.value?.replace(/~/g, '') : (line.value || '???'))}
                         </div>
                         {isEditing && editingPart === 'value' && suggestions.length > 0 && floatingCoords && createPortal(
-                            <div
-                                className="fixed z-[9999] bg-[#1a1a1a] shadow-2xl border border-white/10 rounded-lg p-1 min-w-[240px] overflow-hidden"
-                                style={{
-                                    top: floatingCoords.top,
-                                    left: floatingCoords.left,
-                                    transform: floatingCoords.position === 'top' ? 'translateY(-100%)' : 'none',
-                                    boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
-                                }}
-                            >
+                            <div className="jaml-suggestion-popover" {...{ style: popoverVars }}>
                                 <SuggestionList suggestions={suggestions} selectedIndex={selectedIndex} onHover={setSelectedIndex} onSelect={(val) => {
                                     onChange('value', val);
                                     onEndEdit();
@@ -783,4 +768,3 @@ function JamlLine({
         </div>
     );
 }
-
