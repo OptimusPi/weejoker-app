@@ -1,18 +1,18 @@
-
-import dynamic from "next/dynamic";
-import { PastWeekResults } from "@/components/PastWeekResults";
-
-// December 12th, 2025 (Project Zero Point)
-import { ClientDailyWeeLoader } from "@/components/ClientDailyWeeLoader";
+import { DailyRitual } from "@/components/DailyRitual";
 
 
 
-export default function Home() {
+export default async function Home({
+    searchParams
+}: {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+    const { day } = await searchParams;
+    const initialDay = day ? parseInt(day as string, 10) : 0;
+
     return (
-        <main className="min-h-screen">
-            <ClientDailyWeeLoader />
-
-            {/* PastWeekResults usage removed */}
+        <main className="h-full w-full">
+            <DailyRitual ritualId="TheDailyWee" initialDay={initialDay} />
         </main>
     );
 }

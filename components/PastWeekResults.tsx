@@ -10,6 +10,8 @@ interface DayResult {
     seed: string;
 }
 
+import { EPOCH } from "@/lib/config";
+
 export function PastWeekResults() {
     const [results, setResults] = useState<DayResult[]>([]);
     const [loading, setLoading] = useState(true);
@@ -20,7 +22,7 @@ export function PastWeekResults() {
             try {
                 const res = await fetch('/api/scores?week=true');
                 if (!res.ok) throw new Error('Failed to fetch');
-                const data = await res.json();
+                const data = await res.json() as { scores: DayResult[] };
                 setResults(data.scores || []);
             } catch (err) {
                 setError('Could not load past results');
@@ -31,9 +33,6 @@ export function PastWeekResults() {
         }
         fetchWeekResults();
     }, []);
-
-    // Calculate day number from epoch
-    const EPOCH = new Date('2025-12-14').getTime();
     const getDayLabel = (dayNum: number) => {
         const dayDate = new Date(EPOCH + (dayNum - 1) * 24 * 60 * 60 * 1000);
         return dayDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });

@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Outfit, JetBrains_Mono } from 'next/font/google';
-import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { BackgroundShader } from '@/components/BackgroundShader';
 
 import localFont from 'next/font/local';
+import ClientProviders from '@/components/ClientProviders';
+import NavBar from '@/components/NavBar';
+import { PageFooter } from '@/components/PageFooter';
 
 const fontHeader = localFont({
     src: '../public/fonts/m6x11plusplus.otf',
@@ -44,7 +46,7 @@ export default function RootLayout({
             <body
                 suppressHydrationWarning
                 className={cn(
-                    'min-h-screen font-sans antialiased overflow-x-hidden text-white',
+                    'h-[100svh] overflow-hidden font-sans antialiased text-white',
                     fontSans.variable,
                     fontMono.variable,
                     fontHeader.variable,
@@ -53,18 +55,19 @@ export default function RootLayout({
             >
                 <BackgroundShader />
 
-                <div className="relative z-10 min-h-screen flex flex-col">
+                <div className="ritual-locked-layout h-full overflow-hidden flex flex-col">
+                    {/* Navbar - full width, in normal flow */}
+                    <header className="w-full px-4 py-2 shrink-0 z-20">
+                        <NavBar />
+                    </header>
 
-                    <main className="flex-grow">
-                        {children}
-                    </main>
+                    <div className="flex-grow flex flex-col min-h-0 relative z-0">
+                        <ClientProviders>
+                            {children}
+                        </ClientProviders>
+                    </div>
 
-                    <footer className="balatro-footer">
-                        <p className="balatro-footer-text">
-                            NOT AFFILIATED WITH LOCALTHUNK OR <a href="https://www.playstack.com/games/balatro/" target="_blank" className="hover:text-white underline decoration-white/20 underline-offset-2">PLAYSTACK</a> • <a href="https://playbalatro.com/" target="_blank" className="hover:text-white underline decoration-white/20 underline-offset-2 text-[var(--balatro-gold)]">BUY BALATRO</a> • CREATED WITH <span className="text-[var(--balatro-red)] mx-1 juice-heart">❤</span> FOR THE BALATRO COMMUNITY
-                        </p>
-                    </footer>
-
+                    <PageFooter />
                 </div>
             </body>
         </html>

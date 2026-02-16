@@ -1,12 +1,32 @@
-/** @type {import('next').NextConfig} */
-import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev';
+import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare';
+import withMotelyWasm from "motely-wasm/next-plugin";
 
 if (process.env.NODE_ENV === 'development') {
-    await setupDevPlatform({
-        persist: true,
-    });
+    initOpenNextCloudflareForDev();
 }
 
-const nextConfig = {};
+const baseConfig = {
+    async headers() {
+        return [
+            {
+                source: '/(.*)',
+                headers: [
+                    {
+                        key: 'Cross-Origin-Opener-Policy',
+                        value: 'same-origin',
+                    },
+                    {
+                        key: 'Cross-Origin-Embedder-Policy',
+                        value: 'require-corp',
+                    },
+                ],
+            },
+        ];
+    },
+};
 
-export default nextConfig;
+export default withMotelyWasm(baseConfig);
+
+
+
+

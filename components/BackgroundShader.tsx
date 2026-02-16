@@ -39,14 +39,14 @@ export function BackgroundShader() {
             // #define PIXEL_FILTER 745.0
 
             const float SPIN_ROTATION = -2.0;
-            const float SPIN_SPEED = 2.0; // Slowed down slightly for web
-            const vec4 COLOUR_1 = vec4(0.871, 0.267, 0.231, 1.0);
-            const vec4 COLOUR_2 = vec4(0.0, 0.42, 0.706, 1.0);
-            const vec4 COLOUR_3 = vec4(0.086, 0.137, 0.145, 1.0);
-            const float CONTRAST = 3.5;
-            const float LIGTHING = 0.4;
-            const float SPIN_AMOUNT = 0.25;
-            const float PIXEL_FILTER = 745.0; // 900.0 for cleaner look on high-res?
+            const float SPIN_SPEED = 4.5; // Faster, more hypnotic
+            const vec4 COLOUR_1 = vec4(1.0, 0.2, 0.2, 1.0); // Brighter Red
+            const vec4 COLOUR_2 = vec4(0.0, 0.5, 1.0, 1.0); // Brighter Blue
+            const vec4 COLOUR_3 = vec4(0.05, 0.08, 0.1, 1.0); // Deeper Black
+            const float CONTRAST = 4.5; // High contrast
+            const float LIGTHING = 0.5;
+            const float SPIN_AMOUNT = 0.35;
+            const float PIXEL_FILTER = 1024.0; // Higher resolution pixelation
             const float PI = 3.14159265359;
 
             void main() {
@@ -168,8 +168,7 @@ export function BackgroundShader() {
     return (
         <canvas
             ref={canvasRef}
-            className="fixed inset-0 w-full h-full -z-10"
-            style={{ width: "100%", height: "100%", pointerEvents: 'none' }}
+            className="fixed inset-0 w-full h-full -z-10 pointer-events-none"
         />
     );
 }
