@@ -2,9 +2,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import yaml from 'js-yaml';
-import { Plus, Minus, Check, ChevronRight, X } from 'lucide-react';
-import { CLAUSE_TYPES, ARRAY_KEYS } from '@/lib/jaml/jamlData';
-import { JamlCompletionService, YamlCompletionContext, CompletionData } from '@/lib/jaml/jamlCompletion';
+import { Plus, Minus, Check } from 'lucide-react';
+import { JamlCompletionService, CompletionData } from '@/lib/jaml/jamlCompletion';
 
 
 

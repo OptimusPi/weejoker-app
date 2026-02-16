@@ -130,7 +130,7 @@ export interface SearchResult {
 
 type SearchListener = (event: SearchEvent) => void;
 const searchListeners: Set<SearchListener> = new Set();
-let activeSearchId: string | null = null;
+let isSearchActive = false;
 
 function notifyListeners(event: SearchEvent) {
     searchListeners.forEach(listener => {
@@ -149,6 +149,9 @@ export function addSearchListener(listener: SearchListener): () => void {
 /**
  * Start a JAML search using the WASM engine.
  * Results are emitted to listeners via addSearchListener.
+ *
+ * The API manages a single active search internally —
+ * stopSearch() and disposeSearch() operate on the current search without needing an ID.
  */
 export async function searchSeedsWasm(
     jamlContent: string,
@@ -157,33 +160,28 @@ export async function searchSeedsWasm(
     const api = await getWasmApi();
 
     // Stop and dispose any existing search
-    if (activeSearchId) {
-        try { api.stopSearch(activeSearchId); } catch { /* noop */ }
-        try { await api.disposeSearch(activeSearchId); } catch { /* noop */ }
-        activeSearchId = null;
+    if (isSearchActive) {
+        try { api.stopSearch(); } catch { /* noop */ }
+        try { await api.disposeSearch(); } catch { /* noop */ }
+        isSearchActive = false;
     }
-
-    // Track searchId from first callback
-    let capturedSearchId: string | null = null;
 
     // Start search — promise resolves when search completes
     const threadCount = typeof navigator !== 'undefined' ? Math.max(1, (navigator.hardwareConcurrency || 4) - 1) : 4;
     console.log(`[MotelyWasm] Starting search with ${threadCount} threads`);
 
+    isSearchActive = true;
+
     const searchPromise = api.startJamlSearch(jamlContent, {
         threadCount,
         ...options,
-        onProgress: (searchId: string, totalSeedsSearched: number, matchingSeeds: number, elapsedMs: number, resultCount: number) => {
-            if (!capturedSearchId) {
-                capturedSearchId = searchId;
-                activeSearchId = searchId;
-            }
+        onProgress: (totalSeedsSearched: number, matchingSeeds: number, elapsedMs: number, resultCount: number) => {
             notifyListeners({
                 type: 'progress',
                 data: { SearchedCount: totalSeedsSearched, matchingSeeds, elapsedMs, resultCount }
             });
         },
-        onResult: (searchId: string, seed: string, score: number) => {
+        onResult: (seed: string, score: number) => {
             notifyListeners({
                 type: 'result',
                 data: { seed, score }
@@ -195,33 +193,27 @@ export async function searchSeedsWasm(
     searchPromise
         .then(async (status: SearchStatusInfo) => {
             notifyListeners({ type: 'complete', data: status });
-            const finishedId = capturedSearchId || status.searchId;
-            if (activeSearchId === finishedId) {
-                activeSearchId = null;
-            }
+            isSearchActive = false;
             // Free WASM memory for completed search
-            try { await api.disposeSearch(finishedId); } catch { /* noop */ }
+            try { await api.disposeSearch(); } catch { /* noop */ }
         })
         .catch(async (err: any) => {
             notifyListeners({ type: 'error', message: err?.message || String(err) });
-            if (activeSearchId && capturedSearchId) {
-                try { await api.disposeSearch(capturedSearchId); } catch { /* noop */ }
-            }
-            activeSearchId = null;
+            isSearchActive = false;
+            try { await api.disposeSearch(); } catch { /* noop */ }
         });
 
-    return capturedSearchId || 'pending';
+    return 'active';
 }
 
 /**
  * Cancel the active search.
  */
 export async function cancelSearch(): Promise<void> {
-    if (activeSearchId && wasmApi) {
-        const id = activeSearchId;
-        activeSearchId = null;
-        try { wasmApi.stopSearch(id); } catch { /* noop */ }
-        try { await wasmApi.disposeSearch(id); } catch { /* noop */ }
+    if (isSearchActive && wasmApi) {
+        isSearchActive = false;
+        try { wasmApi.stopSearch(); } catch { /* noop */ }
+        try { await wasmApi.disposeSearch(); } catch { /* noop */ }
     }
 }
 
@@ -229,7 +221,7 @@ export async function cancelSearch(): Promise<void> {
  * Check if a search is currently running.
  */
 export function isSearchRunning(): boolean {
-    return activeSearchId !== null;
+    return isSearchActive;
 }
 
 /**
@@ -240,5 +232,3 @@ export async function validateJamlWasm(jamlContent: string) {
     return api.validateJaml(jamlContent);
 }
 
-// Re-export types for convenience
-// export type { MotelyWasmApi, SeedAnalysisInfo, SearchStatusInfo, SearchResultInfo, VersionInfo, CapabilitiesInfo };
