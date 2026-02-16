@@ -200,7 +200,7 @@ interface ScheduleItem {
 
     return (
         <div className="h-[100dvh] w-full relative overflow-hidden bg-transparent">
-            <div className="absolute inset-0 z-10 flex flex-col items-center">
+            <div className="absolute inset-0 z-10 flex flex-col items-center px-[4%] py-[8%]">
                 <div className="h-full w-full relative z-10 flex flex-col items-center">
 
                     <div className="flex-1 flex flex-col justify-center items-center w-full min-h-0 gap-1 py-2">
