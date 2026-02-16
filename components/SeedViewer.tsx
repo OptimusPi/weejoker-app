@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 
 export default function SeedViewer() {
     const [input, setInput] = useState('');
-    const [seeds, setSeeds] = useState<string[]>(['ALEBB', 'GHOST', 'BEEF']);
+    const [seeds, setSeeds] = useState<string[]>([]);
 
     const handleAdd = () => {
         if (!input.trim()) return;

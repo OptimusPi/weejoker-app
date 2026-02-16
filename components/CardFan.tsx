@@ -38,8 +38,8 @@ export function CardFan({ count, cards, className = '', label, showLabel = true 
     // Dynamic rotation range based on count
     const maxRotation = displayCount > 40 ? 40 : displayCount > 20 ? 30 : displayCount > 10 ? 15 : 25;
 
-    // Height for the cards area
-    const cardsHeight = cardSize * 2.5;
+    // Height for the cards area - STABLE to prevent shifting
+    const cardsHeight = 120;
 
     return (
         <div className={`flex flex-col items-center gap-1 ${className}`}>

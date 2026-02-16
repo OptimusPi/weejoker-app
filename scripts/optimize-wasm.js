@@ -1,8 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const frameworkDir = path.join(process.cwd(), '.vercel/output/static/_framework');
-const headersFile = path.join(process.cwd(), '.vercel/output/static/_headers');
+const projectRoot = path.resolve(__dirname, '..');
+const frameworkDir = path.join(projectRoot, '.open-next/assets/_framework');
+const headersFile = path.join(projectRoot, '.open-next/assets/_headers');
 
 // 25MB in bytes
 const SIZE_LIMIT = 25 * 1024 * 1024;
@@ -36,25 +37,25 @@ files.forEach(file => {
     fs.closeSync(fd);
 
     const isWasmMagic = buffer[0] === 0x00 && buffer[1] === 0x61 && buffer[2] === 0x73 && buffer[3] === 0x6d;
-    
+
     // If it is NOT valid WASM magic, and it is small, it might be Brotli.
     // Let's assume if it's NOT wasm magic, it's compressed.
     if (!isWasmMagic) {
-        console.log(`File ${file} does not have WASM magic header. Assuming it is already compressed/optimized.`);
-        isBrotli = true;
+      console.log(`File ${file} does not have WASM magic header. Assuming it is already compressed/optimized.`);
+      isBrotli = true;
     }
 
     if (stats.size > SIZE_LIMIT) {
       const brFile = filePath + '.br';
       if (fs.existsSync(brFile)) {
         console.log(`Optimizing ${file} (${(stats.size / 1024 / 1024).toFixed(2)} MB) -> replacing with Brotli version`);
-        
+
         // Read the brotli file
         const brContent = fs.readFileSync(brFile);
-        
+
         // Overwrite the original wasm file with brotli content
         fs.writeFileSync(filePath, brContent);
-        
+
         isBrotli = true;
       } else {
         console.warn(`Warning: Large file ${file} found but no .br version available.`);
@@ -62,7 +63,7 @@ files.forEach(file => {
     }
 
     if (isBrotli) {
-        filesToHeader.push(file);
+      filesToHeader.push(file);
     }
   }
 });
@@ -70,12 +71,12 @@ files.forEach(file => {
 console.log('Updating _headers file...');
 let headersContent = '';
 if (fs.existsSync(headersFile)) {
-headersContent = fs.readFileSync(headersFile, 'utf8');
+  headersContent = fs.readFileSync(headersFile, 'utf8');
 }
 
 // Ensure there's a newline at the end
 if (headersContent && !headersContent.endsWith('\n')) {
-headersContent += '\n';
+  headersContent += '\n';
 }
 
 if (filesToHeader.length > 0) {
@@ -84,12 +85,12 @@ if (filesToHeader.length > 0) {
     const headerPath = `/_framework/${file}`;
     // Check if already exists to avoid duplicates (simple check)
     if (!headersContent.includes(headerPath)) {
-        headersContent += `${headerPath}\n  Content-Encoding: br\n  Content-Type: application/wasm\n`;
+      headersContent += `${headerPath}\n  Content-Encoding: br\n  Content-Type: application/wasm\n`;
     }
   });
   console.log(`Added headers for ${filesToHeader.length} optimized files.`);
 } else {
-    console.log('No files needed header updates.');
+  console.log('No files needed header updates.');
 }
 
 fs.writeFileSync(headersFile, headersContent);

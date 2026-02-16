@@ -1,7 +1,9 @@
 import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare';
 import withMotelyWasm from "motely-wasm/next-plugin";
 
-initOpenNextCloudflareForDev();
+if (process.env.NODE_ENV === 'development') {
+    initOpenNextCloudflareForDev();
+}
 
 const baseConfig = {
     async headers() {
