@@ -7,9 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "pages:build": "npx opennextjs-cloudflare build",
-    "pages:preview": "npm run pages:build && npx wrangler pages dev .open-next",
-    "deploy": "npm run pages:build && npx wrangler pages deploy .open-next",
+    "build": "opennext build",
+    "pages:preview": "npm run build && npx wrangler pages dev .open-next",
+    "deploy": "npm run build && npx wrangler pages deploy .open-next",
     "cf-typegen": "npx wrangler types --env-interface CloudflareEnv env.d.ts"
   },
   "dependencies": {
@@ -20,7 +20,7 @@
     "@mantine/hooks": "^8.2.8",
     "@microsoft/signalr": "^10.0.0",
     "@monaco-editor/react": "^4.7.0",
-    "@opennextjs/cloudflare": "^1.16.5",
+    "opennext": "^2.4.0",
     "@types/js-yaml": "^4.0.9",
     "@types/papaparse": "^5.5.2",
     "clsx": "^2.1.0",

@@ -21,7 +21,28 @@ export function DailyWee() {
     const [mounted, setMounted] = useState(false);
     const [viewMode, setViewMode] = useState<'main' | 'wisdom'>('main');
     const [error, setError] = useState<string | null>(null);
-    const [schedule, setSchedule] = useState<any[]>([]);
+    const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
+
+// Define the type for the schedule data
+interface ScheduleItem {
+    id: string;
+    s: number;
+    w: number | string;
+    wj1?: string;
+    wj2?: string;
+    hc1?: string;
+    hc2?: string;
+    hk1?: string;
+    hk2?: string;
+    bp?: boolean;
+    bs?: boolean;
+    sh?: string;
+    rs?: boolean;
+    t: string;
+    j: string;
+    t1: string;
+    t2: string;
+}
     const [topScore, setTopScore] = useState<{ name: string; score: number } | null>(null);
 
     const [showSubmit, setShowSubmit] = useState(false);
@@ -60,7 +81,7 @@ export function DailyWee() {
         fetch('/daily_ritual.json')
             .then(res => {
                 if (!res.ok) throw new Error("The ritual hasn't been baked yet.");
-                return res.json();
+                return res.json() as Promise<ScheduleItem[]>;
             })
             .then(data => setSchedule(data))
             .catch(e => {
