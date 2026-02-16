@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import { analyzeSeedWasm } from '@/lib/api/motelyWasm';
 import { normalizeAnalysis } from '@/lib/seedAnalyzer';
 
-// Run on Cloudflare Workers edge runtime
-export const runtime = 'edge';
+
 
 /**
  * GET /api/analyze/[seed]

@@ -237,8 +237,8 @@ export function RitualChallengeBoard({
                     isLocked={isLocked}
                     dayNumber={dayNumber}
                     className={cn(
-                        "relative z-10",
-                        viewMode === 'full' && "!w-full !max-w-[480px] !h-auto !min-h-0"
+                        "relative z-10 transition-all duration-300",
+                        viewMode === 'full' && "scale-100" // Just verify it doesn't get crushed
                     )}
                     onClick={() => setViewMode('full')}
                 />

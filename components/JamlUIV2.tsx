@@ -116,7 +116,7 @@ export default function JamlUIV2() {
     const seenSeedsRef = useRef<Set<string>>(new Set());
 
     // Deck & Stake Selection
-    const [deckSlug, setDeckSlug] = useState('Ghost');
+    const [deckSlug, setDeckSlug] = useState('Erratic');
     const [stakeSlug, setStakeSlug] = useState('White');
     const [showDeckSelector, setShowDeckSelector] = useState(false);
 
@@ -198,15 +198,15 @@ export default function JamlUIV2() {
     return (
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#0d1416]">
             {/* Main Application Shell */}
-            <div className="flex-1 grid grid-cols-12 gap-5 p-5 min-h-0 overflow-hidden">
+            <div className="flex-1 grid grid-cols-12 gap-5 p-5 min-h-0 overflow-y-auto lg:overflow-hidden">
 
                 {/* Left Column: Command Console & Filter */}
-                <div className="col-span-12 lg:col-span-4 flex flex-col gap-5 min-h-0">
+                <div className="col-span-12 lg:col-span-4 flex flex-col gap-5 min-h-[600px] lg:min-h-0 shrink-0">
                     <Tile
                         title="Ritual manifest (JAML)"
                         icon={Terminal}
                         color="blue"
-                        className="flex-1"
+                        className="flex-1 min-h-[300px]"
                         headerRight={
                             <div className="flex items-center gap-2">
                                 <button
@@ -235,7 +235,7 @@ export default function JamlUIV2() {
                         title="Telemetry Feed"
                         icon={Activity}
                         color="teal"
-                        className="h-[200px]"
+                        className="h-[200px] shrink-0"
                     >
                         <div className="flex-1 overflow-y-auto p-4 font-mono text-[11px] space-y-1 custom-scrollbar bg-black/40">
                             {technicalLogs.map((log, i) => (

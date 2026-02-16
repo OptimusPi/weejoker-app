@@ -99,8 +99,10 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                 const url = `/api/rituals/${ritualId}${fetchDay ? `?day=${fetchDay}` : ''}`;
                 const configRes = await fetch(url);
                 if (!configRes.ok) {
-                    const errorData = await configRes.json() as { error?: string };
-                    throw new Error(errorData.error || "Failed to load ritual");
+                    const text = await configRes.text();
+                    let errorMsg = `Failed to load ritual (${configRes.status})`;
+                    try { errorMsg = JSON.parse(text).error || errorMsg; } catch { }
+                    throw new Error(errorMsg);
                 }
                 const config = await configRes.json() as {
                     title: string;

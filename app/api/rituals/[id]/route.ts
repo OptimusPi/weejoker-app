@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { ritualConfig } from '@/lib/config';
 
-export const runtime = 'edge';
+
 /**
  * GET /api/rituals/[id]
  * 
@@ -15,7 +15,7 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     const { id } = await params;
-    const { env } = await getCloudflareContext();
+    const { env } = await getCloudflareContext({ async: true });
 
     // --- Ritual metadata (D1 or hardcoded config for TheDailyWee) ---
     let config: Record<string, any> = { id, seeds: [] as string[] };

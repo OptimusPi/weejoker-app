@@ -737,3 +737,30 @@ main {
     background-size: var(--sprite-size);
     background-position: var(--sprite-pos);
 }
+
+/* ============================================================================
+   9. DECK FAN STYLES (DeckFan4Row)
+   ============================================================================ */
+
+.suit-fan-row {
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    width: var(--fan-width);
+    height: var(--fan-height);
+}
+
+.suit-fan-card-wrapper {
+    position: absolute;
+    bottom: 0px;
+    left: var(--card-left);
+    transform: translateY(var(--card-y)) rotate(var(--card-rot));
+    transform-origin: bottom center;
+    z-index: var(--card-z);
+    animation-delay: var(--card-delay);
+}
+
+.playing-card-filter {
+    filter: var(--card-filter);
+    transition: filter 0.3s ease;
+}

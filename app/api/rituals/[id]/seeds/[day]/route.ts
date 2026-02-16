@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-export const runtime = 'edge';
+
 
 /**
  * GET /api/rituals/[id]/seeds/[day]

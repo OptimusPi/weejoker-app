@@ -1,7 +1,7 @@
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { NextRequest, NextResponse } from 'next/server';
 
-export const runtime = 'edge';
+
 /**
  * GET /api/scores?ritualId=...&seed=... or ?ritualId=...&week=true
  * POST /api/scores { ritualId, seed, playerName, score }
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const seed = searchParams.get('seed');
     const week = searchParams.get('week');
 
-    const { env } = await getCloudflareContext();
+    const { env } = await getCloudflareContext({ async: true });
 
     if (!env.DB) {
         return NextResponse.json({ error: 'Database not available' }, { status: 500 });
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Invalid score' }, { status: 400 });
         }
 
-        const { env } = await getCloudflareContext();
+        const { env } = await getCloudflareContext({ async: true });
 
         if (!env.DB) {
             return NextResponse.json({ error: 'Database not available' }, { status: 500 });

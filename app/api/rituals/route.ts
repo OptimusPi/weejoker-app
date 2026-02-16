@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ritualConfig } from '@/lib/config';
 
-export const runtime = 'edge';
+
 /**
  * GET /api/rituals
  * Redirects to /api/rituals/[id] with the default ritual ID.

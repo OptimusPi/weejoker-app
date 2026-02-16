@@ -71,10 +71,10 @@ function SuitFanRow({ cards, featuredRank }: { cards: string[]; featuredRank?: s
 
     return (
         <div
-            className="relative mx-auto"
+            className="suit-fan-row"
             style={{
-                width: `${totalWidth}px`,
-                height: `${rowHeight}px`,
+                ['--fan-width' as any]: `${totalWidth}px`,
+                ['--fan-height' as any]: `${rowHeight}px`,
             }}
         >
             {cards.map((card, i) => {
@@ -96,23 +96,22 @@ function SuitFanRow({ cards, featuredRank }: { cards: string[]; featuredRank?: s
                 return (
                     <div
                         key={i}
-                        className={`absolute ${isFeatured && featuredRank ? 'animate-juice-pop' : 'animate-sway'}`}
+                        className={`suit-fan-card-wrapper ${isFeatured && featuredRank ? 'animate-juice-pop' : 'animate-sway'}`}
                         style={{
-                            left: `${xPos}px`,
-                            bottom: '0',
-                            transform: `translateY(${yOffset}px) rotate(${rotation}deg)`,
-                            transformOrigin: 'bottom center',
-                            zIndex: isFeatured ? i + 100 : i,
-                            animationDelay: `${i * 0.15}s`,
+                            ['--card-left' as any]: `${xPos}px`,
+                            ['--card-y' as any]: `${yOffset}px`,
+                            ['--card-rot' as any]: `${rotation}deg`,
+                            ['--card-z' as any]: isFeatured ? i + 100 : i,
+                            ['--card-delay' as any]: `${i * 0.15}s`,
                         }}
                     >
                         <PlayingCard
                             rank={RANK_MAP[rank] as any}
                             suit={SUIT_MAP[suit] as any}
                             size={cardSize}
+                            className="playing-card-filter"
                             style={{
-                                filter: cardFilter,
-                                transition: 'filter 0.3s ease',
+                                ['--card-filter' as any]: cardFilter,
                             }}
                         />
                     </div>

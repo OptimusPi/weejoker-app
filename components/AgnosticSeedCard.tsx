@@ -76,10 +76,11 @@ export function AgnosticSeedCard({
                     "balatro-panel flex flex-col items-center justify-center text-center",
                     "w-[315px] h-[340px] shrink-0",
                     "border-dashed border-white/10 opacity-60 grayscale",
+                    "animate-sway", // Move sway to container
                     className
                 )}
             >
-                <div className="animate-sway mb-4">
+                <div className="mb-4">
                     <DeckSprite deck={deckSlug} stake={stakeSlug} size={84} />
                 </div>
                 <h3 className="font-header text-2xl text-[var(--balatro-grey)] tracking-widest uppercase mb-2">PREVIEW ONLY</h3>
