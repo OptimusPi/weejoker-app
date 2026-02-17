@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { HeartHandshake } from "lucide-react";
 import { Sprite } from "./Sprite";
 
@@ -9,6 +9,30 @@ interface WeeWisdomProps {
 }
 
 export function WeeWisdom({ onBack }: WeeWisdomProps) {
+    const [wisdom, setWisdom] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchWisdom = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch('/api/wisdom');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch wisdom from the digital ether.');
+                }
+                const data = await response.json();
+                setWisdom(data.wisdom);
+            } catch (e: any) {
+                setError(e.message || "An unknown error occurred.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchWisdom();
+    }, []);
+
     return (
         <div className="w-full">
             <div className="balatro-panel p-8 flex flex-col gap-6 items-center relative overflow-hidden">
@@ -21,20 +45,24 @@ export function WeeWisdom({ onBack }: WeeWisdomProps) {
                     </h3>
                 </div>
 
-                <div className="space-y-4 text-center">
-                    <p className="font-pixel text-white/90 leading-relaxed text-sm">
-                        &quot;Every time you play a rank 2 card, I level up. <span className="text-[var(--balatro-blue)] font-header">+8 Chips</span>.&quot;
-                    </p>
-                    <p className="font-pixel text-white/90 leading-relaxed text-sm">
-                        Did you know? Research shows that just <span className="text-[var(--balatro-blue)] font-header">8 minutes</span> of conversation with a friend can significantly reduce feelings of depression and loneliness.
-                    </p>
-                    <p className="font-pixel text-white/60 italic text-xs border-l-2 border-[var(--balatro-blue)] pl-2 text-left mx-auto max-w-md">
-                        Just like in Balatro, small connections stack up to big results.
-                    </p>
-
+                <div className="space-y-4 text-center min-h-[150px] flex flex-col justify-center">
+                    {loading ? (
+                        <p className="font-pixel text-white/90 leading-relaxed text-sm animate-pulse">
+                            Consulting the oracle...
+                        </p>
+                    ) : error ? (
+                        <p className="font-pixel text-red-400 leading-relaxed text-sm">
+                            {error}
+                        </p>
+                    ) : (
+                        <p className="font-pixel text-white/90 leading-relaxed text-sm">
+                            &quot;{wisdom}&quot;
+                        </p>
+                    )}
+                    
                     <div className="pt-4 border-t-2 border-dashed border-white/20 flex flex-col sm:flex-row gap-4 justify-between items-center w-full text-left">
                         <span className="text-xs font-pixel text-white/60 italic">
-                            Got 8 minutes? Call a friend today.
+                            AI-generated wisdom from Cloudflare LLM.
                         </span>
                         <a
                             href="https://findahelpline.com/"
