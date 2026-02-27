@@ -117,6 +117,17 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
 
                 if (!active) return;
 
+                console.log(`[DailyRitual] Received config:`, {
+                    title: config.title,
+                    seedCount: config.seeds?.length,
+                    hasJaml: !!config.jamlConfig,
+                    today: config.today,
+                    dayNumber: config.dayNumber,
+                    currentSeed: config.currentSeed,
+                    seedsIsArray: Array.isArray(config.seeds),
+                    firstFewSeeds: config.seeds?.slice(0, 3)
+                });
+
                 setRitualTitle(config.title);
                 setRitualTagline(config.tagline);
                 const epoch = new Date(config.epoch).getTime();
@@ -124,7 +135,18 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                 setServerToday(config.today || 1);
 
                 setJamlConfig(config.jamlConfig);
-                setSeedsList(Array.isArray(config.seeds) && config.seeds.length > 0 ? config.seeds : (config.currentSeed ? [config.currentSeed] : []));
+                
+                // Set seeds list - ensure we're using the full array
+                if (Array.isArray(config.seeds) && config.seeds.length > 0) {
+                    console.log(`[DailyRitual] Setting ${config.seeds.length} seeds`);
+                    setSeedsList(config.seeds);
+                } else if (config.currentSeed) {
+                    console.log(`[DailyRitual] Fallback to single currentSeed: ${config.currentSeed}`);
+                    setSeedsList([config.currentSeed]);
+                } else {
+                    console.warn(`[DailyRitual] No seeds available!`);
+                    setSeedsList([]);
+                }
 
                 // Only update viewingDay if we were in "latest" mode (0) and got a specific day
                 if (viewingDay === 0 && config.dayNumber) {
@@ -187,10 +209,14 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
     const currentSeedId = useMemo(() => {
         // If we have history, lookup by day index (1-based -> 0-based)
         if (seedsList.length > 1 && viewingDay > 0) {
-            return seedsList[viewingDay - 1] || null;
+            const seed = seedsList[viewingDay - 1] || null;
+            console.log(`[DailyRitual] Looking up seed for day ${viewingDay} from ${seedsList.length} seeds: ${seed}`);
+            return seed;
         }
         // Fallback for single-seed mode
-        return seedsList[0] || (viewingDay <= todayNumber ? (seedsList.length > 0 ? seedsList[0] : null) : null);
+        const fallback = seedsList[0] || (viewingDay <= todayNumber ? (seedsList.length > 0 ? seedsList[0] : null) : null);
+        console.log(`[DailyRitual] Using fallback seed: ${fallback}, seedsList length: ${seedsList.length}`);
+        return fallback;
     }, [seedsList, viewingDay, todayNumber]);
 
     // Run Analyzer - Guard against LOCKED
@@ -308,7 +334,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                                     {configLoading ? "Connecting to Ritual Factory..." : "Reading Seed Data..."}
                                 </div>
                             </div>
-                        ) : analysisError || (!currentSeedId && viewingDay <= todayNumber) ? (
+                        ) : (!currentSeedId && viewingDay <= todayNumber) ? (
                             <div className="balatro-panel border-red-500/20 bg-red-950/20 p-6 md:p-12 text-center max-w-full md:max-w-md mx-auto">
                                 <h3 className="font-header text-red-400 text-xl md:text-2xl uppercase mb-2 md:mb-3">Ritual Lost</h3>
                                 <p className="font-pixel text-red-300/40 text-[11px] md:text-xs leading-relaxed">
