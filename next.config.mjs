@@ -1,4 +1,4 @@
-import { initOpenNextCloudflareForDev } from '@opennext/cloudflare';
+import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare';
 
 // This initializes the dev server to be able to use Cloudflare bindings
 initOpenNextCloudflareForDev();

@@ -1,0 +1,11 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Setup WASM",
+			"type": "shell",
+			"command": "npm run setup:wasm",
+			"isBackground": false
+		}
+	]
+}
