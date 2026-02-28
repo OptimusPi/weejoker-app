@@ -88,19 +88,19 @@ export function SeedSnapshotModal({ analysis, onClose }: SeedSnapshotModalProps)
                             <Hash size={32} className="text-black" />
                         </div>
                         <div>
-                            <h2 className="text-4xl font-header text-white tracking-widest drop-shadow-[2px_2px_0_rgba(0,0,0,0.5)] leading-none uppercase">
+                            <h2 className="text-4xl font-header text-white tracking-widest drop-shadow-[2px_2px_0_rgba(0,0,0,0.5)] leading-none">
                                 Seed Snapshot
                             </h2>
-                            <p className="text-[var(--balatro-gold)] font-pixel text-sm mt-1 uppercase tracking-tighter opacity-80">
+                            <p className="text-[var(--balatro-gold)] font-pixel text-sm mt-1 tracking-tighter opacity-80">
                                 {analysis.seed} • {analysis.deck} • {analysis.stake}
                             </p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="balatro-button balatro-button-red !py-2 !px-5 font-header text-2xl"
+                        className="balatro-button balatro-button-red py-2 px-5 font-header text-2xl"
                     >
-                        CLOSE
+                        Close
                     </button>
                 </div>
 
@@ -111,18 +111,18 @@ export function SeedSnapshotModal({ analysis, onClose }: SeedSnapshotModalProps)
                     <section>
                         <div className="flex items-center gap-3 mb-4">
                             <Award className="text-[var(--balatro-red)]" size={24} />
-                            <h3 className="font-header text-2xl text-white uppercase tracking-wider">Boss Blinds</h3>
+                            <h3 className="font-header text-2xl text-white tracking-wider">Boss Blinds</h3>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
                             {analysis.bosses.map((b, i) => (
                                 <div key={i} className="balatro-panel p-2 bg-black/40 border-white/5 flex flex-col items-center group hover:scale-105 transition-transform duration-200">
                                     <div className="w-full text-center border-b border-white/10 mb-2 pb-1">
-                                        <span className="font-pixel text-[10px] text-white/40 uppercase">Ante {b.ante}</span>
+                                        <span className="font-pixel text-[10px] text-white/40">Ante {b.ante}</span>
                                     </div>
                                     <div className="relative mb-1">
                                         <Sprite name={b.boss} width={48} className="drop-shadow-md" />
                                     </div>
-                                    <span className="font-pixel text-[9px] text-white text-center leading-tight h-8 flex items-center justify-center uppercase">
+                                    <span className="font-pixel text-[9px] text-white text-center leading-tight h-8 flex items-center justify-center">
                                         {b.boss}
                                     </span>
                                 </div>
@@ -134,18 +134,18 @@ export function SeedSnapshotModal({ analysis, onClose }: SeedSnapshotModalProps)
                     <section>
                         <div className="flex items-center gap-3 mb-4">
                             <ShoppingCart className="text-[var(--balatro-orange)]" size={24} />
-                            <h3 className="font-header text-2xl text-white uppercase tracking-wider">Vouchers</h3>
+                            <h3 className="font-header text-2xl text-white tracking-wider">Vouchers</h3>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
                             {analysis.vouchers.map((v, i) => (
                                 <div key={i} className="balatro-panel p-2 bg-black/40 border-white/5 flex flex-col items-center group hover:scale-105 transition-transform duration-200">
                                     <div className="w-full text-center border-b border-white/10 mb-2 pb-1">
-                                        <span className="font-pixel text-[10px] text-white/40 uppercase">Ante {v.ante}</span>
+                                        <span className="font-pixel text-[10px] text-white/40">Ante {v.ante}</span>
                                     </div>
                                     <div className="relative mb-1">
                                         <Sprite name={v.name} width={42} className="drop-shadow-md" />
                                     </div>
-                                    <span className="font-pixel text-[9px] text-white text-center leading-tight h-8 flex items-center justify-center uppercase">
+                                    <span className="font-pixel text-[9px] text-white text-center leading-tight h-8 flex items-center justify-center">
                                         {v.name}
                                     </span>
                                 </div>
@@ -157,7 +157,7 @@ export function SeedSnapshotModal({ analysis, onClose }: SeedSnapshotModalProps)
                     <section>
                         <div className="flex items-center gap-3 mb-4">
                             <Trophy className="text-[var(--balatro-gold)]" size={24} />
-                            <h3 className="font-header text-2xl text-white uppercase tracking-wider">Unique Jokers</h3>
+                            <h3 className="font-header text-2xl text-white tracking-wider">Unique Jokers</h3>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                             {uniqueJokers.map((j, i) => (
@@ -170,20 +170,20 @@ export function SeedSnapshotModal({ analysis, onClose }: SeedSnapshotModalProps)
                                             </div>
                                         </div>
                                         <div className="text-center">
-                                            <div className="font-header text-sm text-white uppercase truncate w-full mb-1">{j.name}</div>
-                                            <div className="font-pixel text-[9px] text-[var(--balatro-gold)] uppercase opacity-60">First: Ante {j.firstAnte}</div>
+                                            <div className="font-header text-sm text-white truncate w-full mb-1">{j.name}</div>
+                                            <div className="font-pixel text-[9px] text-[var(--balatro-gold)] opacity-60">First: Ante {j.firstAnte}</div>
                                         </div>
                                     </div>
 
                                     {/* Tooltip on Hover */}
                                     <div className="absolute z-50 invisible group-hover:visible bg-[var(--balatro-light-black)] border-2 border-[var(--balatro-outline-light)] p-3 rounded-lg shadow-2xl w-56 -translate-y-2 left-1/2 -translate-x-1/2 top-full mt-2 pointer-events-none transition-all duration-200 animate-in zoom-in-95 fill-mode-forwards">
-                                        <div className="font-header text-[var(--balatro-gold)] border-b border-white/10 pb-1 mb-2 text-center uppercase tracking-wider">{j.name}</div>
+                                        <div className="font-header text-[var(--balatro-gold)] border-b border-white/10 pb-1 mb-2 text-center tracking-wider">{j.name}</div>
                                         <div className="space-y-1.5 font-pixel text-[10px]">
-                                            <div className="flex justify-between uppercase">
+                                            <div className="flex justify-between">
                                                 <span className="text-white/40">Total Count:</span>
                                                 <span className="text-white">{j.count}</span>
                                             </div>
-                                            <div className="pt-2 border-t border-white/5 uppercase text-white/40 text-[8px] mb-1">Found At:</div>
+                                            <div className="pt-2 border-t border-white/5 text-white/40 text-[8px] mb-1">Found At:</div>
                                             <div className="max-h-24 overflow-y-auto custom-scrollbar pr-1">
                                                 {j.locations.map((loc, li) => (
                                                     <div key={li} className="flex justify-between items-center py-0.5 border-b border-white/5 last:border-0">

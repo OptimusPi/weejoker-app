@@ -80,7 +80,7 @@ function Tile({
             <div className="flex items-center justify-between mb-3 px-1 shrink-0 relative z-10">
                 <div className="flex items-center gap-2.5">
                     {Icon && <Icon size={18} className={cn("opacity-70", TILE_TEXT[color])} />}
-                    <h3 className={cn("font-header text-sm uppercase tracking-[0.25em] opacity-90", TILE_TEXT[color])}>
+                    <h3 className={cn("font-header text-sm tracking-[0.25em] opacity-90", TILE_TEXT[color])}>
                         {title}
                     </h3>
                 </div>
@@ -212,14 +212,14 @@ export default function JamlUIV2() {
                                 <button
                                     onClick={() => handleSearch()}
                                     className={cn(
-                                        "balatro-button !px-4 !py-1 text-sm h-9 min-w-[120px]",
+                                        "balatro-button px-4 py-1 text-sm h-9 min-w-[120px]",
                                         isSearching ? "balatro-button-red" : "balatro-button-blue"
                                     )}
                                 >
                                     {isSearching ? (
-                                        <><Square size={14} className="mr-2" fill="currentColor" /> ABORT</>
+                                        <><Square size={14} className="mr-2" fill="currentColor" /> Abort</>
                                     ) : (
-                                        <><Flame size={16} className="mr-2" /> IGNITE ENGINE</>
+                                        <><Flame size={16} className="mr-2" /> Ignite Engine</>
                                     )}
                                 </button>
                             </div>
@@ -256,7 +256,7 @@ export default function JamlUIV2() {
                     <div className="flex items-center justify-between px-2 h-10 shrink-0">
                         <div className="flex items-center gap-6">
                             <div className="flex flex-col">
-                                <span className="text-[10px] text-white/30 uppercase tracking-[0.2em]">Deployment State</span>
+                                <span className="text-[10px] text-white/30 tracking-[0.2em]">Deployment State</span>
                                 <div className="flex items-center gap-2">
                                     <div className="w-2 h-2 rounded-full bg-teal-500 animate-pulse shadow-[0_0_8px_rgba(20,184,166,0.5)]"></div>
                                     <MotelyVersionBadge minimal className="text-teal-400" />
@@ -264,8 +264,8 @@ export default function JamlUIV2() {
                             </div>
 
                             <div className="flex flex-col">
-                                <span className="text-[10px] text-white/30 uppercase tracking-[0.2em]">Seeds Processed</span>
-                                <span className="text-xs font-header text-blue-400 uppercase tracking-widest">{seedsProcessed > 0 ? seedsProcessed.toLocaleString() : '--'}</span>
+                                <span className="text-[10px] text-white/30 tracking-[0.2em]">Seeds Processed</span>
+                                <span className="text-xs font-header text-blue-400 tracking-widest">{seedsProcessed > 0 ? seedsProcessed.toLocaleString() : '--'}</span>
                             </div>
                         </div>
 
@@ -277,8 +277,8 @@ export default function JamlUIV2() {
                                 >
                                     <DeckSprite deck={deckSlug} stake={stakeSlug} size={28} />
                                     <div className="text-left">
-                                        <div className="text-[10px] text-white/40 uppercase tracking-widest leading-none mb-1">{stakeSlug} STAKE</div>
-                                        <div className="text-sm font-header text-white uppercase tracking-wider leading-none">{deckSlug} DECK</div>
+                                        <div className="text-[10px] text-white/40 tracking-widest leading-none mb-1">{stakeSlug} Stake</div>
+                                        <div className="text-sm font-header text-white tracking-wider leading-none">{deckSlug} Deck</div>
                                     </div>
                                 </button>
                             </div>
@@ -293,7 +293,7 @@ export default function JamlUIV2() {
                         headerRight={
                             <div className="flex items-center gap-3 text-xs font-header tracking-widest text-[#1ea0e6] opacity-80">
                                 {isSearching && <Loader2 size={14} className="animate-spin" />}
-                                <span>{seedsProcessed.toLocaleString()} SEEDS SCANNED</span>
+                                <span>{seedsProcessed.toLocaleString()} seeds scanned</span>
                             </div>
                         }
                     >
@@ -316,8 +316,8 @@ export default function JamlUIV2() {
                             ) : (
                                 <div className="flex-1 flex flex-col items-center justify-center text-white/10 p-10 text-center">
                                     <Zap size={64} className="mb-4 opacity-5" />
-                                    <p className="font-header text-xl uppercase tracking-[0.3em]">Ignite engine to populate vault</p>
-                                    <p className="font-pixel text-[10px] mt-2 tracking-widest uppercase">Waiting for JAML instruction set...</p>
+                                    <p className="font-header text-xl tracking-[0.3em]">Ignite engine to populate vault</p>
+                                    <p className="font-pixel text-[10px] mt-2 tracking-widest">Waiting for JAML instruction set...</p>
                                 </div>
                             )}
                         </div>

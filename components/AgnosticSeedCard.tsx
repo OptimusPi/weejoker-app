@@ -83,7 +83,7 @@ export function AgnosticSeedCard({
                 <div className="mb-4">
                     <DeckSprite deck={deckSlug} stake={stakeSlug} size={84} />
                 </div>
-                <h3 className="font-header text-2xl text-[var(--balatro-grey)] tracking-widest uppercase mb-2">PREVIEW ONLY</h3>
+                <h3 className="font-header text-2xl text-[var(--balatro-grey)] tracking-widest mb-2">Preview Only</h3>
                 <p className="font-pixel text-[10px] text-white/30 max-w-[200px]">
                     This seed unlocks tomorrow. You can view the deck, but the strategy is hidden!
                 </p>

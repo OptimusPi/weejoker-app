@@ -71,7 +71,7 @@ export function SeedStrategyModal({ analysis, onClose }: SeedStrategyModalProps)
                                             : "hover:bg-white/5 border-transparent text-white/50"
                                     )}
                                 >
-                                    <div className="text-xs font-pixel uppercase opacity-50 mb-1">Ante {ante}</div>
+                                    <div className="text-xs font-pixel opacity-50 mb-1">Ante {ante}</div>
                                     <div className="truncate text-sm opacity-80">{boss || "???"}</div>
                                 </button>
                             );
@@ -88,7 +88,7 @@ export function SeedStrategyModal({ analysis, onClose }: SeedStrategyModalProps)
                                     <div className="balatro-panel p-4 bg-[var(--balatro-red)]/10 border-[var(--balatro-red)]/30">
                                         <div className="flex items-center gap-2 mb-2 text-[var(--balatro-red)]">
                                             <Award size={18} />
-                                            <span className="font-header text-xl uppercase">Boss Blind</span>
+                                            <span className="font-header text-xl">Boss Blind</span>
                                         </div>
                                         <div className="text-2xl font-header text-white tracking-wide">
                                             {anteData.boss}
@@ -98,7 +98,7 @@ export function SeedStrategyModal({ analysis, onClose }: SeedStrategyModalProps)
                                     <div className="balatro-panel p-4 bg-[var(--balatro-orange)]/10 border-[var(--balatro-orange)]/30">
                                         <div className="flex items-center gap-2 mb-2 text-[var(--balatro-orange)]">
                                             <Tag size={18} />
-                                            <span className="font-header text-xl uppercase">Voucher</span>
+                                            <span className="font-header text-xl">Voucher</span>
                                         </div>
                                         <div className="text-2xl font-header text-white tracking-wide">
                                             {anteData.voucher || "None"}
@@ -108,7 +108,7 @@ export function SeedStrategyModal({ analysis, onClose }: SeedStrategyModalProps)
 
                                 {/* Tags */}
                                 <div>
-                                    <div className="font-pixel text-[10px] uppercase text-white/40 mb-2 tracking-widest">Tags</div>
+                                    <div className="font-pixel text-[10px] text-white/40 mb-2 tracking-widest">Tags</div>
                                     <div className="flex gap-2 flex-wrap">
                                         {anteData.tags.map((tag, i) => (
                                             <div key={i} className="px-3 py-1 bg-[var(--balatro-yellow)]/10 border border-[var(--balatro-yellow)]/30 rounded text-[var(--balatro-yellow)] font-pixel text-xs">
@@ -120,7 +120,7 @@ export function SeedStrategyModal({ analysis, onClose }: SeedStrategyModalProps)
 
                                 {/* Shop Queue */}
                                 <div>
-                                    <div className="font-pixel text-[10px] uppercase text-white/40 mb-2 tracking-widest flex items-center gap-2">
+                                    <div className="font-pixel text-[10px] text-white/40 mb-2 tracking-widest flex items-center gap-2">
                                         <ShoppingCart size={12} />
                                         Shop Queue
                                     </div>
@@ -156,7 +156,7 @@ export function SeedStrategyModal({ analysis, onClose }: SeedStrategyModalProps)
 
                                 {/* Packs */}
                                 <div>
-                                    <div className="font-pixel text-[10px] uppercase text-white/40 mb-2 tracking-widest flex items-center gap-2">
+                                    <div className="font-pixel text-[10px] text-white/40 mb-2 tracking-widest flex items-center gap-2">
                                         <PackageOpen size={12} />
                                         Packs
                                     </div>
@@ -185,14 +185,14 @@ export function SeedStrategyModal({ analysis, onClose }: SeedStrategyModalProps)
                                 {/* Deck Draws */}
                                 {(anteData as any).deckDraws && (
                                     <div>
-                                        <div className="font-pixel text-[10px] uppercase text-white/40 mb-2 tracking-widest flex items-center gap-2">
+                                    <div className="font-pixel text-[10px] text-white/40 mb-2 tracking-widest flex items-center gap-2">
                                             <Award size={12} className="rotate-180" />
                                             Deck draws
                                         </div>
                                         <div className="space-y-4">
                                             {Object.entries((anteData as any).deckDraws).map(([round, cards]: [string, any]) => (
                                                 <div key={round} className="balatro-panel p-3 border-[var(--balatro-blue)]/20 bg-[var(--balatro-blue)]/5">
-                                                    <div className="font-header text-lg text-[var(--balatro-blue)] mb-2 uppercase tracking-wider">{round} Sequence</div>
+                                                    <div className="font-header text-lg text-[var(--balatro-blue)] mb-2 tracking-wider">{round} Sequence</div>
                                                     <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
                                                         {cards.map((card: any, i: number) => (
                                                             <div key={i} className="shrink-0 w-16 h-24 bg-black/60 border border-white/10 rounded flex flex-col items-center justify-center p-1 text-center hover:border-[var(--balatro-blue)]/50 transition-colors">

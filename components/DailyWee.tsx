@@ -43,6 +43,38 @@ interface ScheduleItem {
     t1: string;
     t2: string;
 }
+
+function toNum(v: any): number | undefined {
+    if (v == null) return undefined;
+    const n = Number(v);
+    return isNaN(n) ? undefined : n;
+}
+function toBool(v: any): number | undefined {
+    if (v == null) return undefined;
+    return v ? 1 : 0;
+}
+function mapScheduleToSeed(raw: ScheduleItem): SeedData {
+    return {
+        seed: raw.id,
+        score: raw.s,
+        twos: typeof raw.w === 'number' ? raw.w : (parseInt(raw.w as any) || 0),
+        WeeJoker_Ante1: toNum(raw.wj1),
+        WeeJoker_Ante2: toNum(raw.wj2),
+        HanginChad_Ante1: toNum(raw.hc1),
+        HanginChad_Ante2: toNum(raw.hc2),
+        Hack_Ante1: toNum(raw.hk1),
+        Hack_Ante2: toNum(raw.hk2),
+        blueprint_early: toBool(raw.bp),
+        brainstorm_early: toBool(raw.bs),
+        Showman_Ante1: toNum(raw.sh),
+        red_Seal_Two: toBool(raw.rs),
+        themeName: raw.t,
+        themeJoker: raw.j,
+        themeCardAnte1: raw.t1,
+        themeCardAnte2: raw.t2,
+    };
+}
+
     const [topScore, setTopScore] = useState<{ name: string; score: number } | null>(null);
 
     const [showSubmit, setShowSubmit] = useState(false);
@@ -99,48 +131,12 @@ interface ScheduleItem {
                 setSeeds([]);
                 if (schedule.length > 0) setError("Future seed not found.");
             } else {
-                const seedData: SeedData = {
-                    seed: seedRaw.id,
-                    score: seedRaw.s,
-                    twos: seedRaw.w,
-                    WeeJoker_Ante1: seedRaw.wj1,
-                    WeeJoker_Ante2: seedRaw.wj2,
-                    HanginChad_Ante1: seedRaw.hc1,
-                    HanginChad_Ante2: seedRaw.hc2,
-                    Hack_Ante1: seedRaw.hk1,
-                    Hack_Ante2: seedRaw.hk2,
-                    blueprint_early: seedRaw.bp,
-                    brainstorm_early: seedRaw.bs,
-                    Showman_Ante1: seedRaw.sh,
-                    red_Seal_Two: seedRaw.rs,
-                    themeName: seedRaw.t,
-                    themeJoker: seedRaw.j,
-                    themeCardAnte1: seedRaw.t1,
-                    themeCardAnte2: seedRaw.t2
-                };
+                const seedData = mapScheduleToSeed(seedRaw);
                 setSeeds([seedData]);
                 setError(null);
             }
         } else if (seedRaw) {
-            const seedData: SeedData = {
-                seed: seedRaw.id,
-                score: seedRaw.s,
-                twos: typeof seedRaw.w === 'number' ? seedRaw.w : (parseInt(seedRaw.w as any) || 0),
-                WeeJoker_Ante1: seedRaw.wj1,
-                WeeJoker_Ante2: seedRaw.wj2,
-                HanginChad_Ante1: seedRaw.hc1,
-                HanginChad_Ante2: seedRaw.hc2,
-                Hack_Ante1: seedRaw.hk1,
-                Hack_Ante2: seedRaw.hk2,
-                blueprint_early: seedRaw.bp,
-                brainstorm_early: seedRaw.bs,
-                Showman_Ante1: seedRaw.sh,
-                red_Seal_Two: seedRaw.rs,
-                themeName: seedRaw.t,
-                themeJoker: seedRaw.j,
-                themeCardAnte1: seedRaw.t1,
-                themeCardAnte2: seedRaw.t2
-            };
+            const seedData = mapScheduleToSeed(seedRaw);
             setSeeds([seedData]);
             setError(null);
         } else {
@@ -151,7 +147,7 @@ interface ScheduleItem {
         try {
             const scoreRes = await fetch(`/api/scores?day=${day}`);
             if (scoreRes.ok) {
-                const scoreData = await scoreRes.json();
+                const scoreData = await scoreRes.json() as { scores?: any[] };
                 if (scoreData.scores && scoreData.scores.length > 0) {
                     const top = scoreData.scores[0];
                     setTopScore({ name: top.playerName || top.player_name || top.name, score: top.score });
@@ -207,7 +203,6 @@ interface ScheduleItem {
                         <DayHeader
                             dayNumber={viewingDay}
                             displayDate={getDayDisplay(viewingDay)}
-                            theme={currentTheme}
                         />
 
                         <DayNavigation
@@ -234,7 +229,7 @@ interface ScheduleItem {
                                         <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-[var(--balatro-grey-dark)]">
                                             {error ? (
                                                 <div className="flex flex-col items-center gap-2">
-                                                    <p className="text-red-400 font-header text-sm uppercase">{error}</p>
+                                                    <p className="text-red-400 font-header text-sm">{error}</p>
                                                     <button onClick={() => window.location.reload()} className="bg-red-900 text-white font-header text-[9px] px-3 py-1 rounded">Retry</button>
                                                 </div>
                                             ) : (
@@ -270,17 +265,17 @@ interface ScheduleItem {
 
                 {showHowTo && (
                     <HowToPlay
+                        isOpen={showHowTo}
                         onClose={() => setShowHowTo(false)}
-                        themeName={currentTheme.name}
                         seedId={seed?.seed || '--------'}
                         onSubmit={() => { setShowHowTo(false); setShowSubmit(true); }}
                     />
                 )}
-                {showLeaderboard && <LeaderboardModal dayNumber={viewingDay} onClose={() => setShowLeaderboard(false)} />}
+                {showLeaderboard && <LeaderboardModal ritualId="the-daily-wee" seed={seed?.seed || ''} onClose={() => setShowLeaderboard(false)} />}
                 {showSubmit && seed && (
                     <SubmitScoreModal
                         seed={seed.seed}
-                        dayNumber={viewingDay}
+                        ritualId="the-daily-wee"
                         onClose={() => setShowSubmit(false)}
                         onSuccess={() => loadDayData(viewingDay)}
                     />

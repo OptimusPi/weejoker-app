@@ -21,8 +21,8 @@ export function WeeWisdom({ onBack }: WeeWisdomProps) {
                 if (!response.ok) {
                     throw new Error('Failed to fetch wisdom from the digital ether.');
                 }
-                const data = await response.json();
-                setWisdom(data.wisdom);
+                const data = await response.json() as { wisdom?: string };
+                setWisdom(data.wisdom ?? null);
             } catch (e: any) {
                 setError(e.message || "An unknown error occurred.");
             } finally {

@@ -80,7 +80,7 @@ export async function GET(
             const csvObj = await env.SEED_ASSETS.get(`${id}.csv`);
             if (csvObj) {
                 const text = await csvObj.text();
-                const allSeeds = text.split('\n').map(l => l.trim()).filter(l => l.length > 0).map(l => l.split(',')[0].trim());
+                const allSeeds = text.split('\n').map((l: string) => l.trim()).filter((l: string) => l.length > 0).map((l: string) => l.split(',')[0].trim());
                 config.seeds = allSeeds.slice(0, todayNumber);
                 seedsLoaded = true;
             }

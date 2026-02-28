@@ -68,7 +68,7 @@ export function LeaderboardModal({ ritualId, seed, onClose }: LeaderboardModalPr
                         <Trophy size={28} strokeWidth={2.5} />
                         Top Scores
                     </h2>
-                    <span className="font-pixel text-white/80 text-sm uppercase tracking-wider bg-black/20 px-2 py-1 rounded">
+                    <span className="font-pixel text-white/80 text-sm tracking-wider bg-black/20 px-2 py-1 rounded">
                         {ritualId} | {seed}
                     </span>
                 </div>

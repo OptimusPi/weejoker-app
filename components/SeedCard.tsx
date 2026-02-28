@@ -207,7 +207,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                             {/* DECK Section */}
                             <div className="flex w-full min-h-[96px] bg-[var(--color-medium-grey)] rounded-xl overflow-hidden border-2 border-black/20 mb-2 relative shadow-md">
                                 <div className="w-12 flex items-center justify-center relative shrink-0 border-r border-white/10">
-                                    <span className="font-header text-[14px] text-white tracking-[0.25em] whitespace-nowrap -rotate-90 absolute uppercase">
+                                    <span className="font-header text-[14px] text-white tracking-[0.25em] whitespace-nowrap -rotate-90 absolute">
                                         Deck
                                     </span>
                                 </div>
@@ -228,7 +228,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                                     <div className="flex w-full min-h-[108px] bg-[var(--color-medium-grey)] rounded-xl overflow-hidden border-2 border-black/20 mb-2 relative shadow-md">
                                         {/* Left Label - Rotated Text */}
                                         <div className="w-12 flex items-center justify-center relative shrink-0 border-r border-white/10">
-                                            <span className="font-header text-[18px] text-white tracking-[0.3em] whitespace-nowrap -rotate-90 absolute uppercase font-bold">
+                                            <span className="font-header text-[18px] text-white tracking-[0.3em] whitespace-nowrap -rotate-90 absolute">
                                                 {label}
                                             </span>
                                         </div>
@@ -256,7 +256,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                                                 })
                                             ) : (
                                                 <div className="flex items-center justify-center w-full h-full py-4 opacity-20">
-                                                    <span className="font-pixel text-[10px] uppercase tracking-wider text-white">Empty</span>
+                                                    <span className="font-pixel text-[10px] tracking-wider text-white">Empty</span>
                                                 </div>
                                             )}
                                         </div>
@@ -291,8 +291,8 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
 
                     {view === 'PLAY' && (
                         <div className="flex-1 flex flex-col p-2 text-center gap-2 justify-center">
-                            <h3 className="font-header text-[var(--balatro-gold)] text-[10px] uppercase tracking-widest shrink-0">Strategy Guide</h3>
-                            <div className="font-header text-[9px] text-white/70 leading-relaxed uppercase tracking-wider flex-1 flex flex-col justify-center">
+                            <h3 className="font-header text-[var(--balatro-gold)] text-[10px] tracking-widest shrink-0">Strategy Guide</h3>
+                            <div className="font-header text-[9px] text-white/70 leading-relaxed tracking-wider flex-1 flex flex-col justify-center">
                                 {seed.relevantEvents && seed.relevantEvents.length > 0 ? (
                                     seed.relevantEvents.slice(0, 4).map((e, idx) => (
                                         <p key={idx}>{idx + 1}. Find {e.displayName || e.id} (Ante {e.ante})</p>
@@ -317,16 +317,16 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                                     <div key={idx} className="flex justify-between items-center bg-white/5 p-1 rounded-sm">
                                         <div className="flex gap-1.5 items-center">
                                             <span className="font-pixel text-[8px] text-white/20 w-3">#{idx + 1}</span>
-                                            <span className="font-header text-[9px] text-white uppercase truncate max-w-[70px]">{s.player_name}</span>
+                                            <span className="font-header text-[9px] text-white truncate max-w-[70px]">{s.player_name}</span>
                                         </div>
                                         <span className="font-header text-[9px] text-[var(--balatro-gold)]">{s.score.toLocaleString()}</span>
                                     </div>
                                 )) : (
-                                    <div className="flex-1 flex items-center justify-center font-pixel text-[8px] text-white/10 uppercase italic">No scores yet</div>
+                                    <div className="flex-1 flex items-center justify-center font-pixel text-[8px] text-white/10 italic">No scores yet</div>
                                 )}
                             </div>
                             {canSubmit && (
-                                <button onClick={onOpenSubmit} className="mt-1 w-full balatro-button balatro-button-gold text-[8px] py-2 uppercase shrink-0">Submit Score</button>
+                                <button onClick={onOpenSubmit} className="mt-1 w-full balatro-button balatro-button-gold text-[8px] py-2 shrink-0">Submit Score</button>
                             )}
                         </div>
                     )}

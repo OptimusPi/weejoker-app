@@ -80,14 +80,14 @@ export default function JamlEditorMonaco({ value, onChange, diagnostics, classNa
             {/* Toolbar */}
             <div className="h-10 bg-black/40 border-b border-white/5 flex items-center justify-between px-4 shrink-0 overflow-hidden">
                 <div className="flex items-center gap-4">
-                    <span className="font-header text-xs text-[var(--balatro-red)] tracking-widest uppercase flex items-center gap-2">
+                    <span className="font-header text-xs text-[var(--balatro-red)] tracking-widest flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-[var(--balatro-red)] animate-pulse" />
-                        JAML EDITOR
+                        JAML Editor
                     </span>
                     <div className="h-4 w-px bg-white/10" />
                     <div className="flex items-center gap-3">
-                        <button onClick={handleFormat} className="text-[9px] font-pixel text-white/30 hover:text-white/80 uppercase tracking-tighter transition-colors">Format</button>
-                        <button onClick={handleCopy} className="text-[9px] font-pixel text-white/30 hover:text-white/80 uppercase tracking-tighter transition-colors flex items-center gap-1">
+                        <button onClick={handleFormat} className="text-[9px] font-pixel text-white/30 hover:text-white/80 tracking-tighter transition-colors">Format</button>
+                        <button onClick={handleCopy} className="text-[9px] font-pixel text-white/30 hover:text-white/80 tracking-tighter transition-colors flex items-center gap-1">
                             <Copy size={10} /> Copy
                         </button>
                     </div>
@@ -97,12 +97,12 @@ export default function JamlEditorMonaco({ value, onChange, diagnostics, classNa
                     {hasErrors ? (
                         <div className="flex items-center gap-1.5 px-2 py-0.5 bg-red-500/10 border border-red-500/20 rounded text-[9px] font-pixel text-red-400">
                             <AlertCircle size={10} />
-                            <span>{diagnostics.errors.length} SYNTAX ERROR(S)</span>
+                            <span>{diagnostics.errors.length} syntax error(s)</span>
                         </div>
                     ) : (
                         <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-500/10 border border-green-500/20 rounded text-[9px] font-pixel text-green-400 opacity-60">
                             <Check size={10} />
-                            <span>SYNTAX VALID</span>
+                            <span>Syntax valid</span>
                         </div>
                     )}
                 </div>
@@ -142,10 +142,10 @@ export default function JamlEditorMonaco({ value, onChange, diagnostics, classNa
 
             {/* Quick Status Footer */}
             <div className="h-6 bg-black/20 border-t border-white/5 flex items-center px-4 justify-between shrink-0">
-                <div className="text-[8px] font-pixel text-white/20 uppercase">
+                <div className="text-[8px] font-pixel text-white/20">
                     Lines: {value.split('\n').length} | Encoding: UTF-8
                 </div>
-                <div className="text-[8px] font-pixel text-white/20 uppercase tracking-widest">
+                <div className="text-[8px] font-pixel text-white/20 tracking-widest">
                     Motely JAML Engine v1.0.4
                 </div>
             </div>

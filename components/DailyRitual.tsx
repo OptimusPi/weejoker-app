@@ -46,7 +46,6 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
     const [showSubmit, setShowSubmit] = useState(false);
     const [showHowTo, setShowHowTo] = useState(false);
     const [showLeaderboard, setShowLeaderboard] = useState(false);
-    const [isStale, setIsStale] = useState(false); // For dimming during transitions
 
 
     // Mount Effect
@@ -67,9 +66,6 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
 
     // Load Ritual Config (with Debounced Loading State)
     useEffect(() => {
-        // Immediate visual feedback without layout shift (dimming)
-        setIsStale(true);
-
         let active = true;
         // Only show full loading spinner if it takes more than 200ms
         const timer = setTimeout(() => {
@@ -90,7 +86,6 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                     if (active) {
                         clearTimeout(timer);
                         setConfigLoading(false);
-                        setIsStale(false);
                     }
                     return;
                 }
@@ -191,7 +186,6 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                 if (active) {
                     clearTimeout(timer);
                     setConfigLoading(false);
-                    setIsStale(false);
                 }
             }
         }
@@ -222,19 +216,6 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
     // Run Analyzer - Guard against LOCKED
     const analyzerSeed = currentSeedId === 'LOCKED' ? null : currentSeedId;
     const { data: analysisData, loading: analysisLoading, error: analysisError } = useSeedAnalyzer(analyzerSeed);
-
-    // Debounced loading: only show skeleton after 500ms of sustained loading.
-    // This prevents the flash on fast transitions.
-    const [showLoading, setShowLoading] = useState(false);
-    const isActuallyLoading = configLoading || analysisLoading;
-    useEffect(() => {
-        if (!isActuallyLoading) {
-            setShowLoading(false);
-            return;
-        }
-        const timer = setTimeout(() => setShowLoading(true), 500);
-        return () => clearTimeout(timer);
-    }, [isActuallyLoading]);
 
     // Objectives Parsing
     const objectives = useMemo(() => {
@@ -275,9 +256,9 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
 
 
     return (
-        <div className="ritual-locked-layout h-[100svh] overflow-hidden flex flex-col">
+        <div className="flex flex-col h-full min-h-0">
             {/* Main Content Areas - Mobile First Scaling */}
-            <main className="match-height-content z-10 flex-1 min-h-0 relative">
+            <main className="z-10 flex-1 min-h-0 relative overflow-auto">
                 {viewingDay <= 0 && !configLoading ? (
                     <div className="w-full max-w-full md:max-w-xl aspect-[4/3] flex flex-col items-center justify-center p-4 md:p-12 text-center">
                         <div className="balatro-panel border-white/10 bg-black/20 p-4 md:p-8">
@@ -305,36 +286,9 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                     </div>
                 ) : (
                     <div className={cn(
-                        "w-full px-1 md:px-4 max-w-[360px] mx-auto h-full min-h-0 flex flex-col justify-center transition-opacity duration-200",
-                        isStale && "opacity-50 pointer-events-none"
+                        "w-full px-1 mx-auto h-full min-h-0 flex flex-col justify-start pt-2"
                     )}>
-                        {showLoading ? (
-                            <div className="flex flex-col h-full justify-center w-full">
-                                <div className="jimbo-panel mx-8 md:mx-12 min-h-[500px] animate-pulse relative overflow-hidden">
-                                    {/* Header Skeleton */}
-                                    <div className="jimbo-inner-panel p-2 md:p-3 h-[54px] flex items-center shrink-0 mb-3">
-                                        <div className="w-24 h-6 bg-white/10 rounded" />
-                                    </div>
-
-                                    {/* Body Skeleton */}
-                                    <div className="flex flex-col gap-4 flex-1 w-full">
-                                        {/* Deck Fan */}
-                                        <div className="w-full rounded-lg aspect-[2/1] bg-white/5 border border-white/5" />
-
-                                        {/* Jokers */}
-                                        <div className="w-full rounded-lg h-16 bg-white/5 border border-white/5" />
-
-                                        <div className="flex-1" />
-
-                                        {/* Button */}
-                                        <div className="w-full h-12 rounded-lg bg-[var(--balatro-blue)]/20 border border-[var(--balatro-blue)]/30" />
-                                    </div>
-                                </div>
-                                <div className="text-center mt-6 font-pixel text-white/20 text-[11px] md:text-xs tracking-[0.2em] md:tracking-[0.4em] animate-pulse absolute bottom-12 left-0 right-0">
-                                    {configLoading ? "Connecting to Ritual Factory..." : "Reading Seed Data..."}
-                                </div>
-                            </div>
-                        ) : (!currentSeedId && viewingDay <= todayNumber) ? (
+                        {(!currentSeedId && viewingDay <= todayNumber && !configLoading) ? (
                             <div className="balatro-panel border-red-500/20 bg-red-950/20 p-6 md:p-12 text-center max-w-full md:max-w-md mx-auto">
                                 <h3 className="font-header text-red-400 text-xl md:text-2xl uppercase mb-2 md:mb-3">Ritual Lost</h3>
                                 <p className="font-pixel text-red-300/40 text-[11px] md:text-xs leading-relaxed">

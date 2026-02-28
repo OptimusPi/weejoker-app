@@ -94,7 +94,7 @@ export default function Explorer({ initialSeeds }: ExplorerProps) {
             <FilterBar onSearch={setSearch} onSortChange={setSort} />
 
             <div className="flex justify-end mb-2">
-                <span className="text-xs font-pixel text-zinc-500 uppercase">
+                <span className="text-xs font-pixel text-zinc-500">
                     {loading ? "Loading Data..." : "Loaded from CSV"}
                 </span>
             </div>

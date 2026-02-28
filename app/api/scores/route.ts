@@ -96,6 +96,7 @@ export async function POST(request: NextRequest) {
             // Dev mode - no database available
             console.log('Dev mode: Score submission skipped (no database)');
             return NextResponse.json({ success: true, devMode: true });
+        }
     } catch (error: any) {
         console.error('D1 Insert Error:', error);
         return NextResponse.json({ error: 'Failed to save score', details: error.message }, { status: 500 });

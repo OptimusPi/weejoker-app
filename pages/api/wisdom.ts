@@ -1,11 +1,9 @@
 
-import type { PagesFunction } from '@cloudflare/workers-types';
-
 interface Env {
   AI: any;
 }
 
-export const onRequest: PagesFunction<Env> = async (context) => {
+export const onRequest = async (context: { env: Env }) => {
   const { env } = context;
 
   if (!env.AI) {

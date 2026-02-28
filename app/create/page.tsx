@@ -294,7 +294,7 @@ export default function CreateRitualPage() {
                             </div>
                         </JimboInnerPanel>
 
-                        <JimboButton variant="gold" onClick={handleSubmit} disabled={isSubmitting} className="px-12 py-4 text-xl mt-4">
+                        <JimboButton variant="red" onClick={handleSubmit} disabled={isSubmitting} className="px-12 py-4 text-xl mt-4">
                             {isSubmitting ? "Forging..." : "Create Ritual"}
                         </JimboButton>
                     </div>

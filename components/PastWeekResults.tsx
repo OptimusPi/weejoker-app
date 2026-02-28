@@ -91,7 +91,7 @@ export function PastWeekResults() {
                                 <div className="font-header text-2xl text-[var(--balatro-gold)]">
                                     {result.score.toLocaleString()}
                                 </div>
-                                <div className="font-pixel text-zinc-500 text-xs uppercase">chips</div>
+                                <div className="font-pixel text-zinc-500 text-xs">chips</div>
                             </div>
                         </div>
                     ))}

@@ -54,8 +54,8 @@ export function WasmStatus() {
                         <Cpu size={16} />}
 
             <div className="flex flex-col">
-                <span className="text-[12px] uppercase tracking-widest leading-tight">
-                    WASM: {status.toUpperCase()}
+                <span className="text-[12px] tracking-widest leading-tight">
+                    WASM: {status}
                 </span>
                 {displayVersion && (
                     <span className="text-[11px] opacity-70 leading-tight">
