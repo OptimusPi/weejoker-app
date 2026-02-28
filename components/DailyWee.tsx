@@ -40,38 +40,18 @@ interface ScheduleItem {
     rs?: boolean;
     t: string;
     j: string;
-    t1: string;
-    t2: string;
 }
 
-function toNum(v: any): number | undefined {
-    if (v == null) return undefined;
-    const n = Number(v);
-    return isNaN(n) ? undefined : n;
-}
-function toBool(v: any): number | undefined {
-    if (v == null) return undefined;
-    return v ? 1 : 0;
-}
 function mapScheduleToSeed(raw: ScheduleItem): SeedData {
+    // Generic mapper — only map structural fields, spread everything else
+    const { id, s, w, t, j, ...rest } = raw;
     return {
-        seed: raw.id,
-        score: raw.s,
-        twos: typeof raw.w === 'number' ? raw.w : (parseInt(raw.w as any) || 0),
-        WeeJoker_Ante1: toNum(raw.wj1),
-        WeeJoker_Ante2: toNum(raw.wj2),
-        HanginChad_Ante1: toNum(raw.hc1),
-        HanginChad_Ante2: toNum(raw.hc2),
-        Hack_Ante1: toNum(raw.hk1),
-        Hack_Ante2: toNum(raw.hk2),
-        blueprint_early: toBool(raw.bp),
-        brainstorm_early: toBool(raw.bs),
-        Showman_Ante1: toNum(raw.sh),
-        red_Seal_Two: toBool(raw.rs),
-        themeName: raw.t,
-        themeJoker: raw.j,
-        themeCardAnte1: raw.t1,
-        themeCardAnte2: raw.t2,
+        seed: id,
+        score: s,
+        twos: typeof w === 'number' ? w : (parseInt(w as string) || 0),
+        themeName: t,
+        themeJoker: j,
+        ...rest,
     };
 }
 
@@ -156,7 +136,7 @@ function mapScheduleToSeed(raw: ScheduleItem): SeedData {
         } catch (e) {
             setTopScore(null);
         }
-    }, [schedule]);
+    }, [schedule, mapScheduleToSeed]);
 
     useEffect(() => {
         if (!mounted) return;

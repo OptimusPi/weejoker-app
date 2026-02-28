@@ -10,8 +10,7 @@
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
-    "setup:wasm": "cp -r node_modules/motely-wasm/_framework public/"
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
     "@duckdb/duckdb-wasm": "^1.28.0",
@@ -35,13 +34,13 @@
     "wrangler": "^4.69.0"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.10.0",
     "@cloudflare/workers-types": "^4.20260228.1",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
+    "esbuild": "^0.27.3",
     "eslint": "^8",
     "eslint-config-next": "^15.1.0",
     "postcss": "^8",

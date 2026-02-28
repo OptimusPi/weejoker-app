@@ -5,6 +5,7 @@ import { Loader2, Trophy } from "lucide-react";
 import { DeckSprite } from "./DeckSprite";
 import { DeckFan4Row } from "./DeckFan4Row";
 import { PlayingCard } from "./PlayingCard";
+import { Sprite } from "./Sprite";
 import { useSeedAnalyzer } from "@/lib/hooks/useSeedAnalyzer";
 import { evaluateSeed } from "@/lib/jaml/jamlEvaluator";
 import { useJamlFilter } from "@/lib/hooks/useJamlFilter";
@@ -257,7 +258,7 @@ export function RitualChallengeBoard({
             if (clause.suit && JAML_SUIT_MAP[clause.suit]) return JAML_SUIT_MAP[clause.suit];
         }
         return 'Hearts';
-    }, [filter, objectives]);
+    }, [filter]);
 
     // Cartridge-pop navigation handler
     const handleNav = (direction: 'prev' | 'next') => {
@@ -321,8 +322,8 @@ export function RitualChallengeBoard({
                         <div className="balatro-panel flex flex-col h-[340px] overflow-hidden">
                             {/* Top row: seed info (left 50%) | deck visual (right 50%) */}
                             <div className="flex flex-1 min-h-0 gap-2">
-                                {/* Left: seed + copy */}
-                                <div className="w-1/2 flex flex-col justify-center gap-2 py-2 pl-1">
+                                {/* Left: seed + JAML info */}
+                                <div className="w-1/2 flex flex-col justify-center gap-1.5 py-2 pl-1">
                                     <div>
                                         <p className="font-pixel text-[9px] text-white/30 tracking-wider mb-1">seed</p>
                                         <h3 className="font-header text-xl text-white leading-tight truncate">{seed}</h3>
@@ -330,6 +331,26 @@ export function RitualChallengeBoard({
                                             {analysis?.deck || 'Erratic'} &bull; White
                                         </p>
                                     </div>
+                                    {/* JAML Objectives */}
+                                    {objectives.length > 0 && (
+                                        <div className="flex flex-wrap gap-1">
+                                            {objectives.slice(0, 3).map((obj) => (
+                                                <span
+                                                    key={obj}
+                                                    className="font-pixel text-[8px] bg-[var(--jimbo-red)]/30 text-[var(--jimbo-gold)] px-1.5 py-0.5 rounded leading-none"
+                                                >
+                                                    {obj}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {/* Featured JAML joker */}
+                                    {foundJokers.length > 0 && (
+                                        <div className="flex items-center gap-1">
+                                            <Sprite name={foundJokers[0].name} width={24} />
+                                            <span className="font-pixel text-[9px] text-white/50 truncate">{foundJokers[0].name}</span>
+                                        </div>
+                                    )}
                                     <button
                                         type="button"
                                         onClick={handleCopy}
@@ -436,6 +457,51 @@ export function RitualChallengeBoard({
                         <div className="jimbo-inner-panel flex-1 min-h-0 overflow-auto">
                             {activeTab === 'details' && (
                                 <div className="p-2 space-y-2">
+                                    {/* JAML Objectives */}
+                                    {objectives.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 px-1">
+                                            {objectives.map((obj) => (
+                                                <span
+                                                    key={obj}
+                                                    className="font-pixel text-[9px] bg-[var(--jimbo-red)]/30 text-[var(--jimbo-gold)] px-1.5 py-0.5 rounded leading-none"
+                                                >
+                                                    {obj}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Found Jokers */}
+                                    {foundJokers.length > 0 && (
+                                        <div>
+                                            <span className="font-pixel text-[10px] text-white/40 tracking-wider px-1">Key Jokers</span>
+                                            <div className="flex flex-wrap gap-1 mt-1 px-1">
+                                                {foundJokers.map((j) => (
+                                                    <div key={j.id} className="flex flex-col items-center gap-0.5" title={`${j.name} — Ante ${j.ante} (${j.source})`}>
+                                                        <Sprite name={j.name} width={36} />
+                                                        <span className="font-pixel text-[7px] text-white/40 text-center max-w-[40px] truncate">{j.name}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Found Consumables */}
+                                    {foundConsumables.length > 0 && (
+                                        <div>
+                                            <span className="font-pixel text-[10px] text-white/40 tracking-wider px-1">Key Consumables</span>
+                                            <div className="flex flex-wrap gap-1 mt-1 px-1">
+                                                {foundConsumables.map((c) => (
+                                                    <div key={c.id} className="flex flex-col items-center gap-0.5" title={`${c.name} — Ante ${c.ante} (${c.source})`}>
+                                                        <Sprite name={c.name} width={36} />
+                                                        <span className="font-pixel text-[7px] text-white/40 text-center max-w-[40px] truncate">{c.name}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Starting Deck */}
                                     <div className="flex items-center justify-between px-1">
                                         <span className="font-pixel text-[10px] text-white/40 tracking-wider">Starting Deck</span>
                                         <span className="font-pixel text-[10px] text-white/20">{analysis?.startingDeck?.length || 52} cards</span>
