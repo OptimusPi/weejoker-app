@@ -6,6 +6,15 @@ const config: Config = {
         "./components/**/*.{js,ts,jsx,tsx,mdx}",
         "./app/**/*.{js,ts,jsx,tsx,mdx}",
     ],
+    // Added purge settings for production optimization
+    purge: {
+        enabled: process.env.NODE_ENV === 'production',
+        content: [
+            "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+            "./components/**/*.{js,ts,jsx,tsx,mdx}",
+            "./app/**/*.{js,ts,jsx,tsx,mdx}",
+        ],
+    },
     theme: {
         extend: {
             colors: {
@@ -61,6 +70,20 @@ const config: Config = {
                 "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
                 "gradient-conic":
                     "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+            },
+            keyframes: {
+                "cartridge-out": {
+                    "0%": { transform: "translateY(0)" },
+                    "100%": { transform: "translateY(100vh)" },
+                },
+                "cartridge-in": {
+                    "0%": { transform: "translateY(100vh)" },
+                    "100%": { transform: "translateY(0)" },
+                },
+            },
+            animation: {
+                "cartridge-out": "cartridge-out 0.18s ease-in forwards",
+                "cartridge-in": "cartridge-in 0.22s ease-out forwards",
             },
         },
     },

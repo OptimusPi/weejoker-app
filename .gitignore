@@ -14,6 +14,7 @@
 
 # production
 /build
+/public/_framework
 
 # misc
 .DS_Store
@@ -38,3 +39,17 @@ next-env.d.ts
 # cloudflare
 .wrangler
 
+/.agent
+/.claude
+/.cursor
+
+
+# large data
+public/seeds.txt
+/public/_framework
+/Blueprint
+/.open-next/server-functions/default/node_modules
+/.open-next/.build
+/.open-next/assets/_framework
+/.open-next/assets/_next
+/.open-next

@@ -1,0 +1,11 @@
+# Exclude heavy folders to save tokens
+node_modules/
+.next/
+dist/
+build/
+.wrangler/
+.vercel/
+
+
+# Large WASM assets
+public/motely-wasm/

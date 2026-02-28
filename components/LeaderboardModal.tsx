@@ -4,18 +4,19 @@ import { useState, useEffect } from "react";
 import { X, Trophy, Crown, Medal } from "lucide-react";
 
 interface LeaderboardModalProps {
-    dayNumber: number;
+    ritualId: string;
+    seed: string;
     onClose: () => void;
 }
 
 interface ScoreEntry {
     id: number;
     player_name: string;
-    score: number;
+    score: string;
     submitted_at: string;
 }
 
-export function LeaderboardModal({ dayNumber, onClose }: LeaderboardModalProps) {
+export function LeaderboardModal({ ritualId, seed, onClose }: LeaderboardModalProps) {
     const [scores, setScores] = useState<ScoreEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -25,9 +26,9 @@ export function LeaderboardModal({ dayNumber, onClose }: LeaderboardModalProps) 
             setLoading(true);
             setError(null);
             try {
-                const res = await fetch(`/api/scores?day=${dayNumber}`);
+                const res = await fetch(`/api/scores?seed=${seed}&ritualId=${ritualId}`);
                 if (!res.ok) throw new Error("Failed to load scores");
-                const data = await res.json();
+                const data = await res.json() as { scores: any[] };
                 if (data.scores) {
                     setScores(data.scores);
                 }
@@ -40,13 +41,14 @@ export function LeaderboardModal({ dayNumber, onClose }: LeaderboardModalProps) 
         };
 
         fetchScores();
-    }, [dayNumber]);
+    }, [ritualId, seed]);
 
     // Fallback Data for "Jaw Drop" reliability
 
 
-    const formatScore = (num: number) => {
-        return num.toLocaleString();
+    const formatScore = (val: string) => {
+        const num = Number(val);
+        return isNaN(num) ? val : num.toLocaleString();
     };
 
     const getRankIcon = (index: number) => {
@@ -66,8 +68,8 @@ export function LeaderboardModal({ dayNumber, onClose }: LeaderboardModalProps) 
                         <Trophy size={28} strokeWidth={2.5} />
                         Top Scores
                     </h2>
-                    <span className="font-pixel text-white/80 text-sm uppercase tracking-wider bg-black/20 px-2 py-1 rounded">
-                        Day {dayNumber}
+                    <span className="font-pixel text-white/80 text-sm tracking-wider bg-black/20 px-2 py-1 rounded">
+                        {ritualId} | {seed}
                     </span>
                 </div>
 
@@ -92,7 +94,7 @@ export function LeaderboardModal({ dayNumber, onClose }: LeaderboardModalProps) 
                                 className={`
                                     flex items-center justify-between p-3 rounded-lg border-2
                                     ${idx === 0
-                                        ? 'bg-[var(--balatro-gold)] border-[var(--balatro-gold)] text-black shadow-[ inset_0_0_20px_rgba(255,255,255,0.2) ]'
+                                        ? 'bg-[var(--balatro-gold)] border-[var(--balatro-gold)] text-black balatro-gold-glow'
                                         : 'bg-black/40 border-black/20 text-white'
                                     }
                                 `}

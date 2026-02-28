@@ -4,9 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { SeedData } from "@/lib/types";
 import { SeedCard } from "./SeedCard";
 import { FilterBar } from "./FilterBar";
-import { DailyWee } from "./DailyWee";
 import { SeedAnalysisOverlay } from "./SeedAnalysisOverlay";
-import { SeedScatterPlot } from "./SeedScatterPlot";
 
 interface ExplorerProps {
     initialSeeds: SeedData[];
@@ -96,15 +94,12 @@ export default function Explorer({ initialSeeds }: ExplorerProps) {
             <FilterBar onSearch={setSearch} onSortChange={setSort} />
 
             <div className="flex justify-end mb-2">
-                <span className="text-xs font-pixel text-zinc-500 uppercase">
+                <span className="text-xs font-pixel text-zinc-500">
                     {loading ? "Loading Data..." : "Loaded from CSV"}
                 </span>
             </div>
 
-            {/* VISUALIZATION SECTION */}
-            <div className="mb-8">
-                <SeedScatterPlot data={seeds} />
-            </div>
+            {/* VISUALIZATION SECTION REMOVED */}
 
             {/* Results Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

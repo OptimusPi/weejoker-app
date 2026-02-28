@@ -1,7 +1,7 @@
 {
     "name": "The Daily Wee",
-    "short_name": "Daily Wee",
-    "description": "Daily Balatro Seed Challenge - Erratic Deck",
+    "short_name": "WeeJoker.app",
+    "description": "A Balatro-basedDaily Ritual for Wee Joker Ethusiasts",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#27272a",

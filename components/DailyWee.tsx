@@ -21,7 +21,40 @@ export function DailyWee() {
     const [mounted, setMounted] = useState(false);
     const [viewMode, setViewMode] = useState<'main' | 'wisdom'>('main');
     const [error, setError] = useState<string | null>(null);
-    const [schedule, setSchedule] = useState<any[]>([]);
+    const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
+
+// Define the type for the schedule data
+interface ScheduleItem {
+    id: string;
+    s: number;
+    w: number | string;
+    wj1?: string;
+    wj2?: string;
+    hc1?: string;
+    hc2?: string;
+    hk1?: string;
+    hk2?: string;
+    bp?: boolean;
+    bs?: boolean;
+    sh?: string;
+    rs?: boolean;
+    t: string;
+    j: string;
+}
+
+function mapScheduleToSeed(raw: ScheduleItem): SeedData {
+    // Generic mapper — only map structural fields, spread everything else
+    const { id, s, w, t, j, ...rest } = raw;
+    return {
+        seed: id,
+        score: s,
+        twos: typeof w === 'number' ? w : (parseInt(w as string) || 0),
+        themeName: t,
+        themeJoker: j,
+        ...rest,
+    };
+}
+
     const [topScore, setTopScore] = useState<{ name: string; score: number } | null>(null);
 
     const [showSubmit, setShowSubmit] = useState(false);
@@ -60,7 +93,7 @@ export function DailyWee() {
         fetch('/daily_ritual.json')
             .then(res => {
                 if (!res.ok) throw new Error("The ritual hasn't been baked yet.");
-                return res.json();
+                return res.json() as Promise<ScheduleItem[]>;
             })
             .then(data => setSchedule(data))
             .catch(e => {
@@ -78,48 +111,12 @@ export function DailyWee() {
                 setSeeds([]);
                 if (schedule.length > 0) setError("Future seed not found.");
             } else {
-                const seedData: SeedData = {
-                    seed: seedRaw.id,
-                    score: seedRaw.s,
-                    twos: seedRaw.w,
-                    WeeJoker_Ante1: seedRaw.wj1,
-                    WeeJoker_Ante2: seedRaw.wj2,
-                    HanginChad_Ante1: seedRaw.hc1,
-                    HanginChad_Ante2: seedRaw.hc2,
-                    Hack_Ante1: seedRaw.hk1,
-                    Hack_Ante2: seedRaw.hk2,
-                    blueprint_early: seedRaw.bp,
-                    brainstorm_early: seedRaw.bs,
-                    Showman_Ante1: seedRaw.sh,
-                    red_Seal_Two: seedRaw.rs,
-                    themeName: seedRaw.t,
-                    themeJoker: seedRaw.j,
-                    themeCardAnte1: seedRaw.t1,
-                    themeCardAnte2: seedRaw.t2
-                };
+                const seedData = mapScheduleToSeed(seedRaw);
                 setSeeds([seedData]);
                 setError(null);
             }
         } else if (seedRaw) {
-            const seedData: SeedData = {
-                seed: seedRaw.id,
-                score: seedRaw.s,
-                twos: typeof seedRaw.w === 'number' ? seedRaw.w : (parseInt(seedRaw.w as any) || 0),
-                WeeJoker_Ante1: seedRaw.wj1,
-                WeeJoker_Ante2: seedRaw.wj2,
-                HanginChad_Ante1: seedRaw.hc1,
-                HanginChad_Ante2: seedRaw.hc2,
-                Hack_Ante1: seedRaw.hk1,
-                Hack_Ante2: seedRaw.hk2,
-                blueprint_early: seedRaw.bp,
-                brainstorm_early: seedRaw.bs,
-                Showman_Ante1: seedRaw.sh,
-                red_Seal_Two: seedRaw.rs,
-                themeName: seedRaw.t,
-                themeJoker: seedRaw.j,
-                themeCardAnte1: seedRaw.t1,
-                themeCardAnte2: seedRaw.t2
-            };
+            const seedData = mapScheduleToSeed(seedRaw);
             setSeeds([seedData]);
             setError(null);
         } else {
@@ -130,7 +127,7 @@ export function DailyWee() {
         try {
             const scoreRes = await fetch(`/api/scores?day=${day}`);
             if (scoreRes.ok) {
-                const scoreData = await scoreRes.json();
+                const scoreData = await scoreRes.json() as { scores?: any[] };
                 if (scoreData.scores && scoreData.scores.length > 0) {
                     const top = scoreData.scores[0];
                     setTopScore({ name: top.playerName || top.player_name || top.name, score: top.score });
@@ -139,7 +136,7 @@ export function DailyWee() {
         } catch (e) {
             setTopScore(null);
         }
-    }, [schedule]);
+    }, [schedule, mapScheduleToSeed]);
 
     useEffect(() => {
         if (!mounted) return;
@@ -179,14 +176,13 @@ export function DailyWee() {
 
     return (
         <div className="h-[100dvh] w-full relative overflow-hidden bg-transparent">
-            <div className="absolute inset-0 z-10 flex flex-col items-center">
+            <div className="absolute inset-0 z-10 flex flex-col items-center px-[4%] py-[8%]">
                 <div className="h-full w-full relative z-10 flex flex-col items-center">
 
                     <div className="flex-1 flex flex-col justify-center items-center w-full min-h-0 gap-1 py-2">
                         <DayHeader
                             dayNumber={viewingDay}
                             displayDate={getDayDisplay(viewingDay)}
-                            theme={currentTheme}
                         />
 
                         <DayNavigation
@@ -195,34 +191,30 @@ export function DailyWee() {
                             canPrev={canGoBack}
                             canNext={canGoForward}
                         >
-                            {viewingDay === 0 ? (
-                                <WeepochCard onShowHowTo={() => setShowHowTo(true)} onEnterRitual={() => updateDay(1)} />
-                            ) : (
-                                <div className="w-full h-full relative flex flex-col items-center justify-center">
-                                    {seed ? (
-                                        <SeedCard
-                                            seed={seed}
-                                            dayNumber={viewingDay}
-                                            className="w-full h-full"
-                                            onAnalyze={() => setShowHowTo(true)}
-                                            onOpenSubmit={() => setShowSubmit(true)}
-                                            isLocked={viewingDay > todayNumber}
-                                            canSubmit={viewingDay === todayNumber}
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-[var(--balatro-grey-dark)]">
-                                            {error ? (
-                                                <div className="flex flex-col items-center gap-2">
-                                                    <p className="text-red-400 font-header text-sm uppercase">{error}</p>
-                                                    <button onClick={() => window.location.reload()} className="bg-red-900 text-white font-header text-[9px] px-3 py-1 rounded">Retry</button>
-                                                </div>
-                                            ) : (
-                                                <div className="animate-spin text-white/5"><Sprite name="weejoker" width={24} /></div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                            <div className="w-full h-full relative flex flex-col items-center justify-center">
+                                {seed ? (
+                                    <SeedCard
+                                        seed={seed}
+                                        dayNumber={viewingDay}
+                                        className="w-full h-full"
+                                        onAnalyze={() => setShowHowTo(true)}
+                                        onOpenSubmit={() => setShowSubmit(true)}
+                                        isLocked={viewingDay > todayNumber}
+                                        canSubmit={viewingDay === todayNumber}
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-[var(--balatro-grey-dark)]">
+                                        {error ? (
+                                            <div className="flex flex-col items-center gap-2">
+                                                <p className="text-red-400 font-header text-sm">{error}</p>
+                                                <button onClick={() => window.location.reload()} className="bg-red-900 text-white font-header text-[9px] px-3 py-1 rounded">Retry</button>
+                                            </div>
+                                        ) : (
+                                            <div className="animate-spin text-white/5"><Sprite name="weejoker" width={24} /></div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </DayNavigation>
 
                         {/* Banner Ad Rotator - Full width alignment */}
@@ -249,17 +241,17 @@ export function DailyWee() {
 
                 {showHowTo && (
                     <HowToPlay
+                        isOpen={showHowTo}
                         onClose={() => setShowHowTo(false)}
-                        themeName={currentTheme.name}
                         seedId={seed?.seed || '--------'}
                         onSubmit={() => { setShowHowTo(false); setShowSubmit(true); }}
                     />
                 )}
-                {showLeaderboard && <LeaderboardModal dayNumber={viewingDay} onClose={() => setShowLeaderboard(false)} />}
+                {showLeaderboard && <LeaderboardModal ritualId="the-daily-wee" seed={seed?.seed || ''} onClose={() => setShowLeaderboard(false)} />}
                 {showSubmit && seed && (
                     <SubmitScoreModal
                         seed={seed.seed}
-                        dayNumber={viewingDay}
+                        ritualId="the-daily-wee"
                         onClose={() => setShowSubmit(false)}
                         onSuccess={() => loadDayData(viewingDay)}
                     />

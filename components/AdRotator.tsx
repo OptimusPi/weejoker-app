@@ -115,7 +115,7 @@ export function AdRotator({ onOpenWisdom, onOpenLeaderboard, topScore, isLocked 
     return (
         <button
             onClick={handleClick}
-            className="w-full relative overflow-hidden ad-rotator-button rounded-[4px] border border-black/20 p-1 px-3 flex flex-row items-center justify-between gap-3 min-h-[40px]"
+            className="w-full relative overflow-hidden ad-rotator-button rounded-[4px] border border-black/20 p-2 px-4 flex flex-row items-center justify-between gap-3 min-h-[56px]"
         >
             {currentAd.type === 'image' && currentAd.src ? (
                 // Full Image Ad
@@ -129,12 +129,12 @@ export function AdRotator({ onOpenWisdom, onOpenLeaderboard, topScore, isLocked 
                     <div className="flex flex-col items-start text-left z-10 shrink min-w-0">
                         {/* Title with Ad Color Highlight */}
                         <span
-                            className="font-header font-normal text-[11px] sm:text-[13px] uppercase tracking-wider leading-none mb-0.5 drop-shadow-sm transition-colors duration-200 whitespace-nowrap truncate w-full"
+                            className="font-header text-[14px] sm:text-[16px] tracking-wider leading-none mb-1 drop-shadow-sm transition-colors duration-200 whitespace-nowrap truncate w-full"
                             style={{ color: currentAd.color }}
                         >
                             {currentAd.title}
                         </span>
-                        <span className="font-pixel font-normal text-[7px] sm:text-[9px] text-white/70 truncate w-full uppercase">
+                        <span className="font-pixel text-[10px] sm:text-[12px] text-white/70 truncate w-full">
                             {currentAd.subtitle}
                         </span>
                     </div>

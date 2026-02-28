@@ -3,7 +3,12 @@ import { SeedData } from "@/lib/types";
 import { Copy, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Sprite } from "./Sprite";
+import { PlayingCard } from "./PlayingCard";
+import { CardFan } from "./CardFan";
+import { DeckSprite } from "./DeckSprite";
 import { cn } from "@/lib/utils";
+import { parseCardToken } from "@/lib/cardParser";
+import { parseDailyRitualSeed, groupItemsByType } from "@/lib/parseDailyRitual";
 
 interface SeedCardProps {
     seed: SeedData;
@@ -15,10 +20,57 @@ interface SeedCardProps {
     canSubmit?: boolean;
 }
 
-// Simple hook removed as it was unused
-
-
 type CardView = 'DEFAULT' | 'PLAY' | 'SCORES';
+
+// Helper: Extract featured rank from startingDeck
+// In Balatro, ranks are [2,3,4,5...J,Q,K,A]. For Wee Joker ritual, prioritize 2.
+function computeFeaturedRank(startingDeck: string[]): "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "Jack" | "Queen" | "King" | "Ace" {
+    if (!startingDeck || startingDeck.length === 0) return '2';
+    
+    const rankCounts: Record<string, number> = {};
+    for (const card of startingDeck) {
+        const [rank] = card.split('_');
+        rankCounts[rank] = (rankCounts[rank] || 0) + 1;
+    }
+    
+    // For Wee Joker daily, rank 2 is the priority
+    if ((rankCounts['2'] || 0) > 8) return '2'; // Heavy 2s deck
+    
+    // Otherwise, find most common rank
+    let maxRank = '2';
+    let maxCount = rankCounts['2'] || 0;
+    for (const [rank, count] of Object.entries(rankCounts)) {
+        if (count > maxCount) { maxCount = count; maxRank = rank; }
+    }
+    
+    const rankMap: Record<string, "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "Jack" | "Queen" | "King" | "Ace"> = {
+        '2': '2', '3': '3', '4': '4', '5': '5', '6': '6', '7': '7', '8': '8', '9': '9', '10': '10',
+        'J': 'Jack', 'Q': 'Queen', 'K': 'King', 'A': 'Ace',
+    };
+    return rankMap[maxRank] || '2';
+}
+
+// Helper: Extract featured suit from startingDeck
+function computeFeaturedSuit(startingDeck: string[]): "Hearts" | "Clubs" | "Diamonds" | "Spades" {
+    if (!startingDeck || startingDeck.length === 0) return 'Hearts';
+    
+    const suitCounts: Record<string, number> = {};
+    for (const card of startingDeck) {
+        const [, suit] = card.split('_');
+        suitCounts[suit] = (suitCounts[suit] || 0) + 1;
+    }
+    
+    let maxSuit = 'H';
+    let maxCount = 0;
+    for (const [suit, count] of Object.entries(suitCounts)) {
+        if (count > maxCount) { maxCount = count; maxSuit = suit; }
+    }
+    
+    const suitMap: Record<string, "Hearts" | "Clubs" | "Diamonds" | "Spades"> = {
+        'H': 'Hearts', 'C': 'Clubs', 'D': 'Diamonds', 'S': 'Spades',
+    };
+    return suitMap[maxSuit] || 'Hearts';
+}
 
 export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, isLocked, canSubmit }: SeedCardProps) {
     const [view, setView] = useState<CardView>('DEFAULT');
@@ -31,8 +83,8 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
         if (dayNumber <= 0) return;
         let isMounted = true;
         fetch(`/api/scores?day=${dayNumber}`)
-            .then(res => res.json())
-            .then(data => {
+            .then(res => res.json() as Promise<{ scores: any[] }>)
+            .then((data) => {
                 if (isMounted) {
                     const scores = data.scores || [];
                     setAllScores(scores);
@@ -50,38 +102,67 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
     }, [dayNumber]);
 
     const handleCopy = async () => {
-        await navigator.clipboard.writeText(seed.seed);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(seed.seed);
+        } else {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = seed.seed;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+        }
         setCopied(true);
         setTimeout(() => setCopied(false), 3140);
     };
 
-    const getJokers = (ante: 1 | 2) => {
-        const jokers: { id: string; name: string; tally?: number }[] = [];
-        if (seed.themeJoker && seed.themeJoker !== "Joker") {
-            const themeTally = ante === 1 ? seed.themeCardAnte1 : seed.themeCardAnte2;
-            if ((themeTally ?? 0) > 0) {
-                const jokerId = seed.themeJoker.toLowerCase().replace(/ /g, "");
-                jokers.push({ id: jokerId, name: seed.themeJoker, tally: themeTally as number });
+    const getItems = (types: ('joker' | 'tarot' | 'spectral' | 'planet' | 'voucher' | 'consumable')[]) => {
+        // 1. If we have rich JAMZ relevantEvents, use them (The Templatized Future)
+        if (seed.relevantEvents && seed.relevantEvents.length > 0) {
+            return seed.relevantEvents
+                .filter(e => {
+                    if (types.includes('consumable')) {
+                        return e.type === 'tarot' || e.type === 'spectral' || e.type === 'planet';
+                    }
+                    return types.includes(e.type as any);
+                })
+                .map(e => ({
+                    id: e.id,
+                    name: e.displayName || e.id,
+                    tally: e.count || 1,
+                    type: e.type,
+                    ante: e.ante
+                }));
+        }
+
+        // 2. Fallback for legacy flat data (The Hardcoded Past - we'll keep this until data is fully JAMZ)
+        const items: { id: string; name: string; tally: number; type: string }[] = [];
+        const ITEM_DEFS = [
+            { key: 'WeeJoker_Ante1', id: 'weejoker', name: 'Wee Joker', type: 'joker' },
+            { key: 'WeeJoker_Ante2', id: 'weejoker', name: 'Wee Joker', type: 'joker' },
+            { key: 'Hack_Ante1', id: 'hack', name: 'Hack', type: 'joker' },
+            { key: 'Hack_Ante2', id: 'hack', name: 'Hack', type: 'joker' },
+            { key: 'HanginChad_Ante1', id: 'hangingchad', name: 'Hanging Chad', type: 'joker' },
+            { key: 'HanginChad_Ante2', id: 'hangingchad', name: 'Hanging Chad', type: 'joker' },
+            { key: 'blueprint_early', id: 'blueprint', name: 'Blueprint', type: 'joker' },
+            { key: 'brainstorm_early', id: 'brainstorm', name: 'Brainstorm', type: 'joker' },
+            { key: 'Showman_Ante1', id: 'showman', name: 'Showman', type: 'joker' },
+            { key: 'Temperance', id: 'temperance', name: 'Temperance', type: 'consumable' },
+            { key: 'Ankh_Ante1', id: 'ankh', name: 'Ankh', type: 'consumable' },
+            { key: 'InvisibleJoker', id: 'invisiblejoker', name: 'Invisible Joker', type: 'voucher' },
+        ];
+
+        ITEM_DEFS.forEach(def => {
+            const val = seed[def.key];
+            if (typeof val === 'number' && val > 0 && types.includes(def.type as any)) {
+                const existing = items.find(i => i.id === def.id);
+                if (existing) existing.tally += val;
+                else items.push({ id: def.id, name: def.name, tally: val, type: def.type });
             }
-        }
-        const isAlreadyAdded = (name: string) => jokers.some(j => j.name === name);
-        const weeTally = ante === 1 ? seed.WeeJoker_Ante1 : seed.WeeJoker_Ante2;
-        if ((weeTally ?? 0) > 0 && !isAlreadyAdded("Wee Joker")) {
-            jokers.push({ id: "weejoker", name: "Wee Joker", tally: weeTally as number });
-        }
-        const hackTally = ante === 1 ? seed.Hack_Ante1 : seed.Hack_Ante2;
-        if ((hackTally ?? 0) > 0 && !isAlreadyAdded("Hack")) {
-            jokers.push({ id: "hack", name: "Hack", tally: hackTally as number });
-        }
-        const chadTally = ante === 1 ? seed.HanginChad_Ante1 : seed.HanginChad_Ante2;
-        if ((chadTally ?? 0) > 0 && !isAlreadyAdded("Hanging Chad")) {
-            jokers.push({ id: "hangingchad", name: "Hanging Chad", tally: chadTally as number });
-        }
-        if (ante === 1) {
-            if ((seed.blueprint_early ?? 0) > 0 && !isAlreadyAdded("Blueprint")) jokers.push({ id: "blueprint", name: "Blueprint", tally: seed.blueprint_early as number });
-            if ((seed.brainstorm_early ?? 0) > 0 && !isAlreadyAdded("Brainstorm")) jokers.push({ id: "brainstorm", name: "Brainstorm", tally: seed.brainstorm_early as number });
-        }
-        return jokers;
+        });
+
+        return items;
     };
 
     const [timeLeft, setTimeLeft] = useState("");
@@ -102,96 +183,184 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
     }, [isLocked]);
 
     return (
-        <div className={cn("relative group flex flex-col balatro-sway", className)}>
-            <div className="balatro-panel p-1.5 flex flex-col relative h-full z-10 grow gap-1.5 min-h-[345px] !overflow-visible">
+        <div className={cn("relative group flex flex-col", className)}>
+            <div className="balatro-panel p-1.5 flex flex-col relative z-10 gap-1.5 !overflow-visible h-full">
 
-                {/* Header Row: Seed & Twos */}
-                <div className="flex w-full overflow-hidden rounded-lg border-2 border-black/20 shrink-0 h-10">
+                {/* [Seed Display] */}
+                <div className="flex w-full overflow-visible rounded-lg border-2 border-black/20 shrink-0 h-16">
+                    {/* LEFT: Seed + Copy Button (50%) */}
                     <div className="w-1/2 bg-black/40 flex items-center justify-center border-r-2 border-black/20 overflow-hidden px-1">
                         {!isLocked ? (
-                            <button onClick={handleCopy} className="flex items-center gap-2 outline-none w-full justify-center">
-                                <div className={cn("p-1 rounded-md transition-colors shrink-0", copied ? 'bg-[var(--balatro-green)]' : 'bg-black/20')}>
-                                    {copied ? <Check size={10} className="text-white" strokeWidth={4} /> : <Copy size={10} className="text-white/60" strokeWidth={3} />}
+                            <button onClick={handleCopy} className="flex items-center gap-2 outline-none w-full justify-center juice-pop balatro-delay-1">
+                                <div className={cn("p-1.5 rounded-md transition-colors shrink-0", copied ? 'bg-[var(--balatro-green)]' : 'bg-transparent')}>
+                                    {copied ? <Check size={20} className="text-white" strokeWidth={4} /> : <Copy size={20} className="text-white/60" strokeWidth={3} />}
                                 </div>
-                                <span className={cn("font-header text-xs tracking-wider truncate", copied ? 'text-[var(--balatro-green)]' : 'text-white')}>{copied ? 'COPIED!' : seed.seed}</span>
+                                <span className={cn("font-header text-[22px] tracking-widest truncate", copied ? 'text-[var(--balatro-green)]' : 'text-white')}>{copied ? 'Copied!' : seed.seed}</span>
                             </button>
                         ) : (
                             <span className="font-header text-sm text-white/40 tracking-widest leading-none">--------</span>
                         )}
                     </div>
-                    <div className="w-1/2 bg-black/20 flex flex-col items-center justify-center p-0.5">
-                        <span className="font-header text-lg text-white tracking-widest leading-none">{seed.twos ?? 0}</span>
-                        <span className="font-header text-[var(--balatro-blue)] text-[8px] tracking-widest uppercase mt-[-2px]">Starting 2&apos;s</span>
+
+                    {/* RIGHT: Erratic Deck + Card (50%) */}
+                    <div className="w-1/2 bg-black/20 flex items-center justify-center p-1 overflow-visible relative">
+                        {!isLocked ? (
+                            <div className="juice-pop balatro-delay-2 relative" style={{ width: '60px', height: '80px' }}>
+                                {/* Stacked deck backs - tilted RIGHT */}
+                                <div
+                                    className="absolute inset-0 flex items-center justify-center"
+                                    style={{ transform: 'rotate(12deg)', transformOrigin: 'center' }}
+                                >
+                                    <DeckSprite deck="erratic" stake={seed.stake || 'white'} size={48} />
+                                </div>
+                                {/* Card face overlay - tilted LEFT, on top */}
+                                {seed.startingDeck && seed.startingDeck.length > 0 && (
+                                    <div
+                                        className="absolute inset-0 flex items-center justify-center"
+                                        style={{ transform: 'rotate(-8deg)', transformOrigin: 'center', zIndex: 1 }}
+                                    >
+                                        <PlayingCard
+                                            rank={computeFeaturedRank(seed.startingDeck)}
+                                            suit={computeFeaturedSuit(seed.startingDeck)}
+                                            size={40}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="relative" style={{ width: '54px', height: '68px' }}>
+                                <div className="absolute" style={{ left: '0', top: '0' }}>
+                                    <DeckSprite deck="locked" size={48} />
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                {/* View Tabs - Authentic Balatro Multi-Layer Shadows */}
-                <div className="flex gap-1 justify-center shrink-0 mt-0.5">
+                {/* View Tabs */}
+                <div className="flex gap-1 justify-center shrink-0 mt-1">
                     {(['DEFAULT', 'PLAY', 'SCORES'] as CardView[]).map((v) => (
                         <button
                             key={v}
                             onClick={() => setView(v)}
                             className={cn(
-                                "relative px-3 py-1.5 rounded-md font-header text-[9px] uppercase tracking-wider transition-all text-white bg-[var(--balatro-red)]",
-                                view === v
-                                    ? "shadow-[1px_1px_0_rgba(0,0,0,0.5),0_2px_0_var(--color-dark-red)] active:shadow-none active:translate-y-[2px]"
-                                    : "shadow-[1px_1px_0_rgba(0,0,0,0.3),0_1px_0_rgba(0,0,0,0.6)] opacity-70 hover:opacity-90 active:shadow-none active:translate-y-[1px]"
+                                "balatro-tab balatro-button-red min-w-20 py-1.5 text-lg",
+                                view === v && "balatro-selected-tab"
                             )}
                         >
-                            {v === 'DEFAULT' ? 'DETAILS' : v === 'PLAY' ? 'HOW TO' : 'SCORES'}
+                            {v === 'DEFAULT' ? 'Details' : v === 'PLAY' ? 'Strategy' : 'Scores'}
                         </button>
                     ))}
                 </div>
 
                 {/* View Container - Direct content, no inner panel */}
-                <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                <div className="flex-1 flex flex-col w-full relative overflow-hidden">
                     {view === 'DEFAULT' && (
-                        <div className="flex-1 flex flex-col justify-center gap-2 px-2 py-2 overflow-visible">
-                            <div className="flex flex-wrap gap-2 items-center justify-center">
-                                {[1, 2].flatMap((anteNum) =>
-                                    getJokers(anteNum as 1 | 2).map((j) => (
-                                        <div key={`${anteNum}-${j.id}`} className="relative flex flex-col items-center group/joker">
-                                            {/* Ante Badge */}
-                                            <div className={cn(
-                                                "absolute -top-1 -left-1 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[7px] font-header z-20 shadow-sm border border-white/20",
-                                                anteNum === 1 ? "bg-[var(--balatro-gold)] text-black" : "bg-[var(--balatro-blue)] text-white"
-                                            )}>
-                                                {anteNum}
-                                            </div>
+                        <div className="flex-1 flex flex-col gap-1.5 py-1.5 overflow-visible">
 
-                                            {/* Count Badge */}
-                                            {j.tally !== undefined && j.tally > 1 && (
-                                                <div className="absolute -top-1 -right-1 bg-white text-black font-header text-[7px] w-3.5 h-3.5 flex items-center justify-center rounded-full z-20 shadow-sm">
-                                                    {j.tally}
+                            {/* DECK Section */}
+                            <div className="flex w-full min-h-[96px] bg-[var(--color-medium-grey)] rounded-xl overflow-hidden border-2 border-black/20 mb-2 relative shadow-md">
+                                <div className="w-12 flex items-center justify-center relative shrink-0 border-r border-white/10">
+                                    <span className="font-header text-[14px] text-white tracking-[0.25em] whitespace-nowrap -rotate-90 absolute">
+                                        Deck
+                                    </span>
+                                </div>
+                                <div className="flex-1 flex items-center justify-center p-3">
+                                    <CardFan count={seed.startingDeck?.length || 0} cards={seed.startingDeck as string[]} />
+                                </div>
+                            </div>
+
+                            {/* ITEMS Section - Ante 1 and Ante 2 */}
+                            {/* ITEMS Section - Grouped by Type */}
+                            {(() => {
+                                // Parse items directly from the seed object using our new parser
+                                const parsed = parseDailyRitualSeed(seed);
+                                const { jokers, consumables, vouchers } = groupItemsByType(parsed.items);
+
+                                // Helper to render a group section
+                                const renderGroup = (label: string, items: any[], spriteWidth: number = 71) => (
+                                    <div className="flex w-full min-h-[108px] bg-[var(--color-medium-grey)] rounded-xl overflow-hidden border-2 border-black/20 mb-2 relative shadow-md">
+                                        {/* Left Label - Rotated Text */}
+                                        <div className="w-12 flex items-center justify-center relative shrink-0 border-r border-white/10">
+                                            <span className="font-header text-[18px] text-white tracking-[0.3em] whitespace-nowrap -rotate-90 absolute">
+                                                {label}
+                                            </span>
+                                        </div>
+
+                                        {/* Content Panel */}
+                                        <div className="flex-1 p-2 pl-3 flex flex-wrap content-start items-center gap-3">
+                                            {items.length > 0 ? (
+                                                items.map((item, idx) => {
+                                                    // Wee Joker Logic: It's the standard Joker sprite, just... wee.
+                                                    const isWee = item.id === 'weejoker';
+                                                    const finalWidth = isWee ? Math.round(spriteWidth * 0.6) : spriteWidth;
+
+                                                    return (
+                                                        <div key={`${item.id}-${idx}`} className="relative group/item shrink-0">
+                                                            <Sprite name={item.id} width={finalWidth} className="drop-shadow-md transition-transform hover:scale-110 active:scale-95 duration-75 ease-out" />
+
+                                                            {/* Ante Badge */}
+                                                            {item.ante && (
+                                                                <div className="absolute -top-1 -right-1 bg-[var(--balatro-red)] text-white font-header text-[9px] min-w-[20px] h-[20px] px-1 rounded-md flex items-center justify-center border-2 border-black/40 shadow-sm z-20">
+                                                                    {item.ante}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })
+                                            ) : (
+                                                <div className="flex items-center justify-center w-full h-full py-4 opacity-20">
+                                                    <span className="font-pixel text-[10px] tracking-wider text-white">Empty</span>
                                                 </div>
                                             )}
-
-                                            <Sprite
-                                                name={j.id}
-                                                width={j.id === 'weejoker' ? 18 : 32}
-                                                className="drop-shadow-sm transition-transform group-hover/joker:scale-110"
-                                            />
-                                            <span className="font-header text-[6px] text-white uppercase mt-0.5 leading-none">{j.name}</span>
                                         </div>
-                                    ))
-                                )}
-                                {getJokers(1).length === 0 && getJokers(2).length === 0 && (
-                                    <span className="font-pixel text-white/10 text-[9px] uppercase tracking-widest py-4">No Jokers Found</span>
-                                )}
-                            </div>
+                                    </div>
+                                );
+
+                                return (
+                                    <div className="flex flex-col gap-4 mt-1">
+                                        {/* JOKERS */}
+                                        {renderGroup("JOKERS", jokers, 71)}
+
+                                        {/* CONSUMABLES & VOUCHERS (Side by Side if space permits, or stacked) */}
+                                        {(consumables.length > 0 || vouchers.length > 0) && (
+                                            <div className="flex gap-2">
+                                                {consumables.length > 0 && (
+                                                    <div className="flex-1">
+                                                        {renderGroup("CONSUMABLES", consumables, 45)}
+                                                    </div>
+                                                )}
+                                                {vouchers.length > 0 && (
+                                                    <div className="flex-1">
+                                                        {renderGroup("VOUCHERS", vouchers, 45)}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
                         </div>
                     )}
 
                     {view === 'PLAY' && (
                         <div className="flex-1 flex flex-col p-2 text-center gap-2 justify-center">
-                            <h3 className="font-header text-[var(--balatro-gold)] text-[10px] uppercase tracking-widest shrink-0">Strategy Guide</h3>
-                            <div className="font-header text-[9px] text-white/70 leading-relaxed uppercase tracking-wider flex-1 flex flex-col justify-center">
-                                <p>1. Buy Wee Joker in Ante {seed.WeeJoker_Ante1 ? '1' : '2'}.</p>
-                                <p>2. Copy it with Hack/Chad.</p>
-                                <p>3. Scale it with 2s.</p>
-                                <p>4. Submit your high score!</p>
+                            <h3 className="font-header text-[var(--balatro-gold)] text-[10px] tracking-widest shrink-0">Strategy Guide</h3>
+                            <div className="font-header text-[9px] text-white/70 leading-relaxed tracking-wider flex-1 flex flex-col justify-center">
+                                {seed.relevantEvents && seed.relevantEvents.length > 0 ? (
+                                    seed.relevantEvents.slice(0, 4).map((e, idx) => (
+                                        <p key={idx}>{idx + 1}. Find {e.displayName || e.id} (Ante {e.ante})</p>
+                                    ))
+                                ) : (
+                                    <>
+                                        <p>1. Buy Wee Joker in Ante {seed.WeeJoker_Ante1 ? '1' : '2'}.</p>
+                                        <p>2. Copy it with Hack/Chad.</p>
+                                        <p>3. Scale it with 2s.</p>
+                                        <p>4. Submit your high score!</p>
+                                    </>
+                                )}
                             </div>
-                            <button onClick={onAnalyze} className="balatro-button balatro-button-gold text-[8px] py-1.5 uppercase shrink-0">How do I play?</button>
+                            <button onClick={onAnalyze} className="balatro-button balatro-button-blue text-sm py-2 shrink-0">How do I play?</button>
                         </div>
                     )}
 
@@ -202,43 +371,61 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                                     <div key={idx} className="flex justify-between items-center bg-white/5 p-1 rounded-sm">
                                         <div className="flex gap-1.5 items-center">
                                             <span className="font-pixel text-[8px] text-white/20 w-3">#{idx + 1}</span>
-                                            <span className="font-header text-[9px] text-white uppercase truncate max-w-[70px]">{s.player_name}</span>
+                                            <span className="font-header text-[9px] text-white truncate max-w-[70px]">{s.player_name}</span>
                                         </div>
                                         <span className="font-header text-[9px] text-[var(--balatro-gold)]">{s.score.toLocaleString()}</span>
                                     </div>
                                 )) : (
-                                    <div className="flex-1 flex items-center justify-center font-pixel text-[8px] text-white/10 uppercase italic">No scores yet</div>
+                                    <div className="flex-1 flex items-center justify-center font-pixel text-[8px] text-white/10 italic">No scores yet</div>
                                 )}
                             </div>
                             {canSubmit && (
-                                <button onClick={onOpenSubmit} className="mt-1 w-full balatro-button balatro-button-gold text-[8px] py-2 uppercase shrink-0">Submit Score</button>
+                                <button onClick={onOpenSubmit} className="mt-1 w-full balatro-button balatro-button-gold text-[8px] py-2 shrink-0">Submit Score</button>
                             )}
                         </div>
                     )}
                 </div>
 
-                {/* Footer UI - Fixed Action Button */}
-                <div className="mt-1.5 shrink-0 z-50">
-                    {!isLocked && topScore && view === 'DEFAULT' ? (
-                        <div className="bg-black/10 rounded-lg px-2 py-1 mb-1.5 flex justify-between items-center cursor-pointer hover:bg-black/20" onClick={() => setView('SCORES')}>
-                            <span className="font-header text-[var(--balatro-gold)] uppercase text-[9px] tracking-wider">#1 {topScore.name}</span>
-                            <span className="font-header text-white text-sm tracking-widest leading-none">{topScore.score.toLocaleString()}</span>
+                {/* Footer UI */}
+                <div className="mt-1.5 shrink-0 z-50 flex flex-col gap-1.5">
+                    {!isLocked && view === 'DEFAULT' && (
+                        <div className="flex gap-1.5">
+                            <button
+                                onClick={onAnalyze}
+                                className="flex-1 balatro-button balatro-button-orange text-sm py-1.5 font-header"
+                            >
+                                How to play
+                            </button>
+                            {canSubmit && (
+                                <button
+                                    onClick={onOpenSubmit}
+                                    className="flex-1 balatro-button balatro-button-gold text-sm py-1.5 font-header"
+                                >
+                                    Submit Score
+                                </button>
+                            )}
                         </div>
-                    ) : null}
+                    )}
 
                     {isLocked ? (
-                        <div className="w-full bg-black/40 text-white/20 font-header text-md py-3 rounded-lg flex items-center justify-center border border-white/5 uppercase tracking-widest">
-                            (LOCKED) WEE NO. {dayNumber}
+                        <div className="w-full bg-black/40 text-white/20 font-header text-sm py-2 rounded-lg flex items-center justify-center border border-white/5 tracking-widest">
+                            Locked - Wee No. {dayNumber}
                         </div>
-                    ) : (
+                    ) : view === 'DEFAULT' ? (
                         <button
-                            onClick={() => { if (view === 'DEFAULT') setView('PLAY'); else setView('DEFAULT'); }}
-                            className={cn(
-                                "w-full balatro-button text-md py-3 uppercase tracking-widest font-header",
-                                view === 'DEFAULT' ? "balatro-button-red" : "balatro-button-blue"
-                            )}
+                            onClick={() => setView('PLAY')}
+                            className="w-full balatro-button balatro-button-blue text-sm py-1.5 tracking-widest font-header shrink-0"
                         >
-                            {view === 'DEFAULT' ? `PLAY WEE NO. ${dayNumber}` : 'BACK TO SEED'}
+                            Play Ritual No. {dayNumber}
+                        </button>
+                    ) : null}
+
+                    {!isLocked && view !== 'DEFAULT' && (
+                        <button
+                            onClick={() => setView('DEFAULT')}
+                            className="w-full balatro-button balatro-button-orange text-sm py-1.5 tracking-widest font-header shrink-0"
+                        >
+                            Back
                         </button>
                     )}
                 </div>
