@@ -298,28 +298,29 @@ export function RitualChallengeBoard({
 
             {/* ===== VIEW 1: PREVIEW — arrows + compact card + Play button ===== */}
             {viewMode === 'preview' && (
-                <div className="flex items-stretch justify-center gap-1 w-full">
-                    {/* LEFT ARROW */}
+                <div className="flex items-stretch justify-center gap-0 w-full" style={{ maxWidth: '375px', margin: '0 auto' }}>
+                    {/* LEFT ARROW — hugs left edge */}
                     <button
                         type="button"
                         onClick={() => handleNav('prev')}
                         disabled={!canGoBack || navDisabled}
-                        className="balatro-button balatro-button-red rounded-md flex items-center justify-center shrink-0 w-8 px-0 py-0"
+                        className="balatro-button balatro-button-red rounded-md flex items-center justify-center shrink-0 w-7 px-0 py-0"
                         aria-label="Previous Day"
                         title="Previous Day"
                     >
                         <span className="text-base select-none">&lt;</span>
                     </button>
 
-                    {/* PREVIEW CARD — fixed height */}
+                    {/* PREVIEW CARD — fixed 320x340 */}
                     <div
                         className={cn(
-                            "flex-1 min-w-0",
+                            "flex-none",
                             slideState === 'out-down' && "animate-cartridge-out",
                             slideState === 'in-up' && "animate-cartridge-in",
                         )}
+                        style={{ width: '320px' }}
                     >
-                        <div className="balatro-panel flex flex-col h-[340px] overflow-hidden">
+                        <div className="balatro-panel flex flex-col overflow-hidden" style={{ width: '320px', height: '340px' }}>
                             {/* Top row: seed info (left 50%) | deck visual (right 50%) */}
                             <div className="flex flex-1 min-h-0 gap-2">
                                 {/* Left: seed + JAML info */}
@@ -400,12 +401,12 @@ export function RitualChallengeBoard({
                         </div>
                     </div>
 
-                    {/* RIGHT ARROW */}
+                    {/* RIGHT ARROW — hugs right edge */}
                     <button
                         type="button"
                         onClick={() => handleNav('next')}
                         disabled={!canGoForward || navDisabled}
-                        className="balatro-button balatro-button-red rounded-md flex items-center justify-center shrink-0 w-8 px-0 py-0"
+                        className="balatro-button balatro-button-red rounded-md flex items-center justify-center shrink-0 w-7 px-0 py-0"
                         aria-label="Next Day"
                         title="Next Day"
                     >
@@ -416,8 +417,8 @@ export function RitualChallengeBoard({
 
             {/* ===== VIEW 2: DETAIL — full-width, no arrows, tabs ===== */}
             {viewMode === 'detail' && (
-                <div className="w-full">
-                    <div className="balatro-panel flex flex-col h-[340px] overflow-hidden">
+                <div className="w-full" style={{ width: '320px', height: '340px', margin: '0 auto' }}>
+                    <div className="balatro-panel flex flex-col h-[340px] overflow-hidden" style={{ width: '320px', height: '340px' }}>
                         {/* Seed bar */}
                         <div className="flex items-center gap-2 pb-2 border-b border-white/10 shrink-0">
                             <h3 className="font-header text-xl text-white truncate flex-1 min-w-0">{seed}</h3>

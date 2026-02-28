@@ -22,6 +22,56 @@ interface SeedCardProps {
 
 type CardView = 'DEFAULT' | 'PLAY' | 'SCORES';
 
+// Helper: Extract featured rank from startingDeck
+// In Balatro, ranks are [2,3,4,5...J,Q,K,A]. For Wee Joker ritual, prioritize 2.
+function computeFeaturedRank(startingDeck: string[]): "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "Jack" | "Queen" | "King" | "Ace" {
+    if (!startingDeck || startingDeck.length === 0) return '2';
+    
+    const rankCounts: Record<string, number> = {};
+    for (const card of startingDeck) {
+        const [rank] = card.split('_');
+        rankCounts[rank] = (rankCounts[rank] || 0) + 1;
+    }
+    
+    // For Wee Joker daily, rank 2 is the priority
+    if ((rankCounts['2'] || 0) > 8) return '2'; // Heavy 2s deck
+    
+    // Otherwise, find most common rank
+    let maxRank = '2';
+    let maxCount = rankCounts['2'] || 0;
+    for (const [rank, count] of Object.entries(rankCounts)) {
+        if (count > maxCount) { maxCount = count; maxRank = rank; }
+    }
+    
+    const rankMap: Record<string, "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "Jack" | "Queen" | "King" | "Ace"> = {
+        '2': '2', '3': '3', '4': '4', '5': '5', '6': '6', '7': '7', '8': '8', '9': '9', '10': '10',
+        'J': 'Jack', 'Q': 'Queen', 'K': 'King', 'A': 'Ace',
+    };
+    return rankMap[maxRank] || '2';
+}
+
+// Helper: Extract featured suit from startingDeck
+function computeFeaturedSuit(startingDeck: string[]): "Hearts" | "Clubs" | "Diamonds" | "Spades" {
+    if (!startingDeck || startingDeck.length === 0) return 'Hearts';
+    
+    const suitCounts: Record<string, number> = {};
+    for (const card of startingDeck) {
+        const [, suit] = card.split('_');
+        suitCounts[suit] = (suitCounts[suit] || 0) + 1;
+    }
+    
+    let maxSuit = 'H';
+    let maxCount = 0;
+    for (const [suit, count] of Object.entries(suitCounts)) {
+        if (count > maxCount) { maxCount = count; maxSuit = suit; }
+    }
+    
+    const suitMap: Record<string, "Hearts" | "Clubs" | "Diamonds" | "Spades"> = {
+        'H': 'Hearts', 'C': 'Clubs', 'D': 'Diamonds', 'S': 'Spades',
+    };
+    return suitMap[maxSuit] || 'Hearts';
+}
+
 export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, isLocked, canSubmit }: SeedCardProps) {
     const [view, setView] = useState<CardView>('DEFAULT');
     const [copied, setCopied] = useState(false);
@@ -138,6 +188,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
 
                 {/* [Seed Display] */}
                 <div className="flex w-full overflow-visible rounded-lg border-2 border-black/20 shrink-0 h-16">
+                    {/* LEFT: Seed + Copy Button (50%) */}
                     <div className="w-1/2 bg-black/40 flex items-center justify-center border-r-2 border-black/20 overflow-hidden px-1">
                         {!isLocked ? (
                             <button onClick={handleCopy} className="flex items-center gap-2 outline-none w-full justify-center juice-pop balatro-delay-1">
@@ -150,28 +201,31 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                             <span className="font-header text-sm text-white/40 tracking-widest leading-none">--------</span>
                         )}
                     </div>
-                    <div className="w-1/2 bg-black/20 flex items-center justify-center p-1 overflow-visible relative" style={{ minHeight: '64px' }}>
+
+                    {/* RIGHT: Erratic Deck + Card (50%) */}
+                    <div className="w-1/2 bg-black/20 flex items-center justify-center p-1 overflow-visible relative">
                         {!isLocked ? (
-                            <div className="juice-pop balatro-delay-2 flex items-center gap-2">
-                                {/* Stacked cards with deck sprite on top */}
-                                <div className="relative" style={{ width: '42px', height: '54px' }}>
-                                    {/* Back cards for stack effect - using offset sprites */}
-                                    <div className="absolute opacity-40 translate-x-[4px] translate-y-[4px]">
-                                        <DeckSprite deck="erratic" size={36} className="grayscale brightness-50" />
-                                    </div>
-                                    <div className="absolute opacity-60 translate-x-[2px] translate-y-[2px]">
-                                        <DeckSprite deck="erratic" size={36} className="grayscale brightness-75" />
-                                    </div>
-                                    {/* Deck sprite on top */}
-                                    <div className="absolute" style={{ left: '0', top: '0' }}>
-                                        <DeckSprite deck="erratic" stake={seed.stake || 'white'} size={36} />
-                                    </div>
+                            <div className="juice-pop balatro-delay-2 relative" style={{ width: '60px', height: '80px' }}>
+                                {/* Stacked deck backs - tilted RIGHT */}
+                                <div
+                                    className="absolute inset-0 flex items-center justify-center"
+                                    style={{ transform: 'rotate(12deg)', transformOrigin: 'center' }}
+                                >
+                                    <DeckSprite deck="erratic" stake={seed.stake || 'white'} size={48} />
                                 </div>
-                                {/* Labels to the right */}
-                                <div className="flex flex-col gap-0">
-                                    <span className="font-header text-[13px] text-white tracking-wide leading-tight">Erratic Deck</span>
-                                    <span className="font-header text-[11px] text-white/50 tracking-wide leading-tight">White Stake</span>
-                                </div>
+                                {/* Card face overlay - tilted LEFT, on top */}
+                                {seed.startingDeck && seed.startingDeck.length > 0 && (
+                                    <div
+                                        className="absolute inset-0 flex items-center justify-center"
+                                        style={{ transform: 'rotate(-8deg)', transformOrigin: 'center', zIndex: 1 }}
+                                    >
+                                        <PlayingCard
+                                            rank={computeFeaturedRank(seed.startingDeck)}
+                                            suit={computeFeaturedSuit(seed.startingDeck)}
+                                            size={40}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <div className="relative" style={{ width: '54px', height: '68px' }}>

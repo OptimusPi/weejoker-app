@@ -191,34 +191,30 @@ function mapScheduleToSeed(raw: ScheduleItem): SeedData {
                             canPrev={canGoBack}
                             canNext={canGoForward}
                         >
-                            {viewingDay === 0 ? (
-                                <WeepochCard onShowHowTo={() => setShowHowTo(true)} onEnterRitual={() => updateDay(1)} />
-                            ) : (
-                                <div className="w-full h-full relative flex flex-col items-center justify-center">
-                                    {seed ? (
-                                        <SeedCard
-                                            seed={seed}
-                                            dayNumber={viewingDay}
-                                            className="w-full h-full"
-                                            onAnalyze={() => setShowHowTo(true)}
-                                            onOpenSubmit={() => setShowSubmit(true)}
-                                            isLocked={viewingDay > todayNumber}
-                                            canSubmit={viewingDay === todayNumber}
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-[var(--balatro-grey-dark)]">
-                                            {error ? (
-                                                <div className="flex flex-col items-center gap-2">
-                                                    <p className="text-red-400 font-header text-sm">{error}</p>
-                                                    <button onClick={() => window.location.reload()} className="bg-red-900 text-white font-header text-[9px] px-3 py-1 rounded">Retry</button>
-                                                </div>
-                                            ) : (
-                                                <div className="animate-spin text-white/5"><Sprite name="weejoker" width={24} /></div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                            <div className="w-full h-full relative flex flex-col items-center justify-center">
+                                {seed ? (
+                                    <SeedCard
+                                        seed={seed}
+                                        dayNumber={viewingDay}
+                                        className="w-full h-full"
+                                        onAnalyze={() => setShowHowTo(true)}
+                                        onOpenSubmit={() => setShowSubmit(true)}
+                                        isLocked={viewingDay > todayNumber}
+                                        canSubmit={viewingDay === todayNumber}
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-[var(--balatro-grey-dark)]">
+                                        {error ? (
+                                            <div className="flex flex-col items-center gap-2">
+                                                <p className="text-red-400 font-header text-sm">{error}</p>
+                                                <button onClick={() => window.location.reload()} className="bg-red-900 text-white font-header text-[9px] px-3 py-1 rounded">Retry</button>
+                                            </div>
+                                        ) : (
+                                            <div className="animate-spin text-white/5"><Sprite name="weejoker" width={24} /></div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </DayNavigation>
 
                         {/* Banner Ad Rotator - Full width alignment */}

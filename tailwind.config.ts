@@ -74,10 +74,10 @@ const config: Config = {
             keyframes: {
                 "cartridge-out": {
                     "0%": { transform: "translateY(0)" },
-                    "100%": { transform: "translateY(60px)" },
+                    "100%": { transform: "translateY(100vh)" },
                 },
                 "cartridge-in": {
-                    "0%": { transform: "translateY(-60px)" },
+                    "0%": { transform: "translateY(100vh)" },
                     "100%": { transform: "translateY(0)" },
                 },
             },
