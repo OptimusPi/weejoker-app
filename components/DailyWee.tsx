@@ -40,9 +40,33 @@ export function DailyWee() {
         rs?: boolean;
         t: string;
         j: string;
-        t1: string;
-        t2: string;
+        t1?: string;
+        t2?: string;
     }
+
+    const mapScheduleToSeed = useCallback((raw: ScheduleItem): SeedData => {
+        // Generic mapper — map structural fields, then extended fields
+        return {
+            seed: raw.id,
+            score: raw.s,
+            twos: typeof raw.w === 'number' ? raw.w : (parseInt(raw.w as string) || 0),
+            themeName: raw.t || '',
+            themeJoker: raw.j || '',
+            WeeJoker_Ante1: Number(raw.wj1) || 0,
+            WeeJoker_Ante2: Number(raw.wj2) || 0,
+            HanginChad_Ante1: Number(raw.hc1) || 0,
+            HanginChad_Ante2: Number(raw.hc2) || 0,
+            Hack_Ante1: Number(raw.hk1) || 0,
+            Hack_Ante2: Number(raw.hk2) || 0,
+            blueprint_early: Number(raw.bp) || 0,
+            brainstorm_early: Number(raw.bs) || 0,
+            Showman_Ante1: Number(raw.sh) || 0,
+            red_Seal_Two: Number(raw.rs) || 0,
+            themeCardAnte1: raw.t1 || '',
+            themeCardAnte2: raw.t2 || '',
+        };
+    }, []);
+
     const [topScore, setTopScore] = useState<{ name: string; score: number } | null>(null);
 
     const [showSubmit, setShowSubmit] = useState(false);
@@ -99,48 +123,14 @@ export function DailyWee() {
                 setSeeds([]);
                 if (schedule.length > 0) setError("Future seed not found.");
             } else {
-                const seedData: SeedData = {
-                    seed: seedRaw.id,
-                    score: seedRaw.s,
-                    twos: Number(seedRaw.w) || 0,
-                    WeeJoker_Ante1: Number(seedRaw.wj1) || 0,
-                    WeeJoker_Ante2: Number(seedRaw.wj2) || 0,
-                    HanginChad_Ante1: Number(seedRaw.hc1) || 0,
-                    HanginChad_Ante2: Number(seedRaw.hc2) || 0,
-                    Hack_Ante1: Number(seedRaw.hk1) || 0,
-                    Hack_Ante2: Number(seedRaw.hk2) || 0,
-                    blueprint_early: Number(seedRaw.bp) || 0,
-                    brainstorm_early: Number(seedRaw.bs) || 0,
-                    Showman_Ante1: Number(seedRaw.sh) || 0,
-                    red_Seal_Two: Number(seedRaw.rs) || 0,
-                    themeName: seedRaw.t || '',
-                    themeJoker: seedRaw.j || '',
-                    themeCardAnte1: seedRaw.t1 || '',
-                    themeCardAnte2: seedRaw.t2 || ''
-                };
+                const seedData = mapScheduleToSeed(seedRaw);
+
                 setSeeds([seedData]);
                 setError(null);
             }
         } else if (seedRaw) {
-            const seedData: SeedData = {
-                seed: seedRaw.id,
-                score: seedRaw.s,
-                twos: typeof seedRaw.w === 'number' ? seedRaw.w : (parseInt(seedRaw.w as any) || 0),
-                WeeJoker_Ante1: Number(seedRaw.wj1) || 0,
-                WeeJoker_Ante2: Number(seedRaw.wj2) || 0,
-                HanginChad_Ante1: Number(seedRaw.hc1) || 0,
-                HanginChad_Ante2: Number(seedRaw.hc2) || 0,
-                Hack_Ante1: Number(seedRaw.hk1) || 0,
-                Hack_Ante2: Number(seedRaw.hk2) || 0,
-                blueprint_early: Number(seedRaw.bp) || 0,
-                brainstorm_early: Number(seedRaw.bs) || 0,
-                Showman_Ante1: Number(seedRaw.sh) || 0,
-                red_Seal_Two: Number(seedRaw.rs) || 0,
-                themeName: seedRaw.t || '',
-                themeJoker: seedRaw.j || '',
-                themeCardAnte1: seedRaw.t1 || '',
-                themeCardAnte2: seedRaw.t2 || ''
-            };
+            const seedData = mapScheduleToSeed(seedRaw);
+
             setSeeds([seedData]);
             setError(null);
         } else {
@@ -151,7 +141,8 @@ export function DailyWee() {
         try {
             const scoreRes = await fetch(`/api/scores?day=${day}`);
             if (scoreRes.ok) {
-                const scoreData = await scoreRes.json() as { scores: any[] };
+                const scoreData = await scoreRes.json() as { scores?: any[] };
+
                 if (scoreData.scores && scoreData.scores.length > 0) {
                     const top = scoreData.scores[0];
                     setTopScore({ name: top.playerName || top.player_name || top.name, score: top.score });
@@ -160,7 +151,8 @@ export function DailyWee() {
         } catch (e) {
             setTopScore(null);
         }
-    }, [viewingDay]);
+    }, [viewingDay, schedule, mapScheduleToSeed]);
+
 
     useEffect(() => {
         if (!mounted) return;
@@ -206,7 +198,8 @@ export function DailyWee() {
                     <div className="flex-1 flex flex-col justify-center items-center w-full min-h-0 gap-1 py-2">
                         <DayHeader
                             dayNumber={viewingDay}
-                            displayDate={new Date(EPOCH + (viewingDay - 1) * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                            displayDate={getDayDisplay(viewingDay)}
+
                         />
 
                         <DayNavigation
@@ -243,6 +236,7 @@ export function DailyWee() {
                                     )}
                                 </div>
                             )}
+
                         </DayNavigation>
 
                         {/* Banner Ad Rotator - Full width alignment */}
@@ -272,6 +266,7 @@ export function DailyWee() {
                         isOpen={showHowTo}
                         onClose={() => setShowHowTo(false)}
                         objectiveName={currentTheme.name}
+
                         seedId={seed?.seed || '--------'}
                         onSubmit={() => { setShowHowTo(false); setShowSubmit(true); }}
                     />

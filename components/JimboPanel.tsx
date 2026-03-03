@@ -69,13 +69,14 @@ export function JimboInnerPanel({
 // JimboButton — uses .jimbo-btn + variant class
 // ============================================
 
-type ButtonVariant = 'red' | 'blue' | 'green' | 'gold' | 'back'
+type ButtonVariant = 'red' | 'blue' | 'green' | 'orange' | 'purple' | 'back'
 
 const VARIANT_CLASS: Record<ButtonVariant, string> = {
     red: 'jimbo-btn-red',
     blue: 'jimbo-btn-blue',
     green: 'jimbo-btn-green',
-    gold: 'jimbo-btn-gold',
+    orange: 'jimbo-btn-orange',
+    purple: 'jimbo-btn-purple',
     back: 'jimbo-btn-back',
 }
 
@@ -104,7 +105,7 @@ export function JimboButton({
 }
 
 // ============================================
-// JimboBackButton — gold, full-width, structural
+// JimboBackButton — orange, full-width, structural
 // No X icons. No close buttons. Just "Back".
 // ============================================
 

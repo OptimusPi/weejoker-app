@@ -94,12 +94,12 @@ export default function JamlEditorMonaco({ value, onChange, diagnostics, classNa
                     {hasErrors ? (
                         <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#211] border border-[var(--jimbo-red)] rounded text-[9px] font-pixel text-[var(--jimbo-red)]">
                             <AlertCircle size={10} />
-                            <span>{diagnostics.errors.length} SYNTAX ERROR(S)</span>
+                            <span>{diagnostics.errors.length} syntax error(s)</span>
                         </div>
                     ) : (
                         <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#121] border border-[var(--jimbo-dark-green)] rounded text-[9px] font-pixel text-[var(--jimbo-dark-green)]">
                             <Check size={10} />
-                            <span>SYNTAX VALID</span>
+                            <span>Syntax valid</span>
                         </div>
                     )}
                 </div>

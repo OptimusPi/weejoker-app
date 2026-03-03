@@ -61,7 +61,7 @@ export default function RootLayout({
                         <NavBar />
                     </header>
 
-                    <div className="flex-grow flex flex-col min-h-0 relative z-0">
+                    <div className="flex-grow flex flex-col min-h-0 overflow-auto relative z-0">
                         <ClientProviders>
                             {children}
                         </ClientProviders>

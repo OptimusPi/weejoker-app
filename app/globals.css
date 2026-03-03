@@ -37,13 +37,6 @@ main {
     overflow: hidden;
 }
 
-/* UNIVERSAL NO BOLD, NO UPPERCASE POLICY - USER MANDATE */
-* {
-    font-weight: normal !important;
-    text-transform: none !important;
-    image-rendering: auto;
-}
-
 /* ============================================================================
    2. DESIGN TOKENS (CSS VARIABLES)
    ============================================================================ */
@@ -98,7 +91,8 @@ main {
     --jimbo-blue: #0093ff;
     --jimbo-dark-blue: #0057a1;
     --jimbo-gold: #ff9800;
-    --jimbo-dark-gold: #a05b00;
+    --jimbo-orange: #ff9800;
+    --jimbo-dark-orange: #b36b00;
     --jimbo-green: #429f79;
     --jimbo-dark-green: #215f46;
     --jimbo-purple: #9e74ce;
@@ -212,22 +206,30 @@ main {
         background-color: var(--jimbo-dark-green);
     }
 
-    .jimbo-btn-gold {
-        background-color: var(--jimbo-gold);
+    .jimbo-btn-orange {
+        background-color: var(--jimbo-orange);
     }
 
-    .jimbo-btn-gold:hover:not(:disabled) {
-        background-color: var(--jimbo-dark-gold);
+    .jimbo-btn-orange:hover:not(:disabled) {
+        background-color: var(--jimbo-dark-orange);
     }
 
-    /* Back button = gold, always full-width — THE way to exit in Balatro */
+    .jimbo-btn-purple {
+        background-color: var(--jimbo-purple);
+    }
+
+    .jimbo-btn-purple:hover:not(:disabled) {
+        background-color: #6b4e8a;
+    }
+
+    /* Back button = orange, always full-width — THE way to exit in Balatro */
     .jimbo-btn-back {
-        background-color: var(--jimbo-gold);
+        background-color: var(--jimbo-orange);
         font-size: 1.125rem;
     }
 
     .jimbo-btn-back:hover:not(:disabled) {
-        background-color: var(--jimbo-dark-gold);
+        background-color: var(--jimbo-dark-orange);
     }
 
     .jimbo-version-badge {
@@ -242,6 +244,108 @@ main {
         align-items: center;
     }
 
+
+    .balatro-button {
+        /* Authentic Text Shadow */
+        text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+
+        /* Authentic Button Shadow */
+        background-color: var(--balatro-red);
+        /* Default */
+        box-shadow: 0 4px 0 var(--balatro-shadow);
+        transition: none;
+        transform: translateY(0);
+    }
+
+    /* Button Variants — flat color, dark hover, Jimbo standard */
+    .balatro-button-red {
+        background-color: var(--jimbo-red);
+    }
+
+    .balatro-button-red:hover:not(:disabled) {
+        background-color: var(--jimbo-dark-red);
+    }
+
+    .balatro-button-blue {
+        background-color: var(--jimbo-blue);
+    }
+
+    .balatro-button-blue:hover:not(:disabled) {
+        background-color: var(--jimbo-dark-blue);
+    }
+
+    .balatro-button-green {
+        background-color: var(--jimbo-green);
+    }
+
+    .balatro-button-green:hover:not(:disabled) {
+        background-color: var(--jimbo-dark-green);
+    }
+
+    .balatro-button-orange {
+        background-color: var(--jimbo-orange);
+    }
+
+    .balatro-button-orange:hover:not(:disabled) {
+        background-color: var(--jimbo-dark-orange);
+    }
+
+    .balatro-button-purple {
+        background-color: var(--balatro-purple);
+    }
+
+    .balatro-button-purple:hover:not(:disabled) {
+        background-color: #6b4e8a;
+    }
+
+    /* Gold is for TEXT only — not a button color. Use orange for back/alt actions. */
+    .balatro-button-gold {
+        background-color: var(--jimbo-orange);
+        color: white;
+    }
+
+    .balatro-button-gold:hover:not(:disabled) {
+        background-color: var(--jimbo-dark-orange);
+    }
+
+    .balatro-button-grey {
+        background-color: var(--balatro-grey);
+        color: var(--balatro-text-light);
+    }
+
+    .balatro-button-grey:hover:not(:disabled) {
+        background-color: var(--jimbo-dark-grey);
+    }
+
+    /* Pressed = scoot down, kill shadow */
+    .balatro-button:active:not(:disabled) {
+        transform: translateY(4px);
+        box-shadow: none;
+    }
+
+    .balatro-button:disabled {
+        opacity: 1;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* --- INPUTS --- */
+    .balatro-input {
+        background-color: var(--balatro-black);
+        border: 2px solid var(--balatro-outline-dark);
+        border-radius: 0.5rem;
+        color: white;
+        font-family: var(--font-pixel), monospace;
+        padding: 0.5rem 1rem;
+        outline: none;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .balatro-input:focus {
+        border-color: var(--balatro-blue);
+        background-color: var(--balatro-black);
+    }
 
 }
 

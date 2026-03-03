@@ -23,6 +23,56 @@ interface SeedCardProps {
 
 type CardView = 'DEFAULT' | 'PLAY' | 'SCORES';
 
+// Helper: Extract featured rank from startingDeck
+// In Balatro, ranks are [2,3,4,5...J,Q,K,A]. For Wee Joker ritual, prioritize 2.
+function computeFeaturedRank(startingDeck: string[]): "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "Jack" | "Queen" | "King" | "Ace" {
+    if (!startingDeck || startingDeck.length === 0) return '2';
+
+    const rankCounts: Record<string, number> = {};
+    for (const card of startingDeck) {
+        const [rank] = card.split('_');
+        rankCounts[rank] = (rankCounts[rank] || 0) + 1;
+    }
+
+    // For Wee Joker daily, rank 2 is the priority
+    if ((rankCounts['2'] || 0) > 8) return '2'; // Heavy 2s deck
+
+    // Otherwise, find most common rank
+    let maxRank = '2';
+    let maxCount = rankCounts['2'] || 0;
+    for (const [rank, count] of Object.entries(rankCounts)) {
+        if (count > maxCount) { maxCount = count; maxRank = rank; }
+    }
+
+    const rankMap: Record<string, "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "Jack" | "Queen" | "King" | "Ace"> = {
+        '2': '2', '3': '3', '4': '4', '5': '5', '6': '6', '7': '7', '8': '8', '9': '9', '10': '10',
+        'J': 'Jack', 'Q': 'Queen', 'K': 'King', 'A': 'Ace',
+    };
+    return rankMap[maxRank] || '2';
+}
+
+// Helper: Extract featured suit from startingDeck
+function computeFeaturedSuit(startingDeck: string[]): "Hearts" | "Clubs" | "Diamonds" | "Spades" {
+    if (!startingDeck || startingDeck.length === 0) return 'Hearts';
+
+    const suitCounts: Record<string, number> = {};
+    for (const card of startingDeck) {
+        const [, suit] = card.split('_');
+        suitCounts[suit] = (suitCounts[suit] || 0) + 1;
+    }
+
+    let maxSuit = 'H';
+    let maxCount = 0;
+    for (const [suit, count] of Object.entries(suitCounts)) {
+        if (count > maxCount) { maxCount = count; maxSuit = suit; }
+    }
+
+    const suitMap: Record<string, "Hearts" | "Clubs" | "Diamonds" | "Spades"> = {
+        'H': 'Hearts', 'C': 'Clubs', 'D': 'Diamonds', 'S': 'Spades',
+    };
+    return suitMap[maxSuit] || 'Hearts';
+}
+
 export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, isLocked, canSubmit }: SeedCardProps) {
     const [view, setView] = useState<CardView>('DEFAULT');
     const [copied, setCopied] = useState(false);
@@ -68,30 +118,6 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
         setTimeout(() => setCopied(false), 3140);
     };
 
-    const getItems = (types: ('joker' | 'tarot' | 'spectral' | 'planet' | 'voucher' | 'consumable')[]) => {
-        // 1. If we have rich JAMZ relevantEvents, use them
-        if (seed.relevantEvents && seed.relevantEvents.length > 0) {
-            return seed.relevantEvents
-                .filter(e => {
-                    if (types.includes('consumable')) {
-                        return e.type === 'tarot' || e.type === 'spectral' || e.type === 'planet';
-                    }
-                    return types.includes(e.type as any);
-                })
-                .map(e => ({
-                    id: e.id,
-                    name: e.displayName || e.id,
-                    tally: e.count || 1,
-                    type: e.type,
-                    ante: e.ante
-                }));
-        }
-
-        // 2. Fallback
-        const items: { id: string; name: string; tally: number; type: string }[] = [];
-        return items;
-    };
-
     const [timeLeft, setTimeLeft] = useState("");
     useEffect(() => {
         if (!isLocked) return;
@@ -127,19 +153,31 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                             <span className="font-header text-sm text-[var(--jimbo-grey)] tracking-widest leading-none">--------</span>
                         )}
                     </div>
-                    <div className="w-1/2 bg-[var(--jimbo-panel-edge)] flex items-center justify-center p-1 relative" style={{ minHeight: '64px' }}>
+
+                    <div className="w-1/2 bg-[var(--jimbo-panel-edge)] flex items-center justify-center p-1 relative overflow-visible" style={{ minHeight: '64px' }}>
                         {!isLocked ? (
-                            <div className="juice-pop flex items-center gap-2">
-                                <div className="relative" style={{ width: '42px', height: '54px' }}>
-                                    <div className="absolute opacity-40 translate-x-[4px] translate-y-[4px]">
-                                        <DeckSprite deck="erratic" size={36} className="grayscale brightness-50" />
+                            <div className="juice-pop flex items-center gap-2 relative">
+                                <div className="relative juice-pop balatro-delay-2" style={{ width: '60px', height: '80px' }}>
+                                    {/* Stacked deck backs - tilted RIGHT */}
+                                    <div
+                                        className="absolute inset-0 flex items-center justify-center"
+                                        style={{ transform: 'rotate(12deg)', transformOrigin: 'center' }}
+                                    >
+                                        <DeckSprite deck="erratic" stake={seed.stake || 'white'} size={48} />
                                     </div>
-                                    <div className="absolute opacity-60 translate-x-[2px] translate-y-[2px]">
-                                        <DeckSprite deck="erratic" size={36} className="grayscale brightness-75" />
-                                    </div>
-                                    <div className="absolute" style={{ left: '0', top: '0' }}>
-                                        <DeckSprite deck="erratic" stake={seed.stake || 'white'} size={36} />
-                                    </div>
+                                    {/* Card face overlay - tilted LEFT, on top */}
+                                    {seed.startingDeck && seed.startingDeck.length > 0 && (
+                                        <div
+                                            className="absolute inset-0 flex items-center justify-center"
+                                            style={{ transform: 'rotate(-8deg)', transformOrigin: 'center', zIndex: 1 }}
+                                        >
+                                            <PlayingCard
+                                                rank={computeFeaturedRank(seed.startingDeck)}
+                                                suit={computeFeaturedSuit(seed.startingDeck)}
+                                                size={40}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="flex flex-col gap-0">
                                     <span className="font-header text-[13px] text-white tracking-wide leading-tight">Erratic Deck</span>
@@ -268,22 +306,24 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                                     </>
                                 )}
                             </div>
-                            <button onClick={onAnalyze} className="jimbo-btn jimbo-btn-blue text-sm py-2 shrink-0 w-full">How do I play?</button>
+                            <button onClick={onAnalyze} className="jimbo-btn jimbo-btn-blue text-sm py-2 shrink-0 w-full uppercase">Analyze Seed</button>
                         </div>
                     )}
 
                     {view === 'SCORES' && (
                         <div className="flex-1 flex flex-col p-1.5 min-h-0">
                             <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-0.5">
-                                {allScores.length > 0 ? allScores.map((s, idx) => (
-                                    <JimboInnerPanel key={idx} className="flex justify-between items-center p-1 py-1 px-2 rounded-sm mb-1">
-                                        <div className="flex gap-1.5 items-center">
-                                            <span className="font-pixel text-[8px] text-[var(--jimbo-grey)] w-3">#{idx + 1}</span>
-                                            <span className="font-header text-[9px] text-white uppercase truncate max-w-[70px]">{s.player_name}</span>
-                                        </div>
-                                        <span className="font-header text-[9px] text-[var(--jimbo-gold)]">{s.score.toLocaleString()}</span>
-                                    </JimboInnerPanel>
-                                )) : (
+                                {allScores.length > 0 ? (
+                                    allScores.map((s, idx) => (
+                                        <JimboInnerPanel key={idx} className="flex justify-between items-center p-1 py-1 px-2 rounded-sm mb-1">
+                                            <div className="flex gap-1.5 items-center">
+                                                <span className="font-pixel text-[8px] text-[var(--jimbo-grey)] w-3">#{idx + 1}</span>
+                                                <span className="font-header text-[9px] text-white uppercase truncate max-w-[70px] font-bold">{s.player_name}</span>
+                                            </div>
+                                            <span className="font-header text-[9px] text-[var(--jimbo-gold)]">{s.score.toLocaleString()}</span>
+                                        </JimboInnerPanel>
+                                    ))
+                                ) : (
                                     <div className="flex-1 flex items-center justify-center font-pixel text-[8px] text-[var(--jimbo-grey)] uppercase italic">No scores yet</div>
                                 )}
                             </div>
@@ -300,14 +340,14 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                         <div className="flex gap-1.5">
                             <button
                                 onClick={onAnalyze}
-                                className="flex-1 jimbo-btn jimbo-btn-orange text-sm py-1.5 font-header"
+                                className="flex-1 jimbo-btn jimbo-btn-orange text-sm py-1.5 font-header uppercase"
                             >
                                 How to play
                             </button>
                             {canSubmit && (
                                 <button
                                     onClick={onOpenSubmit}
-                                    className="flex-1 jimbo-btn jimbo-btn-gold text-sm py-1.5 font-header"
+                                    className="flex-1 jimbo-btn jimbo-btn-gold text-sm py-1.5 font-header uppercase"
                                 >
                                     Submit Score
                                 </button>
@@ -322,7 +362,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                     ) : view === 'DEFAULT' ? (
                         <button
                             onClick={() => setView('PLAY')}
-                            className="w-full jimbo-btn jimbo-btn-blue text-sm py-1.5 tracking-widest font-header shrink-0"
+                            className="w-full jimbo-btn jimbo-btn-blue text-sm py-1.5 tracking-widest font-header shrink-0 uppercase"
                         >
                             Play Ritual No. {dayNumber}
                         </button>
@@ -331,7 +371,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                     {!isLocked && view !== 'DEFAULT' && (
                         <button
                             onClick={() => setView('DEFAULT')}
-                            className="w-full jimbo-btn jimbo-btn-orange text-sm py-1.5 tracking-widest font-header shrink-0"
+                            className="w-full jimbo-btn jimbo-btn-orange text-sm py-1.5 tracking-widest font-header shrink-0 uppercase"
                         >
                             Back
                         </button>

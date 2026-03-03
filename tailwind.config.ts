@@ -71,6 +71,20 @@ const config: Config = {
                 "gradient-conic":
                     "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
             },
+            keyframes: {
+                "cartridge-out": {
+                    "0%": { transform: "translateY(0)" },
+                    "100%": { transform: "translateY(100vh)" },
+                },
+                "cartridge-in": {
+                    "0%": { transform: "translateY(100vh)" },
+                    "100%": { transform: "translateY(0)" },
+                },
+            },
+            animation: {
+                "cartridge-out": "cartridge-out 0.18s ease-in forwards",
+                "cartridge-in": "cartridge-in 0.22s ease-out forwards",
+            },
         },
     },
     plugins: [],

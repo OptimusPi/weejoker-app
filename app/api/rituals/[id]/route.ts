@@ -74,7 +74,7 @@ export async function GET(
     config.today = todayNumber;
 
     // --- Seeds & JAML from R2 (keys derived from ritual ID) ---
-    console.log('[Seed Loading] Checking R2:', { hasEnv: !!env, hasSeedAssets: !!(env && env.SEED_ASSETS) });
+
 
     let seedsLoaded = false;
     if (env && env.SEED_ASSETS) {
@@ -84,10 +84,7 @@ export async function GET(
                 const text = await csvObj.text();
                 const allSeeds = text.split('\n').map((l: string) => l.trim()).filter((l: string) => l.length > 0).map((l: string) => l.split(',')[0].trim());
                 config.seeds = allSeeds.slice(0, todayNumber);
-                console.log('[Seed Loading] Loaded from R2:', allSeeds.length, 'seeds');
                 seedsLoaded = true;
-            } else {
-                console.log('[Seed Loading] No CSV found in R2 for:', id);
             }
 
             const jamlObj = await env.SEED_ASSETS.get(`${id}.jaml`);
@@ -102,7 +99,6 @@ export async function GET(
     // Dev mode fallback if R2 didn't have the data
     if (!seedsLoaded) {
         // Dev mode fallback - read from public directory or use daily_ritual_clean.json
-        console.log('[Dev Mode] Falling back to local files');
         try {
             // For TheDailyWee, read seeds.csv from public/
             if (id === 'TheDailyWee') {

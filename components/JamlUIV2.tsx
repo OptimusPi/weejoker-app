@@ -81,7 +81,7 @@ function Tile({
             <div className="flex items-center justify-between mb-3 px-1 shrink-0 relative z-10">
                 <div className="flex items-center gap-2.5">
                     {Icon && <Icon size={18} className={cn("opacity-70", TILE_TEXT[color])} />}
-                    <h3 className={cn("font-header text-sm uppercase tracking-[0.25em] opacity-90", TILE_TEXT[color])}>
+                    <h3 className={cn("font-header text-sm tracking-[0.25em] opacity-90", TILE_TEXT[color])}>
                         {title}
                     </h3>
                 </div>
@@ -217,9 +217,9 @@ export default function JamlUIV2() {
                                     )}
                                 >
                                     {isSearching ? (
-                                        <><Square size={14} className="mr-2" fill="currentColor" /> ABORT</>
+                                        <><Square size={14} className="mr-2" fill="currentColor" /> Abort</>
                                     ) : (
-                                        <><Flame size={16} className="mr-2" /> IGNITE ENGINE</>
+                                        <><Flame size={16} className="mr-2" /> Ignite Engine</>
                                     )}
                                 </button>
                             </div>
@@ -293,7 +293,7 @@ export default function JamlUIV2() {
                         headerRight={
                             <div className="flex items-center gap-3 text-xs font-header tracking-widest text-[var(--jimbo-blue)] opacity-80">
                                 {isSearching && <Loader2 size={14} className="animate-spin" />}
-                                <span>{seedsProcessed.toLocaleString()} SEEDS SCANNED</span>
+                                <span>{seedsProcessed.toLocaleString()} seeds scanned</span>
                             </div>
                         }
                     >

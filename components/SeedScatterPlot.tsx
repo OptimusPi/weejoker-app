@@ -53,7 +53,7 @@ export function SeedScatterPlot({ data }: SeedScatterPlotProps) {
         >
             <div className="absolute top-4 left-4 z-10 pointer-events-none">
                 <h3 className="text-white font-header text-xl uppercase drop-shadow-md">Seed Distribution</h3>
-                <p className="text-[var(--jimbo-blue)] font-pixel text-lg">Twos vs. Score</p>
+                <p className="text-[var(--jimbo-blue)] font-pixel text-lg uppercase">Twos vs. Score</p>
             </div>
 
             <ResponsiveContainer width="100%" height="100%">

@@ -33,7 +33,7 @@ export function HowToPlay({ isOpen, onClose, onSubmit, seedId = "--------", obje
             <JimboPanel onBack={prevStep} className="relative w-full max-w-sm" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
 
                 {/* Header */}
-                <div className="bg-[var(--jimbo-blue)] -mx-4 -mt-4 p-4 flex justify-between items-center rounded-t-lg mb-4">
+                <div className="bg-[var(--jimbo-blue)] -mx-4 -mt-4 p-4 flex justify-between items-center rounded-t-lg mb-4 border-b-2 border-black/20">
                     <h2 className="text-xl md:text-2xl font-header text-white tracking-widest flex items-center gap-2">
                         {step === 1 ? 'Step 1' : step === 2 ? 'Step 2' : step === 3 ? 'Step 3' : 'Final Step'}
                     </h2>
@@ -46,7 +46,7 @@ export function HowToPlay({ isOpen, onClose, onSubmit, seedId = "--------", obje
 
                 <div className="flex flex-col items-center text-center gap-3">
                     {step === 1 && (
-                        <div className="space-y-3">
+                        <div className="space-y-3 animate-in slide-in-from-right-4 duration-200 w-full">
                             <h3 className="text-2xl font-header text-white tracking-wider">Get Balatro</h3>
                             <p className="text-[var(--jimbo-border-silver)] font-pixel text-lg leading-none">
                                 You need the game to participate.<br />Available on PC, Console, and Mobile.
@@ -63,10 +63,10 @@ export function HowToPlay({ isOpen, onClose, onSubmit, seedId = "--------", obje
                     )}
 
                     {step === 2 && (
-                        <div className="space-y-4 w-full">
+                        <div className="space-y-4 w-full animate-in slide-in-from-right-4 duration-200">
                             <h3 className="text-2xl font-header text-white tracking-wider">The Ritual</h3>
                             <p className="text-[var(--jimbo-border-silver)] font-pixel text-lg leading-tight">
-                                Copy the Daily Seed and enter it in the Balatro <span className="text-[var(--jimbo-blue)] font-header">New Run</span> menu.
+                                Copy the Daily Seed and enter it in the Balatro <span className="text-[var(--jimbo-blue)] font-header uppercase">New Run</span> menu.
                             </p>
                             <button
                                 onClick={async () => {
@@ -87,16 +87,16 @@ export function HowToPlay({ isOpen, onClose, onSubmit, seedId = "--------", obje
                     )}
 
                     {step === 3 && (
-                        <div className="space-y-4 w-full">
+                        <div className="space-y-4 w-full animate-in slide-in-from-right-4 duration-200">
                             <h3 className="text-2xl font-header text-white tracking-wider">The Setup</h3>
                             <JimboInnerPanel className="flex flex-col gap-3 text-left">
                                 <p className="font-pixel text-lg text-white leading-tight flex items-center gap-3">
                                     <span className="w-6 h-6 rounded-full bg-[var(--jimbo-blue)] flex items-center justify-center text-[10px] font-header shrink-0">1</span>
-                                    <span>Start a <span className="text-[var(--jimbo-blue)] font-header">New Run</span></span>
+                                    <span>Start a <span className="text-[var(--jimbo-blue)] font-header uppercase">New Run</span></span>
                                 </p>
                                 <p className="font-pixel text-lg text-white leading-tight flex items-center gap-3">
                                     <span className="w-6 h-6 rounded-full bg-[var(--jimbo-blue)] flex items-center justify-center text-[10px] font-header shrink-0">2</span>
-                                    <span>Select <span className="text-[var(--jimbo-red)] font-header">Erratic Deck</span></span>
+                                    <span>Select <span className="text-[var(--jimbo-red)] font-header uppercase">Erratic Deck</span></span>
                                 </p>
                                 <p className="font-pixel text-lg text-white leading-tight flex items-center gap-3">
                                     <span className="w-6 h-6 rounded-full bg-[var(--jimbo-blue)] flex items-center justify-center text-[10px] font-header shrink-0">3</span>
@@ -107,29 +107,40 @@ export function HowToPlay({ isOpen, onClose, onSubmit, seedId = "--------", obje
                     )}
 
                     {step === 4 && (
-                        <div className="space-y-3">
+                        <div className="space-y-3 animate-in slide-in-from-right-4 duration-200">
                             <h3 className="text-2xl font-header text-white tracking-wider">The Goal</h3>
                             <JimboInnerPanel className="flex flex-col gap-2 text-left border-2 border-dashed border-[var(--jimbo-gold)]">
                                 <p className="font-pixel text-md text-white leading-tight">
-                                    • Find <span className="text-[var(--jimbo-blue)] font-header">{objectiveName}</span> and upgrade by playing Rank 2 cards!
+                                    • Find <span className="text-[var(--jimbo-blue)] font-header uppercase">{objectiveName}</span> and upgrade by playing Rank 2 cards!
                                 </p>
                                 <p className="font-pixel text-md text-white leading-tight">
-                                    • Win the <span className="text-[var(--jimbo-red)] font-header">Ante 8</span> Boss Blind.
+                                    • Win the <span className="text-[var(--jimbo-red)] font-header uppercase">Ante 8</span> Boss Blind.
                                 </p>
                                 <p className="font-pixel text-md text-white leading-tight">
-                                    • In Ante 9 shop, select your <span className="text-[var(--jimbo-blue)] font-header">{objectiveName}</span>.
+                                    • In Ante 9 shop, select your <span className="text-[var(--jimbo-blue)] font-header uppercase">{objectiveName}</span>.
                                 </p>
                                 <p className="font-pixel text-[var(--jimbo-gold)] font-header text-sm tracking-widest text-center mt-1">
-                                    <span className="text-[var(--jimbo-blue)] font-header">+Chips</span> is your score to submit!
+                                    <span className="text-[var(--jimbo-blue)] font-header uppercase">+Chips</span> is your score to submit!
                                 </p>
                             </JimboInnerPanel>
                         </div>
                     )}
 
-                    {/* Action Button */}
-                    <JimboButton variant="blue" onClick={nextStep} className="text-xl py-2 mt-2">
-                        {step === 1 ? 'Got it' : step === 2 ? 'Next' : "Let's Play!"}
-                    </JimboButton>
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 w-full mt-1">
+                        <button
+                            onClick={() => step > 1 ? setStep(step - 1) : onClose()}
+                            className="jimbo-btn jimbo-btn-orange flex-1 py-2 text-sm uppercase"
+                        >
+                            {step > 1 ? 'Back' : 'Close'}
+                        </button>
+                        <button
+                            onClick={nextStep}
+                            className="jimbo-btn jimbo-btn-blue flex-[2] py-2 text-sm uppercase"
+                        >
+                            {step === 1 ? 'Got it' : step === 2 ? 'Next' : step === 3 ? 'Next' : "Let's Play!"}
+                        </button>
+                    </div>
                 </div>
             </JimboPanel>
         </div>

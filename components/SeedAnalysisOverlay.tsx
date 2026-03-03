@@ -20,13 +20,13 @@ export function SeedAnalysisOverlay({ seed, onClose }: SeedAnalysisOverlayProps)
     if (seed.copy_jokers_a1) tips.push("Copy Joker available early. Flexible build path.");
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-[var(--jimbo-panel-edge)] animate-in fade-in duration-200" onClick={onClose}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
             <JimboPanel
                 className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto !p-0"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="shrink-0 p-6 border-b border-transparent flex justify-between items-start bg-[#1a1a1a]">
+                <div className="shrink-0 p-6 border-b border-white/10 flex justify-between items-start bg-[#1a1a1a]">
                     <div className="mb-2">
                         <h2 className="text-3xl md:text-4xl font-header text-white mb-2 flex flex-col md:flex-row md:items-center gap-3 drop-shadow-md tracking-widest uppercase">
                             <span className="text-[var(--jimbo-blue)]">#{seed.seed}</span>
@@ -52,8 +52,8 @@ export function SeedAnalysisOverlay({ seed, onClose }: SeedAnalysisOverlayProps)
                     </button>
                 </div>
 
-                <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="p-6 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Joker Availability Grid */}
                         <JimboInnerPanel className="p-5">
                             <div className="flex items-center gap-2 mb-4 text-[var(--jimbo-blue)]">

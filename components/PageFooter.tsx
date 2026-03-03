@@ -14,28 +14,30 @@ export function PageFooter() {
     useEffect(() => {
         const interval = setInterval(() => {
             setSuitIndex((prev) => (prev + 1) % SUITS.length);
-        }, 1500); // Cycle every 1.5 seconds
+        }, 1500);
         return () => clearInterval(interval);
     }, []);
 
     return (
-        <footer className="fixed bottom-0 left-0 right-0 z-50 py-2 px-4 bg-black backdrop-blur-sm">
-            <p className="text-center text-white text-sm font-pixel tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-                Not affiliated with LocalThunk or PlayStack •{" "}
+        <footer className="w-full shrink-0 py-2 px-4 bg-black text-center font-pixel text-xs text-white/50 tracking-wider leading-relaxed select-none">
+            <span className="block sm:inline">not affiliated with localthunk or playstack</span>
+            <span className="hidden sm:inline"> • </span>
+            <span className="block sm:inline">
+                created with{" "}
+                <span className="inline-block animate-pulse text-[var(--balatro-red)]">
+                    {SUITS[suitIndex]}
+                </span>
+                {" "}for the{" "}
                 <a
-                    href="https://store.steampowered.com/app/2379780/Balatro/"
+                    href="https://www.playbalatro.com/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[var(--balatro-gold)] hover:underline"
                 >
-                    BUY BALATRO
+                    Balatro
                 </a>
-                {" "}• Created with{" "}
-                <span className="inline-block animate-pulse text-[var(--balatro-red)]">
-                    {SUITS[suitIndex]}
-                </span>
-                {" "}for the Balatro community
-            </p>
+                {" "}community
+            </span>
         </footer>
     );
 }

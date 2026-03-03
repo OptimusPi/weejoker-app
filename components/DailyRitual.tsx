@@ -46,7 +46,6 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
     const [showSubmit, setShowSubmit] = useState(false);
     const [showHowTo, setShowHowTo] = useState(false);
     const [showLeaderboard, setShowLeaderboard] = useState(false);
-    const [isStale, setIsStale] = useState(false); // For dimming during transitions
 
 
     // Mount Effect
@@ -67,9 +66,6 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
 
     // Load Ritual Config (with Debounced Loading State)
     useEffect(() => {
-        // Immediate visual feedback without layout shift (dimming)
-        setIsStale(true);
-
         let active = true;
         // Only show full loading spinner if it takes more than 200ms
         const timer = setTimeout(() => {
@@ -90,7 +86,6 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                     if (active) {
                         clearTimeout(timer);
                         setConfigLoading(false);
-                        setIsStale(false);
                     }
                     return;
                 }
@@ -191,7 +186,6 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                 if (active) {
                     clearTimeout(timer);
                     setConfigLoading(false);
-                    setIsStale(false);
                 }
             }
         }
@@ -223,18 +217,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
     const analyzerSeed = currentSeedId === 'LOCKED' ? null : currentSeedId;
     const { data: analysisData, loading: analysisLoading, error: analysisError } = useSeedAnalyzer(analyzerSeed);
 
-    // Debounced loading: only show skeleton after 500ms of sustained loading.
-    // This prevents the flash on fast transitions.
-    const [showLoading, setShowLoading] = useState(false);
-    const isActuallyLoading = configLoading || analysisLoading;
-    useEffect(() => {
-        if (!isActuallyLoading) {
-            setShowLoading(false);
-            return;
-        }
-        const timer = setTimeout(() => setShowLoading(true), 500);
-        return () => clearTimeout(timer);
-    }, [isActuallyLoading]);
+    const showLoading = configLoading || analysisLoading;
 
     // Objectives Parsing
     const objectives = useMemo(() => {
@@ -275,9 +258,9 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
 
 
     return (
-        <div className="ritual-locked-layout h-[100svh] overflow-hidden flex flex-col">
+        <div className="flex flex-col h-full min-h-0">
             {/* Main Content Areas - Mobile First Scaling */}
-            <main className="match-height-content z-10 flex-1 min-h-0 relative">
+            <main className="z-10 flex-1 min-h-0 relative overflow-auto">
                 {viewingDay <= 0 && !configLoading ? (
                     <div className="w-full max-w-full md:max-w-xl aspect-[4/3] flex flex-col items-center justify-center p-4 md:p-12 text-center">
                         <div className="jimbo-panel p-4 md:p-8">
@@ -305,8 +288,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                     </div>
                 ) : (
                     <div className={cn(
-                        "w-full px-1 md:px-4 max-w-[360px] mx-auto h-full min-h-0 flex flex-col justify-center transition-opacity duration-200",
-                        isStale && "opacity-50 pointer-events-none"
+                        "w-full px-1 mx-auto h-full min-h-0 flex flex-col justify-start pt-2"
                     )}>
                         {showLoading ? (
                             <div className="flex flex-col h-full justify-center w-full">
@@ -336,7 +318,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                             </div>
                         ) : (!currentSeedId && viewingDay <= todayNumber) ? (
                             <div className="jimbo-panel border-[var(--jimbo-red)] p-6 md:p-12 text-center max-w-full md:max-w-md mx-auto">
-                                <h3 className="font-header text-[var(--jimbo-red)] text-xl md:text-2xl mb-2 md:mb-3">Ritual Lost</h3>
+                                <h3 className="font-header text-[var(--jimbo-red)] text-xl md:text-2xl mb-2 md:mb-3 uppercase">Ritual Lost</h3>
                                 <p className="font-pixel text-[var(--jimbo-grey)] text-[11px] md:text-xs leading-relaxed">
                                     The spirits failed to provide data for Day {viewingDay}. <br />
                                     Check your connection or return to today.

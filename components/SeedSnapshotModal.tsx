@@ -77,13 +77,13 @@ export function SeedSnapshotModal({ analysis, onClose }: SeedSnapshotModalProps)
     if (!mounted) return null;
 
     return createPortal(
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-8 bg-[var(--jimbo-panel-edge)] animate-in fade-in duration-300" onClick={onClose}>
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-8 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose}>
             <JimboPanel
                 className="w-full max-w-5xl max-h-[90vh] flex flex-col relative !p-0 overflow-hidden"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="shrink-0 p-6 border-b-2 border-transparent flex justify-between items-center bg-[#1a1a1a]">
+                <div className="shrink-0 p-6 border-b-2 border-white/10 flex justify-between items-center bg-[#1a1a1a]">
                     <div className="flex items-center gap-4">
                         <div className="bg-[var(--jimbo-gold)] p-2 rounded-lg rotate-3 shadow-lg">
                             <Hash size={32} className="text-black" />
@@ -99,9 +99,9 @@ export function SeedSnapshotModal({ analysis, onClose }: SeedSnapshotModalProps)
                     </div>
                     <button
                         onClick={onClose}
-                        className="jimbo-btn jimbo-btn-red !py-2 !px-5 font-header text-2xl"
+                        className="jimbo-btn jimbo-btn-red !py-2 !px-5 font-header text-2xl uppercase"
                     >
-                        CLOSE
+                        Close
                     </button>
                 </div>
 
@@ -117,7 +117,7 @@ export function SeedSnapshotModal({ analysis, onClose }: SeedSnapshotModalProps)
                         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
                             {analysis.bosses.map((b, i) => (
                                 <JimboInnerPanel key={i} className="p-2 flex flex-col items-center group hover:scale-105 transition-transform duration-200">
-                                    <div className="w-full text-center border-b border-transparent mb-2 pb-1">
+                                    <div className="w-full text-center border-b border-white/10 mb-2 pb-1">
                                         <span className="font-pixel text-[10px] text-[var(--jimbo-border-silver)] uppercase">Ante {b.ante}</span>
                                     </div>
                                     <div className="relative mb-1">
@@ -140,7 +140,7 @@ export function SeedSnapshotModal({ analysis, onClose }: SeedSnapshotModalProps)
                         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
                             {analysis.vouchers.map((v, i) => (
                                 <JimboInnerPanel key={i} className="p-2 flex flex-col items-center group hover:scale-105 transition-transform duration-200">
-                                    <div className="w-full text-center border-b border-transparent mb-2 pb-1">
+                                    <div className="w-full text-center border-b border-white/10 mb-2 pb-1">
                                         <span className="font-pixel text-[10px] text-[var(--jimbo-border-silver)] uppercase">Ante {v.ante}</span>
                                     </div>
                                     <div className="relative mb-1">
@@ -178,18 +178,18 @@ export function SeedSnapshotModal({ analysis, onClose }: SeedSnapshotModalProps)
 
                                     {/* Tooltip on Hover */}
                                     <div className="absolute z-50 invisible group-hover:visible bg-[var(--jimbo-dark-blue)] border-2 border-[var(--jimbo-border-silver)] p-3 rounded-lg shadow-2xl w-56 -translate-y-2 left-1/2 -translate-x-1/2 top-full mt-2 pointer-events-none transition-all duration-200 animate-in zoom-in-95 fill-mode-forwards">
-                                        <div className="font-header text-[var(--jimbo-gold)] border-b border-transparent pb-1 mb-2 text-center uppercase tracking-wider">{j.name}</div>
+                                        <div className="font-header text-[var(--jimbo-gold)] border-b border-white/10 pb-1 mb-2 text-center uppercase tracking-wider">{j.name}</div>
                                         <div className="space-y-1.5 font-pixel text-[10px]">
                                             <div className="flex justify-between uppercase">
                                                 <span className="text-[var(--jimbo-border-silver)]">Total Count:</span>
                                                 <span className="text-white">{j.count}</span>
                                             </div>
-                                            <div className="pt-2 border-t border-transparent uppercase text-[var(--jimbo-grey)] text-[8px] mb-1">Found At:</div>
+                                            <div className="pt-2 border-t border-white/5 uppercase text-[var(--jimbo-grey)] text-[8px] mb-1">Found At:</div>
                                             <div className="max-h-24 overflow-y-auto custom-scrollbar pr-1">
                                                 {j.locations.map((loc, li) => (
-                                                    <div key={li} className="flex justify-between items-center py-0.5 border-b border-transparent last:border-0">
-                                                        <span className="text-[#eee]">A{loc.ante} {loc.source.split(' ')[1] || 'Shop'}</span>
-                                                        {loc.edition && <span className="text-blue-400 text-[8px] ml-1">{loc.edition.replace(' Edition', '')}</span>}
+                                                    <div key={li} className="flex justify-between items-center py-0.5 border-b border-white/5 last:border-0">
+                                                        <span className="text-[#eee] uppercase">A{loc.ante} {loc.source.split(' ')[1] || 'Shop'}</span>
+                                                        {loc.edition && <span className="text-[var(--jimbo-blue)] text-[8px] ml-1 uppercase">{loc.edition.replace(' Edition', '')}</span>}
                                                     </div>
                                                 ))}
                                             </div>
