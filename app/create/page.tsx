@@ -1,6 +1,10 @@
 "use client";
 
+// DuckDB WASM and motely-wasm require browser APIs — prevent static prerendering
+export const dynamic = 'force-dynamic';
+
 import { useState } from "react";
+import dynamic_ from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check, AlertCircle, Upload, FileText, Play } from "lucide-react";
 import { JimboPanel, JimboInnerPanel, JimboButton, JimboInput, JimboTextArea } from "@/components/JimboPanel";
@@ -10,6 +14,20 @@ import { analyzeSeedWasm } from "@/lib/api/motelyWasm";
 import { evaluateSeed } from "@/lib/jaml/jamlEvaluator";
 import { normalizeAnalysis } from "@/lib/seedAnalyzer";
 import { cn } from "@/lib/utils";
+
+// Browser-only components: DuckDB accesses `document` at module init, react-json-view also requires DOM
+const DuckDBProvider = dynamic_(
+    () => import('@/components/DuckDBProvider').then(m => m.DuckDBProvider),
+    { ssr: false, loading: () => <div className="text-sm opacity-50">Loading Ice Lake…</div> }
+);
+const SeedExplorer = dynamic_(
+    () => import('@/components/SeedExplorer').then(m => m.SeedExplorer),
+    { ssr: false }
+);
+const ReactJson = dynamic_(
+    () => import('react-json-view'),
+    { ssr: false }
+);
 
 export default function CreateRitualPage() {
     const router = useRouter();
@@ -29,6 +47,74 @@ export default function CreateRitualPage() {
     const [seedsInput, setSeedsInput] = useState("");
     const [verificationResults, setVerificationResults] = useState<any[]>([]);
     const [isVerifying, setIsVerifying] = useState(false);
+
+    // WASM search state
+    const [wasmResults, setWasmResults] = useState<{seed:string,score:number}[]>([]);
+    const [wasmSearching, setWasmSearching] = useState(false);
+    const [wasmProcessed, setWasmProcessed] = useState(0);
+    const [wasmError, setWasmError] = useState<string | null>(null);
+    const wasmSeen = useState<Set<string>>(() => new Set())[0];
+
+    // Add seed from explorer
+    const handleAddSeed = async (seed: string) => {
+        setSeedsInput(prev => prev ? prev + "\n" + seed : seed);
+        // immediately verify the newly added seed
+        try {
+            const rawAnalysis = await analyzeSeedWasm(seed, filter.deck || 'Erratic', filter.stake || 'White');
+            const analysis = normalizeAnalysis(rawAnalysis);
+            const evaluation = evaluateSeed(analysis, filter);
+            setVerificationResults(prev => [...prev, { seed, passed: evaluation.isMatch, score: evaluation.score, details: evaluation }]);
+        } catch (err) {
+            console.error(`Error analyzing seed ${seed}:`, err);
+            setVerificationResults(prev => [...prev, { seed, passed: false, error: 'Analysis failed' }]);
+        }
+    };
+
+    // WASM search handlers
+    const handleWasmSearch = async () => {
+        if (wasmSearching) {
+            handleWasmStop();
+            return;
+        }
+        setWasmSearching(true);
+        setWasmError(null);
+        setWasmResults([]);
+        setWasmProcessed(0);
+        wasmSeen.clear();
+
+        const { searchSeedsWasm, addSearchListener, cancelSearch } = await import('@/lib/api/motelyWasm');
+        const cleanup = addSearchListener((event: any) => {
+            if (event.type === 'result') {
+                const { seed, score } = event.data;
+                if (!wasmSeen.has(seed)) {
+                    wasmSeen.add(seed);
+                    setWasmResults(prev => [{ seed, score }, ...prev].slice(0, 100));
+                }
+            } else if (event.type === 'progress') {
+                setWasmProcessed(event.data?.SearchedCount || 0);
+            } else if (event.type === 'complete') {
+                setWasmSearching(false);
+                cleanup();
+            } else if (event.type === 'error') {
+                setWasmError(event.message || 'unknown');
+                setWasmSearching(false);
+                cleanup();
+            }
+        });
+
+        try {
+            await searchSeedsWasm(jamlText);
+        } catch (err: any) {
+            setWasmError(err.message);
+            setWasmSearching(false);
+            cleanup();
+        }
+    };
+
+    const handleWasmStop = () => {
+        setWasmSearching(false);
+        import('@/lib/api/motelyWasm').then(m => m.cancelSearch());
+    };
 
     const handleNext = () => setStep(s => Math.min(4, s + 1));
     const handleBack = () => {
@@ -191,6 +277,19 @@ export default function CreateRitualPage() {
                             <JamlEditor initialJaml={jamlText} onJamlChange={(text) => setFromJaml(text)} />
                         </JimboInnerPanel>
 
+                        {/* JSON preview of parsed filter */}
+                        <div className="mt-4 text-sm">
+                            <h3 className="font-header text-white/60 mb-1">Parsed Filter</h3>
+                            <div className="bg-[var(--jimbo-panel-edge)] p-2 rounded max-h-64 overflow-auto">
+                                <ReactJson
+                                    src={filter}
+                                    displayDataTypes={false}
+                                    collapsed={1}
+                                    name={null}
+                                />
+                            </div>
+                        </div>
+
                         <JimboButton variant="red" onClick={handleNext} className="text-xl py-4 mt-4">
                             Next Step <ArrowRight size={24} />
                         </JimboButton>
@@ -202,8 +301,48 @@ export default function CreateRitualPage() {
                     <div className="space-y-4 pb-2">
                         <h2 className="text-2xl font-header flex items-center gap-2 text-[var(--jimbo-gold)]">
                             <Upload size={20} />
-                            Upload & Verify Seeds
+                            Upload / Scan Seeds
                         </h2>
+
+                        {/* seed explorer - allowed inside DuckDBProvider */}
+                        <DuckDBProvider>
+                            <SeedExplorer onSelect={handleAddSeed} filter={filter} />
+                        </DuckDBProvider>
+
+                        {/* WASM full‑corpus search */}
+                        <div className="jimbo-inner-panel mt-4 p-3">
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="font-header text-white">WASM Search</span>
+                                <button
+                                    onClick={handleWasmSearch}
+                                    className={cn(
+                                        "balatro-button px-3 py-1 text-sm h-8",
+                                        wasmSearching ? "balatro-button-red" : "balatro-button-blue"
+                                    )}
+                                >
+                                    {wasmSearching ? 'Abort' : 'Search corpus'}
+                                </button>
+                            </div>
+                            <div className="text-[11px] text-white/50 mb-2">
+                                {wasmProcessed.toLocaleString()} seeds scanned
+                                {wasmError && <span className="text-red-400 ml-2">{wasmError}</span>}
+                            </div>
+                            <div className="max-h-40 overflow-y-auto bg-black/20 p-1 font-mono text-xs">
+                                {wasmResults.length === 0 && !wasmSearching && (
+                                    <div className="text-center text-white/30 py-6">No matches yet</div>
+                                )}
+                                {wasmResults.map((r, i) => (
+                                    <div
+                                        key={i}
+                                        className="flex justify-between items-center py-0.5 px-1 cursor-pointer hover:bg-white/5"
+                                        onClick={() => handleAddSeed(r.seed)}
+                                    >
+                                        <span className="truncate w-2/3 text-[var(--jimbo-blue)]">{r.seed}</span>
+                                        <span className="text-white/60 text-right w-1/3">{r.score?.toLocaleString()}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
 
                         <div className="grid md:grid-cols-2 gap-4">
                             <div className="space-y-3">

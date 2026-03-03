@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
-import { ritualConfig } from '@/lib/config';
 import fs from 'fs';
 import path from 'path';
 
@@ -27,7 +26,7 @@ export async function GET(
         console.log('Running in dev mode without Cloudflare context');
     }
 
-    // --- Ritual metadata (D1 or hardcoded config for TheDailyWee) ---
+    // --- Ritual metadata (from D1) ---
     let config: Record<string, any> = { id, seeds: [] as string[] };
 
     if (env && env.DB) {
@@ -43,14 +42,8 @@ export async function GET(
         }
     }
 
-    // If D1 didn't have it and it's the default ritual, use hardcoded config
-    if (!config.title && id === ritualConfig.id) {
-        config.title = ritualConfig.title;
-        config.tagline = ritualConfig.tagline;
-        config.epoch = ritualConfig.epochDate;
-    }
-
-    if (!config.epoch) {
+    if (!config.title || !config.epoch) {
+        // unknown ritual
         return NextResponse.json({ error: `Unknown ritual: ${id}` }, { status: 404 });
     }
 
@@ -98,47 +91,33 @@ export async function GET(
     if (!seedsLoaded) {
         // Dev mode fallback - read from public directory or use daily_ritual_clean.json
         try {
-            // For TheDailyWee, read seeds.csv from public/
-            if (id === 'TheDailyWee') {
-                const publicPath = path.join(process.cwd(), 'public');
-                
-                // Try reading seeds.csv
-                const seedsCsvPath = path.join(publicPath, 'seeds.csv');
-                if (fs.existsSync(seedsCsvPath)) {
-                    const text = fs.readFileSync(seedsCsvPath, 'utf-8');
-                    // Parse CSV - first column is the seed ID, skip header row
-                    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-                    const allSeeds = lines.slice(1).map(line => {
-                        // Extract first column (seed ID) - handle quoted values
-                        const match = line.match(/^"?([^",]+)"?/);
-                        return match ? match[1] : line.split(',')[0];
-                    }).filter(seed => seed && seed !== 'seed');
-                    config.seeds = allSeeds.slice(0, todayNumber);
-                    console.log(`[Dev Mode] Loaded ${allSeeds.length} total seeds from seeds.csv, returning ${config.seeds.length} for day ${todayNumber}`);
-                    
-                    // Set a default JAML config for dev mode
-                    config.jamlConfig = `stake white, deck red, seed ${config.seeds[targetDay - 1] || 'UNKNOWN'}
-ante 1, blind 1, score 300
-ante 2, blind 1, score 450
-ante 2, blind 2, score 900
-ante 2, blind 3, score 1200`;
+            const publicPath = path.join(process.cwd(), 'public');
+
+            // Try reading {id}.csv first, then seeds.csv as legacy fallback
+            const idCsvPath = path.join(publicPath, `${id}.csv`);
+            const legacyCsvPath = path.join(publicPath, 'seeds.csv');
+            const csvPath = fs.existsSync(idCsvPath) ? idCsvPath : (fs.existsSync(legacyCsvPath) ? legacyCsvPath : null);
+
+            if (csvPath) {
+                const text = fs.readFileSync(csvPath, 'utf-8');
+                // Parse CSV - first column is the seed ID, skip header row
+                const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                const allSeeds = lines.slice(1).map(line => {
+                    // Extract first column (seed ID) - handle quoted values
+                    const match = line.match(/^"?([^",]+)"?/);
+                    return match ? match[1] : line.split(',')[0];
+                }).filter(seed => seed && seed !== 'seed');
+                config.seeds = allSeeds.slice(0, todayNumber);
+                console.log(`[Dev Mode] Loaded ${allSeeds.length} total seeds from ${path.basename(csvPath)}, returning ${config.seeds.length} for day ${todayNumber}`);
+            } else {
+                // Fallback to daily_ritual_clean.json
+                const ritualJsonPath = path.join(publicPath, 'daily_ritual_clean.json');
+                if (fs.existsSync(ritualJsonPath)) {
+                    const ritualData = JSON.parse(fs.readFileSync(ritualJsonPath, 'utf-8'));
+                    config.seeds = ritualData.slice(0, todayNumber).map((r: any) => r.id).filter((sid: string) => sid && !sid.includes('\u0000'));
+                    console.log(`[Dev Mode] Loaded ${config.seeds.length} seeds from daily_ritual_clean.json`);
                 } else {
-                    // Fallback to daily_ritual_clean.json
-                    const ritualJsonPath = path.join(publicPath, 'daily_ritual_clean.json');
-                    if (fs.existsSync(ritualJsonPath)) {
-                        const ritualData = JSON.parse(fs.readFileSync(ritualJsonPath, 'utf-8'));
-                        config.seeds = ritualData.slice(0, todayNumber).map((r: any) => r.id).filter((id: string) => id && !id.includes('\u0000'));
-                        console.log(`[Dev Mode] Loaded ${config.seeds.length} seeds from daily_ritual_clean.json`);
-                        
-                        // Set a default JAML config
-                        config.jamlConfig = `stake white, deck red, seed ${config.seeds[targetDay - 1] || 'UNKNOWN'}
-ante 1, blind 1, score 300
-ante 2, blind 1, score 450
-ante 2, blind 2, score 900
-ante 2, blind 3, score 1200`;
-                    } else {
-                        console.error('[Dev Mode] No seed data files found in public/');
-                    }
+                    console.error('[Dev Mode] No seed data files found in public/');
                 }
             }
         } catch (err) {

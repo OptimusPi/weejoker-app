@@ -96,7 +96,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                 if (!configRes.ok) {
                     const text = await configRes.text();
                     let errorMsg = `Failed to load ritual (${configRes.status})`;
-                    try { errorMsg = JSON.parse(text).error || errorMsg; } catch { }
+                    try { errorMsg = JSON.parse(text).error || errorMsg; } catch (e) { console.warn('[DailyRitual] failed to parse error response', e); }
                     throw new Error(errorMsg);
                 }
                 const config = await configRes.json() as {

@@ -9,10 +9,17 @@ import { cn } from '@/lib/utils';
 // SEED_ASSETS binding is only available in server-side API routes
 const BUCKET_URL = "https://r2.weejoker.app/parquet_lake";
 
+export interface SeedExplorerProps {
+    /** callback invoked when a seed row is clicked */
+    onSelect?: (seed: string) => void;
+    /** optional filter object that will be used during scans */
+    filter?: any;
+}
+
 const RANKS = ['2s', '3s', '4s', '5s', '6s', '7s', '8s', '9s', '10s', 'Jacks', 'Queens', 'Kings', 'Aces'];
 const SUITS = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
 
-export function SeedExplorer() {
+export function SeedExplorer(props: SeedExplorerProps) {
     const { scanIceLake, isDbLoading } = useIceLakeScanner();
 
     const [selectedRanks, setSelectedRanks] = useState<string[]>([]);
@@ -47,7 +54,7 @@ export function SeedExplorer() {
         ];
 
         try {
-            const filter: any = {
+            const scanFilter = props.filter || {
                 name: 'Deep Scan',
                 description: 'Ice Lake Scan',
                 author: 'WeeJoker',
@@ -62,7 +69,7 @@ export function SeedExplorer() {
             await scanIceLake(
                 partitions,
                 BUCKET_URL,
-                filter,
+                scanFilter,
                 (seed, score) => {
                     setResults(prev => [...prev, { seed, score }].slice(0, 100));
                     setScannedCount(c => c + 1);
@@ -171,7 +178,11 @@ export function SeedExplorer() {
                 </div>
 
                 {results.map((res, i) => (
-                    <div key={i} className="grid grid-cols-3 items-center p-1.5 mx-1 rounded font-mono text-xs hover:bg-white/5 transition-colors">
+                    <div
+                        key={i}
+                        onClick={() => props.onSelect && props.onSelect(res.seed)}
+                        className="grid grid-cols-3 items-center p-1.5 mx-1 rounded font-mono text-xs hover:bg-white/5 transition-colors cursor-pointer"
+                    >
                         <span className="text-[var(--jimbo-blue)] truncate">{res.seed}</span>
                         <span className="text-center text-white/70">{res.score}</span>
                         <div className="text-right flex items-center justify-end gap-1 text-[var(--jimbo-green)]">

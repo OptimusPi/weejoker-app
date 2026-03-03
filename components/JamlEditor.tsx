@@ -324,7 +324,10 @@ export default function JamlEditor({ initialJaml, onJamlChange, className }: Int
         setLines(newLines);
         const txt = linesToJaml(newLines);
         if (onJamlChange) {
-            try { onJamlChange(txt, yaml.load(txt), true); } catch { onJamlChange(txt, null, false); }
+            try { onJamlChange(txt, yaml.load(txt), true); } catch (e) {
+                console.warn('[JamlEditor] parse error', e);
+                onJamlChange(txt, null, false);
+            }
         }
     }, [lines, linesToJaml, onJamlChange]);
 
@@ -342,7 +345,7 @@ export default function JamlEditor({ initialJaml, onJamlChange, className }: Int
 
         setLines(newLines);
         const txt = linesToJaml(newLines);
-        if (onJamlChange) { try { onJamlChange(txt, yaml.load(txt), true); } catch { onJamlChange(txt, null, false); } }
+        if (onJamlChange) { try { onJamlChange(txt, yaml.load(txt), true); } catch (e) { console.warn('[JamlEditor] updateArrayItem yaml parse failed', e); onJamlChange(txt, null, false); } }
     }, [lines, linesToJaml, onJamlChange]);
 
     const addArrayItem = useCallback((lineId: string, newValue: string) => {
@@ -358,7 +361,7 @@ export default function JamlEditor({ initialJaml, onJamlChange, className }: Int
 
         setLines(newLines);
         const txt = linesToJaml(newLines);
-        if (onJamlChange) { try { onJamlChange(txt, yaml.load(txt), true); } catch { onJamlChange(txt, null, false); } }
+        if (onJamlChange) { try { onJamlChange(txt, yaml.load(txt), true); } catch (e) { console.warn('[JamlEditor] addArrayItem yaml parse failed', e); onJamlChange(txt, null, false); } }
     }, [lines, linesToJaml, onJamlChange]);
 
     const removeArrayItem = useCallback((lineId: string, arrayIndex: number) => {
@@ -374,7 +377,7 @@ export default function JamlEditor({ initialJaml, onJamlChange, className }: Int
 
         setLines(newLines);
         const txt = linesToJaml(newLines);
-        if (onJamlChange) { try { onJamlChange(txt, yaml.load(txt), true); } catch { onJamlChange(txt, null, false); } }
+        if (onJamlChange) { try { onJamlChange(txt, yaml.load(txt), true); } catch (e) { console.warn('[JamlEditor] removeArrayItem yaml parse failed', e); onJamlChange(txt, null, false); } }
     }, [lines, linesToJaml, onJamlChange]);
 
     const addLineAfter = useCallback((afterLineId: string, content: string) => {
@@ -391,7 +394,7 @@ export default function JamlEditor({ initialJaml, onJamlChange, className }: Int
 
         setLines(renumbered);
         const txt = linesToJaml(renumbered);
-        if (onJamlChange) { try { onJamlChange(txt, yaml.load(txt), true); } catch { onJamlChange(txt, null, false); } }
+        if (onJamlChange) { try { onJamlChange(txt, yaml.load(txt), true); } catch (e) { console.warn('[JamlEditor] addLineAfter yaml parse failed', e); onJamlChange(txt, null, false); } }
     }, [lines, linesToJaml, onJamlChange, parseJamlToLines]);
 
     const deleteLine = useCallback((lineId: string) => {
@@ -400,7 +403,7 @@ export default function JamlEditor({ initialJaml, onJamlChange, className }: Int
 
         setLines(renumbered);
         const txt = linesToJaml(renumbered);
-        if (onJamlChange) { try { onJamlChange(txt, yaml.load(txt), true); } catch { onJamlChange(txt, null, false); } }
+        if (onJamlChange) { try { onJamlChange(txt, yaml.load(txt), true); } catch (e) { console.warn('[JamlEditor] deleteLine yaml parse failed', e); onJamlChange(txt, null, false); } }
     }, [lines, linesToJaml, onJamlChange]);
 
     // -- Render --

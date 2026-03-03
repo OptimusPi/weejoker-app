@@ -1,10 +1,9 @@
 import * as duckdb from '@duckdb/duckdb-wasm';
 
-const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
-
 // Initialize DuckDB
 export async function initDuckDB() {
-    // Select a bundle based on browser checks
+    // Select bundle based on browser feature detection (lazy — safe in SSR)
+    const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
     const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
 
     const worker_url = URL.createObjectURL(
