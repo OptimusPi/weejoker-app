@@ -38,20 +38,20 @@ export function AnalyzerSeedReview({ seeds, initialIndex = 0, onClose, jamlConfi
     const currentSeed = seeds[currentIndex];
 
     return (
-        <div className="fixed inset-0 z-[100] bg-[var(--balatro-black)]/95 backdrop-blur-md flex flex-col animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col animate-in fade-in duration-300">
             {/* Header / Toolbar */}
-            <div className="flex items-center justify-between p-4 border-b border-white/5 bg-black/40">
+            <div className="flex items-center justify-between p-4 border-b border-[var(--jimbo-panel-edge)] bg-[var(--jimbo-panel-edge)]">
                 <div className="flex items-center gap-6">
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/60 hover:text-white"
+                        className="p-2 hover:bg-white/10 rounded-sm transition-colors text-[var(--jimbo-grey)] hover:text-white"
                         title="Close Review"
                     >
                         <X size={24} />
                     </button>
                     <div>
-                        <h2 className="font-header text-xl text-white tracking-widest uppercase">Analyzer Review</h2>
-                        <p className="font-pixel text-[10px] text-[var(--balatro-gold)] uppercase tracking-tighter">
+                        <h2 className="font-header text-xl text-white tracking-widest uppercase mb-1">Analyzer Review</h2>
+                        <p className="font-pixel text-[10px] text-[var(--jimbo-gold)] uppercase tracking-tighter">
                             Seed {currentIndex + 1} of {seeds.length}
                         </p>
                     </div>
@@ -61,28 +61,28 @@ export function AnalyzerSeedReview({ seeds, initialIndex = 0, onClose, jamlConfi
                     <button
                         onClick={() => setShowList(!showList)}
                         className={cn(
-                            "balatro-button !py-1 !px-4 !text-[10px] flex items-center gap-2",
-                            showList ? "balatro-button-gold" : "balatro-button-blue"
+                            "jimbo-btn !py-1 !px-4 !text-[10px] flex items-center gap-2",
+                            showList ? "jimbo-btn-gold" : "jimbo-btn-blue"
                         )}
                     >
                         <List size={14} />
                         LIST
                     </button>
 
-                    <div className="flex bg-black/40 rounded-xl border border-white/10 p-1 ml-4">
+                    <div className="flex bg-[#111] border border-[var(--jimbo-panel-edge)] p-1 ml-4 gap-1">
                         <button
                             onClick={handlePrev}
                             disabled={currentIndex === 0}
-                            className="p-2 disabled:opacity-20 hover:text-[var(--balatro-red)] transition-colors"
+                            className="p-2 disabled:opacity-20 hover:text-[var(--jimbo-red)] transition-colors text-[var(--jimbo-grey)]"
                             title="Previous Seed"
                         >
                             <ChevronLeft size={20} />
                         </button>
-                        <div className="w-px bg-white/10 my-1"></div>
+                        <div className="w-px bg-[var(--jimbo-panel-edge)] my-1"></div>
                         <button
                             onClick={handleNext}
                             disabled={currentIndex === seeds.length - 1}
-                            className="p-2 disabled:opacity-20 hover:text-[var(--balatro-red)] transition-colors"
+                            className="p-2 disabled:opacity-20 hover:text-[var(--jimbo-red)] transition-colors text-[var(--jimbo-grey)]"
                             title="Next Seed"
                         >
                             <ChevronRight size={20} />
@@ -94,10 +94,10 @@ export function AnalyzerSeedReview({ seeds, initialIndex = 0, onClose, jamlConfi
             <div className="flex-1 flex overflow-hidden relative">
                 {/* Side List Panel */}
                 <div className={cn(
-                    "w-80 border-r border-white/5 bg-black/20 flex flex-col transition-all duration-300 absolute md:relative h-full z-10",
+                    "w-80 border-r border-[var(--jimbo-panel-edge)] bg-[var(--jimbo-panel-edge)] flex flex-col transition-all duration-300 absolute md:relative h-full z-10",
                     showList ? "translate-x-0" : "-translate-x-full md:-ml-80"
                 )}>
-                    <div className="p-4 border-b border-white/5 font-header text-xs text-white/40 uppercase tracking-widest">
+                    <div className="p-4 border-b border-[var(--jimbo-panel-edge)] font-header text-xs text-[var(--jimbo-grey)] uppercase tracking-widest">
                         Seed Queue
                     </div>
                     <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
@@ -106,9 +106,9 @@ export function AnalyzerSeedReview({ seeds, initialIndex = 0, onClose, jamlConfi
                                 key={`${seed}-${idx}`}
                                 onClick={() => setCurrentIndex(idx)}
                                 className={cn(
-                                    "w-full p-3 rounded-lg text-left transition-all flex items-center justify-between group",
+                                    "w-full p-3 text-left transition-all flex items-center justify-between group border border-transparent",
                                     currentIndex === idx
-                                        ? "bg-[var(--balatro-red)] shadow-lg translate-x-1"
+                                        ? "bg-[var(--jimbo-red)] shadow-lg translate-x-1 border-white/20"
                                         : "hover:bg-white/5 opacity-60 hover:opacity-100"
                                 )}
                             >
@@ -125,14 +125,14 @@ export function AnalyzerSeedReview({ seeds, initialIndex = 0, onClose, jamlConfi
                         <AgnosticSeedCard
                             seed={currentSeed}
                             jamlConfig={jamlConfig}
-                            className="w-full !border-white/20 !shadow-2xl"
+                            className="w-full !max-w-none !shadow-2xl"
                         />
 
                         {/* Keyboard Tip */}
-                        <div className="mt-8 flex justify-center gap-8 font-pixel text-[10px] text-white/20 uppercase tracking-widest">
-                            <span className="flex items-center gap-2"><div className="px-1 border border-white/10 rounded">←</div> Prev</span>
-                            <span className="flex items-center gap-2"><div className="px-1 border border-white/10 rounded">→</div> Next</span>
-                            <span className="flex items-center gap-2"><div className="px-1 border border-white/10 rounded">ESC</div> Close</span>
+                        <div className="mt-8 flex justify-center gap-8 font-pixel text-[10px] text-[var(--jimbo-grey)] uppercase tracking-widest">
+                            <span className="flex items-center gap-2"><div className="px-1 border border-[var(--jimbo-panel-edge)] rounded-sm">←</div> Prev</span>
+                            <span className="flex items-center gap-2"><div className="px-1 border border-[var(--jimbo-panel-edge)] rounded-sm">→</div> Next</span>
+                            <span className="flex items-center gap-2"><div className="px-1 border border-[var(--jimbo-panel-edge)] rounded-sm">ESC</div> Close</span>
                         </div>
                     </div>
                 </div>

@@ -83,13 +83,13 @@ export function SeedExplorer() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <h2 className="text-lg font-header flex items-center gap-2 text-white">
-                    <Database className="text-[var(--balatro-blue)]" size={18} />
+                    <Database className="text-[var(--jimbo-blue)]" size={18} />
                     Deep Scanner
                 </h2>
-                <div className="flex items-center gap-2 text-[10px] text-white/60">
+                <div className="flex items-center gap-2 text-[10px] text-[var(--jimbo-grey)]">
                     <span className={cn(
                         "w-2 h-2 rounded-full",
-                        isScanning ? "bg-[var(--jimbo-green)] animate-pulse" : "bg-white/30"
+                        isScanning ? "bg-[var(--jimbo-dark-green)] animate-pulse" : "bg-[var(--jimbo-grey)] opacity-50"
                     )} />
                     {isScanning ? 'Scanning...' : 'Ready'}
                 </div>
@@ -114,10 +114,10 @@ export function SeedExplorer() {
                                 key={rank}
                                 onClick={() => toggleSelection(rank, selectedRanks, setSelectedRanks)}
                                 className={cn(
-                                    "px-2.5 py-1 rounded text-xs border transition-all",
+                                    "px-2.5 py-1 rounded-sm text-xs border transition-all hover:bg-white/10 hover:text-white",
                                     selectedRanks.includes(rank)
-                                        ? "bg-[var(--jimbo-blue)] border-[var(--jimbo-blue)] text-white shadow-[0_2px_0_rgba(0,0,0,0.3)]"
-                                        : "bg-[var(--jimbo-panel-edge)] border-[var(--jimbo-dark-grey)] text-white/50 hover:text-white hover:border-white/30"
+                                        ? "bg-[var(--jimbo-blue)] border-[var(--jimbo-blue)] text-white shadow-xl"
+                                        : "bg-[#111] border-[var(--jimbo-panel-edge)] text-[var(--jimbo-grey)]"
                                 )}
                             >
                                 {rank}
@@ -135,10 +135,10 @@ export function SeedExplorer() {
                                 key={suit}
                                 onClick={() => toggleSelection(suit, selectedSuits, setSelectedSuits)}
                                 className={cn(
-                                    "px-2.5 py-1 rounded text-xs border transition-all",
+                                    "px-2.5 py-1 rounded text-xs border transition-all hover:bg-white/10 hover:text-white",
                                     selectedSuits.includes(suit)
                                         ? "bg-[var(--jimbo-red)] border-[var(--jimbo-red)] text-white shadow-[0_2px_0_rgba(0,0,0,0.3)]"
-                                        : "bg-[var(--jimbo-panel-edge)] border-[var(--jimbo-dark-grey)] text-white/50 hover:text-white hover:border-white/30"
+                                        : "bg-[#111] border-[var(--jimbo-panel-edge)] text-[var(--jimbo-grey)]"
                                 )}
                             >
                                 {suit}

@@ -86,9 +86,9 @@ export default function Explorer({ initialSeeds }: ExplorerProps) {
 
     return (
         <div className="w-full max-w-7xl mx-auto px-4 py-8">
-            <div className="bg-black/30 p-6 rounded-xl border border-white/10 mb-8">
-                <h3 className="text-2xl font-header text-white mb-2">Seed Archive</h3>
-                <p className="font-pixel text-zinc-400 text-sm">Search the full history of Wee Joker seeds.</p>
+            <div className="bg-[var(--jimbo-panel-edge)] p-6 border border-[var(--jimbo-panel-edge)] mb-8">
+                <h3 className="text-2xl font-header text-white mb-2 uppercase tracking-widest">Seed Archive</h3>
+                <p className="font-pixel text-[var(--jimbo-grey)] text-sm">Search the full history of Wee Joker seeds.</p>
             </div>
 
             <FilterBar onSearch={setSearch} onSortChange={setSort} />
@@ -136,11 +136,11 @@ export default function Explorer({ initialSeeds }: ExplorerProps) {
                     rel="noopener noreferrer"
                     className="inline-block transform hover:scale-105 active:scale-95 transition-transform duration-150"
                 >
-                    <div className="balatro-btn text-xl md:text-2xl px-8 py-4 bg-balatro-blue hover:bg-balatro-blue-dark border-balatro-blue-dark shadow-lg">
+                    <div className="jimbo-btn jimbo-btn-blue text-xl md:text-2xl !px-8 !py-4 shadow-lg">
                         Visit WeeJoker.app
                     </div>
                 </a>
-                <p className="mt-4 text-balatro-silver-light font-pixel text-sm opacity-60">
+                <p className="mt-4 text-[var(--jimbo-grey)] font-pixel text-sm opacity-60">
                     Find your next broken run.
                 </p>
             </div>

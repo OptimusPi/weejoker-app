@@ -18,6 +18,7 @@ export interface JimboPanelProps {
     backLabel?: string
     hideBack?: boolean
     className?: string
+    onClick?: React.MouseEventHandler<HTMLDivElement>
 }
 
 export function JimboPanel({
@@ -26,9 +27,10 @@ export function JimboPanel({
     backLabel = 'Back',
     hideBack = false,
     className,
+    onClick,
 }: JimboPanelProps) {
     return (
-        <div className={cn('jimbo-panel', className)}>
+        <div className={cn('jimbo-panel', className)} onClick={onClick}>
             <div className="flex-1">
                 {children}
             </div>
@@ -49,12 +51,15 @@ export function JimboPanel({
 export function JimboInnerPanel({
     children,
     className,
+    onClick,
+    ...props
 }: {
     children: React.ReactNode
     className?: string
-}) {
+    onClick?: React.MouseEventHandler<HTMLDivElement>
+} & React.HTMLAttributes<HTMLDivElement>) {
     return (
-        <div className={cn('jimbo-inner-panel', className)}>
+        <div className={cn('jimbo-inner-panel', className)} onClick={onClick} {...props}>
             {children}
         </div>
     )

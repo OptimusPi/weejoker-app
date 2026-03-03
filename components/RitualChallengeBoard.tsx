@@ -2,10 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Copy, Map as MapIcon, Trophy, Loader2 } from "lucide-react";
-import { DeckSprite } from "./DeckSprite";
 import { DeckFan4Row } from "./DeckFan4Row";
-import { CardFan } from "./CardFan";
-import { Sprite } from "./Sprite";
 import { useSeedAnalyzer } from "@/lib/hooks/useSeedAnalyzer";
 import { evaluateSeed } from "@/lib/jaml/jamlEvaluator";
 import { useJamlFilter } from "@/lib/hooks/useJamlFilter";
@@ -13,6 +10,7 @@ import { JamlJourneyMap } from "./cards/JamlJourneyMap";
 import { AgnosticSeedCard } from "./AgnosticSeedCard";
 import { cn } from "@/lib/utils";
 import { ritualConfig } from "@/lib/config";
+import { JimboInnerPanel } from "./JimboPanel";
 
 interface RitualChallengeBoardProps {
     seed: string;
@@ -60,7 +58,7 @@ function LeaderboardComponent({ ritualId, seed }: { ritualId: string; seed: stri
     if (loading) {
         return (
             <div className="flex items-center justify-center py-8">
-                <Loader2 className="animate-spin text-white/20" size={24} />
+                <Loader2 className="animate-spin text-[var(--jimbo-grey)]" size={24} />
             </div>
         );
     }
@@ -68,8 +66,8 @@ function LeaderboardComponent({ ritualId, seed }: { ritualId: string; seed: stri
     if (scores.length === 0) {
         return (
             <div className="text-center py-8">
-                <Trophy size={32} className="mx-auto mb-2 text-white/10" />
-                <p className="font-pixel text-[11px] text-white/30">No scores yet. Be the first!</p>
+                <Trophy size={32} className="mx-auto mb-2 text-[var(--jimbo-grey)]" />
+                <p className="font-pixel text-[11px] text-[var(--jimbo-grey)]">No scores yet. Be the first!</p>
             </div>
         );
     }
@@ -77,13 +75,13 @@ function LeaderboardComponent({ ritualId, seed }: { ritualId: string; seed: stri
     return (
         <div className="space-y-1">
             {scores.map((score: any, i: number) => (
-                <div key={i} className="jimbo-inner-panel flex items-center justify-between p-2">
+                <JimboInnerPanel key={i} className="flex items-center justify-between p-2">
                     <div className="flex items-center gap-2">
                         <span className="font-header text-sm text-[var(--jimbo-gold)]">#{i + 1}</span>
-                        <span className="font-pixel text-xs text-white/60">{score.playerName || 'Anonymous'}</span>
+                        <span className="font-pixel text-xs text-[var(--jimbo-grey)]">{score.playerName || 'Anonymous'}</span>
                     </div>
                     <span className="font-header text-sm text-white">{score.score?.toLocaleString()}</span>
-                </div>
+                </JimboInnerPanel>
             ))}
         </div>
     );
@@ -126,34 +124,6 @@ export function RitualChallengeBoard({
         }
         return null;
     }, [analysis, filter]);
-
-    // Extract found jokers from evaluation
-    const foundJokers = React.useMemo(() => {
-        if (!evaluation?.matches) return [];
-        const seen = new Set<string>();
-        return evaluation.matches
-            .filter(m => m.item.type.toLowerCase() === 'joker' && m.priority !== 'mustNot')
-            .filter(m => {
-                if (seen.has(m.item.id)) return false;
-                seen.add(m.item.id);
-                return true;
-            })
-            .map(m => m.item);
-    }, [evaluation]);
-
-    // Extract found consumables (tarot/spectral)
-    const foundConsumables = React.useMemo(() => {
-        if (!evaluation?.matches) return [];
-        const seen = new Set<string>();
-        return evaluation.matches
-            .filter(m => ['tarot', 'spectral'].includes(m.item.type.toLowerCase()) && m.priority !== 'mustNot')
-            .filter(m => {
-                if (seen.has(m.item.id)) return false;
-                seen.add(m.item.id);
-                return true;
-            })
-            .map(m => m.item);
-    }, [evaluation]);
 
     const handleCopy = () => {
         if (isLocked) return;
@@ -205,7 +175,7 @@ export function RitualChallengeBoard({
                     style={{ textShadow: '2px 2px 0 rgba(0,0,0,0.8)' }}>
                     The Daily Wee
                 </div>
-                <div className="flex justify-between items-center py-0.5 border-y border-white/10 text-[11px] font-pixel text-white/40 tracking-[0.1em]">
+                <div className="flex justify-between items-center py-0.5 border-y border-[var(--jimbo-panel-edge)] text-[11px] font-pixel text-[var(--jimbo-grey)] tracking-[0.1em]">
                     <span>{displayDate || 'Loading...'}</span>
                     <span className="text-[var(--jimbo-gold)]">No. {(dayNumber || 0) < 1 ? 1 : dayNumber}</span>
                     <span>Est. 2026</span>
@@ -291,12 +261,12 @@ export function RitualChallengeBoard({
                     </div>
 
                     {/* Tab Content */}
-                    <div className="jimbo-inner-panel min-h-[300px] overflow-visible">
+                    <JimboInnerPanel className="min-h-[300px] overflow-visible">
                         {activeTab === 'details' && (
                             <div className="p-3 space-y-3">
                                 <div className="flex items-center justify-between px-1">
-                                    <span className="font-pixel text-[11px] text-white/40 tracking-wider">Starting Deck</span>
-                                    <span className="font-pixel text-[11px] text-white/20">{analysis?.startingDeck?.length || 52} Cards</span>
+                                    <span className="font-pixel text-[11px] text-[var(--jimbo-grey)] tracking-wider">Starting Deck</span>
+                                    <span className="font-pixel text-[11px] text-[var(--jimbo-border-silver)]">{analysis?.startingDeck?.length || 52} Cards</span>
                                 </div>
                                 <div className="p-2 flex items-center justify-center relative overflow-visible">
                                     {analysis?.startingDeck ? (
@@ -305,8 +275,8 @@ export function RitualChallengeBoard({
                                         </div>
                                     ) : (
                                         <div className="flex flex-col items-center gap-2 animate-pulse py-8">
-                                            <Loader2 className="text-white/10 animate-spin" />
-                                            <span className="font-pixel text-[11px] text-white/20">Analyzing Deck...</span>
+                                            <Loader2 className="text-[var(--jimbo-grey)] animate-spin" />
+                                            <span className="font-pixel text-[11px] text-[var(--jimbo-grey)]">Analyzing Deck...</span>
                                         </div>
                                     )}
                                 </div>
@@ -326,8 +296,8 @@ export function RitualChallengeBoard({
                                     <JamlJourneyMap evaluation={evaluation} />
                                 ) : (
                                     <div className="flex flex-col items-center justify-center py-12 text-center opacity-50">
-                                        <MapIcon size={48} className="mb-4 text-white/20" />
-                                        <p className="font-header text-lg text-white/40">Consulting the Spirits...</p>
+                                        <MapIcon size={48} className="mb-4 text-[var(--jimbo-grey)]" />
+                                        <p className="font-header text-lg text-[var(--jimbo-border-silver)]">Consulting the Spirits...</p>
                                     </div>
                                 )}
                             </div>
@@ -347,7 +317,7 @@ export function RitualChallengeBoard({
                                 <LeaderboardComponent ritualId={ritualId || ritualConfig.id} seed={seed} />
                             </div>
                         )}
-                    </div>
+                    </JimboInnerPanel>
 
                     {/* Back Button */}
                     <button

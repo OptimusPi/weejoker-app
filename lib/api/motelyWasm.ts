@@ -161,8 +161,8 @@ export async function searchSeedsWasm(
 
     // Stop and dispose any existing search
     if (isSearchActive) {
-        try { api.stopSearch(); } catch { /* noop */ }
-        try { await api.disposeSearch(); } catch { /* noop */ }
+        try { api.stopSearch('current'); } catch { /* noop */ }
+        try { await api.disposeSearch('current'); } catch { /* noop */ }
         isSearchActive = false;
     }
 
@@ -175,13 +175,13 @@ export async function searchSeedsWasm(
     const searchPromise = api.startJamlSearch(jamlContent, {
         threadCount,
         ...options,
-        onProgress: (totalSeedsSearched: number, matchingSeeds: number, elapsedMs: number, resultCount: number) => {
+        onProgress: (_id: string, totalSeedsSearched: number, matchingSeeds: number, elapsedMs: number, resultCount: number) => {
             notifyListeners({
                 type: 'progress',
                 data: { SearchedCount: totalSeedsSearched, matchingSeeds, elapsedMs, resultCount }
             });
         },
-        onResult: (seed: string, score: number) => {
+        onResult: (_id: string, seed: string, score: number) => {
             notifyListeners({
                 type: 'result',
                 data: { seed, score }
@@ -195,12 +195,12 @@ export async function searchSeedsWasm(
             notifyListeners({ type: 'complete', data: status });
             isSearchActive = false;
             // Free WASM memory for completed search
-            try { await api.disposeSearch(); } catch { /* noop */ }
+            try { await api.disposeSearch('current'); } catch { /* noop */ }
         })
         .catch(async (err: any) => {
             notifyListeners({ type: 'error', message: err?.message || String(err) });
             isSearchActive = false;
-            try { await api.disposeSearch(); } catch { /* noop */ }
+            try { await api.disposeSearch('current'); } catch { /* noop */ }
         });
 
     return 'active';
@@ -212,8 +212,8 @@ export async function searchSeedsWasm(
 export async function cancelSearch(): Promise<void> {
     if (isSearchActive && wasmApi) {
         isSearchActive = false;
-        try { wasmApi.stopSearch(); } catch { /* noop */ }
-        try { await wasmApi.disposeSearch(); } catch { /* noop */ }
+        try { wasmApi.stopSearch('current'); } catch { /* noop */ }
+        try { await wasmApi.disposeSearch('current'); } catch { /* noop */ }
     }
 }
 

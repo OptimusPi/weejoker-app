@@ -12,7 +12,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     return new Response(JSON.stringify({ error: 'AI binding not configured' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
-    });
+    }) as any;
   }
 
   const model = '@cf/meta/llama-2-7b-chat-int8';
@@ -20,8 +20,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   try {
     const aiResponse = await env.AI.run(model, {
-        prompt: prompt,
-        max_tokens: 50,
+      prompt: prompt,
+      max_tokens: 50,
     });
 
     // The response from Llama-2 is typically in a `response` field.
@@ -31,12 +31,12 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     return new Response(JSON.stringify({ wisdom }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
-    });
+    }) as any;
   } catch (e) {
     console.error("AI Error:", e);
     return new Response(JSON.stringify({ error: 'Failed to generate wisdom from AI' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
-    });
+    }) as any;
   }
 };

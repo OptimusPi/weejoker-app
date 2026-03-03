@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Upload, X, Trophy } from "lucide-react";
+import { Upload, Trophy } from "lucide-react";
+import { JimboPanel, JimboButton, JimboInput } from "@/components/JimboPanel";
 
 interface SubmitScoreModalProps {
     seed: string;
@@ -49,76 +50,71 @@ export function SubmitScoreModal({ seed, ritualId, onClose, onSuccess }: SubmitS
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 animate-in fade-in duration-150" onClick={onClose}>
-            <div className="balatro-panel p-6 max-w-md w-full mx-4 flex flex-col animate-in slide-in-from-bottom-10 duration-150" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--jimbo-panel-edge)]" onClick={onClose}>
+            <JimboPanel onBack={onClose} className="max-w-md w-full mx-4" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
 
-                <div className="text-center mb-6 relative z-10 pt-4">
-                    <Trophy size={48} className="text-[var(--balatro-gold)] mx-auto mb-2 drop-shadow-lg juice-float" />
-                    <h2 className="text-3xl font-header text-white tracking-wider text-shadow-md">
+                <div className="text-center mb-6 pt-4">
+                    <Trophy size={48} className="text-[var(--jimbo-gold)] mx-auto mb-2" />
+                    <h2 className="text-3xl font-header text-white tracking-wider">
                         Submit Your Score
                     </h2>
-                    <p className="text-zinc-300 font-pixel mt-2">
+                    <p className="text-[var(--jimbo-grey)] font-pixel mt-2">
                         {ritualId} | {seed}
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-zinc-400 font-pixel text-sm mb-2">
+                        <label className="block text-[var(--jimbo-grey)] font-pixel text-sm mb-2">
                             Your Name (max 20 chars)
                         </label>
-                        <input
+                        <JimboInput
                             type="text"
                             value={playerName}
                             onChange={(e) => setPlayerName(e.target.value.slice(0, 20))}
                             placeholder="Enter your name..."
-                            className="w-full balatro-input text-lg px-4 py-3"
+                            className="text-lg px-4 py-3"
                             maxLength={20}
                             required
                         />
                     </div>
 
                     <div>
-                        <label className="block text-zinc-400 font-pixel text-sm mb-2">
+                        <label className="block text-[var(--jimbo-grey)] font-pixel text-sm mb-2">
                             Final Score (Chips)
                         </label>
-                        <input
+                        <JimboInput
                             type="text"
                             value={score}
                             onChange={(e) => setScore(e.target.value)}
                             placeholder="e.g. 1.5e12 or 42000"
-                            className="w-full balatro-input text-lg px-4 py-3"
+                            className="text-lg px-4 py-3"
                             required
                         />
                     </div>
 
                     {error && (
-                        <div className="text-[var(--balatro-red)] font-pixel text-sm text-center">
+                        <div className="text-[var(--jimbo-red)] font-pixel text-sm text-center">
                             {error}
                         </div>
                     )}
 
                     <div className="pt-4 space-y-3">
-                        <button
-                            type="submit"
+                        <JimboButton
+                            variant="blue"
+                            onClick={() => {
+                                const form = document.querySelector('form');
+                                form?.requestSubmit();
+                            }}
                             disabled={submitting}
-                            className="w-full balatro-button balatro-button-blue text-xl px-6 py-3 flex items-center justify-center gap-3 disabled:opacity-50"
+                            className="text-xl py-3"
                         >
                             <Upload size={24} />
                             {submitting ? 'Submitting...' : 'Submit Score'}
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            disabled={submitting}
-                            className="w-full balatro-button balatro-button-orange text-lg py-2 disabled:opacity-50"
-                        >
-                            Back
-                        </button>
+                        </JimboButton>
                     </div>
                 </form>
-            </div>
+            </JimboPanel>
         </div>
     );
 }

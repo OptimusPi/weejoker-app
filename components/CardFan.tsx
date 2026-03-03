@@ -1,5 +1,6 @@
 import React from 'react';
 import { PlayingCard } from './PlayingCard';
+import { JimboInnerPanel } from '@/components/JimboPanel';
 
 interface CardFanProps {
     count: number;
@@ -87,13 +88,12 @@ export function CardFan({ count, cards, className = '', label, showLabel = true 
                         );
                     })
                 ) : (
-                    <div className="flex items-center justify-center h-full w-full bg-white/5 rounded-lg border border-white/5">
-                        <span className="font-pixel text-white/10 text-[10px] uppercase tracking-widest">Deck Empty</span>
-                    </div>
+                    <JimboInnerPanel className="flex items-center justify-center h-full w-full">
+                        <span className="font-pixel text-[var(--jimbo-grey)] text-[10px] uppercase tracking-widest">Deck Empty</span>
+                    </JimboInnerPanel>
                 )}
             </div>
 
         </div>
     );
 }
-

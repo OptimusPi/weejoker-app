@@ -12,6 +12,7 @@ import { SearchResult } from '@/lib/api/motelyWasm';
 import { AgnosticSeedCard } from './AgnosticSeedCard';
 import { WasmStatus } from './WasmStatus';
 import { JAML_PRESETS } from '@/lib/jaml/jamlPresets';
+import { JimboPanel, JimboInnerPanel } from './JimboPanel';
 
 export default function JamlBuilder() {
     const {
@@ -125,35 +126,30 @@ export default function JamlBuilder() {
     };
 
     return (
-        <div className="w-full max-w-[1400px] mx-auto p-4 flex-1 overflow-hidden flex flex-col gap-4 bg-[var(--balatro-black)]/40">
-
-
-
+        <div className="w-full max-w-[1400px] mx-auto p-4 flex-1 overflow-hidden flex flex-col gap-4 bg-[var(--jimbo-panel-edge)]">
             <div className="flex flex-col lg:grid lg:grid-cols-[1fr_400px] gap-6 h-full overflow-hidden">
-
                 {/* LEFT COLUMN: Interactive God-Like Editor (Main Workspace) */}
                 <div className="flex flex-col gap-6 overflow-hidden min-h-0">
-
                     {/* CONTROL BAR */}
-                    <div className="balatro-panel border-[var(--balatro-grey)] bg-black/40 py-4">
+                    <JimboPanel className="py-4">
                         <div className="flex justify-between items-center">
                             <div className="flex gap-4 items-center">
                                 <div>
                                     <h2 className="text-white text-xl font-header mb-1 uppercase tracking-widest leading-none">JAML IDE</h2>
-                                    <p className="text-white/60 font-pixel text-[10px] uppercase tracking-wide">Ritual Factory v2.0</p>
+                                    <p className="text-[var(--jimbo-grey)] font-pixel text-[10px] uppercase tracking-wide">Joker Creator v2.0</p>
                                 </div>
-                                <div className="h-8 w-px bg-white/10 mx-2" />
+                                <div className="h-8 w-px bg-[var(--jimbo-panel-edge)] mx-2" />
                                 <div className="flex gap-1">
                                     <button
                                         onClick={handleCopyJaml}
-                                        className="p-2 hover:bg-white/5 rounded text-white/30 hover:text-white/80 transition-colors"
+                                        className="p-2 hover:bg-white/5 rounded text-[var(--jimbo-grey)] hover:text-white transition-colors"
                                         title="Copy JAML"
                                     >
                                         <Copy size={16} />
                                     </button>
                                     <button
                                         onClick={handleResetJaml}
-                                        className="p-2 hover:bg-white/5 rounded text-white/30 hover:text-white/80 transition-colors"
+                                        className="p-2 hover:bg-white/5 rounded text-[var(--jimbo-grey)] hover:text-white transition-colors"
                                         title="Reset Editor"
                                     >
                                         <RotateCcw size={16} />
@@ -162,15 +158,15 @@ export default function JamlBuilder() {
                             </div>
                             <div className="flex gap-2 items-center">
                                 {isSearching && (
-                                    <div className="flex items-center gap-2 mr-2 px-3 py-1 bg-black/40 rounded border border-white/5 font-pixel text-[10px] text-white/50">
-                                        <Loader2 size={12} className="animate-spin text-[var(--balatro-gold)]" />
+                                    <JimboInnerPanel className="flex items-center gap-2 mr-2 px-3 py-1 font-pixel text-[10px] text-[var(--jimbo-grey)]">
+                                        <Loader2 size={12} className="animate-spin text-[var(--jimbo-gold)]" />
                                         <span>SEARCHING...</span>
-                                    </div>
+                                    </JimboInnerPanel>
                                 )}
                                 <button
                                     onClick={handleSearch}
                                     disabled={isSearching}
-                                    className="balatro-button balatro-button-gold !py-2 !px-4 !text-sm flex items-center gap-2"
+                                    className="jimbo-btn jimbo-btn-gold !py-2 !px-4 !text-sm flex items-center gap-2"
                                 >
                                     {isSearching ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
                                     RUN SEARCH
@@ -178,52 +174,52 @@ export default function JamlBuilder() {
                                 {isSearching && (
                                     <button
                                         onClick={handleStop}
-                                        className="balatro-button balatro-button-red !py-2 !px-4 !text-sm"
+                                        className="jimbo-btn jimbo-btn-red !py-2 !px-4 !text-sm"
                                     >
                                         STOP
                                     </button>
                                 )}
                             </div>
                         </div>
-                    </div>
+                    </JimboPanel>
 
                     {/* THE GOD-LIKE EDITOR */}
-                    <div className="flex-1 min-h-0 bg-black/20 rounded-2xl border border-white/5 overflow-hidden shadow-inner flex flex-col">
+                    <JimboInnerPanel className="flex-1 min-h-0 flex flex-col !p-0 overflow-hidden border-[var(--jimbo-panel-edge)]">
                         <JamlEditor
                             initialJaml={jamlText}
                             onJamlChange={(val: string) => setFromJaml(val)}
                             className="flex-1"
                         />
-                    </div>
+                    </JimboInnerPanel>
                 </div>
 
                 {/* RIGHT COLUMN: Search Results (Sidebar) */}
                 <div className="flex flex-col gap-6 overflow-hidden pb-10">
                     {/* SEARCH RESULTS */}
-                    <div className="h-full balatro-panel border-[var(--balatro-gold)] overflow-hidden flex flex-col">
+                    <JimboPanel className="h-full overflow-hidden flex flex-col border-[var(--jimbo-gold)]">
                         <div className="flex justify-between items-center mb-4">
                             <div className="flex items-center gap-3">
-                                <h3 className="text-[var(--balatro-gold)] text-xl font-header drop-shadow-md uppercase">
+                                <h3 className="text-[var(--jimbo-gold)] text-xl font-header drop-shadow-md uppercase">
                                     Results {searchResults.length > 0 && `(${searchResults.length})`}
                                 </h3>
                                 {isSearching && (
-                                    <div className="flex items-center gap-2 font-pixel text-[10px] text-[var(--balatro-blue)] animate-pulse">
+                                    <div className="flex items-center gap-2 font-pixel text-[10px] text-[var(--jimbo-blue)] animate-pulse">
                                         <Sparkles size={12} className="animate-spin" />
                                         <span>{seedsProcessed}</span>
                                     </div>
                                 )}
                             </div>
-                            {isSearching && <Loader2 size={16} className="animate-spin text-[var(--balatro-blue)]" />}
+                            {isSearching && <Loader2 size={16} className="animate-spin text-[var(--jimbo-blue)]" />}
                         </div>
 
                         {/* Spectral Progress Bar */}
                         {isSearching && (
-                            <div className="w-full h-1 bg-black/40 rounded-full mb-4 overflow-hidden border border-white/5">
+                            <JimboInnerPanel className="w-full h-1 !p-0 mb-4 overflow-hidden border-[var(--jimbo-panel-edge)]">
                                 <div
-                                    className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-gradient-x transition-all duration-300"
+                                    className="h-full bg-gradient-to-r from-[var(--jimbo-blue)] via-[var(--jimbo-purple)] to-[var(--jimbo-red)] animate-gradient-x transition-all duration-300"
                                     style={{ width: `${Math.min((searchResults.length / 50) * 100, 100)}%` }}
                                 />
-                            </div>
+                            </JimboInnerPanel>
                         )}
 
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-1">
@@ -239,21 +235,21 @@ export default function JamlBuilder() {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="h-full flex flex-col items-center justify-center italic font-pixel text-sm border-2 border-dashed border-white/5 rounded-2xl p-4 text-center">
+                                <JimboInnerPanel className="h-full flex flex-col items-center justify-center italic font-pixel text-sm p-4 text-center border-dashed">
                                     {searchError ? (
-                                        <div className="text-[var(--balatro-red)] bg-red-950/20 p-4 rounded text-center">
+                                        <div className="text-[var(--jimbo-red)] bg-[#211] p-4 rounded text-center border border-[var(--jimbo-red)]">
                                             <div className="font-header text-lg mb-1">SEARCH FAILED</div>
-                                            <div className="opacity-60">{searchError}</div>
+                                            <div className="text-[var(--jimbo-grey)]">{searchError}</div>
                                         </div>
                                     ) : (
-                                        <div className="opacity-30 text-white/50">
+                                        <div className="text-[var(--jimbo-grey)]">
                                             {isSearching ? 'SEEKING...' : 'RESULTS WILL APPEAR HERE'}
                                         </div>
                                     )}
-                                </div>
+                                </JimboInnerPanel>
                             )}
                         </div>
-                    </div>
+                    </JimboPanel>
                 </div>
             </div>
 
@@ -261,3 +257,4 @@ export default function JamlBuilder() {
         </div>
     );
 }
+

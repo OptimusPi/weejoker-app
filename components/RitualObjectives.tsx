@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { load } from 'js-yaml';
 import { Sprite } from "./Sprite";
+import { JimboPanel, JimboInnerPanel } from "@/components/JimboPanel";
 
 interface RitualObjectivesProps {
     jamlConfig: string | null;
@@ -38,14 +38,8 @@ export function RitualObjectives({ jamlConfig }: RitualObjectivesProps) {
             }
 
             if (inMustBlock && line.startsWith('-')) {
-                // Parse "- type: Joker"
-                //       "value: Wee Joker"
-                //       "antes: [1,2]"
-                // This is multi-line YAML, naive parsing is hard.
-                // Let's assume the simplified format or look for "value:" lines
-
-                // Hacky visual parser for now:
-                // Look for "value: X" lines inside the must block
+                // Parse "- type: Joker" //       "value: Wee Joker" //       "antes: [1,2]"
+                // Hacky visual parser for now: // Look for "value: X" lines inside the must block
                 if (line.includes('value:')) {
                     const val = line.split('value:')[1].trim();
                     foundObjectives.push({ type: 'Target', value: val });
@@ -53,8 +47,7 @@ export function RitualObjectives({ jamlConfig }: RitualObjectivesProps) {
             }
         }
 
-        // If naive parsing fails, fallback to hardcoded (since I wrote the JAML)
-        // Actually, let's just use regex on the whole block
+        // If naive parsing fails, fallback to regex on the whole block
         const mustBlock = jamlConfig.split('must:')[1]?.split('should:')[0]?.split('mustNot:')[0];
         if (mustBlock) {
             const valueMatches = mustBlock.matchAll(/value:\s*([^\n]+)/g);
@@ -72,22 +65,21 @@ export function RitualObjectives({ jamlConfig }: RitualObjectivesProps) {
 
     return (
         <div className="w-full max-w-[400px] mb-4 flex flex-col items-center gap-2 animate-in fade-in slide-in-from-top-4 duration-500">
-            <h3 className="font-header text-[var(--balatro-gold)] text-lg uppercase tracking-widest text-shadow-balatro">
+            <h3 className="font-header text-[var(--jimbo-gold)] text-lg uppercase tracking-widest text-shadow-md">
                 Current Objectives
             </h3>
 
             <div className="flex gap-4">
                 {objectives.map((obj, i) => (
-                    <div key={i} className="balatro-panel !p-2 flex items-center gap-3 bg-[var(--balatro-blue)] border-[var(--balatro-outline-light)]">
-                        <div className="w-10 h-10 bg-black/40 rounded flex items-center justify-center">
-                            {/* Try to sprite it if it matches known sprites */}
+                    <JimboPanel key={i} className="!p-2 flex items-center gap-3 bg-[var(--jimbo-dark-blue)] border-[var(--jimbo-border-silver)]">
+                        <JimboInnerPanel className="w-10 h-10 flex items-center justify-center p-0">
                             <Sprite name={obj.value.replace(/ /g, '').toLowerCase()} width={32} />
-                        </div>
+                        </JimboInnerPanel>
                         <div className="flex flex-col">
-                            <span className="font-pixel text-[10px] uppercase text-white/60 tracking-wider">Target</span>
+                            <span className="font-pixel text-[10px] uppercase text-[var(--jimbo-grey)] tracking-wider">Target</span>
                             <span className="font-header text-white text-md leading-none">{obj.value}</span>
                         </div>
-                    </div>
+                    </JimboPanel>
                 ))}
             </div>
         </div>

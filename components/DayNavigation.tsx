@@ -18,7 +18,7 @@ export function DayNavigation({ onPrev, onNext, canPrev, canNext, children }: Da
             <button
                 onClick={onPrev}
                 disabled={!canPrev}
-                className="balatro-button balatro-button-red balatro-nav-button !rounded-md w-12 !p-0 flex items-center justify-center shrink-0 self-stretch"
+                className="jimbo-btn jimbo-btn-red !rounded-sm w-12 !p-0 flex items-center justify-center shrink-0 self-stretch disabled:opacity-50"
                 aria-label="Previous Day"
                 title="Previous Day"
             >
@@ -26,7 +26,7 @@ export function DayNavigation({ onPrev, onNext, canPrev, canNext, children }: Da
             </button>
 
             {/* Central Stage - FLEXIBLE HEIGHT */}
-            <div className="relative flex-1 z-20 flex flex-col min-w-0 balatro-nav-stage">
+            <div className="relative flex-1 z-20 flex flex-col min-w-0">
                 {children}
             </div>
 
@@ -34,7 +34,7 @@ export function DayNavigation({ onPrev, onNext, canPrev, canNext, children }: Da
             <button
                 onClick={onNext}
                 disabled={!canNext}
-                className="balatro-button balatro-button-red balatro-nav-button !rounded-md w-12 !p-0 flex items-center justify-center shrink-0 self-stretch"
+                className="jimbo-btn jimbo-btn-red !rounded-sm w-12 !p-0 flex items-center justify-center shrink-0 self-stretch disabled:opacity-50"
                 aria-label="Next Day"
                 title="Next Day"
             >

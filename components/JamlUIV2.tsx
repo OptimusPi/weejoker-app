@@ -9,6 +9,7 @@ import { SearchResult } from '@/lib/api/motelyWasm';
 import { cn } from '@/lib/utils';
 import { DeckSprite, DECK_MAP, STAKE_MAP } from './DeckSprite';
 import { MotelyVersionBadge } from './MotelyVersionBadge';
+import { JimboPanel, JimboInnerPanel } from './JimboPanel';
 import {
     Search,
     Square,
@@ -30,23 +31,23 @@ import {
  * Reusable Dashboard Tile with Sleek Professional Aesthetics
  */
 const TILE_TEXT: Record<string, string> = {
-    red: "text-red-400",
-    blue: "text-[#1ea0e6]",
-    green: "text-emerald-400",
-    gold: "text-amber-400",
-    purple: "text-purple-400",
+    red: "text-[var(--jimbo-red)]",
+    blue: "text-[var(--jimbo-blue)]",
+    green: "text-[var(--jimbo-dark-green)]",
+    gold: "text-[var(--jimbo-gold)]",
+    purple: "text-[var(--jimbo-purple)]",
     teal: "text-teal-400",
-    orange: "text-orange-400"
+    orange: "text-[var(--jimbo-orange)]"
 };
 
 const TILE_BG_SOFT: Record<string, string> = {
-    red: "bg-red-400/5",
-    blue: "bg-[#1ea0e6]/5",
-    green: "bg-emerald-400/5",
-    gold: "bg-amber-400/5",
-    purple: "bg-purple-400/5",
-    teal: "bg-teal-400/5",
-    orange: "bg-orange-400/5"
+    red: "bg-[var(--jimbo-red)]/10",
+    blue: "bg-[var(--jimbo-blue)]/10",
+    green: "bg-[var(--jimbo-dark-green)]/10",
+    gold: "bg-[var(--jimbo-gold)]/10",
+    purple: "bg-[var(--jimbo-purple)]/10",
+    teal: "bg-teal-400/10",
+    orange: "bg-[var(--jimbo-orange)]/10"
 };
 
 function Tile({
@@ -65,8 +66,8 @@ function Tile({
     headerRight?: React.ReactNode;
 }) {
     return (
-        <div className={cn(
-            "balatro-panel flex flex-col transition-all duration-300 group relative",
+        <JimboPanel className={cn(
+            "flex flex-col transition-all duration-300 group relative",
             TILE_BG_SOFT[color],
             className
         )}>
@@ -89,11 +90,10 @@ function Tile({
                 </div>
             </div>
 
-            <div className="flex-1 min-h-0 bg-black/40 rounded-xl overflow-hidden flex flex-col border border-white/5">
-
+            <JimboInnerPanel className="flex-1 min-h-0 !p-0 overflow-hidden flex flex-col border-[var(--jimbo-panel-edge)]">
                 {children}
-            </div>
-        </div>
+            </JimboInnerPanel>
+        </JimboPanel>
     );
 }
 
@@ -196,7 +196,7 @@ export default function JamlUIV2() {
     };
 
     return (
-        <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#0d1416]">
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-[var(--jimbo-panel-edge)]">
             {/* Main Application Shell */}
             <div className="flex-1 grid grid-cols-12 gap-5 p-5 min-h-0 overflow-y-auto lg:overflow-hidden">
 
@@ -212,8 +212,8 @@ export default function JamlUIV2() {
                                 <button
                                     onClick={() => handleSearch()}
                                     className={cn(
-                                        "balatro-button !px-4 !py-1 text-sm h-9 min-w-[120px]",
-                                        isSearching ? "balatro-button-red" : "balatro-button-blue"
+                                        "jimbo-btn !px-4 !py-1 text-sm h-9 min-w-[120px]",
+                                        isSearching ? "jimbo-btn-red" : "jimbo-btn-blue"
                                     )}
                                 >
                                     {isSearching ? (
@@ -237,11 +237,11 @@ export default function JamlUIV2() {
                         color="teal"
                         className="h-[200px] shrink-0"
                     >
-                        <div className="flex-1 overflow-y-auto p-4 font-mono text-[11px] space-y-1 custom-scrollbar bg-black/40">
+                        <div className="flex-1 overflow-y-auto p-4 font-mono text-[11px] space-y-1 custom-scrollbar bg-[#111]">
                             {technicalLogs.map((log, i) => (
                                 <div key={i} className={cn(
                                     "transition-opacity duration-500",
-                                    i === technicalLogs.length - 1 ? "text-teal-400 opacity-100" : "text-white/40 opacity-80"
+                                    i === technicalLogs.length - 1 ? "text-teal-400 opacity-100" : "text-[var(--jimbo-grey)] opacity-80"
                                 )}>
                                     {log}
                                 </div>
@@ -256,7 +256,7 @@ export default function JamlUIV2() {
                     <div className="flex items-center justify-between px-2 h-10 shrink-0">
                         <div className="flex items-center gap-6">
                             <div className="flex flex-col">
-                                <span className="text-[10px] text-white/30 uppercase tracking-[0.2em]">Deployment State</span>
+                                <span className="text-[10px] text-[var(--jimbo-grey)] uppercase tracking-[0.2em]">Deployment State</span>
                                 <div className="flex items-center gap-2">
                                     <div className="w-2 h-2 rounded-full bg-teal-500 animate-pulse shadow-[0_0_8px_rgba(20,184,166,0.5)]"></div>
                                     <MotelyVersionBadge minimal className="text-teal-400" />
@@ -264,23 +264,23 @@ export default function JamlUIV2() {
                             </div>
 
                             <div className="flex flex-col">
-                                <span className="text-[10px] text-white/30 uppercase tracking-[0.2em]">Seeds Processed</span>
-                                <span className="text-xs font-header text-blue-400 uppercase tracking-widest">{seedsProcessed > 0 ? seedsProcessed.toLocaleString() : '--'}</span>
+                                <span className="text-[10px] text-[var(--jimbo-grey)] uppercase tracking-[0.2em]">Seeds Processed</span>
+                                <span className="text-xs font-header text-[var(--jimbo-blue)] uppercase tracking-widest">{seedsProcessed > 0 ? seedsProcessed.toLocaleString() : '--'}</span>
                             </div>
                         </div>
 
                         <div className="flex items-center gap-4">
                             <div className="relative">
-                                <button
+                                <JimboInnerPanel
                                     onClick={() => setShowDeckSelector(!showDeckSelector)}
-                                    className="flex items-center gap-3 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-lg border border-white/5 transition-colors"
+                                    className="flex items-center gap-3 !py-2 hover:border-white transition-colors cursor-pointer"
                                 >
                                     <DeckSprite deck={deckSlug} stake={stakeSlug} size={28} />
                                     <div className="text-left">
-                                        <div className="text-[10px] text-white/40 uppercase tracking-widest leading-none mb-1">{stakeSlug} STAKE</div>
+                                        <div className="text-[10px] text-[var(--jimbo-grey)] uppercase tracking-widest leading-none mb-1">{stakeSlug} STAKE</div>
                                         <div className="text-sm font-header text-white uppercase tracking-wider leading-none">{deckSlug} DECK</div>
                                     </div>
-                                </button>
+                                </JimboInnerPanel>
                             </div>
                         </div>
                     </div>
@@ -291,7 +291,7 @@ export default function JamlUIV2() {
                         color="blue"
                         className="flex-1"
                         headerRight={
-                            <div className="flex items-center gap-3 text-xs font-header tracking-widest text-[#1ea0e6] opacity-80">
+                            <div className="flex items-center gap-3 text-xs font-header tracking-widest text-[var(--jimbo-blue)] opacity-80">
                                 {isSearching && <Loader2 size={14} className="animate-spin" />}
                                 <span>{seedsProcessed.toLocaleString()} SEEDS SCANNED</span>
                             </div>
@@ -306,7 +306,7 @@ export default function JamlUIV2() {
                                                 seed={res.seed}
                                                 className={cn(
                                                     "transition-all duration-300 border-2",
-                                                    activeAnalysis === res.seed ? "border-[#1ea0e6] scale-[1.02] shadow-[0_0_20px_rgba(30,160,230,0.2)]" : "border-transparent opacity-90 grayscale-[0.3] hover:grayscale-0 hover:opacity-100"
+                                                    activeAnalysis === res.seed ? "border-[var(--jimbo-blue)] scale-[1.02] shadow-[0_0_20px_rgba(30,160,230,0.2)]" : "border-transparent opacity-90 grayscale-[0.3] hover:grayscale-0 hover:opacity-100"
                                                 )}
                                                 onClick={() => setActiveAnalysis(res.seed)}
                                             />
@@ -314,16 +314,14 @@ export default function JamlUIV2() {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="flex-1 flex flex-col items-center justify-center text-white/10 p-10 text-center">
-                                    <Zap size={64} className="mb-4 opacity-5" />
-                                    <p className="font-header text-xl uppercase tracking-[0.3em]">Ignite engine to populate vault</p>
+                                <div className="flex-1 flex flex-col items-center justify-center text-[var(--jimbo-grey)] p-10 text-center">
+                                    <Zap size={64} className="mb-4 opacity-10" />
+                                    <p className="font-header text-xl uppercase tracking-[0.3em] text-white">Ignite engine to populate vault</p>
                                     <p className="font-pixel text-[10px] mt-2 tracking-widest uppercase">Waiting for JAML instruction set...</p>
                                 </div>
                             )}
                         </div>
                     </Tile>
-
-
                 </div>
             </div>
         </div>

@@ -7,20 +7,20 @@ import { JamlCompletionService, CompletionData } from '@/lib/jaml/jamlCompletion
 
 
 
-// Balatro Colors - High Contrast Theme
+// Jimbo Colors - High Contrast Theme
 const COLORS = {
     white: '#FFFFFF',
     black: '#000000',
-    red: '#ff5e5e',      // Balatro Red
-    blue: '#4bb1ff',     // Balatro Blue
-    green: '#46bc77',    // Balatro Green
-    purple: '#9074ff',   // Balatro Purple
-    orange: '#ff9d4d',   // Balatro Orange
-    yellow: '#ffcf4d',   // Balatro Yellow
-    gold: '#efb82d',
+    red: 'var(--jimbo-red)',
+    blue: 'var(--jimbo-blue)',
+    green: 'var(--jimbo-dark-green)',
+    purple: 'var(--jimbo-purple)',
+    orange: 'var(--jimbo-orange)',
+    yellow: 'var(--jimbo-gold)',
+    gold: 'var(--jimbo-gold)',
     // Editor background
-    editorBg: '#0f1416',
-    editorBgAlt: '#1c2629',
+    editorBg: '#111111',
+    editorBgAlt: '#1a1a1a',
 };
 
 interface InteractiveJamlEditorProps {
@@ -88,7 +88,7 @@ function SuggestionList({ suggestions, selectedIndex, onSelect, onHover }: {
                         onMouseEnter={() => onHover(idx)}
                         className={`
               flex items-center justify-between px-3 py-1.5 cursor-pointer font-mono text-[13px] transition-colors
-              ${isSelected ? 'bg-[var(--balatro-gold)] text-black' : 'text-white hover:bg-white/10'}
+              ${isSelected ? 'bg-[var(--jimbo-gold)] text-black' : 'text-white hover:bg-white/10'}
             `}
                     >
                         <span>{s.displayText}</span>
@@ -419,7 +419,7 @@ export default function JamlEditor({ initialJaml, onJamlChange, className }: Int
     return (
         <div
             ref={editorRef}
-            className={`flex flex-col bg-[#0f1416] text-white font-mono text-[13px] leading-[1.8] outline-none rounded-md p-4 overflow-auto min-h-[500px] border border-white/5 ${className}`}
+            className={`flex flex-col bg-[#111] text-white font-mono text-[13px] leading-[1.8] outline-none rounded-lg p-4 overflow-auto min-h-[500px] border border-[var(--jimbo-panel-edge)] ${className}`}
             tabIndex={0}
         >
             <div className="flex flex-col gap-0.5">
@@ -451,12 +451,12 @@ export default function JamlEditor({ initialJaml, onJamlChange, className }: Int
                     />
                 ))}
             </div>
-            <div className="mt-4 p-2 bg-black/40 rounded border border-white/5 flex flex-wrap gap-4 text-[12px] text-white/50 font-mono">
-                <span className="flex items-center gap-1.5"><span className="jaml-legend-dot jaml-legend-dot--red"></span> required</span>
-                <span className="flex items-center gap-1.5"><span className="jaml-legend-dot jaml-legend-dot--blue"></span> optional</span>
-                <span className="flex items-center gap-1.5"><span className="jaml-legend-dot jaml-legend-dot--green"></span> complete</span>
-                <span className="flex items-center gap-1.5"><span className="jaml-legend-dot jaml-legend-dot--purple"></span> metadata</span>
-                <span className="ml-auto opacity-40">Click to edit • Tab to navigate</span>
+            <div className="mt-4 p-2 bg-[#222] rounded border border-[var(--jimbo-panel-edge)] flex flex-wrap gap-4 text-[12px] text-[var(--jimbo-grey)] font-mono">
+                <span className="flex items-center gap-1.5"><span className="jaml-legend-dot" style={{ backgroundColor: COLORS.red }}></span> required</span>
+                <span className="flex items-center gap-1.5"><span className="jaml-legend-dot" style={{ backgroundColor: COLORS.blue }}></span> optional</span>
+                <span className="flex items-center gap-1.5"><span className="jaml-legend-dot" style={{ backgroundColor: COLORS.green }}></span> complete</span>
+                <span className="flex items-center gap-1.5"><span className="jaml-legend-dot" style={{ backgroundColor: COLORS.purple }}></span> metadata</span>
+                <span className="ml-auto opacity-60">Click to edit • Tab to navigate</span>
             </div>
         </div>
     );

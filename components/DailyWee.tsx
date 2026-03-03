@@ -23,26 +23,26 @@ export function DailyWee() {
     const [error, setError] = useState<string | null>(null);
     const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
 
-// Define the type for the schedule data
-interface ScheduleItem {
-    id: string;
-    s: number;
-    w: number | string;
-    wj1?: string;
-    wj2?: string;
-    hc1?: string;
-    hc2?: string;
-    hk1?: string;
-    hk2?: string;
-    bp?: boolean;
-    bs?: boolean;
-    sh?: string;
-    rs?: boolean;
-    t: string;
-    j: string;
-    t1: string;
-    t2: string;
-}
+    // Define the type for the schedule data
+    interface ScheduleItem {
+        id: string;
+        s: number;
+        w: number | string;
+        wj1?: string;
+        wj2?: string;
+        hc1?: string;
+        hc2?: string;
+        hk1?: string;
+        hk2?: string;
+        bp?: boolean;
+        bs?: boolean;
+        sh?: string;
+        rs?: boolean;
+        t: string;
+        j: string;
+        t1: string;
+        t2: string;
+    }
     const [topScore, setTopScore] = useState<{ name: string; score: number } | null>(null);
 
     const [showSubmit, setShowSubmit] = useState(false);
@@ -102,21 +102,21 @@ interface ScheduleItem {
                 const seedData: SeedData = {
                     seed: seedRaw.id,
                     score: seedRaw.s,
-                    twos: seedRaw.w,
-                    WeeJoker_Ante1: seedRaw.wj1,
-                    WeeJoker_Ante2: seedRaw.wj2,
-                    HanginChad_Ante1: seedRaw.hc1,
-                    HanginChad_Ante2: seedRaw.hc2,
-                    Hack_Ante1: seedRaw.hk1,
-                    Hack_Ante2: seedRaw.hk2,
-                    blueprint_early: seedRaw.bp,
-                    brainstorm_early: seedRaw.bs,
-                    Showman_Ante1: seedRaw.sh,
-                    red_Seal_Two: seedRaw.rs,
-                    themeName: seedRaw.t,
-                    themeJoker: seedRaw.j,
-                    themeCardAnte1: seedRaw.t1,
-                    themeCardAnte2: seedRaw.t2
+                    twos: Number(seedRaw.w) || 0,
+                    WeeJoker_Ante1: Number(seedRaw.wj1) || 0,
+                    WeeJoker_Ante2: Number(seedRaw.wj2) || 0,
+                    HanginChad_Ante1: Number(seedRaw.hc1) || 0,
+                    HanginChad_Ante2: Number(seedRaw.hc2) || 0,
+                    Hack_Ante1: Number(seedRaw.hk1) || 0,
+                    Hack_Ante2: Number(seedRaw.hk2) || 0,
+                    blueprint_early: Number(seedRaw.bp) || 0,
+                    brainstorm_early: Number(seedRaw.bs) || 0,
+                    Showman_Ante1: Number(seedRaw.sh) || 0,
+                    red_Seal_Two: Number(seedRaw.rs) || 0,
+                    themeName: seedRaw.t || '',
+                    themeJoker: seedRaw.j || '',
+                    themeCardAnte1: seedRaw.t1 || '',
+                    themeCardAnte2: seedRaw.t2 || ''
                 };
                 setSeeds([seedData]);
                 setError(null);
@@ -126,20 +126,20 @@ interface ScheduleItem {
                 seed: seedRaw.id,
                 score: seedRaw.s,
                 twos: typeof seedRaw.w === 'number' ? seedRaw.w : (parseInt(seedRaw.w as any) || 0),
-                WeeJoker_Ante1: seedRaw.wj1,
-                WeeJoker_Ante2: seedRaw.wj2,
-                HanginChad_Ante1: seedRaw.hc1,
-                HanginChad_Ante2: seedRaw.hc2,
-                Hack_Ante1: seedRaw.hk1,
-                Hack_Ante2: seedRaw.hk2,
-                blueprint_early: seedRaw.bp,
-                brainstorm_early: seedRaw.bs,
-                Showman_Ante1: seedRaw.sh,
-                red_Seal_Two: seedRaw.rs,
-                themeName: seedRaw.t,
-                themeJoker: seedRaw.j,
-                themeCardAnte1: seedRaw.t1,
-                themeCardAnte2: seedRaw.t2
+                WeeJoker_Ante1: Number(seedRaw.wj1) || 0,
+                WeeJoker_Ante2: Number(seedRaw.wj2) || 0,
+                HanginChad_Ante1: Number(seedRaw.hc1) || 0,
+                HanginChad_Ante2: Number(seedRaw.hc2) || 0,
+                Hack_Ante1: Number(seedRaw.hk1) || 0,
+                Hack_Ante2: Number(seedRaw.hk2) || 0,
+                blueprint_early: Number(seedRaw.bp) || 0,
+                brainstorm_early: Number(seedRaw.bs) || 0,
+                Showman_Ante1: Number(seedRaw.sh) || 0,
+                red_Seal_Two: Number(seedRaw.rs) || 0,
+                themeName: seedRaw.t || '',
+                themeJoker: seedRaw.j || '',
+                themeCardAnte1: seedRaw.t1 || '',
+                themeCardAnte2: seedRaw.t2 || ''
             };
             setSeeds([seedData]);
             setError(null);
@@ -151,7 +151,7 @@ interface ScheduleItem {
         try {
             const scoreRes = await fetch(`/api/scores?day=${day}`);
             if (scoreRes.ok) {
-                const scoreData = await scoreRes.json();
+                const scoreData = await scoreRes.json() as { scores: any[] };
                 if (scoreData.scores && scoreData.scores.length > 0) {
                     const top = scoreData.scores[0];
                     setTopScore({ name: top.playerName || top.player_name || top.name, score: top.score });
@@ -160,7 +160,7 @@ interface ScheduleItem {
         } catch (e) {
             setTopScore(null);
         }
-    }, [schedule]);
+    }, [viewingDay]);
 
     useEffect(() => {
         if (!mounted) return;
@@ -183,13 +183,13 @@ interface ScheduleItem {
         const date = new Date(EPOCH + (day - 1) * 24 * 60 * 60 * 1000);
         const dayOfWeek = date.getUTCDay();
         const defaultThemes = [
-            { name: "Weekend Ritual", color: "var(--balatro-gold)", icon: "🔥" },    // Sunday
-            { name: "Madness Monday", color: "var(--balatro-red)", icon: "🔥" },    // Monday
-            { name: "Twosday", color: "var(--balatro-blue)", icon: "2️⃣" },           // Tuesday
-            { name: "Wee Wednesday", color: "var(--balatro-green)", icon: "🃏" },        // Wednesday
-            { name: "Threshold Thursday", color: "var(--balatro-orange)", icon: "💻" }, // Thursday
-            { name: "Foil Friday", color: "var(--balatro-blue)", icon: "📐" },   // Friday
-            { name: "Weekend Ritual", color: "var(--balatro-gold)", icon: "🎩" },   // Saturday
+            { name: "Weekend Ritual", color: "var(--jimbo-gold)", icon: "🔥" },    // Sunday
+            { name: "Madness Monday", color: "var(--jimbo-red)", icon: "🔥" },    // Monday
+            { name: "Twosday", color: "var(--jimbo-blue)", icon: "2️⃣" },           // Tuesday
+            { name: "Wee Wednesday", color: "var(--jimbo-dark-green)", icon: "🃏" },        // Wednesday
+            { name: "Threshold Thursday", color: "var(--jimbo-orange)", icon: "💻" }, // Thursday
+            { name: "Foil Friday", color: "var(--jimbo-blue)", icon: "📐" },   // Friday
+            { name: "Weekend Ritual", color: "var(--jimbo-gold)", icon: "🎩" },   // Saturday
         ];
         return defaultThemes[dayOfWeek] || defaultThemes[0];
     };
@@ -206,8 +206,7 @@ interface ScheduleItem {
                     <div className="flex-1 flex flex-col justify-center items-center w-full min-h-0 gap-1 py-2">
                         <DayHeader
                             dayNumber={viewingDay}
-                            displayDate={getDayDisplay(viewingDay)}
-                            theme={currentTheme}
+                            displayDate={new Date(EPOCH + (viewingDay - 1) * 24 * 60 * 60 * 1000).toLocaleDateString()}
                         />
 
                         <DayNavigation
@@ -231,7 +230,7 @@ interface ScheduleItem {
                                             canSubmit={viewingDay === todayNumber}
                                         />
                                     ) : (
-                                        <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-[var(--balatro-grey-dark)]">
+                                        <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-[var(--jimbo-panel-edge)]">
                                             {error ? (
                                                 <div className="flex flex-col items-center gap-2">
                                                     <p className="text-red-400 font-header text-sm uppercase">{error}</p>
@@ -270,17 +269,18 @@ interface ScheduleItem {
 
                 {showHowTo && (
                     <HowToPlay
+                        isOpen={showHowTo}
                         onClose={() => setShowHowTo(false)}
-                        themeName={currentTheme.name}
+                        objectiveName={currentTheme.name}
                         seedId={seed?.seed || '--------'}
                         onSubmit={() => { setShowHowTo(false); setShowSubmit(true); }}
                     />
                 )}
-                {showLeaderboard && <LeaderboardModal dayNumber={viewingDay} onClose={() => setShowLeaderboard(false)} />}
+                {showLeaderboard && <LeaderboardModal ritualId="the-daily-wee" seed={seed?.seed || ''} onClose={() => setShowLeaderboard(false)} />}
                 {showSubmit && seed && (
                     <SubmitScoreModal
                         seed={seed.seed}
-                        dayNumber={viewingDay}
+                        ritualId="the-daily-wee"
                         onClose={() => setShowSubmit(false)}
                         onSuccess={() => loadDayData(viewingDay)}
                     />

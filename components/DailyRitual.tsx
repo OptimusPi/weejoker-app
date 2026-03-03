@@ -135,7 +135,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                 setServerToday(config.today || 1);
 
                 setJamlConfig(config.jamlConfig);
-                
+
                 // Set seeds list - ensure we're using the full array
                 if (Array.isArray(config.seeds) && config.seeds.length > 0) {
                     console.log(`[DailyRitual] Setting ${config.seeds.length} seeds`);
@@ -280,23 +280,23 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
             <main className="match-height-content z-10 flex-1 min-h-0 relative">
                 {viewingDay <= 0 && !configLoading ? (
                     <div className="w-full max-w-full md:max-w-xl aspect-[4/3] flex flex-col items-center justify-center p-4 md:p-12 text-center">
-                        <div className="balatro-panel border-white/10 bg-black/20 p-4 md:p-8">
-                            <h3 className="font-header text-2xl md:text-3xl text-[var(--balatro-gold)] mb-2 md:mb-4">{ritualTitle}</h3>
-                            <div className="flex justify-between items-center py-1 border-y border-white/10 text-[11px] md:text-[13px] font-pixel text-white/40 tracking-[0.1em] md:tracking-[0.2em]">
+                        <div className="jimbo-panel p-4 md:p-8">
+                            <h3 className="font-header text-2xl md:text-3xl text-[var(--jimbo-gold)] mb-2 md:mb-4">{ritualTitle}</h3>
+                            <div className="flex justify-between items-center py-1 border-y border-[var(--jimbo-panel-edge)] text-[11px] md:text-[13px] font-pixel text-[var(--jimbo-grey)] tracking-[0.1em] md:tracking-[0.2em]">
                                 The Weepoch begins {new Date(activeEpoch).toLocaleDateString()}
                             </div>
                             <div className="flex flex-col gap-2 md:gap-4 mt-4">
                                 <button
                                     type="button"
                                     onClick={() => setShowHowTo(true)}
-                                    className="balatro-button balatro-button-blue text-xs md:text-sm w-full"
+                                    className="jimbo-btn jimbo-btn-blue text-xs md:text-sm"
                                 >
                                     How to Play
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => updateDay(Math.max(1, todayNumber))}
-                                    className="balatro-button balatro-button-grey text-xs md:text-sm w-full"
+                                    className="jimbo-btn bg-[var(--jimbo-grey)] text-xs md:text-sm"
                                 >
                                     Go to Today (Day {Math.max(1, todayNumber)})
                                 </button>
@@ -313,38 +313,38 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                                 <div className="jimbo-panel mx-8 md:mx-12 min-h-[500px] animate-pulse relative overflow-hidden">
                                     {/* Header Skeleton */}
                                     <div className="jimbo-inner-panel p-2 md:p-3 h-[54px] flex items-center shrink-0 mb-3">
-                                        <div className="w-24 h-6 bg-white/10 rounded" />
+                                        <div className="w-24 h-6 bg-[var(--jimbo-panel-edge)] rounded" />
                                     </div>
 
                                     {/* Body Skeleton */}
                                     <div className="flex flex-col gap-4 flex-1 w-full">
                                         {/* Deck Fan */}
-                                        <div className="w-full rounded-lg aspect-[2/1] bg-white/5 border border-white/5" />
+                                        <div className="w-full rounded-lg aspect-[2/1] bg-[var(--jimbo-panel-edge)] border border-[var(--jimbo-panel-edge)]" />
 
                                         {/* Jokers */}
-                                        <div className="w-full rounded-lg h-16 bg-white/5 border border-white/5" />
+                                        <div className="w-full rounded-lg h-16 bg-[var(--jimbo-panel-edge)] border border-[var(--jimbo-panel-edge)]" />
 
                                         <div className="flex-1" />
 
                                         {/* Button */}
-                                        <div className="w-full h-12 rounded-lg bg-[var(--balatro-blue)]/20 border border-[var(--balatro-blue)]/30" />
+                                        <div className="w-full h-12 rounded-lg bg-[var(--jimbo-dark-blue)] border border-[var(--jimbo-blue)]" />
                                     </div>
                                 </div>
-                                <div className="text-center mt-6 font-pixel text-white/20 text-[11px] md:text-xs tracking-[0.2em] md:tracking-[0.4em] animate-pulse absolute bottom-12 left-0 right-0">
+                                <div className="text-center mt-6 font-pixel text-[var(--jimbo-grey)] text-[11px] md:text-xs tracking-[0.2em] md:tracking-[0.4em] animate-pulse absolute bottom-12 left-0 right-0">
                                     {configLoading ? "Connecting to Ritual Factory..." : "Reading Seed Data..."}
                                 </div>
                             </div>
                         ) : (!currentSeedId && viewingDay <= todayNumber) ? (
-                            <div className="balatro-panel border-red-500/20 bg-red-950/20 p-6 md:p-12 text-center max-w-full md:max-w-md mx-auto">
-                                <h3 className="font-header text-red-400 text-xl md:text-2xl uppercase mb-2 md:mb-3">Ritual Lost</h3>
-                                <p className="font-pixel text-red-300/40 text-[11px] md:text-xs leading-relaxed">
+                            <div className="jimbo-panel border-[var(--jimbo-red)] p-6 md:p-12 text-center max-w-full md:max-w-md mx-auto">
+                                <h3 className="font-header text-[var(--jimbo-red)] text-xl md:text-2xl mb-2 md:mb-3">Ritual Lost</h3>
+                                <p className="font-pixel text-[var(--jimbo-grey)] text-[11px] md:text-xs leading-relaxed">
                                     The spirits failed to provide data for Day {viewingDay}. <br />
                                     Check your connection or return to today.
                                 </p>
                                 <button
                                     type="button"
                                     onClick={() => updateDay(todayNumber)}
-                                    className="balatro-button balatro-button-blue mt-4 md:mt-6 text-xs md:text-sm"
+                                    className="jimbo-btn jimbo-btn-blue mt-4 md:mt-6 text-xs md:text-sm"
                                 >
                                     Back to Today
                                 </button>

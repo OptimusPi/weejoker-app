@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Trophy, Crown, Medal } from "lucide-react";
+import { Trophy, Crown, Medal } from "lucide-react";
+import { JimboPanel, JimboInnerPanel, JimboBackButton } from "@/components/JimboPanel";
 
 interface LeaderboardModalProps {
     ritualId: string;
@@ -43,48 +44,45 @@ export function LeaderboardModal({ ritualId, seed, onClose }: LeaderboardModalPr
         fetchScores();
     }, [ritualId, seed]);
 
-    // Fallback Data for "Jaw Drop" reliability
-
-
     const formatScore = (val: string) => {
         const num = Number(val);
         return isNaN(num) ? val : num.toLocaleString();
     };
 
     const getRankIcon = (index: number) => {
-        if (index === 0) return <Crown size={20} className="text-[var(--balatro-gold)]" fill="currentColor" />;
-        if (index === 1) return <Medal size={20} className="text-zinc-300" />; // Silver
-        if (index === 2) return <Medal size={20} className="text-amber-700" />; // Bronze
-        return <span className="font-header text-zinc-500 w-5 text-center">{index + 1}</span>;
+        if (index === 0) return <Crown size={20} className="text-[var(--jimbo-gold)]" fill="currentColor" />;
+        if (index === 1) return <Medal size={20} className="text-[var(--jimbo-border-silver)]" />;
+        if (index === 2) return <Medal size={20} className="text-[var(--jimbo-gold)]" />;
+        return <span className="font-header text-[var(--jimbo-grey)] w-5 text-center">{index + 1}</span>;
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/80 animate-in fade-in duration-150" onClick={onClose}>
-            <div className="balatro-panel relative w-full max-w-lg h-[70vh] flex flex-col animate-in slide-in-from-bottom-10 duration-150" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-[var(--jimbo-panel-edge)]" onClick={onClose}>
+            <JimboPanel className="relative w-full max-w-lg h-[70vh] flex flex-col" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
 
                 {/* Header */}
-                <div className="bg-[var(--balatro-blue)] p-4 flex justify-between items-center border-b-[3px] border-black/20 shrink-0">
-                    <h2 className="text-2xl md:text-3xl font-header text-white tracking-widest text-shadow-sm flex items-center gap-2">
+                <div className="bg-[var(--jimbo-blue)] -mx-4 -mt-4 p-4 flex justify-between items-center rounded-t-lg shrink-0 mb-4">
+                    <h2 className="text-2xl md:text-3xl font-header text-white tracking-widest flex items-center gap-2">
                         <Trophy size={28} strokeWidth={2.5} />
                         Top Scores
                     </h2>
-                    <span className="font-pixel text-white/80 text-sm uppercase tracking-wider bg-black/20 px-2 py-1 rounded">
+                    <span className="font-pixel text-[var(--jimbo-border-silver)] text-sm tracking-wider bg-[var(--jimbo-dark-blue)] px-2 py-1 rounded">
                         {ritualId} | {seed}
                     </span>
                 </div>
 
                 {/* List */}
-                <div className="flex-grow overflow-y-auto p-6 md:p-8 custom-scrollbar space-y-2">
+                <div className="flex-grow overflow-y-auto space-y-2 min-h-0">
                     {loading ? (
-                        <div className="text-center py-12 text-zinc-300 font-pixel animate-pulse">
+                        <div className="text-center py-12 text-[var(--jimbo-grey)] font-pixel animate-pulse">
                             Loading Scores...
                         </div>
                     ) : error ? (
-                        <div className="text-center py-12 text-[var(--balatro-red)] font-pixel">
+                        <div className="text-center py-12 text-[var(--jimbo-red)] font-pixel">
                             {error}
                         </div>
                     ) : scores.length === 0 ? (
-                        <div className="text-center py-12 text-zinc-400 font-pixel">
+                        <div className="text-center py-12 text-[var(--jimbo-grey)] font-pixel">
                             No scores yet. Be the first!
                         </div>
                     ) : (
@@ -94,8 +92,8 @@ export function LeaderboardModal({ ritualId, seed, onClose }: LeaderboardModalPr
                                 className={`
                                     flex items-center justify-between p-3 rounded-lg border-2
                                     ${idx === 0
-                                        ? 'bg-[var(--balatro-gold)] border-[var(--balatro-gold)] text-black balatro-gold-glow'
-                                        : 'bg-black/40 border-black/20 text-white'
+                                        ? 'bg-[var(--jimbo-gold)] border-[var(--jimbo-gold)] text-black'
+                                        : 'jimbo-inner-panel'
                                     }
                                 `}
                             >
@@ -115,16 +113,11 @@ export function LeaderboardModal({ ritualId, seed, onClose }: LeaderboardModalPr
                     )}
                 </div>
 
-                {/* Footer Button - NO EXTRA BACKGROUND */}
-                <div className="p-3 flex-shrink-0 text-center">
-                    <button
-                        onClick={onClose}
-                        className="balatro-button-back"
-                    >
-                        Back
-                    </button>
+                {/* Footer */}
+                <div className="mt-3 shrink-0">
+                    <JimboBackButton onClick={onClose} />
                 </div>
-            </div>
+            </JimboPanel>
         </div>
     );
 }

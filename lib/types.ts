@@ -9,24 +9,7 @@ export type StakeType =
     | 'white' | 'red' | 'green' | 'black'
     | 'blue' | 'purple' | 'orange' | 'gold';
 
-/**
- * Configuration for a Daily Ritual challenge
- * Matches the dailyritual.schema.json structure
- */
-export interface RitualConfig {
-    filterId: string;       // e.g. "wee_joker_daily"
-    searchId: string;       // e.g. "wee_joker_daily__erratic_white"
-    deck: DeckType;
-    stake: StakeType;
-    seeds: string;          // Path to seeds file
-    name: string;           // Display name
-    author: string;         // Curator username
-    description?: string;   // Brief description
-    tutorial?: string;      // How to use this seed
-    epoch?: string;         // ISO date-time for Day 1
-    icon?: string;          // Emoji for the ritual
-    color?: string;         // Theme color (CSS value)
-}
+
 
 /**
  * Seed data record from the seeds file

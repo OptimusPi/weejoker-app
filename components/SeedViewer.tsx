@@ -20,12 +20,12 @@ export default function SeedViewer() {
     };
 
     return (
-        <div className="flex-1 flex flex-col h-full overflow-hidden bg-[var(--balatro-black)]">
-            <header className="px-8 py-6 border-b border-white/10 shrink-0">
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-[var(--jimbo-panel-edge)]">
+            <header className="px-8 py-6 border-b border-[var(--jimbo-panel-edge)] bg-[#111] shrink-0">
                 <div className="max-w-[1000px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div>
-                        <h1 className="font-header text-4xl text-white tracking-widest uppercase mb-1">SEED ANALYTICS</h1>
-                        <p className="font-pixel text-[var(--balatro-blue)] text-xs tracking-widest opacity-80 uppercase">Diagnostic & Shop Item Debugger</p>
+                        <h1 className="font-header text-4xl text-white tracking-widest uppercase mb-1 drop-shadow-md">SEED ANALYTICS</h1>
+                        <p className="font-pixel text-[var(--jimbo-blue)] text-xs tracking-widest uppercase">Diagnostic & Shop Item Debugger</p>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -34,13 +34,13 @@ export default function SeedViewer() {
                                 value={input}
                                 onChange={e => setInput(e.target.value)}
                                 placeholder="ENTER SEED..."
-                                className="balatro-input !bg-black/40 !border-white/20 !w-48 !text-lg !font-header !tracking-widest uppercase"
+                                className="jimbo-input !w-48 !text-lg !font-header !tracking-widest uppercase"
                                 onKeyDown={e => e.key === 'Enter' && handleAdd()}
                             />
                         </div>
                         <button
                             onClick={handleAdd}
-                            className="balatro-button balatro-button-blue !p-2 !h-11 !w-11"
+                            className="jimbo-btn jimbo-btn-blue !p-2 !h-11 !w-11"
                             aria-label="Add Seed"
                             title="Add Seed"
                         >
@@ -58,7 +58,7 @@ export default function SeedViewer() {
                                 <AgnosticSeedCard seed={seed} className="w-full" />
                                 <button
                                     onClick={() => handleRemove(idx)}
-                                    className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[var(--balatro-red)] text-white items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity flex"
+                                    className="absolute -top-2 -right-2 w-8 h-8 rounded-sm bg-[var(--jimbo-red)] text-white items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity flex"
                                     aria-label="Remove Seed"
                                     title="Remove Seed"
                                 >
@@ -67,13 +67,13 @@ export default function SeedViewer() {
                             </div>
                         ))
                     ) : (
-                        <div className="col-span-full h-[400px] flex flex-col items-center justify-center opacity-20 border-2 border-dashed border-white/10 rounded-3xl">
-                            <Database size={64} className="mb-4" />
-                            <span className="font-header text-xl uppercase tracking-widest text-center px-10">No seeds in diagnostics vault</span>
+                        <div className="col-span-full h-[400px] flex flex-col items-center justify-center border-2 border-dashed border-[var(--jimbo-panel-edge)] bg-[var(--jimbo-panel-edge)]">
+                            <Database size={64} className="mb-4 text-[var(--jimbo-grey)]" />
+                            <span className="font-header text-xl text-[var(--jimbo-grey)] uppercase tracking-widest text-center px-10">No seeds in diagnostics vault</span>
                         </div>
                     )}
                 </div>
-            </main>
-        </div>
+            </main >
+        </div >
     );
 }

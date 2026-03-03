@@ -83,13 +83,13 @@ export default function CreateRitualPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--balatro-black)] text-white font-pixel p-4 md:p-8 flex flex-col items-center">
+        <div className="h-full overflow-y-auto p-4 md:p-8 flex flex-col items-center">
             {/* Header */}
             <div className="w-full max-w-xl mx-auto mb-6 text-center">
-                <h1 className="text-4xl md:text-5xl font-header text-[var(--balatro-blue)] drop-shadow-md mb-2">
-                    Ritual Forge
+                <h1 className="text-4xl md:text-5xl font-header text-[var(--jimbo-gold)] mb-2">
+                    Joker Creator
                 </h1>
-                <p className="text-white/60 text-lg">Design your own daily challenge</p>
+                <p className="text-[var(--jimbo-grey)] text-lg font-header">Design your own daily challenge</p>
                 <div className="flex justify-center gap-3 mt-4">
                     {[1, 2, 3, 4].map(i => (
                         <div
@@ -98,14 +98,14 @@ export default function CreateRitualPage() {
                                 "w-3 h-3 rounded-full transition-all duration-300",
                                 step >= i
                                     ? "bg-[var(--jimbo-gold)] scale-110 shadow-[0_0_10px_rgba(255,152,0,0.4)]"
-                                    : "bg-white/10"
+                                    : "bg-[var(--jimbo-panel-edge)]"
                             )}
                         />
                     ))}
                 </div>
             </div>
 
-            {/* Main JimboPanel — Back button is structural */}
+            {/* Main Panel */}
             <JimboPanel
                 onBack={handleBack}
                 backLabel={step === 1 ? "Back to Home" : "Back"}
@@ -115,13 +115,13 @@ export default function CreateRitualPage() {
                 {step === 1 && (
                     <div className="space-y-5">
                         <div className="text-center mb-4">
-                            <h2 className="text-2xl font-header text-[var(--balatro-blue)] mb-1">Ritual Basics</h2>
-                            <div className="h-1 w-16 bg-[var(--balatro-blue)] mx-auto rounded-full opacity-50" />
+                            <h2 className="text-2xl font-header text-[var(--jimbo-blue)] mb-1">Basics</h2>
+                            <div className="h-1 w-16 bg-[var(--jimbo-blue)] mx-auto rounded-full opacity-50" />
                         </div>
 
                         <JimboInnerPanel className="space-y-4">
                             <div>
-                                <label className="block text-xs text-[var(--balatro-blue)] mb-1 font-header tracking-wider">Ritual ID</label>
+                                <label className="block text-xs text-[var(--jimbo-blue)] mb-1 font-header tracking-wider">Filter ID</label>
                                 <JimboInput
                                     placeholder="my-cool-challenge"
                                     value={meta.id}
@@ -129,7 +129,7 @@ export default function CreateRitualPage() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs text-[var(--balatro-blue)] mb-1 font-header tracking-wider">Title</label>
+                                <label className="block text-xs text-[var(--jimbo-blue)] mb-1 font-header tracking-wider">Title</label>
                                 <JimboInput
                                     placeholder="My Cool Challenge"
                                     value={meta.title}
@@ -137,7 +137,7 @@ export default function CreateRitualPage() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs text-white/40 mb-1 font-header tracking-wider">Tagline</label>
+                                <label className="block text-xs text-[var(--jimbo-grey)] mb-1 font-header tracking-wider">Tagline</label>
                                 <JimboInput
                                     placeholder="Can you beat the heat?"
                                     value={meta.tagline}
@@ -145,7 +145,7 @@ export default function CreateRitualPage() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs text-white/40 mb-1 font-header tracking-wider">Author</label>
+                                <label className="block text-xs text-[var(--jimbo-grey)] mb-1 font-header tracking-wider">Author</label>
                                 <JimboInput
                                     placeholder="Jimbo"
                                     value={meta.author}
@@ -154,7 +154,7 @@ export default function CreateRitualPage() {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs text-white/40 mb-1 font-header tracking-wider">Objective</label>
+                                    <label className="block text-xs text-[var(--jimbo-grey)] mb-1 font-header tracking-wider">Objective</label>
                                     <JimboInput
                                         placeholder="Wee Joker"
                                         value={meta.defaultObjective}
@@ -162,10 +162,10 @@ export default function CreateRitualPage() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs text-white/40 mb-1 font-header tracking-wider">Start Date</label>
+                                    <label className="block text-xs text-[var(--jimbo-grey)] mb-1 font-header tracking-wider">Start Date</label>
                                     <JimboInput
                                         type="date"
-                                        title="Start date for ritual"
+                                        title="Start date"
                                         value={meta.epoch}
                                         onChange={e => setMeta({ ...meta, epoch: e.target.value })}
                                         className="[color-scheme:dark]"
@@ -183,9 +183,9 @@ export default function CreateRitualPage() {
                 {/* Step 2: JAML */}
                 {step === 2 && (
                     <div className="flex flex-col pb-2">
-                        <h2 className="text-2xl font-header flex items-center gap-2 mb-4 text-[var(--balatro-red)]">
+                        <h2 className="text-2xl font-header flex items-center gap-2 mb-4 text-[var(--jimbo-red)]">
                             <FileText size={20} />
-                            Define Rules (Jaml)
+                            Define Rules (JAML)
                         </h2>
                         <JimboInnerPanel className="min-h-[400px]">
                             <JamlEditor initialJaml={jamlText} onJamlChange={(text) => setFromJaml(text)} />
@@ -207,7 +207,7 @@ export default function CreateRitualPage() {
 
                         <div className="grid md:grid-cols-2 gap-4">
                             <div className="space-y-3">
-                                <label className="block text-sm text-white/60">Paste Seeds (Comma or Newline separated)</label>
+                                <label className="block text-sm text-[var(--jimbo-grey)]">Paste Seeds (Comma or Newline separated)</label>
                                 <JimboTextArea
                                     className="h-48 font-mono text-sm"
                                     placeholder="SEED1234, SEED5678..."
@@ -226,17 +226,17 @@ export default function CreateRitualPage() {
                             </div>
 
                             <JimboInnerPanel className="h-64 overflow-y-auto">
-                                <h3 className="text-sm font-header text-white/40 mb-2">Verification Results</h3>
+                                <h3 className="text-sm font-header text-[var(--jimbo-grey)] mb-2">Verification Results</h3>
                                 {verificationResults.length === 0 ? (
-                                    <div className="text-center text-white/20 py-8">No seeds verified yet.</div>
+                                    <div className="text-center text-[var(--jimbo-grey)] py-8">No seeds verified yet.</div>
                                 ) : (
                                     <div className="space-y-2">
                                         {verificationResults.map((res, i) => (
                                             <div key={i} className={cn(
                                                 "flex items-center justify-between p-2 rounded border text-sm",
                                                 res.passed
-                                                    ? "bg-green-500/10 border-green-500/20 text-green-200"
-                                                    : "bg-red-500/10 border-red-500/20 text-red-200"
+                                                    ? "bg-[var(--jimbo-dark-green)] border-[var(--jimbo-green)] text-white"
+                                                    : "bg-[var(--jimbo-dark-red)] border-[var(--jimbo-red)] text-white"
                                             )}>
                                                 <span className="font-mono">{res.seed}</span>
                                                 <div className="flex items-center gap-2">
@@ -277,25 +277,25 @@ export default function CreateRitualPage() {
                             <Check size={48} className="text-white" strokeWidth={4} />
                         </div>
 
-                        <h2 className="text-3xl font-header">Ready to Forge?</h2>
+                        <h2 className="text-3xl font-header">Ready to Create?</h2>
 
                         <JimboInnerPanel className="max-w-md text-left space-y-2 w-full">
                             <div className="flex justify-between">
-                                <span className="text-white/40">ID:</span>
+                                <span className="text-[var(--jimbo-grey)]">ID:</span>
                                 <span className="font-mono">{meta.id}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-white/40">Title:</span>
+                                <span className="text-[var(--jimbo-grey)]">Title:</span>
                                 <span>{meta.title}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-white/40">Seeds:</span>
+                                <span className="text-[var(--jimbo-grey)]">Seeds:</span>
                                 <span className="text-[var(--jimbo-green)]">{verificationResults.filter(r => r.passed).length} valid</span>
                             </div>
                         </JimboInnerPanel>
 
                         <JimboButton variant="gold" onClick={handleSubmit} disabled={isSubmitting} className="px-12 py-4 text-xl mt-4">
-                            {isSubmitting ? "Forging..." : "Create Ritual"}
+                            {isSubmitting ? "Creating..." : "Create Joker"}
                         </JimboButton>
                     </div>
                 )}

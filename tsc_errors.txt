@@ -1,0 +1,94 @@
+app/api/rituals/[id]/route.ts(85,55): error TS7006: Parameter 'l' implicitly has an 'any' type.
+app/api/rituals/[id]/route.ts(85,77): error TS7006: Parameter 'l' implicitly has an 'any' type.
+app/api/rituals/[id]/route.ts(85,100): error TS7006: Parameter 'l' implicitly has an 'any' type.
+components/DailyWee.tsx(105,21): error TS2322: Type 'string | number' is not assignable to type 'number | undefined'.
+  Type 'string' is not assignable to type 'number'.
+components/DailyWee.tsx(106,21): error TS2322: Type 'string | undefined' is not assignable to type 'number | undefined'.
+  Type 'string' is not assignable to type 'number'.
+components/DailyWee.tsx(107,21): error TS2322: Type 'string | undefined' is not assignable to type 'number | undefined'.
+  Type 'string' is not assignable to type 'number'.
+components/DailyWee.tsx(108,21): error TS2322: Type 'string | undefined' is not assignable to type 'number | undefined'.
+  Type 'string' is not assignable to type 'number'.
+components/DailyWee.tsx(109,21): error TS2322: Type 'string | undefined' is not assignable to type 'number | undefined'.
+  Type 'string' is not assignable to type 'number'.
+components/DailyWee.tsx(110,21): error TS2322: Type 'string | undefined' is not assignable to type 'number | undefined'.
+  Type 'string' is not assignable to type 'number'.
+components/DailyWee.tsx(111,21): error TS2322: Type 'string | undefined' is not assignable to type 'number | undefined'.
+  Type 'string' is not assignable to type 'number'.
+components/DailyWee.tsx(112,21): error TS2322: Type 'boolean | undefined' is not assignable to type 'number | undefined'.
+  Type 'boolean' is not assignable to type 'number'.
+components/DailyWee.tsx(113,21): error TS2322: Type 'boolean | undefined' is not assignable to type 'number | undefined'.
+  Type 'boolean' is not assignable to type 'number'.
+components/DailyWee.tsx(114,21): error TS2322: Type 'string | undefined' is not assignable to type 'number | undefined'.
+  Type 'string' is not assignable to type 'number'.
+components/DailyWee.tsx(115,21): error TS2322: Type 'boolean | undefined' is not assignable to type 'number | undefined'.
+  Type 'boolean' is not assignable to type 'number'.
+components/DailyWee.tsx(129,17): error TS2322: Type 'string | undefined' is not assignable to type 'number | undefined'.
+  Type 'string' is not assignable to type 'number'.
+components/DailyWee.tsx(130,17): error TS2322: Type 'string | undefined' is not assignable to type 'number | undefined'.
+  Type 'string' is not assignable to type 'number'.
+components/DailyWee.tsx(131,17): error TS2322: Type 'string | undefined' is not assignable to type 'number | undefined'.
+  Type 'string' is not assignable to type 'number'.
+components/DailyWee.tsx(132,17): error TS2322: Type 'string | undefined' is not assignable to type 'number | undefined'.
+  Type 'string' is not assignable to type 'number'.
+components/DailyWee.tsx(133,17): error TS2322: Type 'string | undefined' is not assignable to type 'number | undefined'.
+  Type 'string' is not assignable to type 'number'.
+components/DailyWee.tsx(134,17): error TS2322: Type 'string | undefined' is not assignable to type 'number | undefined'.
+  Type 'string' is not assignable to type 'number'.
+components/DailyWee.tsx(135,17): error TS2322: Type 'boolean | undefined' is not assignable to type 'number | undefined'.
+  Type 'boolean' is not assignable to type 'number'.
+components/DailyWee.tsx(136,17): error TS2322: Type 'boolean | undefined' is not assignable to type 'number | undefined'.
+  Type 'boolean' is not assignable to type 'number'.
+components/DailyWee.tsx(137,17): error TS2322: Type 'string | undefined' is not assignable to type 'number | undefined'.
+  Type 'string' is not assignable to type 'number'.
+components/DailyWee.tsx(138,17): error TS2322: Type 'boolean | undefined' is not assignable to type 'number | undefined'.
+  Type 'boolean' is not assignable to type 'number'.
+components/DailyWee.tsx(155,21): error TS18046: 'scoreData' is of type 'unknown'.
+components/DailyWee.tsx(155,41): error TS18046: 'scoreData' is of type 'unknown'.
+components/DailyWee.tsx(156,33): error TS18046: 'scoreData' is of type 'unknown'.
+components/DailyWee.tsx(210,29): error TS2322: Type '{ dayNumber: number; displayDate: string; theme: { name: string; color: string; icon: string; }; }' is not assignable to type 'IntrinsicAttributes & DayHeaderProps'.
+  Property 'theme' does not exist on type 'IntrinsicAttributes & DayHeaderProps'.
+components/DailyWee.tsx(274,25): error TS2322: Type '{ onClose: () => void; themeName: string; seedId: string; onSubmit: () => void; }' is not assignable to type 'IntrinsicAttributes & HowToPlayProps'.
+  Property 'themeName' does not exist on type 'IntrinsicAttributes & HowToPlayProps'.
+components/DailyWee.tsx(279,55): error TS2322: Type '{ dayNumber: number; onClose: () => void; }' is not assignable to type 'IntrinsicAttributes & LeaderboardModalProps'.
+  Property 'dayNumber' does not exist on type 'IntrinsicAttributes & LeaderboardModalProps'.
+components/DailyWee.tsx(283,25): error TS2322: Type '{ seed: string; dayNumber: number; onClose: () => void; onSuccess: () => Promise<void>; }' is not assignable to type 'IntrinsicAttributes & SubmitScoreModalProps'.
+  Property 'dayNumber' does not exist on type 'IntrinsicAttributes & SubmitScoreModalProps'.
+components/HowToPlay.tsx(33,80): error TS2322: Type '{ children: Element[]; onBack: () => void; className: string; onClick: (e: MouseEvent<Element, MouseEvent>) => void; }' is not assignable to type 'IntrinsicAttributes & JimboPanelProps'.
+  Property 'onClick' does not exist on type 'IntrinsicAttributes & JimboPanelProps'.
+components/JamlEditor.tsx(4,18): error TS7016: Could not find a declaration file for module 'js-yaml'. 'X:/weejoker.app/node_modules/js-yaml/dist/js-yaml.mjs' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/js-yaml` if it exists or add a new declaration (.d.ts) file containing `declare module 'js-yaml';`
+components/JamlEditorMonaco.tsx(4,41): error TS2307: Cannot find module '@monaco-editor/react' or its corresponding type declarations.
+components/JamlEditorMonaco.tsx(57,44): error TS7006: Parameter 'editor' implicitly has an 'any' type.
+components/JamlEditorMonaco.tsx(57,52): error TS7006: Parameter 'monaco' implicitly has an 'any' type.
+components/JamlUIV2.tsx(275,37): error TS2322: Type '{ children: Element[]; onClick: () => void; className: string; }' is not assignable to type 'IntrinsicAttributes & { children: ReactNode; className?: string | undefined; }'.
+  Property 'onClick' does not exist on type 'IntrinsicAttributes & { children: ReactNode; className?: string | undefined; }'.
+components/LeaderboardModal.tsx(61,85): error TS2322: Type '{ children: Element[]; className: string; onClick: (e: MouseEvent<Element, MouseEvent>) => void; }' is not assignable to type 'IntrinsicAttributes & JimboPanelProps'.
+  Property 'onClick' does not exist on type 'IntrinsicAttributes & JimboPanelProps'.
+components/SeedAnalysisOverlay.tsx(26,17): error TS2322: Type '{ children: Element[]; className: string; onClick: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & JimboPanelProps'.
+  Property 'onClick' does not exist on type 'IntrinsicAttributes & JimboPanelProps'.
+components/SeedAnalysisOverlay.tsx(26,26): error TS7006: Parameter 'e' implicitly has an 'any' type.
+components/SeedSnapshotModal.tsx(83,17): error TS2322: Type '{ children: Element[]; className: string; onClick: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & JimboPanelProps'.
+  Property 'onClick' does not exist on type 'IntrinsicAttributes & JimboPanelProps'.
+components/SeedSnapshotModal.tsx(83,26): error TS7006: Parameter 'e' implicitly has an 'any' type.
+components/SeedStrategyModal.tsx(35,107): error TS2322: Type '{ children: Element[]; className: string; onClick: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & JimboPanelProps'.
+  Property 'onClick' does not exist on type 'IntrinsicAttributes & JimboPanelProps'.
+components/SeedStrategyModal.tsx(35,116): error TS7006: Parameter 'e' implicitly has an 'any' type.
+components/SubmitScoreModal.tsx(54,75): error TS2322: Type '{ children: Element[]; onBack: () => void; className: string; onClick: (e: MouseEvent<Element, MouseEvent>) => void; }' is not assignable to type 'IntrinsicAttributes & JimboPanelProps'.
+  Property 'onClick' does not exist on type 'IntrinsicAttributes & JimboPanelProps'.
+components/WeeWisdom.tsx(26,27): error TS18046: 'data' is of type 'unknown'.
+lib/api/motelyWasm.ts(164,19): error TS2554: Expected 1 arguments, but got 0.
+lib/api/motelyWasm.ts(165,25): error TS2554: Expected 1 arguments, but got 0.
+lib/api/motelyWasm.ts(178,9): error TS2322: Type '(totalSeedsSearched: number, matchingSeeds: number, elapsedMs: number, resultCount: number) => void' is not assignable to type '(searchId: string, totalSeedsSearched: number, matchingSeeds: number, elapsedMs: number, resultCount: number) => void'.
+  Types of parameters 'totalSeedsSearched' and 'searchId' are incompatible.
+    Type 'string' is not assignable to type 'number'.
+lib/api/motelyWasm.ts(184,9): error TS2322: Type '(seed: string, score: number) => void' is not assignable to type '(searchId: string, seed: string, score: number) => void'.
+  Types of parameters 'score' and 'seed' are incompatible.
+    Type 'string' is not assignable to type 'number'.
+lib/api/motelyWasm.ts(198,29): error TS2554: Expected 1 arguments, but got 0.
+lib/api/motelyWasm.ts(203,29): error TS2554: Expected 1 arguments, but got 0.
+lib/api/motelyWasm.ts(215,23): error TS2554: Expected 1 arguments, but got 0.
+lib/api/motelyWasm.ts(216,29): error TS2554: Expected 1 arguments, but got 0.
+lib/jaml/jamlCatalog.ts(3,31): error TS2307: Cannot find module '@json-render/core' or its corresponding type declarations.
+pages/api/wisdom.ts(2,36): error TS2307: Cannot find module '@cloudflare/workers-types' or its corresponding type declarations.
+pages/api/wisdom.ts(8,53): error TS7006: Parameter 'context' implicitly has an 'any' type.

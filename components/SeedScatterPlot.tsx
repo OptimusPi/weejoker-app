@@ -23,10 +23,10 @@ const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
         const data = payload[0].payload;
         return (
-            <div className="bg-balatro-panel border-2 border-white p-3 rounded shadow-xl z-50">
-                <p className="font-header text-balatro-blue text-lg">{data.seed}</p>
-                <p className="font-pixel text-white">Score: <span className="text-balatro-gold">{data.score}</span></p>
-                <p className="font-pixel text-zinc-400">Rank 2s: {data.twos}</p>
+            <div className="bg-[#111] border-2 border-[var(--jimbo-panel-edge)] p-3 rounded-sm shadow-xl z-50">
+                <p className="font-header text-[var(--jimbo-blue)] text-lg">{data.seed}</p>
+                <p className="font-pixel text-white">Score: <span className="text-[var(--jimbo-gold)]">{data.score}</span></p>
+                <p className="font-pixel text-[var(--jimbo-grey)]">Rank 2s: {data.twos}</p>
             </div>
         );
     }
@@ -49,11 +49,11 @@ export function SeedScatterPlot({ data }: SeedScatterPlotProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="w-full h-[400px] bg-balatro-grey-darker border-2 border-balatro-grey rounded-xl p-4 relative overflow-hidden shadow-balatro-inner"
+            className="w-full h-[400px] bg-[#111] border-2 border-[var(--jimbo-panel-edge)] p-4 relative overflow-hidden shadow-lg"
         >
             <div className="absolute top-4 left-4 z-10 pointer-events-none">
-                <h3 className="text-white font-header text-xl uppercase drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">Seed Distribution</h3>
-                <p className="text-balatro-blue font-pixel text-lg">Twos vs. Score</p>
+                <h3 className="text-white font-header text-xl uppercase drop-shadow-md">Seed Distribution</h3>
+                <p className="text-[var(--jimbo-blue)] font-pixel text-lg">Twos vs. Score</p>
             </div>
 
             <ResponsiveContainer width="100%" height="100%">

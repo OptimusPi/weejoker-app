@@ -16,7 +16,7 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     const { id } = await params;
-    
+
     // Try to get Cloudflare context, but handle dev mode gracefully
     let env: any = null;
     try {
@@ -75,14 +75,14 @@ export async function GET(
 
     // --- Seeds & JAML from R2 (keys derived from ritual ID) ---
     console.log('[Seed Loading] Checking R2:', { hasEnv: !!env, hasSeedAssets: !!(env && env.SEED_ASSETS) });
-    
+
     let seedsLoaded = false;
     if (env && env.SEED_ASSETS) {
         try {
             const csvObj = await env.SEED_ASSETS.get(`${id}.csv`);
             if (csvObj) {
                 const text = await csvObj.text();
-                const allSeeds = text.split('\n').map(l => l.trim()).filter(l => l.length > 0).map(l => l.split(',')[0].trim());
+                const allSeeds = text.split('\n').map((l: string) => l.trim()).filter((l: string) => l.length > 0).map((l: string) => l.split(',')[0].trim());
                 config.seeds = allSeeds.slice(0, todayNumber);
                 console.log('[Seed Loading] Loaded from R2:', allSeeds.length, 'seeds');
                 seedsLoaded = true;
@@ -98,7 +98,7 @@ export async function GET(
             console.error('R2 fetch error:', err);
         }
     }
-    
+
     // Dev mode fallback if R2 didn't have the data
     if (!seedsLoaded) {
         // Dev mode fallback - read from public directory or use daily_ritual_clean.json
@@ -107,7 +107,7 @@ export async function GET(
             // For TheDailyWee, read seeds.csv from public/
             if (id === 'TheDailyWee') {
                 const publicPath = path.join(process.cwd(), 'public');
-                
+
                 // Try reading seeds.csv
                 const seedsCsvPath = path.join(publicPath, 'seeds.csv');
                 if (fs.existsSync(seedsCsvPath)) {
@@ -121,7 +121,7 @@ export async function GET(
                     }).filter(seed => seed && seed !== 'seed');
                     config.seeds = allSeeds.slice(0, todayNumber);
                     console.log(`[Dev Mode] Loaded ${allSeeds.length} total seeds from seeds.csv, returning ${config.seeds.length} for day ${todayNumber}`);
-                    
+
                     // Set a default JAML config for dev mode
                     config.jamlConfig = `stake white, deck red, seed ${config.seeds[targetDay - 1] || 'UNKNOWN'}
 ante 1, blind 1, score 300
@@ -135,7 +135,7 @@ ante 2, blind 3, score 1200`;
                         const ritualData = JSON.parse(fs.readFileSync(ritualJsonPath, 'utf-8'));
                         config.seeds = ritualData.slice(0, todayNumber).map((r: any) => r.id).filter((id: string) => id && !id.includes('\u0000'));
                         console.log(`[Dev Mode] Loaded ${config.seeds.length} seeds from daily_ritual_clean.json`);
-                        
+
                         // Set a default JAML config
                         config.jamlConfig = `stake white, deck red, seed ${config.seeds[targetDay - 1] || 'UNKNOWN'}
 ante 1, blind 1, score 300

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Trophy, Crown, Medal } from "lucide-react";
+import { JimboInnerPanel } from "@/components/JimboPanel";
 
 interface LeaderboardComponentProps {
     ritualId: string;
@@ -48,10 +49,10 @@ export function LeaderboardComponent({ ritualId, seed }: LeaderboardComponentPro
     };
 
     const getRankIcon = (index: number) => {
-        if (index === 0) return <Crown size={20} className="text-[var(--balatro-gold)]" fill="currentColor" />;
-        if (index === 1) return <Medal size={20} className="text-zinc-300" />; // Silver
-        if (index === 2) return <Medal size={20} className="text-amber-700" />; // Bronze
-        return <span className="font-header text-zinc-500 w-5 text-center">{index + 1}</span>;
+        if (index === 0) return <Crown size={20} className="text-[var(--jimbo-gold)]" fill="currentColor" />;
+        if (index === 1) return <Medal size={20} className="text-[var(--jimbo-border-silver)]" />;
+        if (index === 2) return <Medal size={20} className="text-[var(--jimbo-gold)]" />;
+        return <span className="font-header text-[var(--jimbo-grey)] w-5 text-center">{index + 1}</span>;
     };
 
     return (
@@ -62,23 +63,23 @@ export function LeaderboardComponent({ ritualId, seed }: LeaderboardComponentPro
                     <Trophy size={20} strokeWidth={2.5} />
                     Top Scores
                 </h2>
-                <span className="font-pixel text-white/50 text-[10px] uppercase tracking-wider bg-black/20 px-2 py-1 rounded">
+                <JimboInnerPanel className="font-pixel text-[var(--jimbo-grey)] text-[10px] tracking-wider px-2 py-1">
                     {seed}
-                </span>
+                </JimboInnerPanel>
             </div>
 
             {/* List */}
             <div className="flex-grow overflow-y-auto custom-scrollbar space-y-2 pr-1">
                 {loading ? (
-                    <div className="text-center py-8 text-zinc-300 font-pixel animate-pulse text-sm">
+                    <div className="text-center py-8 text-[var(--jimbo-grey)] font-pixel animate-pulse text-sm">
                         Loading...
                     </div>
                 ) : error ? (
-                    <div className="text-center py-8 text-[var(--balatro-red)] font-pixel text-sm">
+                    <div className="text-center py-8 text-[var(--jimbo-red)] font-pixel text-sm">
                         {error}
                     </div>
                 ) : scores.length === 0 ? (
-                    <div className="text-center py-8 text-zinc-400 font-pixel text-sm">
+                    <div className="text-center py-8 text-[var(--jimbo-grey)] font-pixel text-sm">
                         No scores yet.
                     </div>
                 ) : (
@@ -88,8 +89,8 @@ export function LeaderboardComponent({ ritualId, seed }: LeaderboardComponentPro
                             className={`
                                 flex items-center justify-between p-2 rounded border
                                 ${idx === 0
-                                    ? 'bg-[var(--balatro-gold)] border-[var(--balatro-gold)] text-black balatro-gold-glow'
-                                    : 'bg-black/20 border-white/5 text-white hover:bg-black/30'
+                                    ? 'bg-[var(--jimbo-gold)] border-[var(--jimbo-gold)] text-black'
+                                    : 'jimbo-inner-panel'
                                 }
                             `}
                         >
