@@ -11,6 +11,14 @@ import { cn } from "@/lib/utils";
 
 import { ritualConfig } from "@/lib/config";
 
+type RitualCacheEntry = {
+    seed: string;
+    jaml: string;
+    title: string;
+    tagline: string;
+    defaultObjective: string;
+};
+
 export const getDayNumber = (epoch: number) => {
     if (!epoch) return 0;
     const now = Date.now();
@@ -20,7 +28,7 @@ export const getDayNumber = (epoch: number) => {
 
 export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: string, initialDay?: number }) {
     const defaultRitualId = propId || ritualConfig.id;
-    const [ritualId, setRitualId] = useState(defaultRitualId);
+    const [ritualId] = useState(defaultRitualId);
     const [configLoading, setConfigLoading] = useState(false);
     const [serverToday, setServerToday] = useState(1);
 
@@ -39,7 +47,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
     const todayNumber = serverToday || getDayNumber(activeEpoch);
 
     // Cache to prevent redundant re-fetches
-    const [ritualCache, setRitualCache] = useState<Record<number, { seed: string, jaml: string }>>({});
+    const [ritualCache, setRitualCache] = useState<Record<number, RitualCacheEntry>>({});
 
     // Modals
     // Modals
@@ -82,6 +90,9 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                     const cached = ritualCache[fetchDay];
                     setJamlConfig(cached.jaml);
                     setSeedsList([cached.seed]);
+                    setRitualTitle(cached.title);
+                    setRitualTagline(cached.tagline);
+                    setDefaultObjective(cached.defaultObjective);
                     // setViewingDay(fetchDay); // Don't self-update if we are already here
                     if (active) {
                         clearTimeout(timer);
@@ -104,6 +115,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                     tagline: string;
                     epoch: string;
                     today: number;
+                    defaultObjective?: string;
                     jamlConfig: string;
                     seeds: string[];
                     currentSeed?: string;
@@ -125,6 +137,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
 
                 setRitualTitle(config.title);
                 setRitualTagline(config.tagline);
+                setDefaultObjective(config.defaultObjective || ritualConfig.defaultObjective);
                 const epoch = new Date(config.epoch).getTime();
                 setActiveEpoch(epoch);
                 setServerToday(config.today || 1);
@@ -157,7 +170,8 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                             seed: config.currentSeed!,
                             jaml: config.jamlConfig,
                             title: config.title,
-                            tagline: config.tagline
+                            tagline: config.tagline,
+                            defaultObjective: config.defaultObjective || ritualConfig.defaultObjective
                         }
                     }));
                 }
@@ -221,7 +235,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
 
     // Objectives Parsing
     const objectives = useMemo(() => {
-        if (!jamlConfig) return ["Wee Joker"];
+        if (!jamlConfig) return [defaultObjective];
         const mustBlock = jamlConfig.split('must:')[1]?.split('should:')[0]?.split('mustNot:')[0];
         if (mustBlock) {
             const values: string[] = [];
@@ -229,10 +243,10 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
             for (const match of valueMatches) {
                 values.push(match[1].trim());
             }
-            return values.length > 0 ? values : ["Wee Joker"];
+            return values.length > 0 ? values : [defaultObjective];
         }
-        return ["Wee Joker"];
-    }, [jamlConfig]);
+        return [defaultObjective];
+    }, [defaultObjective, jamlConfig]);
 
     const handleCopySeed = useCallback(() => {
         if (currentSeedId) {
@@ -335,6 +349,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                             <RitualChallengeBoard
                                 seed={currentSeedId || 'LOCKED'}
                                 objectives={objectives}
+                                ritualTitle={ritualTitle}
                                 onCopy={handleCopySeed}
                                 onShowHowTo={() => setShowHowTo(true)}
                                 onOpenSubmit={() => setShowSubmit(true)}

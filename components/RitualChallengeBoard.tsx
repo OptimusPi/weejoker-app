@@ -11,7 +11,6 @@ import { evaluateSeed } from "@/lib/jaml/jamlEvaluator";
 import { useJamlFilter } from "@/lib/hooks/useJamlFilter";
 import { JamlJourneyMap } from "./cards/JamlJourneyMap";
 import { cn } from "@/lib/utils";
-import { ritualConfig } from "@/lib/config";
 import { JimboInnerPanel } from "./JimboPanel";
 
 // Maps JAML filter clause rank values → PlayingCard rank prop
@@ -35,6 +34,7 @@ const JAML_SUIT_MAP: Record<string, "Hearts" | "Clubs" | "Diamonds" | "Spades"> 
 interface RitualChallengeBoardProps {
     seed: string;
     objectives: string[];
+    ritualTitle?: string;
     onCopy: () => void;
     onShowHowTo: () => void;
     onOpenSubmit: () => void;
@@ -129,6 +129,7 @@ function LeaderboardComponent({ ritualId, seed }: { ritualId: string; seed: stri
 export function RitualChallengeBoard({
     seed,
     objectives,
+    ritualTitle,
     onCopy,
     onShowHowTo,
     onOpenSubmit,
@@ -268,7 +269,7 @@ export function RitualChallengeBoard({
                     className="font-header text-xl text-white tracking-wider leading-none mb-1 select-none"
                     style={{ textShadow: '2px 2px 0 rgba(0,0,0,0.8)' }}
                 >
-                    The Daily Wee
+                    {ritualTitle || ritualId || 'Daily Ritual'}
                 </div>
                 <div className="flex justify-between items-center py-0.5 border-y border-[var(--jimbo-panel-edge)] text-[11px] font-pixel text-[var(--jimbo-grey)] tracking-[0.1em]">
                     <span>{displayDate || ''}</span>

@@ -1,5 +1,6 @@
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { NextRequest, NextResponse } from 'next/server';
+import { ritualConfig } from '@/lib/config';
 
 
 /**
@@ -10,7 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
  */
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
-    const ritualId = (searchParams.get('ritualId') || 'the-daily-wee').toLowerCase();
+    const ritualId = (searchParams.get('ritualId') || ritualConfig.id).trim();
     const seed = searchParams.get('seed');
     const week = searchParams.get('week');
 
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
 
             if (seed) {
                 const result = await env.DB.prepare(`
-                    SELECT player_name, score_display as score, submitted_at
+                    SELECT rowid as id, player_name, score_display as score, submitted_at
                     FROM scores
                     WHERE ritual_id = ? AND seed = ?
                     ORDER BY score_value DESC
@@ -63,21 +64,21 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json() as { ritualId?: string; seed?: string; playerName?: string; score?: string };
-        const { ritualId: rawRitualId = 'the-daily-wee', seed, playerName, score } = body;
-        const ritualId = rawRitualId.toLowerCase();
+        const { ritualId: rawRitualId = ritualConfig.id, seed, playerName, score } = body;
+        const ritualId = rawRitualId.trim();
+        const normalizedPlayerName = (playerName || '').trim() || 'Anonymous';
+        const scoreDisplay = (score || '').trim();
 
-        if (!seed || !playerName || !score) {
+        if (!seed || !scoreDisplay) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        if (playerName.length > 20) {
+        if (normalizedPlayerName.length > 20) {
             return NextResponse.json({ error: 'Name too long (max 20 chars)' }, { status: 400 });
         }
 
-        const numericScore = parseFloat(score);
-        if (isNaN(numericScore) || numericScore < 0) {
-            return NextResponse.json({ error: 'Invalid score' }, { status: 400 });
-        }
+        const numericScore = Number(scoreDisplay.replace(/,/g, ''));
+        const sortableScore = Number.isFinite(numericScore) && numericScore >= 0 ? numericScore : 0;
 
         try {
             const { env } = await getCloudflareContext({ async: true });
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
             await env.DB.prepare(`
                 INSERT OR REPLACE INTO scores (ritual_id, seed, player_name, score_display, score_value)
                 VALUES (?, ?, ?, ?, ?)
-            `).bind(ritualId, seed, playerName, score, numericScore).run();
+            `).bind(ritualId, seed, normalizedPlayerName, scoreDisplay, sortableScore).run();
 
             return NextResponse.json({ success: true });
         } catch (cfError) {

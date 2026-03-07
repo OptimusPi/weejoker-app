@@ -66,28 +66,27 @@ export function SubmitScoreModal({ seed, ritualId, onClose, onSuccess }: SubmitS
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="block text-[var(--jimbo-grey)] font-pixel text-sm mb-2">
-                            Your Name (max 20 chars)
+                            Your Name (optional, max 20 chars)
                         </label>
                         <JimboInput
                             type="text"
                             value={playerName}
                             onChange={(e) => setPlayerName(e.target.value.slice(0, 20))}
-                            placeholder="Enter your name..."
+                            placeholder="Anonymous"
                             className="text-lg px-4 py-3"
                             maxLength={20}
-                            required
                         />
                     </div>
 
                     <div>
                         <label className="block text-[var(--jimbo-grey)] font-pixel text-sm mb-2">
-                            Final Score (Chips)
+                            Final Score
                         </label>
                         <JimboInput
                             type="text"
                             value={score}
                             onChange={(e) => setScore(e.target.value)}
-                            placeholder="e.g. 1.5e12 or 42000"
+                            placeholder="e.g. 1.5e12, 42000, or any score string"
                             className="text-lg px-4 py-3"
                             required
                         />

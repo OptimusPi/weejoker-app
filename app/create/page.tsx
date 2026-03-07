@@ -11,10 +11,65 @@ import { evaluateSeed } from "@/lib/jaml/jamlEvaluator";
 import { normalizeAnalysis } from "@/lib/seedAnalyzer";
 import { cn } from "@/lib/utils";
 
+const MAX_UPLOAD_BYTES = 24 * 1024 * 1024;
+
+function normalizeRitualId(value: string) {
+    return value
+        .replace(/\s+/g, '_')
+        .replace(/[^A-Za-z0-9_]/g, '')
+        .replace(/^_+|_+$/g, '')
+        .slice(0, 64);
+}
+
+function normalizeSeed(value: string) {
+    const normalized = value
+        .trim()
+        .replace(/^['"\s]+|['"\s]+$/g, '')
+        .replace(/[^A-Za-z0-9]/g, '')
+        .toUpperCase();
+
+    if (!normalized || normalized.length > 8) {
+        return null;
+    }
+
+    return normalized;
+}
+
+function parseSeedFileText(text: string) {
+    const lines = text.split(/\r?\n/);
+    const seeds = lines
+        .map((line, index) => {
+            const trimmed = line.trim();
+            if (!trimmed) return null;
+
+            let candidate = trimmed;
+            if (trimmed.includes(',')) {
+                if (trimmed.startsWith('"')) {
+                    const quoted = trimmed.match(/^"([^"]*)"/);
+                    candidate = quoted?.[1] || trimmed;
+                } else {
+                    candidate = trimmed.split(',')[0] || trimmed;
+                }
+            }
+
+            const normalized = normalizeSeed(candidate);
+            if (!normalized) return null;
+            if (index === 0 && normalized.toLowerCase() === 'seed') return null;
+            return normalized;
+        })
+        .filter((seed): seed is string => !!seed);
+
+    return Array.from(new Set(seeds));
+}
+
 export default function CreateRitualPage() {
     const router = useRouter();
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
+    const [createError, setCreateError] = useState<string | null>(null);
+    const [existingPlayUrl, setExistingPlayUrl] = useState<string | null>(null);
+    const [suggestedId, setSuggestedId] = useState<string | null>(null);
 
     const [meta, setMeta] = useState({
         id: "",
@@ -39,7 +94,7 @@ export default function CreateRitualPage() {
     const handleVerifySeeds = async () => {
         setIsVerifying(true);
         setVerificationResults([]);
-        const seeds = seedsInput.split(/[\n,]+/).map(s => s.trim()).filter(s => s.length > 0);
+        const seeds = Array.from(new Set(seedsInput.split(/[\n,]+/).map(normalizeSeed).filter((seed): seed is string => !!seed)));
         const results = [];
 
         for (const seed of seeds) {
@@ -57,8 +112,42 @@ export default function CreateRitualPage() {
         setIsVerifying(false);
     };
 
+    const handleSeedFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        setUploadError(null);
+
+        if (file.size > MAX_UPLOAD_BYTES) {
+            setUploadError('Upload too large. Max size is 24 MB.');
+            event.target.value = '';
+            return;
+        }
+
+        try {
+            const text = await file.text();
+            const parsedSeeds = parseSeedFileText(text);
+
+            if (parsedSeeds.length === 0) {
+                setUploadError('No valid seeds found in that file.');
+                return;
+            }
+
+            setSeedsInput(parsedSeeds.join('\n'));
+            setVerificationResults([]);
+        } catch (error) {
+            console.error(error);
+            setUploadError('Could not read that upload. Try CSV or TXT.');
+        } finally {
+            event.target.value = '';
+        }
+    };
+
     const handleSubmit = async () => {
         setIsSubmitting(true);
+        setCreateError(null);
+        setExistingPlayUrl(null);
+        setSuggestedId(null);
         try {
             const validSeeds = verificationResults.filter(r => r.passed).map(r => r.seed);
             if (validSeeds.length === 0) {
@@ -71,12 +160,20 @@ export default function CreateRitualPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...meta, jaml: jamlText, seeds: validSeeds })
             });
-            if (!res.ok) throw new Error(await res.text());
+
+            if (!res.ok) {
+                const data = await res.json().catch(() => null) as { error?: string; playUrl?: string; suggestedId?: string } | null;
+                setCreateError(data?.error || 'Failed to create ritual');
+                setExistingPlayUrl(data?.playUrl || null);
+                setSuggestedId(data?.suggestedId || null);
+                return;
+            }
+
             const data = await res.json() as { id: string };
             router.push(`/${data.id}`);
         } catch (err) {
             console.error(err);
-            alert("Failed to create ritual: " + err);
+            setCreateError(`Failed to create ritual: ${err}`);
         } finally {
             setIsSubmitting(false);
         }
@@ -121,12 +218,15 @@ export default function CreateRitualPage() {
 
                         <JimboInnerPanel className="space-y-4">
                             <div>
-                                <label className="block text-xs text-[var(--jimbo-blue)] mb-1 font-header tracking-wider">Filter ID</label>
+                                <label className="block text-xs text-[var(--jimbo-blue)] mb-1 font-header tracking-wider">Ritual ID</label>
                                 <JimboInput
-                                    placeholder="my-cool-challenge"
+                                    placeholder="Cloud9_Challenge"
                                     value={meta.id}
-                                    onChange={e => setMeta({ ...meta, id: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') })}
+                                    onChange={e => setMeta({ ...meta, id: normalizeRitualId(e.target.value) })}
                                 />
+                                <p className="mt-1 text-xs font-pixel text-[var(--jimbo-grey)]">
+                                    Letters, numbers, and underscores only. Spaces become underscores.
+                                </p>
                             </div>
                             <div>
                                 <label className="block text-xs text-[var(--jimbo-blue)] mb-1 font-header tracking-wider">Title</label>
@@ -207,7 +307,20 @@ export default function CreateRitualPage() {
 
                         <div className="grid md:grid-cols-2 gap-4">
                             <div className="space-y-3">
-                                <label className="block text-sm text-[var(--jimbo-grey)]">Paste Seeds (Comma or Newline separated)</label>
+                                <label className="block text-sm text-[var(--jimbo-grey)]">Upload CSV/TXT or paste seeds</label>
+                                <JimboInput
+                                    type="file"
+                                    accept=".csv,.txt,text/csv,text/plain"
+                                    onChange={handleSeedFileUpload}
+                                />
+                                <p className="text-xs font-pixel text-[var(--jimbo-grey)]">
+                                    Max upload: 24 MB. CSV reads the first column. TXT reads one seed per line.
+                                </p>
+                                {uploadError && (
+                                    <div className="text-[var(--jimbo-red)] font-pixel text-sm">
+                                        {uploadError}
+                                    </div>
+                                )}
                                 <JimboTextArea
                                     className="h-48 font-mono text-sm"
                                     placeholder="SEED1234, SEED5678..."
@@ -297,6 +410,30 @@ export default function CreateRitualPage() {
                         <JimboButton variant="red" onClick={handleSubmit} disabled={isSubmitting} className="px-12 py-4 text-xl mt-4">
                             {isSubmitting ? "Forging..." : "Create Ritual"}
                         </JimboButton>
+
+                        {createError && (
+                            <JimboInnerPanel className="max-w-md w-full space-y-3 text-left">
+                                <div className="text-[var(--jimbo-red)] font-pixel text-sm">{createError}</div>
+                                {existingPlayUrl && (
+                                    <button
+                                        type="button"
+                                        onClick={() => router.push(existingPlayUrl)}
+                                        className="jimbo-btn jimbo-btn-blue w-full"
+                                    >
+                                        Play Existing Ritual
+                                    </button>
+                                )}
+                                {suggestedId && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setMeta(current => ({ ...current, id: suggestedId }))}
+                                        className="jimbo-btn jimbo-btn-red w-full"
+                                    >
+                                        Use Ritual ID {suggestedId}
+                                    </button>
+                                )}
+                            </JimboInnerPanel>
+                        )}
                     </div>
                 )}
             </JimboPanel>

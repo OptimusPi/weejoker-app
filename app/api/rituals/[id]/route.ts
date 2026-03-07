@@ -4,6 +4,47 @@ import { ritualConfig } from '@/lib/config';
 import fs from 'fs';
 import path from 'path';
 
+function normalizeSeed(value: string) {
+    const normalized = value
+        .trim()
+        .replace(/^['"\s]+|['"\s]+$/g, '')
+        .replace(/[^A-Za-z0-9]/g, '')
+        .toUpperCase();
+
+    if (!normalized || normalized.length > 8) {
+        return null;
+    }
+
+    return normalized;
+}
+
+function extractSeedFromCsvLine(line: string) {
+    const trimmed = line.trim();
+    if (!trimmed) return null;
+
+    if (trimmed.startsWith('"')) {
+        const quoted = trimmed.match(/^"([^"]*)"/);
+        return quoted?.[1] || null;
+    }
+
+    return trimmed.split(',')[0] || null;
+}
+
+function parseSeedList(text: string) {
+    const lines = text.split(/\r?\n/);
+    const parsed = lines
+        .map((line, index) => {
+            const candidate = line.includes(',') ? extractSeedFromCsvLine(line) : line;
+            const normalized = normalizeSeed(candidate || '');
+            if (!normalized) return null;
+            if (index === 0 && normalized.toLowerCase() === 'seed') return null;
+            return normalized;
+        })
+        .filter((seed): seed is string => !!seed);
+
+    return Array.from(new Set(parsed));
+}
+
 /**
  * GET /api/rituals/[id]
  * 
@@ -48,6 +89,7 @@ export async function GET(
         config.title = ritualConfig.title;
         config.tagline = ritualConfig.tagline;
         config.epoch = ritualConfig.epochDate;
+        config.defaultObjective = ritualConfig.defaultObjective;
     }
 
     if (!config.epoch) {
@@ -82,7 +124,7 @@ export async function GET(
             const csvObj = await env.SEED_ASSETS.get(`${id}.csv`);
             if (csvObj) {
                 const text = await csvObj.text();
-                const allSeeds = text.split('\n').map((l: string) => l.trim()).filter((l: string) => l.length > 0).map((l: string) => l.split(',')[0].trim());
+                const allSeeds = parseSeedList(text);
                 config.seeds = allSeeds.slice(0, todayNumber);
                 seedsLoaded = true;
             }
@@ -90,6 +132,13 @@ export async function GET(
             const jamlObj = await env.SEED_ASSETS.get(`${id}.jaml`);
             if (jamlObj) {
                 config.jamlConfig = await jamlObj.text();
+            }
+
+            const metaObj = await env.SEED_ASSETS.get(`${id}.meta.json`);
+            if (metaObj) {
+                const meta = JSON.parse(await metaObj.text()) as { author?: string; defaultObjective?: string };
+                config.author = meta.author || config.author;
+                config.defaultObjective = meta.defaultObjective || config.defaultObjective;
             }
         } catch (err) {
             console.error('R2 fetch error:', err);
@@ -108,13 +157,7 @@ export async function GET(
                 const seedsCsvPath = path.join(publicPath, 'seeds.csv');
                 if (fs.existsSync(seedsCsvPath)) {
                     const text = fs.readFileSync(seedsCsvPath, 'utf-8');
-                    // Parse CSV - first column is the seed ID, skip header row
-                    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-                    const allSeeds = lines.slice(1).map(line => {
-                        // Extract first column (seed ID) - handle quoted values
-                        const match = line.match(/^"?([^",]+)"?/);
-                        return match ? match[1] : line.split(',')[0];
-                    }).filter(seed => seed && seed !== 'seed');
+                    const allSeeds = parseSeedList(text);
                     config.seeds = allSeeds.slice(0, todayNumber);
                     console.log(`[Dev Mode] Loaded ${allSeeds.length} total seeds from seeds.csv, returning ${config.seeds.length} for day ${todayNumber}`);
 
@@ -129,7 +172,10 @@ ante 2, blind 3, score 1200`;
                     const ritualJsonPath = path.join(publicPath, 'daily_ritual_clean.json');
                     if (fs.existsSync(ritualJsonPath)) {
                         const ritualData = JSON.parse(fs.readFileSync(ritualJsonPath, 'utf-8'));
-                        config.seeds = ritualData.slice(0, todayNumber).map((r: any) => r.id).filter((id: string) => id && !id.includes('\u0000'));
+                        config.seeds = ritualData
+                            .slice(0, todayNumber)
+                            .map((r: any) => normalizeSeed(r.id || ''))
+                            .filter((seed: string | null): seed is string => !!seed);
                         console.log(`[Dev Mode] Loaded ${config.seeds.length} seeds from daily_ritual_clean.json`);
 
                         // Set a default JAML config
@@ -164,6 +210,8 @@ ante 2, blind 1, score 450
 ante 2, blind 2, score 900
 ante 2, blind 3, score 1200`;
     }
+
+    config.defaultObjective = config.defaultObjective || ritualConfig.defaultObjective;
 
     console.log(`[API Response] Returning config for ${id} day ${targetDay}:`, {
         title: config.title,
