@@ -86,7 +86,7 @@ export function SubmitScoreModal({ seed, ritualId, onClose, onSuccess }: SubmitS
                             type="text"
                             value={score}
                             onChange={(e) => setScore(e.target.value)}
-                            placeholder="e.g. 1.5e12, 42000, or any score string"
+                            placeholder="e.g. 1.5e12 or 42000"
                             className="text-lg px-4 py-3"
                             required
                         />

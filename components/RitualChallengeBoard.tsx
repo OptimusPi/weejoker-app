@@ -114,9 +114,9 @@ function LeaderboardComponent({ ritualId, seed }: { ritualId: string; seed: stri
                 <JimboInnerPanel key={i} className="flex items-center justify-between p-2">
                     <div className="flex items-center gap-2">
                         <span className="font-header text-sm text-[var(--jimbo-gold)]">#{i + 1}</span>
-                        <span className="font-pixel text-xs text-[var(--jimbo-grey)]">{score.playerName || 'Anonymous'}</span>
+                        <span className="font-pixel text-xs text-[var(--jimbo-grey)]">{score.player_name || 'Anonymous'}</span>
                     </div>
-                    <span className="font-header text-sm text-white">{score.score?.toLocaleString()}</span>
+                    <span className="font-header text-sm text-white">{typeof score.score === 'number' ? score.score.toLocaleString() : score.score}</span>
                 </JimboInnerPanel>
             ))}
         </div>
@@ -519,7 +519,7 @@ export function RitualChallengeBoard({
 
                             {activeTab === 'scores' && (
                                 <div className="p-2 space-y-2">
-                                    <LeaderboardComponent ritualId={ritualId || ritualConfig.id} seed={seed} />
+                                    <LeaderboardComponent ritualId={ritualId || 'TheDailyWee'} seed={seed} />
                                 </div>
                             )}
                         </div>

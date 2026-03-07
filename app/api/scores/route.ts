@@ -78,7 +78,9 @@ export async function POST(request: NextRequest) {
         }
 
         const numericScore = Number(scoreDisplay.replace(/,/g, ''));
-        const sortableScore = Number.isFinite(numericScore) && numericScore >= 0 ? numericScore : 0;
+        if (!Number.isFinite(numericScore) || numericScore < 0) {
+            return NextResponse.json({ error: 'Score must be a valid non-negative number' }, { status: 400 });
+        }
 
         try {
             const { env } = await getCloudflareContext({ async: true });
@@ -90,7 +92,7 @@ export async function POST(request: NextRequest) {
             await env.DB.prepare(`
                 INSERT OR REPLACE INTO scores (ritual_id, seed, player_name, score_display, score_value)
                 VALUES (?, ?, ?, ?, ?)
-            `).bind(ritualId, seed, normalizedPlayerName, scoreDisplay, sortableScore).run();
+            `).bind(ritualId, seed, normalizedPlayerName, scoreDisplay, numericScore).run();
 
             return NextResponse.json({ success: true });
         } catch (cfError) {
