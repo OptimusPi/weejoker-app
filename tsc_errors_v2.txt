@@ -1,8 +1,0 @@
-components/WeeWisdom.tsx(26,27): error TS18046: 'data' is of type 'unknown'.
-lib/jaml/jamlCatalog.ts(3,10): error TS2305: Module '"@json-render/core"' has no exported member 'createCatalog'.
-pages/api/wisdom.ts(8,14): error TS2322: Type '(context: EventContext<Env, any, Record<string, unknown>>) => Promise<Response>' is not assignable to type 'PagesFunction<Env>'.
-  Type 'Promise<Response>' is not assignable to type 'Response | Promise<Response>'.
-    Type 'Promise<Response>' is not assignable to type 'Promise<import("X:/weejoker.app/node_modules/@cloudflare/workers-types/index").Response>'.
-      Type 'Response' is not assignable to type 'import("X:/weejoker.app/node_modules/@cloudflare/workers-types/index").Response'.
-        Types of property 'headers' are incompatible.
-          Property 'getAll' is missing in type 'Headers' but required in type 'import("X:/weejoker.app/node_modules/@cloudflare/workers-types/index").Headers'.

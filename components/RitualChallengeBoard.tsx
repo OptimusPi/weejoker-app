@@ -302,7 +302,7 @@ export function RitualChallengeBoard({
                         )}
                         style={{ width: '320px' }}
                     >
-                        <div className="balatro-panel flex flex-col overflow-hidden" style={{ width: '320px', height: '340px' }}>
+                        <div className="jimbo-panel flex flex-col overflow-hidden" style={{ width: '320px', height: '340px' }}>
                             {/* Top row: seed info (left 50%) | deck visual (right 50%) */}
                             <div className="flex flex-1 min-h-0 gap-2">
                                 {/* Left: seed + JAML info */}
@@ -400,7 +400,7 @@ export function RitualChallengeBoard({
             {/* ===== VIEW 2: DETAIL — full-width, no arrows, tabs ===== */}
             {viewMode === 'detail' && (
                 <div className="w-full" style={{ width: '320px', height: '340px', margin: '0 auto' }}>
-                    <div className="balatro-panel flex flex-col h-[340px] overflow-hidden" style={{ width: '320px', height: '340px' }}>
+                    <div className="jimbo-panel flex flex-col h-[340px] overflow-hidden" style={{ width: '320px', height: '340px' }}>
                         {/* Seed bar */}
                         <div className="flex items-center gap-2 pb-2 border-b border-white/10 shrink-0">
                             <h3 className="font-header text-xl text-white truncate flex-1 min-w-0">{seed}</h3>

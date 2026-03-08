@@ -52,6 +52,10 @@ export function DuckDBProvider({ children }: { children: React.ReactNode }) {
                 const database = await initDuckDB();
                 const connection = await database.connect();
 
+                // Initialize httpfs explicitly for Parquet data lakes
+                await connection.query("INSTALL httpfs; LOAD httpfs;");
+                console.log('[DuckDB] WASM engine and httpfs loaded.');
+
                 if (isMounted) {
                     setDb(database);
                     setConn(connection);

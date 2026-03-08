@@ -47,10 +47,8 @@ async function getWasmApi(): Promise<MotelyWasmApi> {
     initPromise = (async () => {
         try {
             const { loadMotely } = await import('motely-wasm');
-            console.log('[MotelyWasm] Loading WASM runtime (single-thread mode)...');
-            const api = await loadMotely({
-                threads: 'off'
-            });
+            console.log('[MotelyWasm] Loading WASM runtime...');
+            const api = await loadMotely();
             wasmApi = api;
             const version = api.getVersion();
             console.log(`[MotelyWasm] Loaded v${version.version} (${version.runtime})`);
