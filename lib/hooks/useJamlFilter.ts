@@ -22,8 +22,8 @@ export interface JamlFilter {
     stake: string;
     defaults: {
         antes: number[];
-        packSlots: number[];
-        shopSlots: number[];
+        boosterPacks: number[];
+        shopItems: number[];
         score: number;
     };
     must: JamlClause[];
@@ -149,8 +149,8 @@ function parseJamlToFilter(text: string): JamlFilter {
                     if (propMatch) {
                         const [_, key, val] = propMatch;
                         if (key === 'antes') filter.defaults.antes = parseNumArray(val);
-                        if (key === 'packSlots') filter.defaults.packSlots = parseNumArray(val);
-                        if (key === 'shopSlots') filter.defaults.shopSlots = parseNumArray(val);
+                        if (key === 'boosterPacks') filter.defaults.boosterPacks = parseNumArray(val);
+                        if (key === 'shopItems') filter.defaults.shopItems = parseNumArray(val);
                         if (key === 'score') filter.defaults.score = parseInt(val) || 0;
                     }
                 } else {
@@ -204,8 +204,8 @@ function filterToJaml(filter: JamlFilter): string {
     lines.push('');
     lines.push('defaults:');
     lines.push(`  antes: [${filter.defaults.antes.join(', ')}]`);
-    lines.push(`  packSlots: [${filter.defaults.packSlots.join(', ')}]`);
-    lines.push(`  shopSlots: [${filter.defaults.shopSlots.join(', ')}]`);
+    lines.push(`  boosterPacks: [${filter.defaults.boosterPacks.join(', ')}]`);
+    lines.push(`  shopItems: [${filter.defaults.shopItems.join(', ')}]`);
     lines.push(`  score: ${filter.defaults.score}`);
     lines.push('');
 
@@ -252,8 +252,8 @@ function createBlankFilter(): JamlFilter {
         stake: 'White',
         defaults: {
             antes: [...ANTE_OPTIONS],
-            packSlots: [...SLOT_OPTIONS],
-            shopSlots: [...SLOT_OPTIONS],
+            boosterPacks: [...SLOT_OPTIONS],
+            shopItems: [...SLOT_OPTIONS],
             score: 1
         },
         must: [],
