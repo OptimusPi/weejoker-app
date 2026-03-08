@@ -25,7 +25,7 @@
     "csv-parse": "^6.1.0",
     "framer-motion": "^11.0.8",
     "lucide-react": "^0.561.0",
-    "motely-wasm": "^2.3.0",
+    "motely-wasm": "3.0.1",
     "next": "15.1.11",
     "papaparse": "^5.5.3",
     "react": "^19.2.3",
