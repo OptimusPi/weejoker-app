@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check, AlertCircle, Upload, FileText, Play } from "lucide-react";
 import { JimboPanel, JimboInnerPanel, JimboButton, JimboInput, JimboTextArea } from "@/components/JimboPanel";
@@ -88,18 +88,19 @@ export default function CreateRitualPage() {
 
     const previewSeed = useMemo(() => verificationResults.find(r => r.passed)?.seed || '', [verificationResults]);
     const previewObjectives = useMemo(() => {
-        if (!filter) return [meta.defaultObjective || 'Wee Joker'];
-        const mustBlock = filter.jaml?.split('must:')[1]?.split('should:')[0]?.split('mustNot:')[0];
+        const fallbackObjective = meta.defaultObjective || 'Wee Joker';
+        if (!jamlText) return [fallbackObjective];
+        const mustBlock = jamlText.split('must:')[1]?.split('should:')[0]?.split('mustNot:')[0];
         if (mustBlock) {
             const values: string[] = [];
             const valueMatches = mustBlock.matchAll(/value:\s*([^ \n#]+)/g);
             for (const match of valueMatches) {
                 values.push(match[1].trim());
             }
-            return values.length > 0 ? values : [meta.defaultObjective || 'Wee Joker'];
+            return values.length > 0 ? values : [fallbackObjective];
         }
-        return [meta.defaultObjective || 'Wee Joker'];
-    }, [filter, meta.defaultObjective]);
+        return [fallbackObjective];
+    }, [jamlText, meta.defaultObjective]);
 
     const handleNext = () => setStep(s => Math.min(4, s + 1));
     const handleBack = () => {

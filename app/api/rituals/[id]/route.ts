@@ -4,6 +4,17 @@ import { ritualConfig } from '@/lib/config';
 import fs from 'fs';
 import path from 'path';
 
+async function loadPublicTextAsset(request: Request, assetPath: string) {
+    try {
+        const assetUrl = new URL(assetPath, request.url);
+        const res = await fetch(assetUrl);
+        if (!res.ok) return null;
+        return await res.text();
+    } catch {
+        return null;
+    }
+}
+
 function normalizeSeed(value: string) {
     const normalized = value
         .trim()
@@ -153,10 +164,13 @@ export async function GET(
             if (id === 'TheDailyWee') {
                 const publicPath = path.join(process.cwd(), 'public');
 
-                // Try reading seeds.csv
+                const publicSeedsText = await loadPublicTextAsset(request, '/seeds.csv');
                 const seedsCsvPath = path.join(publicPath, 'seeds.csv');
-                if (fs.existsSync(seedsCsvPath)) {
-                    const text = fs.readFileSync(seedsCsvPath, 'utf-8');
+                const localSeedsText = fs.existsSync(seedsCsvPath) ? fs.readFileSync(seedsCsvPath, 'utf-8') : null;
+                const seedsText = publicSeedsText || localSeedsText;
+
+                if (seedsText) {
+                    const text = seedsText;
                     const allSeeds = parseSeedList(text);
                     config.seeds = allSeeds.slice(0, todayNumber);
                     console.log(`[Dev Mode] Loaded ${allSeeds.length} total seeds from seeds.csv, returning ${config.seeds.length} for day ${todayNumber}`);
@@ -170,8 +184,11 @@ ante 2, blind 3, score 1200`;
                 } else {
                     // Fallback to daily_ritual_clean.json
                     const ritualJsonPath = path.join(publicPath, 'daily_ritual_clean.json');
-                    if (fs.existsSync(ritualJsonPath)) {
-                        const ritualData = JSON.parse(fs.readFileSync(ritualJsonPath, 'utf-8'));
+                    const publicRitualJson = await loadPublicTextAsset(request, '/daily_ritual_clean.json');
+                    const localRitualJson = fs.existsSync(ritualJsonPath) ? fs.readFileSync(ritualJsonPath, 'utf-8') : null;
+                    const ritualJson = publicRitualJson || localRitualJson;
+                    if (ritualJson) {
+                        const ritualData = JSON.parse(ritualJson);
                         config.seeds = ritualData
                             .slice(0, todayNumber)
                             .map((r: any) => normalizeSeed(r.id || ''))

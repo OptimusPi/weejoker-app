@@ -151,7 +151,7 @@ export function DailyWee() {
         } catch (e) {
             setTopScore(null);
         }
-    }, [viewingDay, schedule, mapScheduleToSeed]);
+    }, [schedule, mapScheduleToSeed]);
 
 
     useEffect(() => {

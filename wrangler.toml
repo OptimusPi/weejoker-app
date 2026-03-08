@@ -21,4 +21,5 @@ bucket_name = "seeds-1"
 
 [ai]
 binding = "AI"
+remote = true
 

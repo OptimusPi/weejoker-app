@@ -58,10 +58,14 @@ export async function GET(
                 'Cache-Control': 'public, max-age=86400, s-maxage=86400',
             },
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('[/api/analyze] Error:', error);
+        const msg = error?.message || String(error);
+        if (msg.includes('browser environment')) {
+            return NextResponse.json({ error: 'Server analysis not supported' }, { status: 501 });
+        }
         return NextResponse.json(
-            { error: 'Analysis failed', details: String(error) },
+            { error: 'Analysis failed', details: msg },
             { status: 500 }
         );
     }
