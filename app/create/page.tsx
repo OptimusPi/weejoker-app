@@ -10,6 +10,7 @@ import { analyzeSeedWasm } from "@/lib/api/motelyWasm";
 import { evaluateSeed } from "@/lib/jaml/jamlEvaluator";
 import { normalizeAnalysis } from "@/lib/seedAnalyzer";
 import { cn } from "@/lib/utils";
+import { RitualChallengeBoard } from "@/components/RitualChallengeBoard";
 
 const MAX_UPLOAD_BYTES = 24 * 1024 * 1024;
 
@@ -84,6 +85,21 @@ export default function CreateRitualPage() {
     const [seedsInput, setSeedsInput] = useState("");
     const [verificationResults, setVerificationResults] = useState<any[]>([]);
     const [isVerifying, setIsVerifying] = useState(false);
+
+    const previewSeed = useMemo(() => verificationResults.find(r => r.passed)?.seed || '', [verificationResults]);
+    const previewObjectives = useMemo(() => {
+        if (!filter) return [meta.defaultObjective || 'Wee Joker'];
+        const mustBlock = filter.jaml?.split('must:')[1]?.split('should:')[0]?.split('mustNot:')[0];
+        if (mustBlock) {
+            const values: string[] = [];
+            const valueMatches = mustBlock.matchAll(/value:\s*([^ \n#]+)/g);
+            for (const match of valueMatches) {
+                values.push(match[1].trim());
+            }
+            return values.length > 0 ? values : [meta.defaultObjective || 'Wee Joker'];
+        }
+        return [meta.defaultObjective || 'Wee Joker'];
+    }, [filter, meta.defaultObjective]);
 
     const handleNext = () => setStep(s => Math.min(4, s + 1));
     const handleBack = () => {
@@ -386,6 +402,28 @@ export default function CreateRitualPage() {
                 {/* Step 4: Review */}
                 {step === 4 && (
                     <div className="space-y-6 flex flex-col items-center justify-center text-center py-8">
+                        {/* preview card */}
+                        {previewSeed && (
+                            <div className="mb-4">
+                                <RitualChallengeBoard
+                                    seed={previewSeed}
+                                    objectives={previewObjectives}
+                                    ritualTitle={meta.title}
+                                    ritualId={meta.id || undefined}
+                                    isLocked={false}
+                                    dayNumber={1}
+                                    jamlConfig={jamlText}
+                                    onCopy={() => {}}
+                                    onShowHowTo={() => {}}
+                                    onOpenSubmit={() => {}}
+                                    onOpenLeaderboard={() => {}}
+                                    canGoBack={false}
+                                    canGoForward={false}
+                                    displayDate={new Date(meta.epoch).toLocaleDateString()}
+                                />
+                            </div>
+                        )}
+
                         <div className="w-24 h-24 rounded-full bg-[var(--jimbo-blue)] flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(0,147,255,0.4)]">
                             <Check size={48} className="text-white" strokeWidth={4} />
                         </div>
