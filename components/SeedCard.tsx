@@ -163,7 +163,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                                         className="absolute inset-0 flex items-center justify-center"
                                         style={{ transform: 'rotate(12deg)', transformOrigin: 'center' }}
                                     >
-                                        <DeckSprite deck="erratic" stake={seed.stake || 'white'} size={48} />
+                                        <DeckSprite deck={seed.deck || 'erratic'} stake={seed.stake || 'white'} size={48} />
                                     </div>
                                     {/* Card face overlay - tilted LEFT, on top */}
                                     {seed.startingDeck && seed.startingDeck.length > 0 && (
@@ -180,8 +180,8 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                                     )}
                                 </div>
                                 <div className="flex flex-col gap-0">
-                                    <span className="font-header text-[13px] text-white tracking-wide leading-tight">Erratic Deck</span>
-                                    <span className="font-header text-[11px] text-[var(--jimbo-grey)] tracking-wide leading-tight">White Stake</span>
+                                    <span className="font-header text-[13px] text-white tracking-wide leading-tight">{seed.deck ? `${seed.deck} Deck` : 'Erratic Deck'}</span>
+                                    <span className="font-header text-[11px] text-[var(--jimbo-grey)] tracking-wide leading-tight">{seed.stake ? `${seed.stake} Stake` : 'White Stake'}</span>
                                 </div>
                             </div>
                         ) : (

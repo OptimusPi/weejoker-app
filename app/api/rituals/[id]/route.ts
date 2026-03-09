@@ -161,7 +161,7 @@ export async function GET(
         // Dev mode fallback - read from public directory or use daily_ritual_clean.json
         try {
             // For TheDailyWee, read seeds.csv from public/
-            if (id === 'TheDailyWee') {
+            if (id === ritualConfig.id) {
                 const publicPath = path.join(process.cwd(), 'public');
 
                 const publicSeedsText = await loadPublicTextAsset(request, '/seeds.csv');

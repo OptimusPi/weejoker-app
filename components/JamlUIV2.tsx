@@ -99,6 +99,7 @@ function Tile({
 
 export default function JamlUIV2() {
     const {
+        filter,
         jamlText,
         setFromJaml
     } = useJamlFilter();
@@ -304,6 +305,7 @@ export default function JamlUIV2() {
                                         <div key={res.seed} className="juice-pop juice-pop-delay" {...{ style: { '--delay': `${i * 0.05}s` } as React.CSSProperties }}>
                                             <AgnosticSeedCard
                                                 seed={res.seed}
+                                                jamlFilter={filter}
                                                 className={cn(
                                                     "transition-all duration-300 border-2",
                                                     activeAnalysis === res.seed ? "border-[var(--jimbo-blue)] scale-[1.02] shadow-[0_0_20px_rgba(30,160,230,0.2)]" : "border-transparent opacity-90 grayscale-[0.3] hover:grayscale-0 hover:opacity-100"

@@ -24,6 +24,8 @@ export interface SeedData {
     // These can vary based on the ritual's JAML filter
     twos?: number;
 
+    // Deck/stake are passed from RitualConfig for UI display
+    deck?: DeckType;
     // Stake is passed from RitualConfig for UI display
     stake?: StakeType;
 

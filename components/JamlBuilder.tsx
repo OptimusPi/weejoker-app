@@ -183,7 +183,7 @@ export default function JamlBuilder() {
                         </div>
                     </JimboPanel>
 
-                    {/* THE GOD-LIKE EDITOR */}
+                    {/* THE GOD-LIKE EDITOR - (YEAH I FUCKIN WISH... IDIOT..) */}
                     <JimboInnerPanel className="flex-1 min-h-0 flex flex-col !p-0 overflow-hidden border-[var(--jimbo-panel-edge)]">
                         <JamlEditor
                             initialJaml={jamlText}
@@ -229,7 +229,7 @@ export default function JamlBuilder() {
                                         <AgnosticSeedCard
                                             key={result.seed}
                                             seed={result.seed}
-                                            result={result}
+                                            jamlFilter={filter}
                                             className="!scale-95 !origin-top"
                                         />
                                     ))}

@@ -10,9 +10,11 @@ interface HowToPlayProps {
     onSubmit?: () => void;
     seedId?: string;
     objectiveName?: string;
+    deckName?: string;
+    stakeName?: string;
 }
 
-export function HowToPlay({ isOpen, onClose, onSubmit, seedId = "--------", objectiveName = "Objective" }: HowToPlayProps) {
+export function HowToPlay({ isOpen, onClose, onSubmit, seedId = "--------", objectiveName = "Objective", deckName = "Erratic", stakeName = "White" }: HowToPlayProps) {
     const [step, setStep] = useState(1);
     const [copied, setCopied] = useState(false);
     const totalSteps = 4;
@@ -66,7 +68,7 @@ export function HowToPlay({ isOpen, onClose, onSubmit, seedId = "--------", obje
                         <div className="space-y-4 w-full animate-in slide-in-from-right-4 duration-200">
                             <h3 className="text-2xl font-header text-white tracking-wider">The Ritual</h3>
                             <p className="text-[var(--jimbo-border-silver)] font-pixel text-lg leading-tight">
-                                Copy the Daily Seed and enter it in the Balatro <span className="text-[var(--jimbo-blue)] font-header uppercase">New Run</span> menu.
+                                Copy the ritual seed and enter it in the Balatro <span className="text-[var(--jimbo-blue)] font-header uppercase">New Run</span> menu.
                             </p>
                             <button
                                 onClick={async () => {
@@ -96,11 +98,11 @@ export function HowToPlay({ isOpen, onClose, onSubmit, seedId = "--------", obje
                                 </p>
                                 <p className="font-pixel text-lg text-white leading-tight flex items-center gap-3">
                                     <span className="w-6 h-6 rounded-full bg-[var(--jimbo-blue)] flex items-center justify-center text-[10px] font-header shrink-0">2</span>
-                                    <span>Select <span className="text-[var(--jimbo-red)] font-header uppercase">Erratic Deck</span></span>
+                                    <span>Select <span className="text-[var(--jimbo-red)] font-header uppercase">{deckName} Deck</span></span>
                                 </p>
                                 <p className="font-pixel text-lg text-white leading-tight flex items-center gap-3">
                                     <span className="w-6 h-6 rounded-full bg-[var(--jimbo-blue)] flex items-center justify-center text-[10px] font-header shrink-0">3</span>
-                                    <span>Select <span className="font-header">White Stake</span></span>
+                                    <span>Select <span className="font-header">{stakeName} Stake</span></span>
                                 </p>
                             </JimboInnerPanel>
                         </div>
@@ -111,7 +113,7 @@ export function HowToPlay({ isOpen, onClose, onSubmit, seedId = "--------", obje
                             <h3 className="text-2xl font-header text-white tracking-wider">The Goal</h3>
                             <JimboInnerPanel className="flex flex-col gap-2 text-left border-2 border-dashed border-[var(--jimbo-gold)]">
                                 <p className="font-pixel text-md text-white leading-tight">
-                                    • Find <span className="text-[var(--jimbo-blue)] font-header uppercase">{objectiveName}</span> and upgrade by playing Rank 2 cards!
+                                    • Find <span className="text-[var(--jimbo-blue)] font-header uppercase">{objectiveName}</span> and build around the ritual objective.
                                 </p>
                                 <p className="font-pixel text-md text-white leading-tight">
                                     • Win the <span className="text-[var(--jimbo-red)] font-header uppercase">Ante 8</span> Boss Blind.

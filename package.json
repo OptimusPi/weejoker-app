@@ -10,7 +10,8 @@
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "pages:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview"
   },
   "dependencies": {
     "@cloudflare/workers-types": "^4.20260301.1",
@@ -25,7 +26,7 @@
     "csv-parse": "^6.1.0",
     "framer-motion": "^11.0.8",
     "lucide-react": "^0.561.0",
-    "motely-wasm": "^3.0.4",
+    "motely-wasm": "^3.0.5",
     "next": "15.1.11",
     "papaparse": "^5.5.3",
     "react": "^19.2.3",

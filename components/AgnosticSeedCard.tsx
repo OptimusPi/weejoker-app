@@ -3,15 +3,22 @@
 import React, { useState, useEffect } from 'react';
 import { analyzeSeedWasm } from '@/lib/api/motelyWasm';
 import { normalizeAnalysis } from '@/lib/seedAnalyzer';
-import { evaluateSeed } from '@/lib/jaml/jamlEvaluator';
-import { JamlFilter } from '@/lib/hooks/useJamlFilter';
+import { evaluateSeed, type EvaluationResult } from '@/lib/jaml/jamlEvaluator';
+import { JamlFilter, parseJamlToFilter } from '@/lib/hooks/useJamlFilter';
 import { cn } from '@/lib/utils';
 import { DeckSprite } from './DeckSprite';
 import { Loader2, Sparkles, ChevronRight } from 'lucide-react';
 
-interface AgnosticSeedCardProps {
+export interface AgnosticSeedCardProps {
     seed: string;
-    jamlFilter: JamlFilter;
+    /** Prefer passing a pre-parsed filter. Passing raw JAML string is a fallback. */
+    jamlFilter?: JamlFilter;
+    jamlConfig?: string;
+    /** When provided, skips WASM re-analysis and uses this result directly. */
+    result?: EvaluationResult | null;
+    /** Override deck/stake derived from the JAML filter. */
+    deck?: string;
+    stake?: string;
     className?: string;
     onClick?: () => void;
     isLocked?: boolean;
@@ -21,37 +28,57 @@ interface AgnosticSeedCardProps {
 export function AgnosticSeedCard({
     seed,
     jamlFilter,
+    jamlConfig,
+    result,
+    deck,
+    stake,
     isLocked,
     dayNumber,
     className,
     onClick,
 }: AgnosticSeedCardProps) {
-    const deckSlug = jamlFilter.deck || 'Erratic';
-    const stakeSlug = jamlFilter.stake || 'White';
+    const resolvedFilter = React.useMemo(
+        () => jamlFilter ?? parseJamlToFilter(jamlConfig || ''),
+        [jamlFilter, jamlConfig],
+    );
 
-    const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState<any>(null);
+    const deckSlug = deck || resolvedFilter.deck || 'Erratic';
+    const stakeSlug = stake || resolvedFilter.stake || 'White';
 
+    // Only run WASM analysis when the caller hasn't already supplied a result.
+    const needsAnalysis = result === undefined;
+    const [loading, setLoading] = useState(needsAnalysis);
+    const [evaluation, setEvaluation] = useState<EvaluationResult | null>(result ?? null);
+
+    // When a pre-computed result flows in, use it immediately — no WASM required.
     useEffect(() => {
+        if (!needsAnalysis) {
+            setEvaluation(result ?? null);
+            setLoading(false);
+        }
+    }, [result, needsAnalysis]);
+
+    // WASM analysis only when the caller provides no result.
+    useEffect(() => {
+        if (!needsAnalysis) return;
         let active = true;
+
         const analyze = async () => {
             setLoading(true);
             try {
                 const rawData = await analyzeSeedWasm(seed, deckSlug, stakeSlug);
                 const normalized = normalizeAnalysis(rawData);
-                if (active) {
-                    const evaluation = evaluateSeed(normalized, jamlFilter);
-                    setResult(evaluation);
-                }
+                if (active) setEvaluation(evaluateSeed(normalized, resolvedFilter));
             } catch (err) {
-                console.error(err);
+                console.error('[AgnosticSeedCard] Analysis failed:', err);
             } finally {
                 if (active) setLoading(false);
             }
         };
+
         analyze();
         return () => { active = false; };
-    }, [seed, deckSlug, stakeSlug, jamlFilter]);
+    }, [seed, deckSlug, stakeSlug, resolvedFilter, needsAnalysis]);
 
     if (isLocked) {
         return (
@@ -78,6 +105,9 @@ export function AgnosticSeedCard({
         );
     }
 
+    const primaryMatch = evaluation?.matches?.[0]?.item?.name ?? "N/A";
+    const simScore = evaluation?.score?.toLocaleString() ?? "0";
+
     return (
         <div
             className={cn(
@@ -99,11 +129,10 @@ export function AgnosticSeedCard({
                         {deckSlug} • {stakeSlug}
                     </p>
                 </div>
-                {loading ? (
-                    <Loader2 className="animate-spin text-[var(--jimbo-gold)] shrink-0" size={28} />
-                ) : (
-                    <Sparkles className="text-[var(--jimbo-gold)] shrink-0" size={28} />
-                )}
+                {loading
+                    ? <Loader2 className="animate-spin text-[var(--jimbo-gold)] shrink-0" size={28} />
+                    : <Sparkles className="text-[var(--jimbo-gold)] shrink-0" size={28} />
+                }
             </div>
 
             {/* Stats */}
@@ -111,13 +140,13 @@ export function AgnosticSeedCard({
                 <div className="bg-[#111] p-5 border border-[var(--jimbo-panel-edge)] flex flex-col items-center justify-center">
                     <span className="block text-[11px] font-pixel text-[var(--jimbo-grey)] mb-2 uppercase">PRIMARY MATCH</span>
                     <div className="font-header text-xl text-[var(--jimbo-blue)] leading-tight text-center">
-                        {result?.matches?.[0]?.item?.name || result?.matches?.[0]?.name || "N/A"}
+                        {primaryMatch}
                     </div>
                 </div>
                 <div className="bg-[#111] p-5 border border-[var(--jimbo-panel-edge)] flex flex-col items-center justify-center">
                     <span className="block text-[11px] font-pixel text-[var(--jimbo-grey)] mb-2 uppercase">SIM SCORE</span>
                     <div className="font-header text-xl text-[var(--jimbo-dark-green)] leading-tight text-center">
-                        {result?.score?.toLocaleString() || "0"}
+                        {simScore}
                     </div>
                 </div>
             </div>

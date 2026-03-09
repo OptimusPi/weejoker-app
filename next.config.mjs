@@ -1,13 +1,20 @@
 import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare';
 
-// This initializes the dev server to be able to use Cloudflare bindings
-initOpenNextCloudflareForDev();
+// This initializes the dev server to be able to use Cloudflare bindings.
+// Wrapped in try-catch because dotnet.native.wasm (28MB) exceeds the 25MB
+// Cloudflare Workers asset limit, causing an unhandled rejection that crashes
+// the dev server. The API route has its own dev fallbacks for seed data.
+try {
+  initOpenNextCloudflareForDev();
+} catch (e) {
+  console.warn('[next.config] initOpenNextCloudflareForDev failed:', e?.message || e);
+}
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Your Next.js config
   // The `initOpenNextCloudflareForDev` call will handle the rest
-  
+
   // Add headers for WASM support
   async headers() {
     return [
@@ -26,7 +33,7 @@ const nextConfig = {
       },
     ];
   },
-  
+
   webpack: (config, { isServer }) => {
     // Add WASM support
     config.experiments = {
@@ -34,7 +41,7 @@ const nextConfig = {
       asyncWebAssembly: true,
       layers: true,
     };
-    
+
     // Handle .wasm files
     config.module.rules.push({
       test: /\.wasm$/,

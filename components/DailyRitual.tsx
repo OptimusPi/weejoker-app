@@ -5,10 +5,9 @@ import { RitualChallengeBoard } from "./RitualChallengeBoard";
 import { HowToPlay } from "./HowToPlay";
 import { SubmitScoreModal } from "./SubmitScoreModal";
 import { LeaderboardModal } from "./LeaderboardModal";
-import { Sprite } from "./Sprite";
-import { useSeedAnalyzer } from "@/lib/hooks/useSeedAnalyzer";
+import { parseJamlToFilter } from "@/lib/hooks/useJamlFilter";
+import { parseJamlToObjectives } from "@/lib/jaml/jamlObjectives";
 import { cn } from "@/lib/utils";
-
 import { ritualConfig } from "@/lib/config";
 
 type RitualCacheEntry = {
@@ -19,37 +18,39 @@ type RitualCacheEntry = {
     defaultObjective: string;
 };
 
-export const getDayNumber = (epoch: number) => {
-    if (!epoch) return 0;
-    const now = Date.now();
-    const diff = now - epoch;
-    return Math.floor(diff / (24 * 60 * 60 * 1000)) + 1;
+type RitualRuntimeState = {
+    title: string;
+    tagline: string;
+    epoch: number;
+    today: number;
+    defaultObjective: string;
+    jamlConfig: string;
+    seeds: string[];
 };
 
 export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: string, initialDay?: number }) {
-    const defaultRitualId = propId || ritualConfig.id;
-    const [ritualId] = useState(defaultRitualId);
+    const ritualId = propId || ritualConfig.id;
     const [configLoading, setConfigLoading] = useState(false);
-    const [serverToday, setServerToday] = useState(1);
 
     // Initialize specific viewing day from server prop (SSR safe)
     const [viewingDay, setViewingDay] = useState<number>(initialDay);
 
     const [mounted, setMounted] = useState(false);
-    const [seedsList, setSeedsList] = useState<string[]>([]);
-    const [jamlConfig, setJamlConfig] = useState('');
-    const [ritualTitle, setRitualTitle] = useState(ritualConfig.title);
-    const [ritualTagline, setRitualTagline] = useState(ritualConfig.tagline);
-    const [activeEpoch, setActiveEpoch] = useState(ritualConfig.epoch);
-    const [defaultObjective, setDefaultObjective] = useState(ritualConfig.defaultObjective);
+    const [ritualRuntime, setRitualRuntime] = useState<RitualRuntimeState>({
+        title: ritualConfig.title,
+        tagline: ritualConfig.tagline,
+        epoch: ritualConfig.epoch,
+        today: 1,
+        defaultObjective: ritualConfig.defaultObjective,
+        jamlConfig: '',
+        seeds: [],
+    });
 
-    // Simplified: always use serverToday if available, or compute locally (as backup)
-    const todayNumber = serverToday || getDayNumber(activeEpoch);
+    const todayNumber = ritualRuntime.today;
 
     // Cache to prevent redundant re-fetches
     const [ritualCache, setRitualCache] = useState<Record<number, RitualCacheEntry>>({});
 
-    // Modals
     // Modals
     const [showSubmit, setShowSubmit] = useState(false);
     const [showHowTo, setShowHowTo] = useState(false);
@@ -88,11 +89,14 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                 // 0. Check Cache First
                 if (fetchDay && ritualCache[fetchDay]) {
                     const cached = ritualCache[fetchDay];
-                    setJamlConfig(cached.jaml);
-                    setSeedsList([cached.seed]);
-                    setRitualTitle(cached.title);
-                    setRitualTagline(cached.tagline);
-                    setDefaultObjective(cached.defaultObjective);
+                    setRitualRuntime(prev => ({
+                        ...prev,
+                        title: cached.title,
+                        tagline: cached.tagline,
+                        defaultObjective: cached.defaultObjective,
+                        jamlConfig: cached.jaml,
+                        seeds: [cached.seed],
+                    }));
                     // setViewingDay(fetchDay); // Don't self-update if we are already here
                     if (active) {
                         clearTimeout(timer);
@@ -124,37 +128,27 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
 
                 if (!active) return;
 
-                console.log(`[DailyRitual] Received config:`, {
-                    title: config.title,
-                    seedCount: config.seeds?.length,
-                    hasJaml: !!config.jamlConfig,
-                    today: config.today,
-                    dayNumber: config.dayNumber,
-                    currentSeed: config.currentSeed,
-                    seedsIsArray: Array.isArray(config.seeds),
-                    firstFewSeeds: config.seeds?.slice(0, 3)
-                });
+                console.log('[DailyRitual] Received config for day', config.dayNumber, '— seeds:', config.seeds?.length);
 
-                setRitualTitle(config.title);
-                setRitualTagline(config.tagline);
-                setDefaultObjective(config.defaultObjective || ritualConfig.defaultObjective);
-                const epoch = new Date(config.epoch).getTime();
-                setActiveEpoch(epoch);
-                setServerToday(config.today || 1);
+                const nextSeeds = Array.isArray(config.seeds) && config.seeds.length > 0
+                    ? config.seeds
+                    : config.currentSeed
+                        ? [config.currentSeed]
+                        : [];
 
-                setJamlConfig(config.jamlConfig);
-
-                // Set seeds list - ensure we're using the full array
-                if (Array.isArray(config.seeds) && config.seeds.length > 0) {
-                    console.log(`[DailyRitual] Setting ${config.seeds.length} seeds`);
-                    setSeedsList(config.seeds);
-                } else if (config.currentSeed) {
-                    console.log(`[DailyRitual] Fallback to single currentSeed: ${config.currentSeed}`);
-                    setSeedsList([config.currentSeed]);
-                } else {
+                if (nextSeeds.length === 0) {
                     console.warn(`[DailyRitual] No seeds available!`);
-                    setSeedsList([]);
                 }
+
+                setRitualRuntime({
+                    title: config.title,
+                    tagline: config.tagline,
+                    epoch: new Date(config.epoch).getTime(),
+                    today: config.today || 1,
+                    defaultObjective: config.defaultObjective || ritualConfig.defaultObjective,
+                    jamlConfig: config.jamlConfig,
+                    seeds: nextSeeds,
+                });
 
                 // Only update viewingDay if we were in "latest" mode (0) and got a specific day
                 if (viewingDay === 0 && config.dayNumber) {
@@ -194,7 +188,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
             } catch (err: any) {
                 console.error("Ritual Fetch Error:", err);
                 if (err.message.includes("future")) {
-                    setSeedsList([]);
+                    setRitualRuntime(prev => ({ ...prev, seeds: [] }));
                 }
             } finally {
                 if (active) {
@@ -215,35 +209,27 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
 
     // Get Current Seed
     const currentSeedId = useMemo(() => {
-        // If we have history, lookup by day index (1-based -> 0-based)
-        if (seedsList.length > 1 && viewingDay > 0) {
-            const seed = seedsList[viewingDay - 1] || null;
-            console.log(`[DailyRitual] Looking up seed for day ${viewingDay} from ${seedsList.length} seeds: ${seed}`);
-            return seed;
-        }
-        // Fallback for single-seed mode
-        const fallback = seedsList[0] || (viewingDay <= todayNumber ? (seedsList.length > 0 ? seedsList[0] : null) : null);
-        console.log(`[DailyRitual] Using fallback seed: ${fallback}, seedsList length: ${seedsList.length}`);
-        return fallback;
-    }, [seedsList, viewingDay, todayNumber]);
+        const seed = ritualRuntime.seeds.length > 1 && viewingDay > 0
+            ? (ritualRuntime.seeds[viewingDay - 1] ?? null)
+            : (ritualRuntime.seeds[0] ?? null);
+        return seed;
+    }, [ritualRuntime.seeds, viewingDay]);
 
-    // Run Analyzer - Guard against LOCKED
-    const analyzerSeed = currentSeedId === 'LOCKED' ? null : currentSeedId;
-    const { data: analysisData, loading: analysisLoading, error: analysisError } = useSeedAnalyzer(analyzerSeed);
-
-    const showLoading = configLoading || analysisLoading;
+    const showLoading = configLoading;
+    const ritualFilter = useMemo(() => parseJamlToFilter(ritualRuntime.jamlConfig || ''), [ritualRuntime.jamlConfig]);
+    const ritualDeck = ritualFilter.deck || 'Erratic';
+    const ritualStake = ritualFilter.stake || 'White';
 
     // Objectives — extract must-clause values from parsed JAML
     const objectives = useMemo(() => {
-        if (!jamlConfig) return [defaultObjective];
+        if (!ritualRuntime.jamlConfig) return [ritualRuntime.defaultObjective];
         try {
-            const { parseJamlToObjectives } = require('@/lib/jaml/jamlObjectives');
-            const parsed = parseJamlToObjectives(jamlConfig);
-            return parsed.length > 0 ? parsed : [defaultObjective];
+            const parsed = parseJamlToObjectives(ritualRuntime.jamlConfig);
+            return parsed.length > 0 ? parsed : [ritualRuntime.defaultObjective];
         } catch {
-            return [defaultObjective];
+            return [ritualRuntime.defaultObjective];
         }
-    }, [defaultObjective, jamlConfig]);
+    }, [ritualRuntime.defaultObjective, ritualRuntime.jamlConfig]);
 
     const handleCopySeed = useCallback(() => {
         if (currentSeedId) {
@@ -256,15 +242,8 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
     const canGoForward = viewingDay < todayNumber + 1;
 
     const displayDate = viewingDay > 0
-        ? new Date(activeEpoch + (viewingDay - 1) * 86400000).toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' })
+        ? new Date(ritualRuntime.epoch + (viewingDay - 1) * 86400000).toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' })
         : "PRE-LAUNCH";
-
-
-
-    // Helper to update day and ensure we scroll top or reset state if needed
-    const updateDay = (newDay: number) => {
-        setViewingDay(newDay);
-    };
 
 
 
@@ -275,9 +254,9 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                 {viewingDay <= 0 && !configLoading ? (
                     <div className="w-full max-w-full md:max-w-xl aspect-[4/3] flex flex-col items-center justify-center p-4 md:p-12 text-center">
                         <div className="jimbo-panel p-4 md:p-8">
-                            <h3 className="font-header text-2xl md:text-3xl text-[var(--jimbo-gold)] mb-2 md:mb-4">{ritualTitle}</h3>
+                            <h3 className="font-header text-2xl md:text-3xl text-[var(--jimbo-gold)] mb-2 md:mb-4">{ritualRuntime.title}</h3>
                             <div className="flex justify-between items-center py-1 border-y border-[var(--jimbo-panel-edge)] text-[11px] md:text-[13px] font-pixel text-[var(--jimbo-grey)] tracking-[0.1em] md:tracking-[0.2em]">
-                                The Weepoch begins {new Date(activeEpoch).toLocaleDateString()}
+                                Epoch begins {new Date(ritualRuntime.epoch).toLocaleDateString()}
                             </div>
                             <div className="flex flex-col gap-2 md:gap-4 mt-4">
                                 <button
@@ -289,7 +268,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => updateDay(Math.max(1, todayNumber))}
+                                    onClick={() => setViewingDay(Math.max(1, todayNumber))}
                                     className="jimbo-btn bg-[var(--jimbo-grey)] text-xs md:text-sm"
                                 >
                                     Go to Today (Day {Math.max(1, todayNumber)})
@@ -336,7 +315,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                                 </p>
                                 <button
                                     type="button"
-                                    onClick={() => updateDay(todayNumber)}
+                                    onClick={() => setViewingDay(todayNumber)}
                                     className="jimbo-btn jimbo-btn-blue mt-4 md:mt-6 text-xs md:text-sm"
                                 >
                                     Back to Today
@@ -346,7 +325,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                             <RitualChallengeBoard
                                 seed={currentSeedId || 'LOCKED'}
                                 objectives={objectives}
-                                ritualTitle={ritualTitle}
+                                ritualTitle={ritualRuntime.title}
                                 onCopy={handleCopySeed}
                                 onShowHowTo={() => setShowHowTo(true)}
                                 onOpenSubmit={() => setShowSubmit(true)}
@@ -354,9 +333,9 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                                 isLocked={viewingDay > todayNumber}
                                 dayNumber={viewingDay}
                                 ritualId={ritualId}
-                                onPrevDay={() => updateDay(Math.max(0, viewingDay - 1))}
-                                onNextDay={() => updateDay(Math.min(todayNumber + 1, viewingDay + 1))}
-                                jamlConfig={jamlConfig || ''}
+                                onPrevDay={() => setViewingDay(Math.max(0, viewingDay - 1))}
+                                onNextDay={() => setViewingDay(Math.min(todayNumber + 1, viewingDay + 1))}
+                                jamlConfig={ritualRuntime.jamlConfig}
                                 canGoBack={canGoBack}
                                 canGoForward={canGoForward}
                                 displayDate={displayDate}
@@ -371,7 +350,9 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                 isOpen={showHowTo}
                 onClose={() => setShowHowTo(false)}
                 seedId={currentSeedId || undefined}
-                objectiveName={defaultObjective}
+                objectiveName={ritualRuntime.defaultObjective}
+                deckName={ritualDeck}
+                stakeName={ritualStake}
             />
 
             {showSubmit && currentSeedId && (

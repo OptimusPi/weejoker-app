@@ -9,6 +9,7 @@ import { Sprite } from "./Sprite";
 import { useSeedAnalyzer } from "@/lib/hooks/useSeedAnalyzer";
 import { evaluateSeed } from "@/lib/jaml/jamlEvaluator";
 import { useJamlFilter } from "@/lib/hooks/useJamlFilter";
+import { ritualConfig } from "@/lib/config";
 import { JamlJourneyMap } from "./cards/JamlJourneyMap";
 import { cn } from "@/lib/utils";
 import { JimboInnerPanel } from "./JimboPanel";
@@ -160,9 +161,11 @@ export function RitualChallengeBoard({
 
     // JAML Filter
     const { filter } = useJamlFilter(jamlConfig || '');
+    const analysisDeck = filter?.deck || 'Erratic';
+    const analysisStake = filter?.stake || 'White';
 
     // Seed analysis (from WASM)
-    const { data: analysis, loading: isAnalyzing } = useSeedAnalyzer(seed);
+    const { data: analysis, loading: isAnalyzing } = useSeedAnalyzer(seed, analysisDeck, analysisStake);
 
     const foundJokers = React.useMemo(() => {
         return analysis?.jokers || [];
@@ -519,7 +522,7 @@ export function RitualChallengeBoard({
 
                             {activeTab === 'scores' && (
                                 <div className="p-2 space-y-2">
-                                    <LeaderboardComponent ritualId={ritualId || 'TheDailyWee'} seed={seed} />
+                                    <LeaderboardComponent ritualId={ritualId || ritualConfig.id} seed={seed} />
                                 </div>
                             )}
                         </div>

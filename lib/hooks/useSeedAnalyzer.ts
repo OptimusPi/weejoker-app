@@ -5,7 +5,7 @@ import { AnalyzedSeed, normalizeAnalysis } from '../seedAnalyzer';
 import { analyzeSeedWasm } from '../api/motelyWasm';
 
 
-export function useSeedAnalyzer(seed: string | null) {
+export function useSeedAnalyzer(seed: string | null, deck: string = 'Erratic', stake: string = 'White') {
     const [data, setData] = useState<AnalyzedSeed | null | undefined>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -21,7 +21,7 @@ export function useSeedAnalyzer(seed: string | null) {
             setLoading(true);
             setError(null);
             try {
-                const rawResult = await analyzeSeedWasm(seed, "Erratic", "White");
+                const rawResult = await analyzeSeedWasm(seed, deck, stake);
                 if (abortController.signal.aborted) return;
 
                 if (rawResult) {
@@ -41,7 +41,7 @@ export function useSeedAnalyzer(seed: string | null) {
 
         runAnalysis();
         return () => abortController.abort();
-    }, [seed]);
+    }, [seed, deck, stake]);
 
     return { data, loading, error };
 }

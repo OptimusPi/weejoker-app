@@ -33,6 +33,19 @@ import type {
 let wasmApi: MotelyWasmApi | null = null;
 let initPromise: Promise<MotelyWasmApi> | null = null;
 
+function toMotelyLoadError(error: unknown): Error {
+    const message = error instanceof Error ? error.message : String(error);
+
+    if (/Failed to fetch dynamically imported module/i.test(message) || /\/dotnet\.js/i.test(message)) {
+        return new Error(
+            `[MotelyWasm] Failed to load the bundled single-thread runtime assets from motely-wasm. ` +
+            `The package runtime files were not resolved correctly by the app bundler/host. Original error: ${message}`,
+        );
+    }
+
+    return error instanceof Error ? error : new Error(message);
+}
+
 /**
  * Initialize and return the Motely WASM API (singleton).
  * Browser-only — throws in SSR/Edge.
@@ -47,15 +60,18 @@ async function getWasmApi(): Promise<MotelyWasmApi> {
     initPromise = (async () => {
         try {
             const { loadMotely } = await import('motely-wasm');
-            console.log('[MotelyWasm] Loading WASM runtime...');
-            const api = await loadMotely();
+            console.log('[MotelyWasm] Loading bundled single-thread WASM runtime...');
+            const api = await loadMotely({
+                threads: 'off',
+            });
             wasmApi = api;
+
             const version = api.getVersion();
             console.log(`[MotelyWasm] Loaded v${version.version} (${version.runtime})`);
             return api;
         } catch (error) {
             initPromise = null;
-            throw error;
+            throw toMotelyLoadError(error);
         }
     })();
 

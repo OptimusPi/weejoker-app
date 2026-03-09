@@ -1,4 +1,5 @@
 import { DailyRitual } from "@/components/DailyRitual";
+import { ritualConfig } from "@/lib/config";
 
 
 
@@ -12,7 +13,7 @@ export default async function Home({
 
     return (
         <main className="h-full w-full">
-            <DailyRitual ritualId="TheDailyWee" initialDay={initialDay} />
+            <DailyRitual ritualId={ritualConfig.id} initialDay={initialDay} />
         </main>
     );
 }
