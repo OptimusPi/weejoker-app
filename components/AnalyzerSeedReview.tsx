@@ -9,7 +9,7 @@ interface AnalyzerSeedReviewProps {
     seeds: string[];
     initialIndex?: number;
     onClose: () => void;
-    jamlConfig?: string | null;
+    jamlConfig?: string;
 }
 
 export function AnalyzerSeedReview({ seeds, initialIndex = 0, onClose, jamlConfig }: AnalyzerSeedReviewProps) {

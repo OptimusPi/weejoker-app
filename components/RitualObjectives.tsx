@@ -3,15 +3,15 @@
 import { useEffect, useState } from "react";
 import { Sprite } from "./Sprite";
 import { JimboPanel, JimboInnerPanel } from "@/components/JimboPanel";
+import { parseJamlToObjectives } from "@/lib/jaml/jamlObjectives";
 
 interface RitualObjectivesProps {
-    jamlConfig: string | null;
+    jamlConfig: string;
 }
 
 interface Objective {
     type: string;
     value: string;
-    ante?: number;
 }
 
 export function RitualObjectives({ jamlConfig }: RitualObjectivesProps) {
@@ -20,45 +20,8 @@ export function RitualObjectives({ jamlConfig }: RitualObjectivesProps) {
     useEffect(() => {
         if (!jamlConfig) return;
 
-        // Simple parsing for "must:" clause list
-        // This is a naive regex parser for display purposes only
-        const lines = jamlConfig.split('\n');
-        const foundObjectives: Objective[] = [];
-
-        let inMustBlock = false;
-
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (line.startsWith('must:')) {
-                inMustBlock = true;
-                continue;
-            }
-            if (inMustBlock && (line.startsWith('should:') || line.startsWith('mustNot:'))) {
-                break;
-            }
-
-            if (inMustBlock && line.startsWith('-')) {
-                // Parse "- type: Joker" //       "value: Wee Joker" //       "antes: [1,2]"
-                // Hacky visual parser for now: // Look for "value: X" lines inside the must block
-                if (line.includes('value:')) {
-                    const val = line.split('value:')[1].trim();
-                    foundObjectives.push({ type: 'Target', value: val });
-                }
-            }
-        }
-
-        // If naive parsing fails, fallback to regex on the whole block
-        const mustBlock = jamlConfig.split('must:')[1]?.split('should:')[0]?.split('mustNot:')[0];
-        if (mustBlock) {
-            const valueMatches = mustBlock.matchAll(/value:\s*([^\n]+)/g);
-            for (const match of valueMatches) {
-                if (!foundObjectives.find(o => o.value === match[1].trim())) {
-                    foundObjectives.push({ type: 'Find', value: match[1].trim() });
-                }
-            }
-        }
-
-        setObjectives(foundObjectives);
+        const names = parseJamlToObjectives(jamlConfig);
+        setObjectives(names.map(name => ({ type: 'Target', value: name })));
     }, [jamlConfig]);
 
     if (!jamlConfig || objectives.length === 0) return null;

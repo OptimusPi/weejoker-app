@@ -4,13 +4,14 @@ import { createPortal } from 'react-dom';
 import yaml from 'js-yaml';
 import { Plus, Minus, Check } from 'lucide-react';
 import { JamlCompletionService, CompletionData } from '@/lib/jaml/jamlCompletion';
+import { METADATA_KEYS as SCHEMA_METADATA_KEYS, CLAUSE_TYPE_KEYS } from '@/lib/jaml/jamlSchema';
 
 
 
-// Jimbo Colors - High Contrast Theme
+// Jimbo Colors — all values from CSS custom properties, zero magic strings
 const COLORS = {
-    white: '#FFFFFF',
-    black: '#000000',
+    white: 'var(--jimbo-white, #fff)',
+    black: 'var(--jimbo-black, #000)',
     red: 'var(--jimbo-red)',
     blue: 'var(--jimbo-blue)',
     green: 'var(--jimbo-dark-green)',
@@ -18,9 +19,8 @@ const COLORS = {
     orange: 'var(--jimbo-orange)',
     yellow: 'var(--jimbo-gold)',
     gold: 'var(--jimbo-gold)',
-    // Editor background
-    editorBg: '#111111',
-    editorBgAlt: '#1a1a1a',
+    editorBg: 'var(--jimbo-editor-bg, #111)',
+    editorBgAlt: 'var(--jimbo-editor-bg-alt, #1a1a1a)',
 };
 
 interface InteractiveJamlEditorProps {
@@ -60,8 +60,8 @@ should:
     score: 5
 `;
 
-const METADATA_KEYS = ['name', 'author', 'description', 'deck', 'stake', 'label'];
-const REQUIRED_KEYS = ['joker', 'soulJoker', 'voucher', 'tarotCard', 'planetCard', 'spectralCard', 'standardCard', 'tag', 'boss', 'event'];
+const METADATA_KEYS = [...SCHEMA_METADATA_KEYS, 'label'];
+const REQUIRED_KEYS = [...CLAUSE_TYPE_KEYS];
 
 // --- Sub-components ---
 
@@ -530,18 +530,23 @@ function JamlLine({
     // Suggestions Logic
     useEffect(() => {
         if (isEditing && editingPart) {
-            let textContext = line.raw;
+            let sugs: CompletionData[];
             if (editingPart === 'value' && line.key) {
-                textContext = `${line.key}: ${localValue}`;
+                // Context-aware: suggest valid values for this key
+                sugs = JamlCompletionService.getValueCompletions(line.key, localValue);
+                // Fall back to flat keyword search if no schema values for this key
+                if (sugs.length === 0) {
+                    sugs = JamlCompletionService.getCompletions(localValue);
+                }
             } else if (editingPart === 'key') {
-                textContext = localValue;
+                sugs = JamlCompletionService.getKeyCompletions(line.indent, localValue);
+            } else {
+                sugs = JamlCompletionService.getCompletions(localValue);
             }
-
-            const sugs = JamlCompletionService.getCompletions(textContext);
             setSuggestions(sugs.slice(0, 10));
             setSelectedIndex(0);
         }
-    }, [isEditing, editingPart, localValue, line.raw, line.key]);
+    }, [isEditing, editingPart, localValue, line.raw, line.key, line.indent]);
 
     // Input Focus
     useEffect(() => {

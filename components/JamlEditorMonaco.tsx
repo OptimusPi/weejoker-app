@@ -5,6 +5,14 @@ import Editor, { OnMount, loader } from "@monaco-editor/react";
 import { Copy, RotateCcw, Check, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { JimboPanel, JimboInnerPanel } from './JimboPanel';
+import {
+    JAML_SCHEMA_VERSION,
+    SECTION_KEYS,
+    METADATA_KEYS,
+    PROPERTY_KEYS,
+    CLAUSE_TYPE_KEYS,
+    getValidValuesForKey,
+} from '@/lib/jaml/jamlSchema';
 
 interface JamlEditorMonacoProps {
     value: string;
@@ -50,6 +58,84 @@ export default function JamlEditorMonaco({ value, onChange, diagnostics, classNa
                 'list.hoverForeground': '#ffffff',
                 'list.focusBackground': '#d8b97d',
                 'list.focusForeground': '#1a1a1a',
+            }
+        });
+
+        // Register JAML completion provider for YAML
+        monaco.languages.registerCompletionItemProvider('yaml', {
+            triggerCharacters: [':', ' ', '-', '\n'],
+            provideCompletionItems: (model: any, position: any) => {
+                const lineContent = model.getLineContent(position.lineNumber);
+                const textUntilPosition = lineContent.substring(0, position.column - 1).trimStart();
+                const wordAtPosition = model.getWordUntilPosition(position);
+                const range = {
+                    startLineNumber: position.lineNumber,
+                    endLineNumber: position.lineNumber,
+                    startColumn: wordAtPosition.startColumn,
+                    endColumn: wordAtPosition.endColumn,
+                };
+
+                const suggestions: any[] = [];
+
+                // Detect if we're after a colon (value position)
+                const colonMatch = lineContent.match(/^\s*-?\s*(\w+):\s*/);
+                if (colonMatch && position.column > colonMatch[0].length) {
+                    const key = colonMatch[1];
+                    const validValues = getValidValuesForKey(key);
+                    if (validValues) {
+                        for (const val of validValues) {
+                            suggestions.push({
+                                label: val,
+                                kind: monaco.languages.CompletionItemKind.Value,
+                                insertText: val,
+                                range,
+                                sortText: `0-${val}`,
+                            });
+                        }
+                    }
+                    // Also suggest clause types for 'type:' key
+                    if (key === 'type') {
+                        for (const ct of CLAUSE_TYPE_KEYS) {
+                            suggestions.push({
+                                label: ct,
+                                kind: monaco.languages.CompletionItemKind.EnumMember,
+                                insertText: ct,
+                                range,
+                                sortText: `0-${ct}`,
+                            });
+                        }
+                    }
+                } else {
+                    // Key position — suggest keys based on indent
+                    const indent = lineContent.search(/\S|$/);
+                    const isArrayItem = textUntilPosition.startsWith('-');
+
+                    if (indent === 0 && !isArrayItem) {
+                        // Root level: metadata + sections
+                        for (const key of [...METADATA_KEYS, ...SECTION_KEYS]) {
+                            suggestions.push({
+                                label: key,
+                                kind: monaco.languages.CompletionItemKind.Property,
+                                insertText: SECTION_KEYS.includes(key) ? `${key}:\n  - ` : `${key}: `,
+                                range,
+                                sortText: `0-${key}`,
+                            });
+                        }
+                    } else {
+                        // Inside a section: property keys + clause shorthand keys
+                        for (const key of PROPERTY_KEYS) {
+                            suggestions.push({
+                                label: key,
+                                kind: monaco.languages.CompletionItemKind.Property,
+                                insertText: `${key}: `,
+                                range,
+                                sortText: `1-${key}`,
+                            });
+                        }
+                    }
+                }
+
+                return { suggestions };
             }
         });
     };
@@ -143,7 +229,7 @@ export default function JamlEditorMonaco({ value, onChange, diagnostics, classNa
                     Lines: {value.split('\n').length} | Encoding: UTF-8
                 </div>
                 <div className="text-[8px] font-pixel text-[var(--jimbo-grey)] uppercase tracking-widest">
-                    Motely JAML Engine v1.0.4
+                    Motely JAML Schema v{JAML_SCHEMA_VERSION}
                 </div>
             </div>
         </JimboInnerPanel>

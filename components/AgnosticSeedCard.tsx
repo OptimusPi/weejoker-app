@@ -4,70 +4,54 @@ import React, { useState, useEffect } from 'react';
 import { analyzeSeedWasm } from '@/lib/api/motelyWasm';
 import { normalizeAnalysis } from '@/lib/seedAnalyzer';
 import { evaluateSeed } from '@/lib/jaml/jamlEvaluator';
+import { JamlFilter } from '@/lib/hooks/useJamlFilter';
 import { cn } from '@/lib/utils';
 import { DeckSprite } from './DeckSprite';
-
 import { Loader2, Sparkles, ChevronRight } from 'lucide-react';
 
 interface AgnosticSeedCardProps {
     seed: string;
-    deckSlug?: string;
-    stakeSlug?: string;
+    jamlFilter: JamlFilter;
     className?: string;
     onClick?: () => void;
-    analysis?: any;
-    result?: any;
-    dayNumber?: number;
-    ritualId?: string;
-    jamlConfig?: string | null;
     isLocked?: boolean;
-    onShowHowTo?: () => void;
-    onOpenSubmit?: () => void;
-    canSubmit?: boolean;
-    filter?: any;
+    dayNumber?: number;
 }
 
 export function AgnosticSeedCard({
     seed,
-    deckSlug = 'Erratic',
-    stakeSlug = 'White',
+    jamlFilter,
     isLocked,
     dayNumber,
     className,
     onClick,
-    analysis: propAnalysis,
-    result: propResult,
-    filter
 }: AgnosticSeedCardProps) {
-    const [loading, setLoading] = useState(false);
-    const [fetchedAnalysis, setFetchedAnalysis] = useState<any>(null);
+    const deckSlug = jamlFilter.deck || 'Erratic';
+    const stakeSlug = jamlFilter.stake || 'White';
 
-    const result = propAnalysis || propResult || fetchedAnalysis;
+    const [loading, setLoading] = useState(false);
+    const [result, setResult] = useState<any>(null);
 
     useEffect(() => {
-        if (propAnalysis || propResult) return;
-
+        let active = true;
         const analyze = async () => {
             setLoading(true);
             try {
                 const rawData = await analyzeSeedWasm(seed, deckSlug, stakeSlug);
                 const normalized = normalizeAnalysis(rawData);
-
-                if (filter) {
-                    const evaluation = evaluateSeed(normalized, filter);
-                    setFetchedAnalysis(evaluation);
-                } else {
-                    setFetchedAnalysis({ ...normalized, score: 0, matches: [] });
+                if (active) {
+                    const evaluation = evaluateSeed(normalized, jamlFilter);
+                    setResult(evaluation);
                 }
             } catch (err) {
                 console.error(err);
             } finally {
-                setLoading(false);
+                if (active) setLoading(false);
             }
         };
-
         analyze();
-    }, [seed, deckSlug, stakeSlug, propAnalysis, propResult, filter]);
+        return () => { active = false; };
+    }, [seed, deckSlug, stakeSlug, jamlFilter]);
 
     if (isLocked) {
         return (
@@ -76,7 +60,7 @@ export function AgnosticSeedCard({
                     "flex flex-col items-center justify-center text-center",
                     "w-[315px] h-[340px] shrink-0",
                     "border-dashed border-[var(--jimbo-panel-edge)] bg-[var(--jimbo-panel-edge)] opacity-60 grayscale",
-                    "animate-sway", // Move sway to container
+                    "animate-sway",
                     className
                 )}
             >
@@ -98,13 +82,13 @@ export function AgnosticSeedCard({
         <div
             className={cn(
                 "flex flex-col cursor-pointer bg-gradient-to-br from-[#1c2e27] to-[#151c19] border-y-2 border-t-[#224536] border-b-[#0b120f] shadow-lg",
-                "w-[315px] h-[340px] shrink-0 p-4", // ONE SIZE RULE
-                "animate-sway relative overflow-hidden", // Preserve the cute breathing/sway
+                "w-[315px] h-[340px] shrink-0 p-4",
+                "animate-sway relative overflow-hidden",
                 className
             )}
             onClick={onClick}
         >
-            {/* Header - Mobile Optimized */}
+            {/* Header */}
             <div className="flex items-start gap-3 pb-4 border-b border-[var(--jimbo-panel-edge)]">
                 <div className="animate-juice-pop">
                     <DeckSprite deck={deckSlug} stake={stakeSlug} size={64} />
@@ -122,7 +106,7 @@ export function AgnosticSeedCard({
                 )}
             </div>
 
-            {/* Stats Grid - Larger Touch Targets */}
+            {/* Stats */}
             <div className="grid grid-cols-2 gap-3 py-6">
                 <div className="bg-[#111] p-5 border border-[var(--jimbo-panel-edge)] flex flex-col items-center justify-center">
                     <span className="block text-[11px] font-pixel text-[var(--jimbo-grey)] mb-2 uppercase">PRIMARY MATCH</span>
@@ -138,7 +122,7 @@ export function AgnosticSeedCard({
                 </div>
             </div>
 
-            {/* Footer - Mobile Optimized */}
+            {/* Footer */}
             <div className="flex items-center justify-end pt-4 border-t border-[var(--jimbo-panel-edge)]">
                 <button className="flex items-center gap-2 font-header text-sm text-[var(--jimbo-gold)] hover:brightness-125 transition-all active:scale-95 py-2 px-3 -mr-3">
                     VIEW STRATEGY <ChevronRight size={16} />

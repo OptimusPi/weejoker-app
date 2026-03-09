@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getCapabilities, type CapabilitiesInfo } from '@/lib/api/motelyWasm';
+import { JAML_SCHEMA_VERSION } from '@/lib/jaml/jamlSchema';
 import { Loader2, Cpu, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -51,7 +52,7 @@ export function MotelyVersionBadge({ className, minimal = false }: MotelyVersion
             {loading ? (
                 <Loader2 size={10} className="animate-spin" />
             ) : (
-                <span>Motely v{version}</span>
+                <span>Motely v{version} · JAML {JAML_SCHEMA_VERSION}</span>
             )}
         </div>
     );

@@ -37,7 +37,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
 
     const [mounted, setMounted] = useState(false);
     const [seedsList, setSeedsList] = useState<string[]>([]);
-    const [jamlConfig, setJamlConfig] = useState<string | null>(null);
+    const [jamlConfig, setJamlConfig] = useState('');
     const [ritualTitle, setRitualTitle] = useState(ritualConfig.title);
     const [ritualTagline, setRitualTagline] = useState(ritualConfig.tagline);
     const [activeEpoch, setActiveEpoch] = useState(ritualConfig.epoch);
@@ -233,19 +233,16 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
 
     const showLoading = configLoading || analysisLoading;
 
-    // Objectives Parsing
+    // Objectives — extract must-clause values from parsed JAML
     const objectives = useMemo(() => {
         if (!jamlConfig) return [defaultObjective];
-        const mustBlock = jamlConfig.split('must:')[1]?.split('should:')[0]?.split('mustNot:')[0];
-        if (mustBlock) {
-            const values: string[] = [];
-            const valueMatches = mustBlock.matchAll(/value:\s*([^ \n#]+)/g);
-            for (const match of valueMatches) {
-                values.push(match[1].trim());
-            }
-            return values.length > 0 ? values : [defaultObjective];
+        try {
+            const { parseJamlToObjectives } = require('@/lib/jaml/jamlObjectives');
+            const parsed = parseJamlToObjectives(jamlConfig);
+            return parsed.length > 0 ? parsed : [defaultObjective];
+        } catch {
+            return [defaultObjective];
         }
-        return [defaultObjective];
     }, [defaultObjective, jamlConfig]);
 
     const handleCopySeed = useCallback(() => {

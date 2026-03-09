@@ -46,7 +46,7 @@ interface RitualChallengeBoardProps {
     onNextDay?: () => void;
     canGoBack?: boolean;
     canGoForward?: boolean;
-    jamlConfig?: string | null;
+    jamlConfig?: string;
     displayDate?: string;
 }
 

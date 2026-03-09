@@ -25,14 +25,14 @@
     "csv-parse": "^6.1.0",
     "framer-motion": "^11.0.8",
     "lucide-react": "^0.561.0",
-    "motely-wasm": "3.0.2",
+    "motely-wasm": "^3.0.4",
     "next": "15.1.11",
     "papaparse": "^5.5.3",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "recharts": "^2.12.2",
     "tailwind-merge": "^2.2.1",
-    "wrangler": "^4.69.0"
+    "wrangler": "^4.71.0"
   },
   "devDependencies": {
     "@cloudflare/next-on-pages": "^1.10.0",
