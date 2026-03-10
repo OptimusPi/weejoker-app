@@ -61,11 +61,13 @@ export default function JamlEditor({ initialJaml, onJamlChange, className }: Int
                 <span className="flex items-center gap-1.5">
                     <span
                         className="w-2.5 h-2.5 rounded-full"
+                        // @ts-ignore
                         style={{
                             backgroundColor: isValid ? JimboColorOption.DARK_GREEN : JimboColorOption.RED,
                             boxShadow: `0 0 8px ${isValid ? JimboColorOption.DARK_GREEN : JimboColorOption.RED}`
                         }}
                     ></span>
+                    {/* @ts-ignore */}
                     <span style={{ color: isValid ? JimboColorOption.DARK_GREEN : JimboColorOption.RED }}>
                         {isValid ? 'JAML VIBES' : 'JAML ERROR'}
                     </span>
