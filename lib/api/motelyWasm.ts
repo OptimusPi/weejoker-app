@@ -46,6 +46,13 @@ function toMotelyLoadError(error: unknown): Error {
     return error instanceof Error ? error : new Error(message);
 }
 
+function getWasmRuntimeOptions() {
+    const supportsThreads = typeof window !== 'undefined' && window.crossOriginIsolated;
+    return supportsThreads
+        ? { baseUrl: '/_framework', threads: 'auto' as const }
+        : { baseUrl: '/_framework_st', threads: 'off' as const };
+}
+
 /**
  * Initialize and return the Motely WASM API (singleton).
  * Browser-only — throws in SSR/Edge.
@@ -60,9 +67,11 @@ async function getWasmApi(): Promise<MotelyWasmApi> {
     initPromise = (async () => {
         try {
             const { loadMotely } = await import('motely-wasm');
-            console.log('[MotelyWasm] Loading bundled single-thread WASM runtime...');
+            console.log('[MotelyWasm] Loading WASM runtime...');
+            const runtimeOptions = getWasmRuntimeOptions();
             const api = await loadMotely({
-                threads: 'off',
+                baseUrl: runtimeOptions.baseUrl,
+                threads: runtimeOptions.threads,
             });
             wasmApi = api;
 

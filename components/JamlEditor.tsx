@@ -1,10 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import yaml from 'js-yaml';
+import { JimboPanel, JimboInnerPanel, cn } from '@jimbo-ui/components/Panel';
+import { JimboColorOption } from '@jimbo-ui/types';
 
-const COLORS = {
-    green: 'var(--jimbo-dark-green)',
-    red: 'var(--jimbo-red)',
-};
 
 interface InteractiveJamlEditorProps {
     initialJaml?: string;
@@ -48,22 +46,33 @@ export default function JamlEditor({ initialJaml, onJamlChange, className }: Int
     }, [initialJaml]);
 
     return (
-        <div className={`flex flex-col bg-[#111] text-white rounded-lg overflow-hidden min-h-[500px] border border-[var(--jimbo-panel-edge)] ${className ?? ''}`}>
+        <JimboPanel className={cn("min-h-[500px]", className)}>
             <textarea
+                title="JAML Editor"
+                placeholder="Enter JAML..."
                 value={text}
                 onChange={(e) => emitChange(e.target.value)}
                 spellCheck={false}
                 autoCapitalize="off"
                 autoCorrect="off"
-                className="flex-1 w-full resize-none outline-none border-none p-4 bg-[#111] text-white font-mono text-[13px] leading-[1.8]"
+                className="flex-1 w-full resize-none outline-none border-none p-4 bg-transparent text-white font-mono text-[13px] leading-[1.8]"
             />
-            <div className="mt-0 p-2 bg-[#222] border-t border-[var(--jimbo-panel-edge)] flex flex-wrap gap-4 text-[12px] text-[var(--jimbo-grey)] font-mono">
+            <JimboInnerPanel className="mt-0 p-2 flex flex-wrap gap-4 text-[12px] text-[var(--jimbo-grey)] font-mono">
                 <span className="flex items-center gap-1.5">
-                    <span className="jaml-legend-dot" style={{ backgroundColor: isValid ? COLORS.green : COLORS.red }}></span>
-                    {isValid ? 'yaml ok' : 'yaml invalid'}
+                    <span
+                        className="w-2.5 h-2.5 rounded-full"
+                        style={{
+                            backgroundColor: isValid ? JimboColorOption.DARK_GREEN : JimboColorOption.RED,
+                            boxShadow: `0 0 8px ${isValid ? JimboColorOption.DARK_GREEN : JimboColorOption.RED}`
+                        }}
+                    ></span>
+                    <span style={{ color: isValid ? JimboColorOption.DARK_GREEN : JimboColorOption.RED }}>
+                        {isValid ? 'JAML VIBES' : 'JAML ERROR'}
+                    </span>
                 </span>
                 <span className="ml-auto opacity-60">plain text only</span>
-            </div>
-        </div>
+            </JimboInnerPanel>
+        </JimboPanel>
     );
 }
+

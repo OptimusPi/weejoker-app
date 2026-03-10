@@ -269,8 +269,7 @@ export function RitualChallengeBoard({
             {/* ===== DAY HEADER ===== */}
             <div className="text-center mb-2 w-full px-1">
                 <div
-                    className="font-header text-xl text-white tracking-wider leading-none mb-1 select-none"
-                    style={{ textShadow: '2px 2px 0 rgba(0,0,0,0.8)' }}
+                    className="font-header text-xl text-white tracking-wider leading-none mb-1 select-none [text-shadow:2px_2px_0_rgba(0,0,0,0.8)]"
                 >
                     {ritualTitle || ritualId || 'Daily Ritual'}
                 </div>
@@ -283,7 +282,7 @@ export function RitualChallengeBoard({
 
             {/* ===== VIEW 1: PREVIEW — arrows + compact card + Play button ===== */}
             {viewMode === 'preview' && (
-                <div className="flex items-stretch justify-center gap-0 w-full" style={{ maxWidth: '375px', margin: '0 auto' }}>
+                <div className="flex items-stretch justify-center gap-0 w-full max-w-[375px] mx-auto">
                     {/* LEFT ARROW — hugs left edge */}
                     <button
                         type="button"
@@ -299,13 +298,12 @@ export function RitualChallengeBoard({
                     {/* PREVIEW CARD — fixed 320x340 */}
                     <div
                         className={cn(
-                            "flex-none",
+                            "flex-none w-[320px]",
                             slideState === 'out-down' && "animate-cartridge-out",
                             slideState === 'in-up' && "animate-cartridge-in",
                         )}
-                        style={{ width: '320px' }}
                     >
-                        <div className="jimbo-panel flex flex-col overflow-hidden" style={{ width: '320px', height: '340px' }}>
+                        <div className="jimbo-panel flex flex-col overflow-hidden w-[320px] h-[340px]">
                             {/* Top row: seed info (left 50%) | deck visual (right 50%) */}
                             <div className="flex flex-1 min-h-0 gap-2">
                                 {/* Left: seed + JAML info */}
@@ -349,18 +347,17 @@ export function RitualChallengeBoard({
 
                                 {/* Right: tilted deck back + playing card overlay */}
                                 <div className="w-1/2 flex items-center justify-center relative">
-                                    <div className="relative" style={{ width: 80, height: 100 }}>
+                                    {/* JAML rank/suit indicator — larger focused card */}
+                                    <div className="relative w-20 h-[100px]">
                                         {/* Deck back — tilted RIGHT */}
                                         <div
-                                            className="absolute inset-0 flex items-center justify-center"
-                                            style={{ transform: 'rotate(12deg)', transformOrigin: 'center' }}
+                                            className="absolute inset-0 flex items-center justify-center rotate-12"
                                         >
                                             <DeckSprite deck={analysis?.deck || 'Erratic'} stake="White" size={52} />
                                         </div>
                                         {/* Card face overlay — tilted LEFT, on top */}
                                         <div
-                                            className="absolute inset-0 flex items-center justify-center"
-                                            style={{ transform: 'rotate(-8deg) translate(-4px, -4px)', transformOrigin: 'center', zIndex: 1 }}
+                                            className="absolute inset-0 flex items-center justify-center transition-transform hover:scale-110 z-[1] -rotate-[8deg] -translate-x-1 -translate-y-1"
                                         >
                                             <PlayingCard rank={jamlRank} suit={jamlSuit} size={52} />
                                         </div>
@@ -371,6 +368,23 @@ export function RitualChallengeBoard({
                                         </div>
                                     )}
                                 </div>
+                            </div>
+
+                            {/* Starting Deck Fan — Restored to preview! */}
+                            <div className="flex-1 min-h-0 flex items-center justify-center overflow-hidden py-1 opacity-90">
+                                {analysis?.startingDeck ? (
+                                    <div className="scale-[0.8] origin-center">
+                                        <DeckFan4Row
+                                            cards={analysis.startingDeck}
+                                            featuredRank={startingRankSummary?.rank}
+                                            cardSize={32}
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="border border-white/5 bg-white/5 rounded-md flex items-center justify-center w-full h-16">
+                                        <Loader2 className="animate-spin text-white/10" size={20} />
+                                    </div>
+                                )}
                             </div>
 
                             {/* Blue Play button */}
@@ -398,164 +412,167 @@ export function RitualChallengeBoard({
                         <span className="text-base select-none">&gt;</span>
                     </button>
                 </div>
-            )}
+            )
+            }
 
             {/* ===== VIEW 2: DETAIL — full-width, no arrows, tabs ===== */}
-            {viewMode === 'detail' && (
-                <div className="w-full" style={{ width: '320px', height: '340px', margin: '0 auto' }}>
-                    <div className="jimbo-panel flex flex-col h-[340px] overflow-hidden" style={{ width: '320px', height: '340px' }}>
-                        {/* Seed bar */}
-                        <div className="flex items-center gap-2 pb-2 border-b border-white/10 shrink-0">
-                            <h3 className="font-header text-xl text-white truncate flex-1 min-w-0">{seed}</h3>
-                            <span className="font-pixel text-[10px] text-white/30 shrink-0">
-                                {analysis?.deck || 'Erratic'} &bull; White
-                            </span>
-                        </div>
+            {
+                viewMode === 'detail' && (
+                    <div className="w-[320px] h-[340px] mx-auto">
+                        <div className="jimbo-panel flex flex-col h-[340px] overflow-hidden w-[320px]">
+                            {/* Seed bar */}
+                            <div className="flex items-center gap-2 pb-2 border-b border-white/10 shrink-0">
+                                <h3 className="font-header text-xl text-white truncate flex-1 min-w-0">{seed}</h3>
+                                <span className="font-pixel text-[10px] text-white/30 shrink-0">
+                                    {analysis?.deck || 'Erratic'} &bull; White
+                                </span>
+                            </div>
 
-                        {/* Red Tab Bar */}
-                        <div className="flex w-full shrink-0 gap-1 justify-center pt-2 pb-1">
-                            {tabs.map((tab) => {
-                                const isActive = activeTab === tab;
-                                const label = tab.charAt(0).toUpperCase() + tab.slice(1);
-                                return (
-                                    <div key={tab} className="relative flex flex-col items-center">
-                                        {isActive && (
-                                            <div className="mb-0.5 animate-jimbo-bounce">
-                                                <svg width="10" height="7" viewBox="0 0 14 10" fill="var(--jimbo-red)">
-                                                    <polygon points="7,10 0,0 14,0" />
-                                                </svg>
+                            {/* Red Tab Bar */}
+                            <div className="flex w-full shrink-0 gap-1 justify-center pt-2 pb-1">
+                                {tabs.map((tab) => {
+                                    const isActive = activeTab === tab;
+                                    const label = tab.charAt(0).toUpperCase() + tab.slice(1);
+                                    return (
+                                        <div key={tab} className="relative flex flex-col items-center">
+                                            {isActive && (
+                                                <div className="mb-0.5 animate-jimbo-bounce">
+                                                    <svg width="10" height="7" viewBox="0 0 14 10" fill="var(--jimbo-red)">
+                                                        <polygon points="7,10 0,0 14,0" />
+                                                    </svg>
+                                                </div>
+                                            )}
+                                            {!isActive && <div className="mb-0.5 h-[7px]" />}
+                                            <button
+                                                type="button"
+                                                onClick={() => setActiveTab(tab)}
+                                                className="jimbo-tab font-header tracking-wide min-w-[72px] text-center uppercase"
+                                            >
+                                                {label}
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Tab Content */}
+                            <div className="jimbo-inner-panel flex-1 min-h-0 overflow-auto">
+                                {activeTab === 'details' && (
+                                    <div className="p-2 space-y-2">
+                                        {/* JAML Objectives */}
+                                        {objectives.length > 0 && (
+                                            <div className="flex flex-wrap gap-1 px-1">
+                                                {objectives.map((obj) => (
+                                                    <span
+                                                        key={obj}
+                                                        className="font-pixel text-[9px] bg-[var(--jimbo-red)]/30 text-[var(--jimbo-gold)] px-1.5 py-0.5 rounded leading-none"
+                                                    >
+                                                        {obj}
+                                                    </span>
+                                                ))}
                                             </div>
                                         )}
-                                        {!isActive && <div className="mb-0.5 h-[7px]" />}
-                                        <button
-                                            type="button"
-                                            onClick={() => setActiveTab(tab)}
-                                            className="jimbo-tab font-header tracking-wide min-w-[72px] text-center uppercase"
-                                        >
-                                            {label}
-                                        </button>
-                                    </div>
-                                );
-                            })}
-                        </div>
 
-                        {/* Tab Content */}
-                        <div className="jimbo-inner-panel flex-1 min-h-0 overflow-auto">
-                            {activeTab === 'details' && (
-                                <div className="p-2 space-y-2">
-                                    {/* JAML Objectives */}
-                                    {objectives.length > 0 && (
-                                        <div className="flex flex-wrap gap-1 px-1">
-                                            {objectives.map((obj) => (
-                                                <span
-                                                    key={obj}
-                                                    className="font-pixel text-[9px] bg-[var(--jimbo-red)]/30 text-[var(--jimbo-gold)] px-1.5 py-0.5 rounded leading-none"
-                                                >
-                                                    {obj}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    {/* Found Jokers */}
-                                    {foundJokers.length > 0 && (
-                                        <div>
-                                            <span className="font-pixel text-[10px] text-white/40 tracking-wider px-1">Key Jokers</span>
-                                            <div className="flex flex-wrap gap-1 mt-1 px-1">
-                                                {foundJokers.map((j) => (
-                                                    <div key={j.id} className="flex flex-col items-center gap-0.5" title={`${j.name} — Ante ${j.ante} (${j.source})`}>
-                                                        <Sprite name={j.name} width={36} />
-                                                        <span className="font-pixel text-[7px] text-white/40 text-center max-w-[40px] truncate">{j.name}</span>
-                                                    </div>
-                                                ))}
+                                        {/* Found Jokers */}
+                                        {foundJokers.length > 0 && (
+                                            <div>
+                                                <span className="font-pixel text-[10px] text-white/40 tracking-wider px-1">Key Jokers</span>
+                                                <div className="flex flex-wrap gap-1 mt-1 px-1">
+                                                    {foundJokers.map((j) => (
+                                                        <div key={j.id} className="flex flex-col items-center gap-0.5" title={`${j.name} — Ante ${j.ante} (${j.source})`}>
+                                                            <Sprite name={j.name} width={36} />
+                                                            <span className="font-pixel text-[7px] text-white/40 text-center max-w-[40px] truncate">{j.name}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
 
-                                    {/* Found Consumables */}
-                                    {foundConsumables.length > 0 && (
-                                        <div>
-                                            <span className="font-pixel text-[10px] text-white/40 tracking-wider px-1">Key Consumables</span>
-                                            <div className="flex flex-wrap gap-1 mt-1 px-1">
-                                                {foundConsumables.map((c) => (
-                                                    <div key={c.id} className="flex flex-col items-center gap-0.5" title={`${c.name} — Ante ${c.ante} (${c.source})`}>
-                                                        <Sprite name={c.name} width={36} />
-                                                        <span className="font-pixel text-[7px] text-white/40 text-center max-w-[40px] truncate">{c.name}</span>
-                                                    </div>
-                                                ))}
+                                        {/* Found Consumables */}
+                                        {foundConsumables.length > 0 && (
+                                            <div>
+                                                <span className="font-pixel text-[10px] text-white/40 tracking-wider px-1">Key Consumables</span>
+                                                <div className="flex flex-wrap gap-1 mt-1 px-1">
+                                                    {foundConsumables.map((c) => (
+                                                        <div key={c.id} className="flex flex-col items-center gap-0.5" title={`${c.name} — Ante ${c.ante} (${c.source})`}>
+                                                            <Sprite name={c.name} width={36} />
+                                                            <span className="font-pixel text-[7px] text-white/40 text-center max-w-[40px] truncate">{c.name}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
 
-                                    {/* Starting Deck */}
-                                    <div className="flex items-center justify-between px-1">
-                                        <span className="font-pixel text-[10px] text-white/40 tracking-wider">Starting Deck</span>
-                                        <span className="font-pixel text-[10px] text-white/20">{analysis?.startingDeck?.length || 52} cards</span>
+                                        {/* Starting Deck */}
+                                        <div className="flex items-center justify-between px-1">
+                                            <span className="font-pixel text-[10px] text-white/40 tracking-wider">Starting Deck</span>
+                                            <span className="font-pixel text-[10px] text-white/20">{analysis?.startingDeck?.length || 52} cards</span>
+                                        </div>
+                                        <div className="flex items-center justify-center overflow-visible">
+                                            {analysis?.startingDeck ? (
+                                                <DeckFan4Row
+                                                    cards={analysis.startingDeck}
+                                                    featuredRank={startingRankSummary?.rank}
+                                                    cardSize={44}
+                                                />
+                                            ) : (
+                                                <div className="flex items-center justify-center py-8">
+                                                    <Loader2 className="animate-spin text-white/20" size={24} />
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="flex items-center justify-center overflow-visible">
-                                        {analysis?.startingDeck ? (
-                                            <DeckFan4Row
-                                                cards={analysis.startingDeck}
-                                                featuredRank={startingRankSummary?.rank}
-                                                cardSize={44}
-                                            />
+                                )}
+
+                                {activeTab === 'strategy' && (
+                                    <div className="p-2">
+                                        {evaluation ? (
+                                            <JamlJourneyMap evaluation={evaluation} />
                                         ) : (
                                             <div className="flex items-center justify-center py-8">
                                                 <Loader2 className="animate-spin text-white/20" size={24} />
                                             </div>
                                         )}
                                     </div>
-                                </div>
-                            )}
-
-                            {activeTab === 'strategy' && (
-                                <div className="p-2">
-                                    {evaluation ? (
-                                        <JamlJourneyMap evaluation={evaluation} />
-                                    ) : (
-                                        <div className="flex items-center justify-center py-8">
-                                            <Loader2 className="animate-spin text-white/20" size={24} />
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {activeTab === 'scores' && (
-                                <div className="p-2 space-y-2">
-                                    <LeaderboardComponent ritualId={ritualId || ritualConfig.id} seed={seed} />
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Action row + orange Back button */}
-                        <div className="flex flex-col gap-2 pt-2 shrink-0">
-                            <div className="flex gap-2">
-                                {!isLocked && (
-                                    <button
-                                        onClick={onOpenSubmit}
-                                        className="jimbo-btn jimbo-btn-blue flex-1 text-sm py-2 uppercase"
-                                    >
-                                        Submit Score
-                                    </button>
                                 )}
+
+                                {activeTab === 'scores' && (
+                                    <div className="p-2 space-y-2">
+                                        <LeaderboardComponent ritualId={ritualId || ritualConfig.id} seed={seed} />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Action row + orange Back button */}
+                            <div className="flex flex-col gap-2 pt-2 shrink-0">
+                                <div className="flex gap-2">
+                                    {!isLocked && (
+                                        <button
+                                            onClick={onOpenSubmit}
+                                            className="jimbo-btn jimbo-btn-blue flex-1 text-sm py-2 uppercase"
+                                        >
+                                            Submit Score
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={onShowHowTo}
+                                        className="jimbo-btn jimbo-btn-red flex-1 text-sm py-2 uppercase"
+                                    >
+                                        How to Play
+                                    </button>
+                                </div>
                                 <button
-                                    onClick={onShowHowTo}
-                                    className="jimbo-btn jimbo-btn-red flex-1 text-sm py-2 uppercase"
+                                    type="button"
+                                    onClick={() => setViewMode('preview')}
+                                    className="jimbo-btn jimbo-btn-orange w-full py-2 text-sm uppercase"
                                 >
-                                    How to Play
+                                    Back
                                 </button>
                             </div>
-                            <button
-                                type="button"
-                                onClick={() => setViewMode('preview')}
-                                className="jimbo-btn jimbo-btn-orange w-full py-2 text-sm uppercase"
-                            >
-                                Back
-                            </button>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }

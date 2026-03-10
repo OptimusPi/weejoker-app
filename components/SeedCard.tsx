@@ -154,22 +154,20 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                         )}
                     </div>
 
-                    <div className="w-1/2 bg-[var(--jimbo-panel-edge)] flex items-center justify-center p-1 relative overflow-visible" style={{ minHeight: '64px' }}>
+                    <div className="w-1/2 bg-[var(--jimbo-panel-edge)] flex items-center justify-center p-1 relative overflow-visible min-h-[64px]">
                         {!isLocked ? (
                             <div className="juice-pop flex items-center gap-2 relative">
-                                <div className="relative juice-pop balatro-delay-2" style={{ width: '60px', height: '80px' }}>
+                                <div className="relative juice-pop balatro-delay-2 w-[60px] h-[80px]">
                                     {/* Stacked deck backs - tilted RIGHT */}
                                     <div
-                                        className="absolute inset-0 flex items-center justify-center"
-                                        style={{ transform: 'rotate(12deg)', transformOrigin: 'center' }}
+                                        className="absolute inset-0 flex items-center justify-center rotate-12"
                                     >
                                         <DeckSprite deck={seed.deck || 'erratic'} stake={seed.stake || 'white'} size={48} />
                                     </div>
                                     {/* Card face overlay - tilted LEFT, on top */}
                                     {seed.startingDeck && seed.startingDeck.length > 0 && (
                                         <div
-                                            className="absolute inset-0 flex items-center justify-center"
-                                            style={{ transform: 'rotate(-8deg)', transformOrigin: 'center', zIndex: 1 }}
+                                            className="absolute inset-0 flex items-center justify-center z-[1] -rotate-[8deg]"
                                         >
                                             <PlayingCard
                                                 rank={computeFeaturedRank(seed.startingDeck)}
@@ -185,8 +183,8 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                                 </div>
                             </div>
                         ) : (
-                            <div className="relative" style={{ width: '54px', height: '68px' }}>
-                                <div className="absolute" style={{ left: '0', top: '0' }}>
+                            <div className="relative w-[54px] h-[68px]">
+                                <div className="absolute left-0 top-0">
                                     <DeckSprite deck="locked" size={48} />
                                 </div>
                             </div>

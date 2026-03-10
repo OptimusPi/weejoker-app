@@ -216,8 +216,9 @@ export default function JamlBuilder() {
                         {isSearching && (
                             <JimboInnerPanel className="w-full h-1 !p-0 mb-4 overflow-hidden border-[var(--jimbo-panel-edge)]">
                                 <div
-                                    className="h-full bg-gradient-to-r from-[var(--jimbo-blue)] via-[var(--jimbo-purple)] to-[var(--jimbo-red)] animate-gradient-x transition-all duration-300"
-                                    style={{ width: `${Math.min((searchResults.length / 50) * 100, 100)}%` }}
+                                    className="h-full bg-gradient-to-r from-[var(--jimbo-blue)] via-[var(--jimbo-purple)] to-[var(--jimbo-red)] animate-gradient-x transition-all duration-300 w-[var(--progress-w)]"
+                                    // eslint-disable-next-line react/forbid-component-props
+                                    style={{ '--progress-w': `${Math.min((searchResults.length / 50) * 100, 100)}%` } as React.CSSProperties}
                                 />
                             </JimboInnerPanel>
                         )}

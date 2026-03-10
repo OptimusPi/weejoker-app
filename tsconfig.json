@@ -26,16 +26,18 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@jimbo-ui/*": [
+        "../jimbo-ui/src/*"
       ]
     },
     "target": "ES2020"
   },
   "include": [
-    "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    "next-env.d.ts",
+    ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
