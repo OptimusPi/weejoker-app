@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import JamlEditor from '@/components/JamlEditor';
 import { useJamlFilter } from '@/lib/hooks/useJamlFilter';
+import { disposeMotelySearch, getMotelyWasmApi, stopMotelySearch } from '@/lib/motelyWasm';
 import { AgnosticSeedCard } from './AgnosticSeedCard';
 import { WasmStatus } from './WasmStatus';
 import type { SearchResultInfo } from 'motely-wasm';
@@ -151,9 +152,7 @@ export default function JamlUIV2() {
         setActiveAnalysis(null);
         addLog(`Spinning up WASM Thread Pool...`);
 
-        // Dynamic import of the WASM engine
-        const { loadMotely } = await import('motely-wasm');
-        const api = await loadMotely();
+        const api = await getMotelyWasmApi();
 
         searchCleanupRef.current = () => {
             api.stopSearch();
@@ -187,6 +186,8 @@ export default function JamlUIV2() {
         stopRef.current = true;
         setIsSearching(false);
         if (searchCleanupRef.current) searchCleanupRef.current();
+        void stopMotelySearch().catch(() => { });
+        void disposeMotelySearch().catch(() => { });
         addLog(`Search aborted by user.`);
     };
 

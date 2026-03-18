@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { loadMotely } from 'motely-wasm';
+import { analyzeSeedWasm } from '@/lib/motelyWasm';
 import { normalizeAnalysis } from '@/lib/seedAnalyzer';
 import { evaluateSeed, type EvaluationResult } from '@/lib/jaml/jamlEvaluator';
 import { JamlFilter, parseJamlToFilter } from '@/lib/hooks/useJamlFilter';
@@ -73,8 +73,7 @@ export function AgnosticSeedCard({
         const timer = setTimeout(async () => {
             if (!active) return;
             try {
-                const api = await loadMotely();
-                const rawData = await api.analyzeSeed(seed, deckSlug, stakeSlug);
+                const rawData = await analyzeSeedWasm(seed, deckSlug, stakeSlug);
                 const normalized = normalizeAnalysis(rawData);
                 if (active) setEvaluation(evaluateSeed(normalized, resolvedFilter));
             } catch (err) {

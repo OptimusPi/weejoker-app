@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 
 // Using public R2 URL because this is a client component
 // SEED_ASSETS binding is only available in server-side API routes
-const BUCKET_URL = "https://seeds.erraticdeck.app/parquet_lake";
+const BUCKET_URL = "https://r2.weejoker.app/parquet_lake";
 
 const RANKS = ['2s', '3s', '4s', '5s', '6s', '7s', '8s', '9s', '10s', 'Jacks', 'Queens', 'Kings', 'Aces'];
 const SUITS = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
@@ -42,8 +42,8 @@ export function SeedExplorer() {
         setScannedCount(0);
 
         const partitions = [
-            ...selectedRanks.map(r => `ranks/${r}`),
-            ...selectedSuits.map(s => `suits/${s}`)
+            ...selectedRanks.map(r => `ranks/little_${r}.parquet`),
+            ...selectedSuits.map(s => `suits/little_${s}.parquet`)
         ];
 
         try {

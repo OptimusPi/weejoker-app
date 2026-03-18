@@ -6,8 +6,8 @@ import { ArrowRight, Check, AlertCircle, Upload, FileText, Play } from "lucide-r
 import { JimboPanel, JimboInnerPanel, JimboButton, JimboInput, JimboTextArea } from "@/components/JimboPanel";
 import JamlEditor from "@/components/JamlEditor";
 import { useJamlFilter } from "@/lib/hooks/useJamlFilter";
-import { loadMotely } from "motely-wasm";
 import { evaluateSeed } from "@/lib/jaml/jamlEvaluator";
+import { analyzeSeedWasm } from "@/lib/motelyWasm";
 import { normalizeAnalysis } from "@/lib/seedAnalyzer";
 import { cn } from "@/lib/utils";
 import { RitualChallengeBoard } from "@/components/RitualChallengeBoard";
@@ -116,8 +116,7 @@ export default function CreateRitualPage() {
 
         for (const seed of seeds) {
             try {
-                const api = await loadMotely();
-                const rawAnalysis = await api.analyzeSeed(seed, filter.deck || 'Erratic', filter.stake || 'White');
+                const rawAnalysis = await analyzeSeedWasm(seed, filter.deck || 'Erratic', filter.stake || 'White');
                 const analysis = normalizeAnalysis(rawAnalysis);
                 const evaluation = evaluateSeed(analysis, filter);
                 results.push({ seed, passed: evaluation.isMatch, score: evaluation.score, details: evaluation });
@@ -415,10 +414,10 @@ export default function CreateRitualPage() {
                                     isLocked={false}
                                     dayNumber={1}
                                     jamlConfig={jamlText}
-                                    onCopy={() => {}}
-                                    onShowHowTo={() => {}}
-                                    onOpenSubmit={() => {}}
-                                    onOpenLeaderboard={() => {}}
+                                    onCopy={() => { }}
+                                    onShowHowTo={() => { }}
+                                    onOpenSubmit={() => { }}
+                                    onOpenLeaderboard={() => { }}
                                     canGoBack={false}
                                     canGoForward={false}
                                     displayDate={new Date(meta.epoch).toLocaleDateString()}

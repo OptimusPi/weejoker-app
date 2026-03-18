@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 
 import { useJamlFilter } from '@/lib/hooks/useJamlFilter';
 import { DECK_OPTIONS, STAKE_OPTIONS } from '@/lib/data/constants';
+import { disposeMotelySearch, getMotelyWasmApi, stopMotelySearch } from '@/lib/motelyWasm';
 import JamlEditor from './JamlEditor';
 
 import { cn } from '@/lib/utils';
@@ -38,7 +39,8 @@ export default function JamlBuilder() {
     useEffect(() => {
         return () => {
             if (searchCleanupRef.current) searchCleanupRef.current();
-            import('motely-wasm').then(({ loadMotely }) => loadMotely().then(api => { api.stopSearch(); api.disposeSearch(); }));
+            void stopMotelySearch().catch(() => { });
+            void disposeMotelySearch().catch(() => { });
         };
     }, []);
     const pollRef = useRef<NodeJS.Timeout | null>(null);
@@ -56,8 +58,7 @@ export default function JamlBuilder() {
         stopRef.current = false;
 
         try {
-            const { loadMotely } = await import('motely-wasm');
-            const api = await loadMotely();
+            const api = await getMotelyWasmApi();
 
             searchCleanupRef.current = () => {
                 api.stopSearch();
@@ -91,10 +92,8 @@ export default function JamlBuilder() {
         setIsSearching(false);
 
         try {
-            const { loadMotely } = await import('motely-wasm');
-            const api = await loadMotely();
-            api.stopSearch();
-            await api.disposeSearch();
+            await stopMotelySearch();
+            await disposeMotelySearch();
         } catch { }
 
         if (searchCleanupRef.current) {
