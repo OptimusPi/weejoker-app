@@ -1,0 +1,15 @@
+[
+  {
+    "AllowedOrigins": [
+      "https://weejoker.app",
+      "https://www.weejoker.app",
+      "https://r2.weejoker.app",
+      "http://localhost:3000",
+      "http://127.0.0.1:3000"
+    ],
+    "AllowedMethods": ["GET", "HEAD"],
+    "AllowedHeaders": ["Range", "Origin"],
+    "ExposeHeaders": ["Content-Range", "Accept-Ranges", "Content-Length", "ETag"],
+    "MaxAgeSeconds": 3600
+  }
+]

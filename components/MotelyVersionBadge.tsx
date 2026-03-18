@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { getCapabilities, type CapabilitiesInfo } from '@/lib/api/motelyWasm';
+import { loadMotely, type CapabilitiesInfo } from 'motely-wasm';
 import { JAML_SCHEMA_VERSION } from '@/lib/jaml/jamlSchema';
 import { Loader2, Cpu, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -19,7 +19,8 @@ export function MotelyVersionBadge({ className, minimal = false }: MotelyVersion
         let mounted = true;
         const fetchCaps = async () => {
             try {
-                const info = await getCapabilities();
+                const api = await loadMotely();
+                const info = await api.getCapabilities();
                 if (mounted) {
                     setCaps(info);
                 }

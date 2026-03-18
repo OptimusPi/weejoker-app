@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import yaml from 'js-yaml';
-import { JimboPanel, JimboInnerPanel, cn } from '@jimbo-ui/components/Panel';
+import { JimboPanel, JimboInnerPanel } from '@/components/JimboPanel';
+import { cn } from '@/lib/utils';
 import { JimboColorOption } from '@jimbo-ui/types';
 
 

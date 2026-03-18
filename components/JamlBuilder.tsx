@@ -8,7 +8,7 @@ import JamlEditor from './JamlEditor';
 
 import { cn } from '@/lib/utils';
 import { X, Edit2, Loader2, Search, Square, Copy, RotateCcw, Flame, Sparkles } from 'lucide-react';
-import { SearchResult } from '@/lib/api/motelyWasm';
+import type { SearchResultInfo } from 'motely-wasm';
 import { AgnosticSeedCard } from './AgnosticSeedCard';
 import { WasmStatus } from './WasmStatus';
 import { JAML_PRESETS } from '@/lib/jaml/jamlPresets';
@@ -28,7 +28,7 @@ export default function JamlBuilder() {
     } = useJamlFilter();
 
     const [isSearching, setIsSearching] = useState(false);
-    const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+    const [searchResults, setSearchResults] = useState<SearchResultInfo[]>([]);
     const [searchError, setSearchError] = useState<string | null>(null);
     const [seedsProcessed, setSeedsProcessed] = useState(0);
     const stopRef = useRef(false);
@@ -38,7 +38,7 @@ export default function JamlBuilder() {
     useEffect(() => {
         return () => {
             if (searchCleanupRef.current) searchCleanupRef.current();
-            import('@/lib/api/motelyWasm').then(({ cancelSearch }) => cancelSearch());
+            import('motely-wasm').then(({ loadMotely }) => loadMotely().then(api => { api.stopSearch(); api.disposeSearch(); }));
         };
     }, []);
     const pollRef = useRef<NodeJS.Timeout | null>(null);
@@ -56,38 +56,29 @@ export default function JamlBuilder() {
         stopRef.current = false;
 
         try {
-            const { searchSeedsWasm, addSearchListener } = await import('@/lib/api/motelyWasm');
+            const { loadMotely } = await import('motely-wasm');
+            const api = await loadMotely();
 
-            // Subscribe to results
-            const cleanup = addSearchListener((event) => {
-                if (event.type === 'result') {
+            searchCleanupRef.current = () => {
+                api.stopSearch();
+            };
+
+            await api.startJamlSearch(jamlText, {
+                onProgress: (totalSeedsSearched) => {
+                    setSeedsProcessed(totalSeedsSearched);
+                },
+                onResult: (seed, score) => {
                     setSearchResults(prev => {
-                        // Prevent duplicates
-                        if (prev.some(r => r.seed === event.data.seed)) return prev;
-                        return [...prev, {
-                            seed: event.data.seed,
-                            score: event.data.score,
-                            tallies: event.data.tallies || []
-                        } as any];
+                        if (prev.some(r => r.seed === seed)) return prev;
+                        return [...prev, { seed, score } as any];
                     });
-                } else if (event.type === 'progress') {
-                    setSeedsProcessed(event.data.SearchedCount || 0);
-                } else if (event.type === 'complete') {
-                    setIsSearching(false);
-                    if (searchCleanupRef.current) {
-                        searchCleanupRef.current();
-                        searchCleanupRef.current = null;
-                    }
-                } else if (event.type === 'error') {
-                    setSearchError(event.message || 'Unknown error');
-                    setIsSearching(false);
                 }
             });
 
-            searchCleanupRef.current = cleanup;
-
-            // Start the search
-            await searchSeedsWasm(jamlText);
+            setIsSearching(false);
+            if (searchCleanupRef.current) {
+                searchCleanupRef.current = null;
+            }
         } catch (e: any) {
             console.error("Local search error:", e);
             setSearchError(e.message || 'Local search failed');
@@ -100,8 +91,10 @@ export default function JamlBuilder() {
         setIsSearching(false);
 
         try {
-            const { cancelSearch } = await import('@/lib/api/motelyWasm');
-            await cancelSearch();
+            const { loadMotely } = await import('motely-wasm');
+            const api = await loadMotely();
+            api.stopSearch();
+            await api.disposeSearch();
         } catch { }
 
         if (searchCleanupRef.current) {
@@ -226,7 +219,7 @@ export default function JamlBuilder() {
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-1">
                             {searchResults.length > 0 ? (
                                 <div className="grid grid-cols-1 gap-4">
-                                    {searchResults.map((result: SearchResult) => (
+                                    {searchResults.map((result: SearchResultInfo) => (
                                         <AgnosticSeedCard
                                             key={result.seed}
                                             seed={result.seed}

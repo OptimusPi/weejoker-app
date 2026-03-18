@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { getCapabilities, getVersion } from '@/lib/api/motelyWasm';
+import { loadMotely } from 'motely-wasm';
 import { Cpu, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -18,9 +18,10 @@ export function WasmStatus() {
         const load = async () => {
             setStatus('loading');
             try {
-                const [info, caps] = await Promise.all([getVersion(), getCapabilities()]);
+                const api = await loadMotely();
+                const caps = await api.getCapabilities();
                 if (cancelled) return;
-                setVersion(info.version);
+                setVersion(caps.version || 'unknown');
                 setThreads(caps.threads);
                 setSimd(caps.simd);
                 setProcessors(caps.processorCount);

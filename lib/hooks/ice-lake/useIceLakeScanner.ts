@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { analyzeSeedWasm } from '@/lib/api/motelyWasm';
+import { loadMotely } from 'motely-wasm';
 import { evaluateSeed } from '@/lib/jaml/jamlEvaluator';
 import { useIceLake } from './useIceLake';
 import { JamlFilter } from '../useJamlFilter';
@@ -46,7 +46,8 @@ export function useIceLakeScanner() {
                 const seed = row.seed;
                 try {
                     // Analyze with Motely (C# WASM)
-                    const rawAnalysis = await analyzeSeedWasm(seed, filter.deck || 'Erratic', filter.stake || 'White');
+                    const api = await loadMotely();
+                    const rawAnalysis = await api.analyzeSeed(seed, filter.deck || 'Erratic', filter.stake || 'White');
                     const analysis = normalizeAnalysis(rawAnalysis);
                     
                     // Evaluate with JAML (TS)

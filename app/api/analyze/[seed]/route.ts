@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { analyzeSeedWasm } from '@/lib/api/motelyWasm';
+import motelyNode from 'motely-node';
 import { normalizeAnalysis } from '@/lib/seedAnalyzer';
 
 
@@ -49,7 +49,7 @@ export async function GET(
     }
 
     try {
-        const rawResult = await analyzeSeedWasm(seed.toUpperCase(), deck, stake);
+        const rawResult = await motelyNode.analyzeSeed(seed.toUpperCase(), deck, stake);
         const analysis = normalizeAnalysis(rawResult);
 
         return NextResponse.json(analysis, {

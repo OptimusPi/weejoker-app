@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { analyzeSeedWasm } from '@/lib/api/motelyWasm';
+import { loadMotely } from 'motely-wasm';
 import { normalizeAnalysis } from '@/lib/seedAnalyzer';
 import { evaluateSeed, type EvaluationResult } from '@/lib/jaml/jamlEvaluator';
 import { JamlFilter, parseJamlToFilter } from '@/lib/hooks/useJamlFilter';
@@ -59,14 +59,22 @@ export function AgnosticSeedCard({
     }, [result, needsAnalysis]);
 
     // WASM analysis only when the caller provides no result.
+    // Debounced 80ms: rapid swiping skips intermediate seeds — only the seed
+    // you pause on gets analyzed. WASM singleton has no startup overhead but
+    // is single-threaded, so queuing 50 analyses for skipped seeds is wasteful.
     useEffect(() => {
         if (!needsAnalysis) return;
         let active = true;
 
-        const analyze = async () => {
-            setLoading(true);
+        // Show loading immediately when seed changes (instant UI feedback)
+        setLoading(true);
+        setEvaluation(null);
+
+        const timer = setTimeout(async () => {
+            if (!active) return;
             try {
-                const rawData = await analyzeSeedWasm(seed, deckSlug, stakeSlug);
+                const api = await loadMotely();
+                const rawData = await api.analyzeSeed(seed, deckSlug, stakeSlug);
                 const normalized = normalizeAnalysis(rawData);
                 if (active) setEvaluation(evaluateSeed(normalized, resolvedFilter));
             } catch (err) {
@@ -74,10 +82,12 @@ export function AgnosticSeedCard({
             } finally {
                 if (active) setLoading(false);
             }
-        };
+        }, 80);
 
-        analyze();
-        return () => { active = false; };
+        return () => {
+            active = false;
+            clearTimeout(timer);
+        };
     }, [seed, deckSlug, stakeSlug, resolvedFilter, needsAnalysis]);
 
     if (isLocked) {

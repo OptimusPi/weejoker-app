@@ -29,6 +29,18 @@
       ],
       "@jimbo-ui/*": [
         "../jimbo-ui/src/*"
+      ],
+      "react": [
+        "./node_modules/@types/react"
+      ],
+      "react/jsx-runtime": [
+        "./node_modules/react/jsx-runtime"
+      ],
+      "clsx": [
+        "./node_modules/clsx"
+      ],
+      "tailwind-merge": [
+        "./node_modules/tailwind-merge"
       ]
     },
     "target": "ES2020"

@@ -100,7 +100,7 @@ export function SubmitScoreModal({ seed, ritualId, onClose, onSuccess }: SubmitS
 
                     <div className="pt-4 space-y-3">
                         <JimboButton
-                            variant="blue"
+                            variant="secondary"
                             onClick={() => {
                                 const form = document.querySelector('form');
                                 form?.requestSubmit();

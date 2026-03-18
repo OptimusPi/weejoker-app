@@ -6,7 +6,7 @@ import { ArrowRight, Check, AlertCircle, Upload, FileText, Play } from "lucide-r
 import { JimboPanel, JimboInnerPanel, JimboButton, JimboInput, JimboTextArea } from "@/components/JimboPanel";
 import JamlEditor from "@/components/JamlEditor";
 import { useJamlFilter } from "@/lib/hooks/useJamlFilter";
-import { analyzeSeedWasm } from "@/lib/api/motelyWasm";
+import { loadMotely } from "motely-wasm";
 import { evaluateSeed } from "@/lib/jaml/jamlEvaluator";
 import { normalizeAnalysis } from "@/lib/seedAnalyzer";
 import { cn } from "@/lib/utils";
@@ -116,7 +116,8 @@ export default function CreateRitualPage() {
 
         for (const seed of seeds) {
             try {
-                const rawAnalysis = await analyzeSeedWasm(seed, filter.deck || 'Erratic', filter.stake || 'White');
+                const api = await loadMotely();
+                const rawAnalysis = await api.analyzeSeed(seed, filter.deck || 'Erratic', filter.stake || 'White');
                 const analysis = normalizeAnalysis(rawAnalysis);
                 const evaluation = evaluateSeed(analysis, filter);
                 results.push({ seed, passed: evaluation.isMatch, score: evaluation.score, details: evaluation });

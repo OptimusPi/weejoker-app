@@ -3,13 +3,15 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Sparkles, Terminal, Database, Search, Zap } from 'lucide-react';
+import { Sparkles, Terminal, Database, Search, Zap, Rocket } from 'lucide-react';
 
 const navItems = [
     { name: 'Daily', href: '/we', icon: Zap },
     { name: 'Editor', href: '/create', icon: Terminal, special: true },
-    { name: 'Vault', href: '/jaml-uiv2', icon: Database },
+    { name: 'Vault', href: '/jaml-builder', icon: Database },
     { name: 'Search', href: '/seed-viewer', icon: Search },
+    { name: 'Explore', href: '/explore', icon: Sparkles },
+    { name: 'Moon Lander', href: '/moon-lander', icon: Rocket },
 ];
 
 export default function NavBar() {

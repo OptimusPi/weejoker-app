@@ -52,8 +52,14 @@ export function DuckDBProvider({ children }: { children: React.ReactNode }) {
                 const database = await initDuckDB();
                 const connection = await database.connect();
 
-                // Initialize httpfs explicitly for Parquet data lakes
-                await connection.query("INSTALL httpfs; LOAD httpfs;");
+                // Initialize httpfs for Parquet over HTTP (R2 Ice Lake)
+                // INSTALL may fail in WASM (extensions often pre-bundled); LOAD is what we need
+                try {
+                    await connection.query("INSTALL httpfs;");
+                } catch {
+                    /* noop: httpfs usually bundled in WASM */
+                }
+                await connection.query("LOAD httpfs;");
                 console.log('[DuckDB] WASM engine and httpfs loaded.');
 
                 if (isMounted) {

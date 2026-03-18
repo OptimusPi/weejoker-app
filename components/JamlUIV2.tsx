@@ -5,7 +5,7 @@ import JamlEditor from '@/components/JamlEditor';
 import { useJamlFilter } from '@/lib/hooks/useJamlFilter';
 import { AgnosticSeedCard } from './AgnosticSeedCard';
 import { WasmStatus } from './WasmStatus';
-import { SearchResult } from '@/lib/api/motelyWasm';
+import type { SearchResultInfo } from 'motely-wasm';
 import { cn } from '@/lib/utils';
 import { DeckSprite, DECK_MAP, STAKE_MAP } from './DeckSprite';
 import { MotelyVersionBadge } from './MotelyVersionBadge';
@@ -106,7 +106,7 @@ export default function JamlUIV2() {
 
     // Search State
     const [isSearching, setIsSearching] = useState(false);
-    const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+    const [searchResults, setSearchResults] = useState<SearchResultInfo[]>([]);
     const [seedsProcessed, setSeedsProcessed] = useState(0);
     const [searchError, setSearchError] = useState<string | null>(null);
     const [jamlDiagnostics, setJamlDiagnostics] = useState<any>(null);
@@ -152,36 +152,30 @@ export default function JamlUIV2() {
         addLog(`Spinning up WASM Thread Pool...`);
 
         // Dynamic import of the WASM engine
-        const { searchSeedsWasm, addSearchListener, cancelSearch } = await import('@/lib/api/motelyWasm');
+        const { loadMotely } = await import('motely-wasm');
+        const api = await loadMotely();
 
-        searchCleanupRef.current = async () => {
-            await cancelSearch();
+        searchCleanupRef.current = () => {
+            api.stopSearch();
         };
 
-        addSearchListener((event: any) => {
-            if (stopRef.current) return;
-
-            if (event.type === 'result') {
-                const result = event.data as SearchResult;
-                if (!seenSeedsRef.current.has(result.seed)) {
-                    seenSeedsRef.current.add(result.seed);
-                    setSearchResults(prev => [result, ...prev].slice(0, 10));
-                    addLog(`MATCH: ${result.seed} (${result.score?.toLocaleString()})`);
-                }
-            } else if (event.type === 'progress') {
-                setSeedsProcessed(event.data?.SearchedCount || 0);
-            } else if (event.type === 'complete') {
-                setIsSearching(false);
-                addLog(`Search completed. ${event.data?.totalSeedsSearched || 0} seeds analyzed.`);
-            } else if (event.type === 'error') {
-                setSearchError(event.message || 'Unknown error');
-                setIsSearching(false);
-                addLog(`ERROR: ${event.message}`);
-            }
-        });
-
         try {
-            await searchSeedsWasm(jamlText);
+            const status = await api.startJamlSearch(jamlText, {
+                onProgress: (totalSeedsSearched) => {
+                    if (stopRef.current) return;
+                    setSeedsProcessed(totalSeedsSearched);
+                },
+                onResult: (seed, score) => {
+                    if (stopRef.current) return;
+                    if (!seenSeedsRef.current.has(seed)) {
+                        seenSeedsRef.current.add(seed);
+                        setSearchResults(prev => [{ seed, score } as any, ...prev].slice(0, 10));
+                        addLog(`MATCH: ${seed} (${score.toLocaleString()})`);
+                    }
+                }
+            });
+            setIsSearching(false);
+            addLog(`Search completed. ${status.totalSeedsSearched} seeds analyzed.`);
         } catch (err: any) {
             setSearchError(err.message);
             setIsSearching(false);

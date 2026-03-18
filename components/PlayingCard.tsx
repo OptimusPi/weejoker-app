@@ -1,14 +1,25 @@
 'use client'
 
 import React from 'react'
-import { JimboPlayingCard } from '@jimbo-ui/components/PlayingCard'
-import {
-    JimboSuit,
-    JimboRank,
-    JimboEnhancement,
-    JimboSeal,
-    JimboEdition
-} from '@jimbo-ui/types'
+import { cn } from '@/lib/utils'
+
+export type JimboSuit = 'Hearts' | 'Diamonds' | 'Clubs' | 'Spades' | 'hearts' | 'diamonds' | 'clubs' | 'spades'
+export type JimboRank = 'Ace' | 'King' | 'Queen' | 'Jack' | '10' | '9' | '8' | '7' | '6' | '5' | '4' | '3' | '2' | 'A' | 'K' | 'Q' | 'J'
+export type JimboEnhancement = 'bonus' | 'mult' | 'wild' | 'glass' | 'steel' | 'stone' | 'gold' | 'lucky'
+export type JimboSeal = 'gold' | 'red' | 'blue' | 'purple'
+export type JimboEdition = 'foil' | 'holographic' | 'polychrome' | 'negative'
+
+const SUIT_SYMBOL: Partial<Record<string, string>> = {
+    Hearts: '♥', Diamonds: '♦', Clubs: '♣', Spades: '♠',
+    hearts: '♥', diamonds: '♦', clubs: '♣', spades: '♠',
+}
+const SUIT_COLOR: Partial<Record<string, string>> = {
+    Hearts: 'text-red-400', Diamonds: 'text-red-400', Clubs: 'text-white', Spades: 'text-white',
+    hearts: 'text-red-400', diamonds: 'text-red-400', clubs: 'text-white', spades: 'text-white',
+}
+const RANK_DISPLAY: Partial<Record<string, string>> = {
+    Ace: 'A', King: 'K', Queen: 'Q', Jack: 'J',
+}
 
 interface PlayingCardProps {
     suit: JimboSuit
@@ -21,31 +32,19 @@ interface PlayingCardProps {
     style?: React.CSSProperties
 }
 
-/**
- * PlayingCard — Refactored to use the Unified Jimbo UI library.
- * This ensures strict adherence to React TS best practices and 
- * eliminates redundant sprite logic in the application.
- */
-export function PlayingCard({
-    suit,
-    rank,
-    enhancement,
-    seal,
-    edition,
-    className,
-    size = 40,
-    style
-}: PlayingCardProps) {
+export function PlayingCard({ suit, rank, enhancement: _e, seal: _s, edition: _ed, className, size = 40, style }: PlayingCardProps) {
+    const fontSize = Math.round(size * 0.35)
     return (
-        <JimboPlayingCard
-            suit={suit}
-            rank={rank}
-            enhancement={enhancement ?? undefined}
-            seal={seal ?? undefined}
-            edition={edition ?? undefined}
-            className={className}
-            size={size}
-            style={style}
-        />
+        <div
+            className={cn(
+                'flex flex-col items-center justify-center rounded-sm border border-white/20 bg-[#1a1a2e] select-none',
+                SUIT_COLOR[suit],
+                className,
+            )}
+            style={{ width: size, height: Math.round(size * 1.4), fontSize, ...style }}
+        >
+            <span className="font-bold leading-none">{RANK_DISPLAY[rank] ?? rank}</span>
+            <span className="leading-none">{SUIT_SYMBOL[suit] ?? suit}</span>
+        </div>
     )
 }
