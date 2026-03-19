@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Copy, Map as MapIcon, Trophy, Loader2 } from "lucide-react";
 import { DeckSprite } from "./DeckSprite";
 import { DeckFan4Row } from "./DeckFan4Row";
-import { PlayingCard } from "./PlayingCard";
+import { RealPlayingCard } from "./RealPlayingCard";
 import { Sprite } from "./Sprite";
 import { useSeedAnalyzer } from "@/lib/hooks/useSeedAnalyzer";
 import { evaluateSeed } from "@/lib/jaml/jamlEvaluator";
@@ -359,7 +359,7 @@ export function RitualChallengeBoard({
                                         <div
                                             className="absolute inset-0 flex items-center justify-center transition-transform hover:scale-110 z-[1] -rotate-[8deg] -translate-x-1 -translate-y-1"
                                         >
-                                            <PlayingCard rank={jamlRank} suit={jamlSuit} size={52} />
+                                            <RealPlayingCard rank={jamlRank} suit={jamlSuit} size={52} />
                                         </div>
                                     </div>
                                     {isAnalyzing && (

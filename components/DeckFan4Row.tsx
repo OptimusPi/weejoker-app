@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { PlayingCard } from './PlayingCard';
+import { RealPlayingCard } from './RealPlayingCard';
 
 // Card string format: "2_C", "10_H", "K_S", "A_D"
 const RANK_MAP: Record<string, string> = {
@@ -112,7 +112,7 @@ function SuitFanRow({ cards, featuredRank, animated, cardSize: propCardSize }: {
                             ['--card-delay' as any]: `${i * 0.15}s`,
                         }}
                     >
-                        <PlayingCard
+                        <RealPlayingCard
                             rank={RANK_MAP[rank] as any}
                             suit={SUIT_MAP[suit] as any}
                             size={cardSize}

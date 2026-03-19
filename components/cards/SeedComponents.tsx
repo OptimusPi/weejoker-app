@@ -1,7 +1,7 @@
 import React from 'react';
 import { CardFan } from '../CardFan';
 import { Sprite } from '../Sprite';
-import { PlayingCard } from '../PlayingCard';
+import { RealPlayingCard } from '../RealPlayingCard';
 import { AnalyzedSeed } from '@/lib/seedAnalyzer';
 
 interface PanelProps {
@@ -34,7 +34,7 @@ export function DeckPanel({ analysis }: PanelProps) {
             <div className="flex flex-wrap justify-center gap-1 opacity-40 grayscale scale-75 origin-top">
                 {sortedOthers.map((card, i) => (
                     <div key={i} className="hover:opacity-100 transition-opacity">
-                        <PlayingCard
+                        <RealPlayingCard
                             rank={card.split('_')[0] as any}
                             suit={card.split('_')[1] as any}
                             size={32}

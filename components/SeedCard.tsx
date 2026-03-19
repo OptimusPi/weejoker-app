@@ -3,7 +3,7 @@ import { SeedData } from "@/lib/types";
 import { Copy, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Sprite } from "./Sprite";
-import { PlayingCard } from "./PlayingCard";
+import { RealPlayingCard } from "./RealPlayingCard";
 import { CardFan } from "./CardFan";
 import { DeckSprite } from "./DeckSprite";
 import { cn } from "@/lib/utils";
@@ -169,7 +169,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                                         <div
                                             className="absolute inset-0 flex items-center justify-center z-[1] -rotate-[8deg]"
                                         >
-                                            <PlayingCard
+                                            <RealPlayingCard
                                                 rank={computeFeaturedRank(seed.startingDeck)}
                                                 suit={computeFeaturedSuit(seed.startingDeck)}
                                                 size={40}

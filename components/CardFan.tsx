@@ -1,5 +1,5 @@
 import React from 'react';
-import { PlayingCard } from './PlayingCard';
+import { RealPlayingCard } from './RealPlayingCard';
 import { JimboInnerPanel } from '@/components/JimboPanel';
 
 interface CardFanProps {
@@ -76,7 +76,7 @@ export function CardFan({ count, cards, className = '', label, showLabel = true 
                                     animationDelay: `${i * 0.02}s`,
                                 }}
                             >
-                                <PlayingCard
+                                <RealPlayingCard
                                     rank={cardData.rank as any}
                                     suit={cardData.suit as any}
                                     size={cardSize}
