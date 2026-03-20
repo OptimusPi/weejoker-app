@@ -1,59 +1,67 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import { inputState } from "./Player";
 
 export function MobileControls() {
   const joystickRef = useRef<HTMLDivElement>(null);
+  const knobRef = useRef<HTMLDivElement>(null);
   const lookAreaRef = useRef<HTMLDivElement>(null);
-  const isMobile = useRef(false);
-  const joystickManagerRef = useRef<ReturnType<typeof import("nipplejs").create> | null>(null);
   const lastTouchRef = useRef<{ x: number; y: number } | null>(null);
-
-  const setupJoystick = useCallback(async () => {
-    if (!joystickRef.current) return;
-    const nipplejs = await import("nipplejs");
-
-    const manager = nipplejs.create({
-      zone: joystickRef.current,
-      mode: "static",
-      position: { left: "70px", bottom: "70px" },
-      color: "rgba(255,255,255,0.5)",
-      size: 120,
-    });
-
-    manager.on("move", (_evt, data) => {
-      if (data.vector) {
-        inputState.joystickX = data.vector.x;
-        inputState.joystickY = data.vector.y;
-      }
-    });
-
-    manager.on("end", () => {
-      inputState.joystickX = 0;
-      inputState.joystickY = 0;
-    });
-
-    joystickManagerRef.current = manager;
-  }, []);
+  const joystickOrigin = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
-    isMobile.current = "ontouchstart" in window;
-    if (!isMobile.current) return;
+    if (!("ontouchstart" in window)) return;
 
-    setupJoystick();
-
-    // Touch-to-look on right side
+    const joystick = joystickRef.current;
+    const knob = knobRef.current;
     const lookArea = lookAreaRef.current;
-    if (!lookArea) return;
+    if (!joystick || !knob || !lookArea) return;
 
-    const onTouchStart = (e: TouchEvent) => {
+    const RADIUS = 50;
+
+    // --- Joystick ---
+    const onJoystickStart = (e: TouchEvent) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const rect = joystick.getBoundingClientRect();
+      joystickOrigin.current = {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      };
+    };
+
+    const onJoystickMove = (e: TouchEvent) => {
+      e.preventDefault();
+      if (!joystickOrigin.current) return;
+      const touch = e.touches[0];
+      let dx = touch.clientX - joystickOrigin.current.x;
+      let dy = touch.clientY - joystickOrigin.current.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist > RADIUS) {
+        dx = (dx / dist) * RADIUS;
+        dy = (dy / dist) * RADIUS;
+      }
+      knob.style.transform = `translate(${dx}px, ${dy}px)`;
+      inputState.joystickX = dx / RADIUS;
+      inputState.joystickY = dy / RADIUS;
+    };
+
+    const onJoystickEnd = () => {
+      joystickOrigin.current = null;
+      knob.style.transform = "translate(0px, 0px)";
+      inputState.joystickX = 0;
+      inputState.joystickY = 0;
+    };
+
+    // --- Look ---
+    const onLookStart = (e: TouchEvent) => {
       e.preventDefault();
       const touch = e.touches[0];
       lastTouchRef.current = { x: touch.clientX, y: touch.clientY };
     };
 
-    const onTouchMove = (e: TouchEvent) => {
+    const onLookMove = (e: TouchEvent) => {
       e.preventDefault();
       const touch = e.touches[0];
       if (lastTouchRef.current) {
@@ -63,32 +71,42 @@ export function MobileControls() {
       }
     };
 
-    const onTouchEnd = () => {
+    const onLookEnd = () => {
       lastTouchRef.current = null;
     };
 
-    lookArea.addEventListener("touchstart", onTouchStart, { passive: false });
-    lookArea.addEventListener("touchmove", onTouchMove, { passive: false });
-    lookArea.addEventListener("touchend", onTouchEnd);
+    joystick.addEventListener("touchstart", onJoystickStart, { passive: false });
+    joystick.addEventListener("touchmove", onJoystickMove, { passive: false });
+    joystick.addEventListener("touchend", onJoystickEnd);
+
+    lookArea.addEventListener("touchstart", onLookStart, { passive: false });
+    lookArea.addEventListener("touchmove", onLookMove, { passive: false });
+    lookArea.addEventListener("touchend", onLookEnd);
 
     return () => {
-      joystickManagerRef.current?.destroy();
-      lookArea.removeEventListener("touchstart", onTouchStart);
-      lookArea.removeEventListener("touchmove", onTouchMove);
-      lookArea.removeEventListener("touchend", onTouchEnd);
+      joystick.removeEventListener("touchstart", onJoystickStart);
+      joystick.removeEventListener("touchmove", onJoystickMove);
+      joystick.removeEventListener("touchend", onJoystickEnd);
+      lookArea.removeEventListener("touchstart", onLookStart);
+      lookArea.removeEventListener("touchmove", onLookMove);
+      lookArea.removeEventListener("touchend", onLookEnd);
     };
-  }, [setupJoystick]);
+  }, []);
 
-  // Only render on touch devices (hidden on desktop via CSS)
   return (
     <>
-      {/* Joystick zone - bottom left */}
+      {/* Joystick - bottom left */}
       <div
         ref={joystickRef}
-        className="fixed bottom-0 left-0 w-[180px] h-[180px] z-50 touch-none md:hidden"
-      />
+        className="fixed bottom-4 left-4 w-[120px] h-[120px] rounded-full bg-white/20 border-2 border-white/30 z-50 touch-none md:hidden flex items-center justify-center"
+      >
+        <div
+          ref={knobRef}
+          className="w-12 h-12 rounded-full bg-white/50 transition-none"
+        />
+      </div>
 
-      {/* Look zone - right half of screen */}
+      {/* Look zone - right half */}
       <div
         ref={lookAreaRef}
         className="fixed top-0 right-0 w-1/2 h-full z-40 touch-none md:hidden"
