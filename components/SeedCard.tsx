@@ -10,10 +10,12 @@ import { cn } from "@/lib/utils";
 import { parseCardToken } from "@/lib/cardParser";
 import { parseDailyRitualSeed, groupItemsByType } from "@/lib/parseDailyRitual";
 import { JimboPanel, JimboInnerPanel } from "@/components/JimboPanel";
+import { ritualConfig } from "@/lib/config";
 
 interface SeedCardProps {
     seed: SeedData;
     dayNumber: number;
+    ritualId?: string;
     className?: string;
     onAnalyze?: () => void;
     onOpenSubmit?: () => void;
@@ -73,7 +75,7 @@ function computeFeaturedSuit(startingDeck: string[]): "Hearts" | "Clubs" | "Diam
     return suitMap[maxSuit] || 'Hearts';
 }
 
-export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, isLocked, canSubmit }: SeedCardProps) {
+export function SeedCard({ seed, dayNumber, ritualId, className, onAnalyze, onOpenSubmit, isLocked, canSubmit }: SeedCardProps) {
     const [view, setView] = useState<CardView>('DEFAULT');
     const [copied, setCopied] = useState(false);
     const [topScore, setTopScore] = useState<{ name: string; score: number } | null>(null);
@@ -81,9 +83,10 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
 
     // Fetch Scores
     useEffect(() => {
-        if (dayNumber <= 0) return;
+        if (!seed?.seed) return;
         let isMounted = true;
-        fetch(`/api/scores?day=${dayNumber}`)
+        const resolvedRitualId = ritualId || ritualConfig.id;
+        fetch(`/api/scores?seed=${encodeURIComponent(seed.seed)}&ritualId=${encodeURIComponent(resolvedRitualId)}`)
             .then(res => res.json() as Promise<{ scores: any[] }>)
             .then((data) => {
                 if (isMounted) {
@@ -100,7 +103,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                 if (isMounted) setTopScore(null);
             });
         return () => { isMounted = false; };
-    }, [dayNumber]);
+    }, [seed?.seed, ritualId]);
 
     const handleCopy = async () => {
         if (navigator.clipboard && navigator.clipboard.writeText) {
