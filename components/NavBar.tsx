@@ -11,7 +11,6 @@ const navItems = [
     { name: 'Vault', href: '/jaml-builder', icon: Database },
     { name: 'Search', href: '/seed-viewer', icon: Search },
     { name: 'Explore', href: '/explore', icon: Sparkles },
-    { name: 'Moon Lander', href: '/moon-lander', icon: Rocket },
     { name: 'Drive', href: '/drive', icon: Rocket },
 ];
 
