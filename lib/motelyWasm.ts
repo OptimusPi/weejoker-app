@@ -6,18 +6,6 @@ import {
     type SeedAnalysisInfo,
 } from 'motely-wasm';
 
-const loadAttempts = [
-    { baseUrl: '/motely-framework', threads: 'auto' as const },
-    { baseUrl: '/motely-framework-st', threads: 'off' as const },
-    { baseUrl: '/_framework', threads: 'auto' as const },
-    { baseUrl: '/_framework_st', threads: 'off' as const },
-    { baseUrl: 'https://r2.weejoker.app/_framework', threads: 'auto' as const },
-    { baseUrl: 'https://r2.weejoker.app/_framework_st', threads: 'off' as const },
-    { baseUrl: 'https://seeds.erraticdeck.app/_framework', threads: 'auto' as const },
-    { baseUrl: 'https://seeds.erraticdeck.app/_framework_st', threads: 'off' as const },
-    undefined,
-] as const;
-
 interface WasmSearchOptions {
     threadCount?: number;
     batchCharCount?: number;
@@ -30,17 +18,13 @@ interface WasmSearchOptions {
 let apiPromise: Promise<MotelyWasmApi> | null = null;
 
 async function createApi(): Promise<MotelyWasmApi> {
-    const errors: string[] = [];
-
-    for (const attempt of loadAttempts) {
-        try {
-            return attempt ? await loadMotely(attempt) : await loadMotely();
-        } catch (error) {
-            errors.push(error instanceof Error ? error.message : String(error));
-        }
+    try {
+        // Let motely-wasm handle its own initialization
+        return await loadMotely();
+    } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        throw new Error(`Failed to load Motely WASM runtime: ${msg}`);
     }
-
-    throw new Error(errors.filter(Boolean).join(' | ') || 'Failed to load Motely WASM runtime');
 }
 
 export async function getMotelyWasmApi(): Promise<MotelyWasmApi> {
