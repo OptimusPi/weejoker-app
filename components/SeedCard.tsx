@@ -235,7 +235,7 @@ export function SeedCard({ seed, dayNumber, ritualId, className, onAnalyze, onOp
                                 const renderGroup = (label: string, items: any[], spriteWidth: number = 71) => (
                                     <JimboInnerPanel className="flex w-full min-h-[108px] overflow-hidden mb-2 p-0 flex-row">
                                         <div className="w-12 flex items-center justify-center relative shrink-0 border-r border-transparent">
-                                            <span className="font-header text-[18px] text-white tracking-[0.3em] whitespace-nowrap -rotate-90 absolute uppercase font-bold">
+                                            <span className="font-header text-[18px] text-white tracking-[0.2em] whitespace-nowrap -rotate-90 absolute uppercase">
                                                 {label}
                                             </span>
                                         </div>
@@ -319,7 +319,7 @@ export function SeedCard({ seed, dayNumber, ritualId, className, onAnalyze, onOp
                                         <JimboInnerPanel key={idx} className="flex justify-between items-center p-1 py-1 px-2 rounded-sm mb-1">
                                             <div className="flex gap-1.5 items-center">
                                                 <span className="font-pixel text-[8px] text-[var(--jimbo-grey)] w-3">#{idx + 1}</span>
-                                                <span className="font-header text-[9px] text-white uppercase truncate max-w-[70px] font-bold">{s.player_name}</span>
+                                                <span className="font-header text-[9px] text-white uppercase truncate max-w-[70px]">{s.player_name}</span>
                                             </div>
                                             <span className="font-header text-[9px] text-[var(--jimbo-gold)]">{s.score.toLocaleString()}</span>
                                         </JimboInnerPanel>

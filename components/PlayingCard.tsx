@@ -43,7 +43,7 @@ export function PlayingCard({ suit, rank, enhancement: _e, seal: _s, edition: _e
             )}
             style={{ width: size, height: Math.round(size * 1.4), fontSize, ...style }}
         >
-            <span className="font-bold leading-none">{RANK_DISPLAY[rank] ?? rank}</span>
+            <span className="leading-none">{RANK_DISPLAY[rank] ?? rank}</span>
             <span className="leading-none">{SUIT_SYMBOL[suit] ?? suit}</span>
         </div>
     )
