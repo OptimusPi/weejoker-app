@@ -4,10 +4,11 @@ import { useState } from 'react';
 import { useIceLakeScanner } from '@/lib/hooks/ice-lake/useIceLakeScanner';
 import { Search, Database, Loader2, Play, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-// Using public R2 URL because this is a client component
-// SEED_ASSETS binding is only available in server-side API routes
-const BUCKET_URL = "https://r2.weejoker.app/parquet_lake";
+import {
+  ICELAKE_BUCKET_URL,
+  buildIceLakePartitions,
+  ICELAKE_PATH_STYLE,
+} from '@/lib/iceLakeConfig';
 
 const RANKS = ['2s', '3s', '4s', '5s', '6s', '7s', '8s', '9s', '10s', 'Jacks', 'Queens', 'Kings', 'Aces'];
 const SUITS = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
@@ -41,10 +42,7 @@ export function SeedExplorer() {
         setResults([]);
         setScannedCount(0);
 
-        const partitions = [
-            ...selectedRanks.map(r => `ranks/little_${r}.parquet`),
-            ...selectedSuits.map(s => `suits/little_${s}.parquet`)
-        ];
+        const partitions = buildIceLakePartitions(selectedRanks, selectedSuits);
 
         try {
             const filter: any = {
@@ -61,7 +59,7 @@ export function SeedExplorer() {
 
             await scanIceLake(
                 partitions,
-                BUCKET_URL,
+                ICELAKE_BUCKET_URL,
                 filter,
                 (seed, score) => {
                     setResults(prev => [...prev, { seed, score }].slice(0, 100));
@@ -94,6 +92,10 @@ export function SeedExplorer() {
                     {isScanning ? 'Scanning...' : 'Ready'}
                 </div>
             </div>
+
+            <p className="text-[10px] text-[var(--jimbo-grey)] font-mono truncate" title={ICELAKE_BUCKET_URL}>
+                Source: {ICELAKE_BUCKET_URL} · paths: {ICELAKE_PATH_STYLE}
+            </p>
 
             {/* Rank/Suit Selection — THE key UI to preserve */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

@@ -7,7 +7,7 @@ import { JimboPanel, JimboInnerPanel, JimboButton, JimboInput, JimboTextArea } f
 import JamlEditor from "@/components/JamlEditor";
 import { useJamlFilter } from "@/lib/hooks/useJamlFilter";
 import { evaluateSeed } from "@/lib/jaml/jamlEvaluator";
-import { analyzeSeedWasm } from "@/lib/motelyWasm";
+import { openSingleSeedContext } from "@/lib/motelyWasm";
 import { normalizeAnalysis } from "@/lib/seedAnalyzer";
 import { cn } from "@/lib/utils";
 import { RitualChallengeBoard } from "@/components/RitualChallengeBoard";
@@ -116,7 +116,7 @@ export default function CreateRitualPage() {
 
         for (const seed of seeds) {
             try {
-                const rawAnalysis = await analyzeSeedWasm(seed, filter.deck || 'Erratic', filter.stake || 'White');
+                const rawAnalysis = await openSingleSeedContext(seed, filter.deck || 'Erratic', filter.stake || 'White');
                 const analysis = normalizeAnalysis(rawAnalysis);
                 const evaluation = evaluateSeed(analysis, filter);
                 results.push({ seed, passed: evaluation.isMatch, score: evaluation.score, details: evaluation });

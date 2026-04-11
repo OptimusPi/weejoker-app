@@ -157,7 +157,7 @@ R2: parquet_lake/seeds_rank_{rank}.parquet
   → DuckDB WASM (client-side, in-browser)
   → SQL queries via HTTP range requests (no download needed)
   → useIceLakeScanner hook → streams matching seeds
-  → Optional: analyzeSeedWasm per match for full details
+  → Optional: openSingleSeedContext per match for full details
 ```
 
 ### Route

@@ -51,7 +51,7 @@
 R2: {ritualId}.csv + {ritualId}.jaml
   → GET /api/rituals/{id}?day=N
   → DailyRitual.tsx (orchestrator)
-  → useSeedAnalyzer(seed) → analyzeSeedWasm → normalizeAnalysis
+  → useSeedAnalyzer(seed) → openSingleSeedContext → normalizeAnalysis
   → evaluateSeed(analysis, filter) → matches
   → RitualChallengeBoard.tsx (renders card)
 ```

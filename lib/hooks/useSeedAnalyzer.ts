@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AnalyzedSeed, normalizeAnalysis } from '../seedAnalyzer';
-import { analyzeSeedWasm } from '@/lib/motelyWasm';
+import { openSingleSeedContext } from '@/lib/motelyWasm';
 
 
 export function useSeedAnalyzer(seed: string | null, deck: string = 'Erratic', stake: string = 'White') {
@@ -21,7 +21,7 @@ export function useSeedAnalyzer(seed: string | null, deck: string = 'Erratic', s
             setLoading(true);
             setError(null);
             try {
-                const rawResult = await analyzeSeedWasm(seed, deck, stake);
+                const rawResult = await openSingleSeedContext(seed, deck, stake);
                 if (abortController.signal.aborted) return;
 
                 if (rawResult) {

@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import type { CapabilitiesInfo } from 'motely-wasm';
 import { JAML_SCHEMA_VERSION } from '@/lib/jaml/jamlSchema';
-import { getWasmCapabilities } from '@/lib/motelyWasm';
-import { Loader2, Cpu, Zap } from 'lucide-react';
+import { getWasmCapabilities, type WasmCapabilities } from '@/lib/motelyWasm';
+import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MotelyVersionBadgeProps {
@@ -13,7 +12,7 @@ interface MotelyVersionBadgeProps {
 }
 
 export function MotelyVersionBadge({ className, minimal = false }: MotelyVersionBadgeProps) {
-    const [caps, setCaps] = useState<CapabilitiesInfo | null>(null);
+    const [caps, setCaps] = useState<WasmCapabilities | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {

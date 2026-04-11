@@ -19,7 +19,7 @@ async function ensureBooted(): Promise<void> {
     bootPromise = (async () => {
       if (typeof window === 'undefined') {
         throw new Error(
-          'Motely WASM is browser-only in this app. Use client-side analyzeSeedWasm() or the 501 API stub.'
+          'Motely WASM is browser-only in this app. Use client-side openSingleSeedContext() or the 501 API stub.'
         );
       }
       await bootsharp.boot({ root: MOTELY_WASM_PUBLIC_PATH });
@@ -39,13 +39,14 @@ export async function getMotelyVersion(): Promise<string> {
   return MotelyJamlSearchBuilder.getVersion();
 }
 
-// ── Single seed analysis ───────────────────────────────────────────────────
+// ── Single-seed run context (shop stream, bosses, etc.) ───────────────────
 
-export async function analyzeSeedWasm(
+/** Opens {@link MotelySingleSearchContext} for one seed — same as C# `Open`. */
+export async function openSingleSeedContext(
   seed: string,
   deck: string,
   stake: string
-): Promise<Analysis.MotelySingleSearchContextImpl> {
+): Promise<Analysis.IMotelySingleSearchContextImpl> {
   await ensureBooted();
   const deckEnum =
     Motely.MotelyDeck[deck as keyof typeof Motely.MotelyDeck] ??

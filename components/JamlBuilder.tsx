@@ -4,12 +4,11 @@ import React, { useState, useRef, useEffect } from 'react';
 
 import { useJamlFilter } from '@/lib/hooks/useJamlFilter';
 import { DECK_OPTIONS, STAKE_OPTIONS } from '@/lib/data/constants';
-import { disposeMotelySearch, getMotelyWasmApi, stopMotelySearch } from '@/lib/motelyWasm';
+import { disposeMotelySearch, getMotelyWasmApi, stopMotelySearch, type SearchResultInfo } from '@/lib/motelyWasm';
 import JamlEditor from './JamlEditor';
 
 import { cn } from '@/lib/utils';
 import { X, Edit2, Loader2, Search, Square, Copy, RotateCcw, Flame, Sparkles } from 'lucide-react';
-import type { SearchResultInfo } from 'motely-wasm';
 import { AgnosticSeedCard } from './AgnosticSeedCard';
 import { WasmStatus } from './WasmStatus';
 import { JAML_PRESETS } from '@/lib/jaml/jamlPresets';

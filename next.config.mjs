@@ -48,6 +48,17 @@ const nextConfig = {
       type: 'webassembly/async',
     });
 
+    // motely-wasm's Bootsharp bundle contains `/*! webpackIgnore: true */`
+    // magic comments that Next.js webpack can't parse. Suppress these warnings.
+    config.module.rules.push({
+      test: /node_modules[\\/]motely-wasm[\\/]index\.mjs$/,
+      parser: { javascript: { importMeta: false } },
+    });
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings || []),
+      { module: /motely-wasm/ },
+    ];
+
     // Fallback for node modules
     if (!isServer) {
       config.resolve.fallback = {
@@ -56,6 +67,14 @@ const nextConfig = {
         path: false,
         crypto: false,
       };
+    }
+
+    // Server: don't try to bundle motely-wasm (it's browser-only WASM)
+    if (isServer) {
+      config.externals = config.externals || [];
+      if (Array.isArray(config.externals)) {
+        config.externals.push('motely-wasm');
+      }
     }
 
     return config;

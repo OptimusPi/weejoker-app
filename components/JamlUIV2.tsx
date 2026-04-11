@@ -3,10 +3,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import JamlEditor from '@/components/JamlEditor';
 import { useJamlFilter } from '@/lib/hooks/useJamlFilter';
-import { disposeMotelySearch, getMotelyWasmApi, stopMotelySearch } from '@/lib/motelyWasm';
+import { disposeMotelySearch, getMotelyWasmApi, stopMotelySearch, type SearchResultInfo } from '@/lib/motelyWasm';
 import { AgnosticSeedCard } from './AgnosticSeedCard';
 import { WasmStatus } from './WasmStatus';
-import type { SearchResultInfo } from 'motely-wasm';
 import { cn } from '@/lib/utils';
 import { DeckSprite, DECK_MAP, STAKE_MAP } from './DeckSprite';
 import { MotelyVersionBadge } from './MotelyVersionBadge';
