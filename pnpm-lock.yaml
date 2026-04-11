@@ -44,9 +44,6 @@ importers:
       '@react-three/xr':
         specifier: ^6.0.3
         version: 6.6.29(@react-three/fiber@8.18.0(@types/react@18.3.28)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(three@0.163.0))(@types/react@18.3.28)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(three@0.163.0)
-      '@types/papaparse':
-        specifier: ^5.5.2
-        version: 5.5.2
       '@types/three':
         specifier: ^0.163.0
         version: 0.163.0
@@ -62,18 +59,12 @@ importers:
       lucide-react:
         specifier: ^0.561.0
         version: 0.561.0(react@19.2.4)
-      motely-node:
-        specifier: ^3.15.27
-        version: 3.15.27
       motely-wasm:
-        specifier: ^3.15.27
-        version: 3.15.27
+        specifier: ^9.0.0
+        version: 9.0.0
       next:
         specifier: 15.2.9
         version: 15.2.9(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      papaparse:
-        specifier: ^5.5.3
-        version: 5.5.3
       react:
         specifier: ^19.2.3
         version: 19.2.4
@@ -1796,9 +1787,6 @@ packages:
 
   '@types/offscreencanvas@2019.7.3':
     resolution: {integrity: sha512-ieXiYmgSRXUDeOntE1InxjWyvEelZGP63M+cGuquuRLuIKKT1osnkXjxev9B7d1nXSug5vpunx+gNlbVxMlC9A==}
-
-  '@types/papaparse@5.5.2':
-    resolution: {integrity: sha512-gFnFp/JMzLHCwRf7tQHrNnfhN4eYBVYYI897CGX4MY1tzY9l2aLkVyx2IlKZ/SAqDbB3I1AOZW5gTMGGsqWliA==}
 
   '@types/prop-types@15.7.15':
     resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
@@ -3563,13 +3551,8 @@ packages:
   monaco-editor@0.55.1:
     resolution: {integrity: sha512-jz4x+TJNFHwHtwuV9vA9rMujcZRb0CEilTEwG2rRSpe/A7Jdkuj8xPKttCgOh+v/lkHy7HsZ64oj+q3xoAFl9A==}
 
-  motely-node@3.15.27:
-    resolution: {integrity: sha512-mZ2CkWjSlPtfVPvBg/vNrY5MZbidjCowWo4RCO4ysNbmY80e3g7X2jf0QxxOkCCc3FZbtUslPeCV6+KhN0Lb/w==}
-    engines: {node: '>=22.0.0'}
-    os: [linux]
-
-  motely-wasm@3.15.27:
-    resolution: {integrity: sha512-TtIbavzMA6wH38SQhrDqBuzfe/R2530FUdP7gpbFa1lOzu2T3eoc5ijVCWB9a1qrFpYYKLHq7h/PdZmzNXbciA==}
+  motely-wasm@9.0.0:
+    resolution: {integrity: sha512-W/UgKwxibpA68qQD+PHc0SqaK6CLIG6+ge1gfOsDL0dUmUtvAMFFLtywO+gh4Sdcam7pK4M8/tcrFd3rHdgALw==}
 
   motion-dom@11.18.1:
     resolution: {integrity: sha512-g76KvA001z+atjfxczdRtw/RXOM3OMSdd1f4DL77qCTF/+avrRJiawSG4yDibEQ215sr9kpinSlX2pCTJ9zbhw==}
@@ -3729,9 +3712,6 @@ packages:
 
   package-manager-manager@0.2.0:
     resolution: {integrity: sha512-V02gl0bafXJ2gcY6j+5IHM7UdnYwmF+2OsFZuqVcha6iMSStD4dpIOBOsypnUIwOi4jLcPz6RQuyifmAE3mG8g==}
-
-  papaparse@5.5.3:
-    resolution: {integrity: sha512-5QvjGxYVjxO59MGU2lHVYpRWBBtKHnlIAcSe1uNFCkkptUh63NFRj0FJQm7nR67puEruUci/ZkjmEFrjCAyP4A==}
 
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
@@ -6766,10 +6746,6 @@ snapshots:
 
   '@types/offscreencanvas@2019.7.3': {}
 
-  '@types/papaparse@5.5.2':
-    dependencies:
-      '@types/node': 20.19.37
-
   '@types/prop-types@15.7.15': {}
 
   '@types/react-dom@18.3.7(@types/react@18.3.28)':
@@ -8692,9 +8668,7 @@ snapshots:
       dompurify: 3.2.7
       marked: 14.0.0
 
-  motely-node@3.15.27: {}
-
-  motely-wasm@3.15.27: {}
+  motely-wasm@9.0.0: {}
 
   motion-dom@11.18.1:
     dependencies:
@@ -8855,8 +8829,6 @@ snapshots:
     dependencies:
       js-yaml: 4.1.1
       shellac: 0.8.0
-
-  papaparse@5.5.3: {}
 
   parent-module@1.0.1:
     dependencies:
