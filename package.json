@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node scripts/copy-motely-wasm.mjs",
-    "prebuild": "node scripts/copy-motely-wasm.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -33,7 +31,7 @@
     "csv-parse": "^6.1.0",
     "framer-motion": "^11.0.8",
     "lucide-react": "^0.561.0",
-    "motely-wasm": "^9.0.0",
+    "motely-wasm": "^11.2.0",
     "next": "15.2.9",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",

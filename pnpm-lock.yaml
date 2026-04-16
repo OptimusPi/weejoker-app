@@ -60,8 +60,8 @@ importers:
         specifier: ^0.561.0
         version: 0.561.0(react@19.2.4)
       motely-wasm:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^11.2.0
+        version: 11.2.0
       next:
         specifier: 15.2.9
         version: 15.2.9(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -3551,8 +3551,8 @@ packages:
   monaco-editor@0.55.1:
     resolution: {integrity: sha512-jz4x+TJNFHwHtwuV9vA9rMujcZRb0CEilTEwG2rRSpe/A7Jdkuj8xPKttCgOh+v/lkHy7HsZ64oj+q3xoAFl9A==}
 
-  motely-wasm@9.0.0:
-    resolution: {integrity: sha512-W/UgKwxibpA68qQD+PHc0SqaK6CLIG6+ge1gfOsDL0dUmUtvAMFFLtywO+gh4Sdcam7pK4M8/tcrFd3rHdgALw==}
+  motely-wasm@11.2.0:
+    resolution: {integrity: sha512-Ru1lq91wJCLRJeI9ehWRzjbGnCFKhEyANP07RalVk64w+jldK6E8nnDh5X4GzJaJrS4TNS1DUYZhu3i5N1nfEg==}
 
   motion-dom@11.18.1:
     resolution: {integrity: sha512-g76KvA001z+atjfxczdRtw/RXOM3OMSdd1f4DL77qCTF/+avrRJiawSG4yDibEQ215sr9kpinSlX2pCTJ9zbhw==}
@@ -8668,7 +8668,7 @@ snapshots:
       dompurify: 3.2.7
       marked: 14.0.0
 
-  motely-wasm@9.0.0: {}
+  motely-wasm@11.2.0: {}
 
   motion-dom@11.18.1:
     dependencies:
