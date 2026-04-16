@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { AnalyzedSeed } from '@/lib/seedAnalyzer';
+import { AnalyzedSeed, MotelyItemTypeCategory } from '@/lib/seedAnalyzer';
 import { Award, ShoppingCart, PackageOpen, Tag, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { JimboPanel, JimboInnerPanel } from '@/components/JimboPanel';
@@ -132,10 +132,10 @@ export function SeedStrategyModal({ analysis, onClose }: SeedStrategyModalProps)
                                         {anteData.shopQueue.map((item, i) => (
                                             <div key={i} className={cn(
                                                 "p-2 rounded border text-center transition-all hover:scale-105 cursor-default group relative",
-                                                item.type === 'Joker' ? "bg-[#222] border-[var(--jimbo-red)]" :
-                                                    item.type === 'Tarot' ? "bg-[#313] border-[#a5f]" :
-                                                        item.type === 'Planet' ? "bg-[#124] border-[#5af]" :
-                                                            item.type === 'Spectral' ? "bg-[#133] border-[#5ff]" :
+                                                item.category === MotelyItemTypeCategory.Joker ? "bg-[#222] border-[var(--jimbo-red)]" :
+                                                    item.category === MotelyItemTypeCategory.TarotCard ? "bg-[#313] border-[#a5f]" :
+                                                        item.category === MotelyItemTypeCategory.PlanetCard ? "bg-[#124] border-[#5af]" :
+                                                            item.category === MotelyItemTypeCategory.SpectralCard ? "bg-[#133] border-[#5ff]" :
                                                                 "bg-[#333] border-transparent"
                                             )}>
                                                 <div className="font-pixel text-[10px] text-[var(--jimbo-border-silver)] truncate uppercase">{item.name}</div>
@@ -150,7 +150,7 @@ export function SeedStrategyModal({ analysis, onClose }: SeedStrategyModalProps)
                                                         {item.edition.replace(' Edition', '')}
                                                     </div>
                                                 )}
-                                                {item.type === 'Joker' && (
+                                                {item.category === MotelyItemTypeCategory.Joker && (
                                                     <div className="text-[var(--jimbo-red)] absolute top-[2px] left-[4px] text-[8px] font-pixel">J</div>
                                                 )}
                                             </div>

@@ -1,63 +1,108 @@
-import bootsharp, {
-  MotelyJamlSearchBuilder,
-  MotelySingleSearchContext,
-  SearchEvents,
-  Motely,
-} from 'motely-wasm';
-import type { Analysis, BrowserWasm } from 'motely-wasm';
+'use client';
 
-// Re-export for consumers
-export { MotelyJamlSearchBuilder, MotelySingleSearchContext, SearchEvents, Motely };
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import dotnet, { MotelyWasm, Motely } from 'motely-wasm';
+import { decodeMotelyItemName, motelyItemCategory } from 'jaml-ui/motely';
 
-/** Public URL path where `motely-wasm` bin/* is staged (see `scripts/copy-motely-wasm.mjs`). */
-const MOTELY_WASM_PUBLIC_PATH = '/motely-wasm';
+const MAX_ANTES = 8;
+const MAX_SHOP_ITEMS = 6;
+const MAX_PACKS = 2;
+const MAX_TAGS = 4;
 
 let bootPromise: Promise<void> | null = null;
 
 async function ensureBooted(): Promise<void> {
   if (!bootPromise) {
     bootPromise = (async () => {
-      if (typeof window === 'undefined') {
-        throw new Error(
-          'Motely WASM is browser-only in this app. Use client-side openSingleSeedContext() or the 501 API stub.'
-        );
-      }
-      await bootsharp.boot({ root: MOTELY_WASM_PUBLIC_PATH });
-    })().catch((error) => {
+      if (typeof window === 'undefined') throw new Error('Motely WASM is browser-only');
+      await dotnet.boot();
+    })().catch((e) => {
       bootPromise = null;
-      const msg = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to boot Motely WASM runtime: ${msg}`);
+      throw new Error(`Failed to boot Motely WASM: ${e instanceof Error ? e.message : String(e)}`);
     });
   }
   return bootPromise;
 }
 
-// ── Version ────────────────────────────────────────────────────────────────
+/** "AmberAcorn" → "Amber Acorn" */
+function enumKeyToName(key: string | undefined): string {
+  if (!key) return 'Unknown';
+  return key.replace(/([A-Z])/g, ' $1').trim();
+}
+
+// ── Version ──────────────────────────────────────────────────────────────────
 
 export async function getMotelyVersion(): Promise<string> {
   await ensureBooted();
-  return MotelyJamlSearchBuilder.getVersion();
+  return MotelyWasm.getVersion();
 }
 
-// ── Single-seed run context (shop stream, bosses, etc.) ───────────────────
+// ── Single-seed analysis ──────────────────────────────────────────────────────
 
-/** Opens {@link MotelySingleSearchContext} for one seed — same as C# `Open`. */
+/**
+ * Runs a full seed analysis using the 11.x stream API.
+ * Returns a raw object shaped for normalizeAnalysis() in seedAnalyzer.ts.
+ */
 export async function openSingleSeedContext(
   seed: string,
   deck: string,
   stake: string
-): Promise<Analysis.IMotelySingleSearchContextImpl> {
+): Promise<Record<string, unknown>> {
   await ensureBooted();
-  const deckEnum =
-    Motely.MotelyDeck[deck as keyof typeof Motely.MotelyDeck] ??
-    Motely.MotelyDeck.Erratic;
-  const stakeEnum =
-    Motely.MotelyStake[stake as keyof typeof Motely.MotelyStake] ??
-    Motely.MotelyStake.White;
-  return MotelySingleSearchContext.open(seed, deckEnum, stakeEnum);
+
+  const deckEnum = Motely.MotelyDeck[deck as keyof typeof Motely.MotelyDeck] ?? Motely.MotelyDeck.Red;
+  const stakeEnum = Motely.MotelyStake[stake as keyof typeof Motely.MotelyStake] ?? Motely.MotelyStake.White;
+
+  const ctx = MotelyWasm.createSearchContext(seed.toUpperCase(), deckEnum, stakeEnum);
+
+  let erraticDeckComposition: string[] = [];
+  if (deckEnum === Motely.MotelyDeck.Erratic) {
+    try {
+      const deckStream = ctx.createErraticDeckPrngStream();
+      const deckChunk = ctx.getNextErraticDeckCardChunk(deckStream, 52);
+      erraticDeckComposition = Array.from(deckChunk.items, (v) => decodeMotelyItemName(v) ?? `card#${v}`);
+    } catch { /* non-erratic decks won't have this stream */ }
+  }
+
+  let runState: Motely.MotelyJsRunState = { voucherBitfield: 0, bossBitfield: 0 };
+  let bossStream = ctx.createBossStream();
+  const antes: unknown[] = [];
+
+  for (let ante = 1; ante <= MAX_ANTES; ante++) {
+    const bossResult = ctx.getNextBossForAnte(bossStream, ante, runState);
+    bossStream = bossResult.stream;
+    runState = bossResult.runState;
+    const boss = enumKeyToName(Motely.MotelyBossBlind[bossResult.boss]);
+
+    const voucherResult = ctx.getAnteFirstVoucher(ante, runState);
+    runState = voucherResult.runState;
+    const voucher = enumKeyToName(Motely.MotelyVoucher[voucherResult.voucher]);
+
+    const tagChunk = ctx.getNextTagChunk(ctx.createTagStream(ante), MAX_TAGS);
+    const tags = Array.from(tagChunk.tags, (t) => enumKeyToName(Motely.MotelyTag[t]));
+
+    const packChunk = ctx.getNextBoosterPackChunk(ctx.createBoosterPackStream(ante), MAX_PACKS);
+    const packs = Array.from(packChunk.packs, (p) => ({
+      type: enumKeyToName(Motely.MotelyBoosterPack[p]),
+      items: [] as string[],
+    }));
+
+    const shopStream = ctx.createShopItemStream(
+      ante,
+      runState,
+      Motely.MotelyShopStreamFlags.Default,
+      Motely.MotelyJokerStreamFlags.Default
+    );
+    const shopChunk = ctx.getNextShopItemChunk(shopStream, MAX_SHOP_ITEMS);
+    const shopQueue = Array.from(shopChunk.items, (v) => ({ name: decodeMotelyItemName(v) ?? `item#${v}`, category: motelyItemCategory(v) }));
+
+    antes.push({ ante, boss, voucher, smallBlindTag: tags[0] ?? '', bigBlindTag: tags[1] ?? '', shopQueue, packs });
+  }
+
+  return { seed: seed.toUpperCase(), deck, stake, erraticDeckComposition, antes };
 }
 
-// ── JAML Search ────────────────────────────────────────────────────────────
+// ── JAML Search ───────────────────────────────────────────────────────────────
 
 export interface SearchResultInfo {
   seed: string;
@@ -75,105 +120,63 @@ export interface WasmSearchStatus {
   matchingSeeds: bigint;
 }
 
-let activeSession: BrowserWasm.IMotelySearchSession | null = null;
-let progressUnsub: (() => void) | null = null;
-let resultUnsub: (() => void) | null = null;
-let completeUnsub: (() => void) | null = null;
-
-function cleanupSubscriptions() {
-  if (progressUnsub) { progressUnsub(); progressUnsub = null; }
-  if (resultUnsub) { resultUnsub(); resultUnsub = null; }
-  if (completeUnsub) { completeUnsub(); completeUnsub = null; }
-}
-
 export interface MotelyWasmApi {
-  startJamlSearch(
-    jamlContent: string,
-    options?: WasmSearchOptions
-  ): Promise<WasmSearchStatus>;
+  startJamlSearch(jamlContent: string, options?: WasmSearchOptions): Promise<WasmSearchStatus>;
   stopSearch(): void;
 }
+
+let activeSearch: Motely.IMotelyWasmSearch | null = null;
 
 export async function getMotelyWasmApi(): Promise<MotelyWasmApi> {
   await ensureBooted();
   return {
-    startJamlSearch: (jamlContent, options) =>
-      startJamlSearchWasm(jamlContent, options),
-    stopSearch: () => {
-      stopMotelySearchSync();
-    },
+    startJamlSearch: (jamlContent, options) => startJamlSearchWasm(jamlContent, options),
+    stopSearch: stopMotelySearchSync,
   };
 }
 
-async function startJamlSearchWasm(
-  jamlContent: string,
-  options?: WasmSearchOptions
-): Promise<WasmSearchStatus> {
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+async function startJamlSearchWasm(jamlContent: string, options?: WasmSearchOptions): Promise<WasmSearchStatus> {
   await ensureBooted();
+  stopMotelySearchSync();
 
-  // Clean up any previous subscriptions
-  cleanupSubscriptions();
+  const search = MotelyWasm.startRandomSearch(jamlContent, 1_000_000);
+  activeSearch = search;
+  const completionPromise = search.waitForCompletion();
 
-  const builder = MotelyJamlSearchBuilder.loadJaml(jamlContent);
-  MotelyJamlSearchBuilder.random(1_000_000);
-
-  // Subscribe to events
-  if (options?.onProgress) {
-    const handler = (seedsSearched: bigint, _matchingSeeds: bigint) => {
-      options.onProgress!(Number(seedsSearched));
-    };
-    SearchEvents.onProgress.subscribe(handler);
-    progressUnsub = () => SearchEvents.onProgress.unsubscribe(handler);
-  }
-
-  if (options?.onResult) {
-    const handler = (seed: string, score: number, tallyColumns: Int32Array) => {
-      options.onResult!(seed, score, tallyColumns);
-    };
-    SearchEvents.onResult.subscribe(handler);
-    resultUnsub = () => SearchEvents.onResult.unsubscribe(handler);
-  }
-
-  return new Promise<WasmSearchStatus>((resolve, reject) => {
-    const completeHandler = (
-      status: string,
-      totalSeedsSearched: bigint,
-      matchingSeeds: bigint
-    ) => {
-      cleanupSubscriptions();
-      activeSession = null;
-      resolve({ totalSeedsSearched, matchingSeeds });
-    };
-    SearchEvents.onComplete.subscribe(completeHandler);
-    completeUnsub = () => SearchEvents.onComplete.unsubscribe(completeHandler);
-
-    try {
-      activeSession = MotelyJamlSearchBuilder.run();
-    } catch (err) {
-      cleanupSubscriptions();
-      activeSession = null;
-      reject(err);
+  while (true) {
+    const snapshot = search.getSnapshot();
+    const chunk = search.drainResults(256);
+    for (const result of chunk) {
+      options?.onResult?.(result.seed, result.score, result.tallyColumns);
     }
-  });
+    options?.onProgress?.(Number(snapshot.totalSeedsSearched));
+    if (snapshot.isCompleted) break;
+    await sleep(25);
+  }
+
+  const tail = search.drainResults(1_000_000);
+  for (const result of tail) {
+    options?.onResult?.(result.seed, result.score, result.tallyColumns);
+  }
+
+  const completion = await completionPromise;
+  activeSearch = null;
+  return { totalSeedsSearched: completion.totalSeedsSearched, matchingSeeds: completion.matchingSeeds };
 }
 
 function stopMotelySearchSync(): void {
-  if (activeSession) {
-    activeSession.cancel();
-    activeSession = null;
+  if (activeSearch) {
+    try { activeSearch.cancel(); } catch { /* noop */ }
+    activeSearch = null;
   }
-  cleanupSubscriptions();
 }
 
-export async function stopMotelySearch(): Promise<void> {
-  stopMotelySearchSync();
-}
+export async function stopMotelySearch(): Promise<void> { stopMotelySearchSync(); }
+export async function disposeMotelySearch(): Promise<void> { stopMotelySearchSync(); }
 
-export async function disposeMotelySearch(): Promise<void> {
-  stopMotelySearchSync();
-}
-
-// ── Capabilities (simplified for v7) ──────────────────────────────────────
+// ── Capabilities ──────────────────────────────────────────────────────────────
 
 export interface WasmCapabilities {
   version: string;
@@ -185,9 +188,10 @@ export interface WasmCapabilities {
 export async function getWasmCapabilities(): Promise<WasmCapabilities> {
   await ensureBooted();
   return {
-    version: MotelyJamlSearchBuilder.getVersion(),
+    version: MotelyWasm.getVersion(),
     threads: typeof SharedArrayBuffer !== 'undefined',
-    simd: true, // NativeAOT-LLVM WASM always has SIMD
-    processorCount: typeof navigator !== 'undefined' ? navigator.hardwareConcurrency ?? 1 : 1,
+    simd: true,
+    processorCount: typeof navigator !== 'undefined' ? (navigator.hardwareConcurrency ?? 1) : 1,
   };
 }
+

@@ -5,6 +5,11 @@
  * Primary analysis is performed by Motely WASM.
  */
 
+import { Motely } from 'motely-wasm';
+const MotelyItemTypeCategory = Motely.MotelyItemTypeCategory;
+type MotelyItemTypeCategory = Motely.MotelyItemTypeCategory;
+export { MotelyItemTypeCategory };
+
 /**
  * Analyzed seed data - the output format for UI consumption
  */
@@ -33,7 +38,7 @@ export interface AnalyzedSeed {
     consumables: Array<{
         id: string;
         name: string;
-        type: string; // 'tarot', 'spectral', 'planet'
+        type: MotelyItemTypeCategory;
         ante: number;
         source: string;
         slot?: number;
@@ -66,7 +71,7 @@ export interface AnalyzedSeed {
             tags: string[];
             shopQueue: Array<{
                 name: string;
-                type: string;
+                category: MotelyItemTypeCategory;
                 edition?: string;
                 stickers?: string[];
             }>;
@@ -74,7 +79,7 @@ export interface AnalyzedSeed {
                 name: string;
                 cards: Array<{
                     name: string;
-                    type: string;
+                    category: MotelyItemTypeCategory;
                     edition?: string;
                     stickers?: string[];
                 }>;
@@ -157,16 +162,16 @@ export function normalizeAnalysis(wasm: any): AnalyzedSeed {
                     if (!itemName) return;
 
                     const { cleanName, edition } = extractEdition(itemName);
-                    const type = getItemType(cleanName);
+                    const category: MotelyItemTypeCategory = get(item, 'category') ?? MotelyItemTypeCategory.Invalid;
                     const slot = slotIdx + 1;
 
                     output.antes[anteNum].shopQueue.push({
                         name: cleanName,
-                        type,
+                        category,
                         edition
                     });
 
-                    if (type === 'Joker') {
+                    if (category === MotelyItemTypeCategory.Joker) {
                         output.jokers.push({
                             id: normalizeId(cleanName),
                             name: cleanName,
@@ -175,11 +180,15 @@ export function normalizeAnalysis(wasm: any): AnalyzedSeed {
                             edition,
                             slot
                         });
-                    } else if (['Tarot', 'Planet', 'Spectral'].includes(type) || type === 'Consumable') {
+                    } else if (
+                        category === MotelyItemTypeCategory.TarotCard ||
+                        category === MotelyItemTypeCategory.PlanetCard ||
+                        category === MotelyItemTypeCategory.SpectralCard
+                    ) {
                         output.consumables.push({
                             id: normalizeId(cleanName),
                             name: cleanName,
-                            type: type.toLowerCase(),
+                            type: category,
                             ante: anteNum,
                             source: 'shop',
                             slot
@@ -195,12 +204,13 @@ export function normalizeAnalysis(wasm: any): AnalyzedSeed {
                     const packItems = get(pack, 'items') || [];
                     const packType = get(pack, 'type') || "Standard";
 
-                    const packCards = packItems.map((itemName: string, slotIdx: number) => {
+                    const packCards = packItems.map((item: any, slotIdx: number) => {
+                        const itemName = typeof item === 'string' ? item : get(item, 'name') ?? '';
                         const { cleanName, edition } = extractEdition(itemName);
-                        const type = getItemType(cleanName);
+                        const category: MotelyItemTypeCategory = typeof item === 'object' ? (get(item, 'category') ?? MotelyItemTypeCategory.Invalid) : MotelyItemTypeCategory.Invalid;
                         const slot = slotIdx + 1;
 
-                        if (type === 'Joker') {
+                        if (category === MotelyItemTypeCategory.Joker) {
                             output.jokers.push({
                                 id: normalizeId(cleanName),
                                 name: cleanName,
@@ -209,18 +219,22 @@ export function normalizeAnalysis(wasm: any): AnalyzedSeed {
                                 edition,
                                 slot
                             });
-                        } else if (['Tarot', 'Planet', 'Spectral'].includes(type)) {
+                        } else if (
+                            category === MotelyItemTypeCategory.TarotCard ||
+                            category === MotelyItemTypeCategory.PlanetCard ||
+                            category === MotelyItemTypeCategory.SpectralCard
+                        ) {
                             output.consumables.push({
                                 id: normalizeId(cleanName),
                                 name: cleanName,
-                                type: type.toLowerCase(),
+                                type: category,
                                 ante: anteNum,
                                 source: packType,
                                 slot
                             });
                         }
 
-                        return { name: cleanName, type, edition };
+                        return { name: cleanName, category, edition };
                     });
 
                     output.antes[anteNum].packs.push({
@@ -236,17 +250,6 @@ export function normalizeAnalysis(wasm: any): AnalyzedSeed {
 }
 
 // Helpers
-const PLANETS = ['Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto', 'Planet X', 'Ceres', 'Eris', 'Mercury', 'Earth'];
-const SPECTRALS = ['Familiar', 'Grim', 'Incantation', 'Talisman', 'Aura', 'Wraith', 'Sigil', 'Ouija', 'Ectoplasm', 'Immolate', 'Ankh', 'Deja Vu', 'Hex', 'Trance', 'Medium', 'Cryptid', 'The Soul', 'Black Hole'];
-
-function getItemType(itemName: string): string {
-    if (PLANETS.includes(itemName)) return 'Planet';
-    if (SPECTRALS.includes(itemName)) return 'Spectral';
-    if (itemName.includes('Joker') || itemName === 'Showman' || itemName === 'Blueprint' || itemName === 'Brainstorm') return 'Joker';
-    if (itemName.includes('Tag')) return 'Tag';
-    if (itemName.includes('Voucher') || itemName === 'Seed Source') return 'Voucher';
-    return 'Tarot';
-}
 
 function extractEdition(itemName: string): { cleanName: string; edition?: string } {
     const editionPrefixes = ['Negative', 'Polychrome', 'Foil', 'Holographic'];

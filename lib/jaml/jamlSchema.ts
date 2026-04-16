@@ -5,7 +5,7 @@
  * All JAML-aware files import from here — single swap point if the API changes.
  */
 
-import jamlSchemaJson from 'motely-wasm/jaml.schema.json';
+import jamlSchemaJson from '../../jaml.schema.json';
 
 const schema = jamlSchemaJson as any;
 const clauseDef = schema.definitions?.clause?.properties ?? {};
