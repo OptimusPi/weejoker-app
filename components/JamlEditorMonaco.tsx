@@ -4,15 +4,7 @@ import React, { useRef } from 'react';
 import Editor, { OnMount, loader } from "@monaco-editor/react";
 import { Copy, RotateCcw, Check, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { JimboPanel, JimboInnerPanel } from './JimboPanel';
-import {
-    JAML_SCHEMA_VERSION,
-    SECTION_KEYS,
-    METADATA_KEYS,
-    PROPERTY_KEYS,
-    CLAUSE_TYPE_KEYS,
-    getValidValuesForKey,
-} from '@/lib/jaml/jamlSchema';
+
 
 interface JamlEditorMonacoProps {
     value: string;
@@ -25,16 +17,16 @@ export default function JamlEditorMonaco({ value, onChange, diagnostics, classNa
     const editorRef = useRef<any>(null);
 
     const handleEditorWillMount = (monaco: any) => {
-        // Define Jimbo Theme
-        monaco.editor.defineTheme('jimbo-dark', {
+        // Define Balatro Theme
+        monaco.editor.defineTheme('balatro-dark', {
             base: 'vs-dark',
             inherit: true,
             rules: [
                 { token: 'comment', foreground: '5f7377', fontStyle: 'italic' },
-                { token: 'keyword', foreground: 'fe5f55' }, // Jimbo Red
-                { token: 'string', foreground: 'eac058' },  // Jimbo Gold
-                { token: 'number', foreground: '009dff' },  // Jimbo Blue
-                { token: 'type', foreground: '4bc292' },    // Jimbo Green
+                { token: 'keyword', foreground: 'fe5f55' }, // Balatro Red
+                { token: 'string', foreground: 'eac058' },  // Balatro Gold
+                { token: 'number', foreground: '009dff' },  // Balatro Blue
+                { token: 'type', foreground: '4bc292' },    // Balatro Green
             ],
             colors: {
                 'editor.background': '#1e2b2d', // Authentic G.C.BLACK variant
@@ -46,104 +38,29 @@ export default function JamlEditorMonaco({ value, onChange, diagnostics, classNa
                 'editor.lineHighlightBackground': '#00000020',
                 'editorCursor.foreground': '#eac058',
 
-                // Widget/Popover Colors
-                'editorWidget.background': '#1a1a1a', // Jimbo Dark
-                'editorWidget.border': '#333333',
+                // Widget/Popover Colors (Fixes User Issue: "White text on white background")
+                'editorWidget.background': '#1e2b2d', // Balatro Dark
+                'editorWidget.border': '#ffffff20',
                 'editorWidget.foreground': '#ffffff',
 
                 // Suggestion List Colors
-                'list.activeSelectionBackground': '#d8b97d', // Jimbo Gold Selection
-                'list.activeSelectionForeground': '#1a1a1a', // Dark text on gold
-                'list.hoverBackground': '#2a2a2a',
+                'list.activeSelectionBackground': '#d8b97d', // Balatro Gold Selection
+                'list.activeSelectionForeground': '#1e2b2d', // Dark text on gold
+                'list.hoverBackground': '#2a3b3d',
                 'list.hoverForeground': '#ffffff',
                 'list.focusBackground': '#d8b97d',
-                'list.focusForeground': '#1a1a1a',
-            }
-        });
-
-        // Register JAML completion provider for YAML
-        monaco.languages.registerCompletionItemProvider('yaml', {
-            triggerCharacters: [':', ' ', '-', '\n'],
-            provideCompletionItems: (model: any, position: any) => {
-                const lineContent = model.getLineContent(position.lineNumber);
-                const textUntilPosition = lineContent.substring(0, position.column - 1).trimStart();
-                const wordAtPosition = model.getWordUntilPosition(position);
-                const range = {
-                    startLineNumber: position.lineNumber,
-                    endLineNumber: position.lineNumber,
-                    startColumn: wordAtPosition.startColumn,
-                    endColumn: wordAtPosition.endColumn,
-                };
-
-                const suggestions: any[] = [];
-
-                // Detect if we're after a colon (value position)
-                const colonMatch = lineContent.match(/^\s*-?\s*(\w+):\s*/);
-                if (colonMatch && position.column > colonMatch[0].length) {
-                    const key = colonMatch[1];
-                    const validValues = getValidValuesForKey(key);
-                    if (validValues) {
-                        for (const val of validValues) {
-                            suggestions.push({
-                                label: val,
-                                kind: monaco.languages.CompletionItemKind.Value,
-                                insertText: val,
-                                range,
-                                sortText: `0-${val}`,
-                            });
-                        }
-                    }
-                    // Also suggest clause types for 'type:' key
-                    if (key === 'type') {
-                        for (const ct of CLAUSE_TYPE_KEYS) {
-                            suggestions.push({
-                                label: ct,
-                                kind: monaco.languages.CompletionItemKind.EnumMember,
-                                insertText: ct,
-                                range,
-                                sortText: `0-${ct}`,
-                            });
-                        }
-                    }
-                } else {
-                    // Key position — suggest keys based on indent
-                    const indent = lineContent.search(/\S|$/);
-                    const isArrayItem = textUntilPosition.startsWith('-');
-
-                    if (indent === 0 && !isArrayItem) {
-                        // Root level: metadata + sections
-                        for (const key of [...METADATA_KEYS, ...SECTION_KEYS]) {
-                            suggestions.push({
-                                label: key,
-                                kind: monaco.languages.CompletionItemKind.Property,
-                                insertText: SECTION_KEYS.includes(key) ? `${key}:\n  - ` : `${key}: `,
-                                range,
-                                sortText: `0-${key}`,
-                            });
-                        }
-                    } else {
-                        // Inside a section: property keys + clause shorthand keys
-                        for (const key of PROPERTY_KEYS) {
-                            suggestions.push({
-                                label: key,
-                                kind: monaco.languages.CompletionItemKind.Property,
-                                insertText: `${key}: `,
-                                range,
-                                sortText: `1-${key}`,
-                            });
-                        }
-                    }
-                }
-
-                return { suggestions };
+                'list.focusForeground': '#1e2b2d',
             }
         });
     };
 
     const handleEditorDidMount: OnMount = (editor, monaco) => {
         editorRef.current = editor;
+
         // Focus editor
         editor.focus();
+
+        // Optional: Add custom JAML commands/actions here
     };
 
     const handleFormat = () => {
@@ -159,18 +76,18 @@ export default function JamlEditorMonaco({ value, onChange, diagnostics, classNa
     const hasErrors = diagnostics?.errors?.length > 0;
 
     return (
-        <JimboInnerPanel className={cn("flex flex-col h-full !p-0 overflow-hidden group", className)}>
+        <div className={cn("flex flex-col h-full bg-[#1e2b2d] border border-white/10 rounded-xl overflow-hidden shadow-2xl group", className)}>
             {/* Toolbar */}
-            <div className="h-10 bg-[#111] border-b border-[var(--jimbo-panel-edge)] flex items-center justify-between px-4 shrink-0 overflow-hidden">
+            <div className="h-10 bg-black/40 border-b border-white/5 flex items-center justify-between px-4 shrink-0 overflow-hidden">
                 <div className="flex items-center gap-4">
-                    <span className="font-header text-xs text-[var(--jimbo-red)] tracking-widest uppercase flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-[var(--jimbo-red)] animate-pulse" />
+                    <span className="font-header text-xs text-[var(--balatro-red)] tracking-widest uppercase flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-[var(--balatro-red)] animate-pulse" />
                         JAML EDITOR
                     </span>
-                    <div className="h-4 w-px bg-[var(--jimbo-panel-edge)]" />
+                    <div className="h-4 w-px bg-white/10" />
                     <div className="flex items-center gap-3">
-                        <button onClick={handleFormat} className="text-[9px] font-pixel text-[var(--jimbo-grey)] hover:text-white uppercase tracking-tighter transition-colors">Format</button>
-                        <button onClick={handleCopy} className="text-[9px] font-pixel text-[var(--jimbo-grey)] hover:text-white uppercase tracking-tighter transition-colors flex items-center gap-1">
+                        <button onClick={handleFormat} className="text-[9px] font-pixel text-white/30 hover:text-white/80 uppercase tracking-tighter transition-colors">Format</button>
+                        <button onClick={handleCopy} className="text-[9px] font-pixel text-white/30 hover:text-white/80 uppercase tracking-tighter transition-colors flex items-center gap-1">
                             <Copy size={10} /> Copy
                         </button>
                     </div>
@@ -178,14 +95,14 @@ export default function JamlEditorMonaco({ value, onChange, diagnostics, classNa
 
                 <div className="flex items-center gap-2">
                     {hasErrors ? (
-                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#211] border border-[var(--jimbo-red)] rounded text-[9px] font-pixel text-[var(--jimbo-red)]">
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-red-500/10 border border-red-500/20 rounded text-[9px] font-pixel text-red-400">
                             <AlertCircle size={10} />
-                            <span>{diagnostics.errors.length} syntax error(s)</span>
+                            <span>{diagnostics.errors.length} SYNTAX ERROR(S)</span>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#121] border border-[var(--jimbo-dark-green)] rounded text-[9px] font-pixel text-[var(--jimbo-dark-green)]">
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-500/10 border border-green-500/20 rounded text-[9px] font-pixel text-green-400 opacity-60">
                             <Check size={10} />
-                            <span>Syntax valid</span>
+                            <span>SYNTAX VALID</span>
                         </div>
                     )}
                 </div>
@@ -197,7 +114,7 @@ export default function JamlEditorMonaco({ value, onChange, diagnostics, classNa
                     height="100%"
                     defaultLanguage="yaml"
                     value={value}
-                    theme="jimbo-dark"
+                    theme="balatro-dark"
                     onChange={onChange}
                     onMount={handleEditorDidMount}
                     beforeMount={handleEditorWillMount}
@@ -224,14 +141,14 @@ export default function JamlEditorMonaco({ value, onChange, diagnostics, classNa
             </div>
 
             {/* Quick Status Footer */}
-            <div className="h-6 bg-[#111] border-t border-[var(--jimbo-panel-edge)] flex items-center px-4 justify-between shrink-0">
-                <div className="text-[8px] font-pixel text-[var(--jimbo-grey)] uppercase">
+            <div className="h-6 bg-black/20 border-t border-white/5 flex items-center px-4 justify-between shrink-0">
+                <div className="text-[8px] font-pixel text-white/20 uppercase">
                     Lines: {value.split('\n').length} | Encoding: UTF-8
                 </div>
-                <div className="text-[8px] font-pixel text-[var(--jimbo-grey)] uppercase tracking-widest">
-                    Motely JAML Schema v{JAML_SCHEMA_VERSION}
+                <div className="text-[8px] font-pixel text-white/20 uppercase tracking-widest">
+                    Motely JAML Engine v1.0.4
                 </div>
             </div>
-        </JimboInnerPanel>
+        </div>
     );
 }

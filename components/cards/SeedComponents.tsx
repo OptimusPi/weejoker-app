@@ -1,7 +1,7 @@
 import React from 'react';
 import { CardFan } from '../CardFan';
 import { Sprite } from '../Sprite';
-import { RealPlayingCard } from '../RealPlayingCard';
+import { PlayingCard } from '../PlayingCard';
 import { AnalyzedSeed } from '@/lib/seedAnalyzer';
 
 interface PanelProps {
@@ -34,7 +34,7 @@ export function DeckPanel({ analysis }: PanelProps) {
             <div className="flex flex-wrap justify-center gap-1 opacity-40 grayscale scale-75 origin-top">
                 {sortedOthers.map((card, i) => (
                     <div key={i} className="hover:opacity-100 transition-opacity">
-                        <RealPlayingCard
+                        <PlayingCard
                             rank={card.split('_')[0] as any}
                             suit={card.split('_')[1] as any}
                             size={32}
@@ -66,7 +66,7 @@ export function TagsPanel({ analysis }: PanelProps) {
                 {analysis.tags.slice(0, 6).map((t, i) => (
                     <div key={i} className="relative group/tag">
                         <Sprite name={t.tag} width={28} className="drop-shadow-sm group-hover/tag:scale-110" />
-                        <div className="absolute -top-1 -right-1 bg-black/60 text-white font-pixel text-[7px] w-3.5 h-3.5 flex items-center justify-center rounded-sm border border-white/10">{t.ante}</div>
+                        <div className="absolute -top-1 -right-1 bg-black/60 text-white font-pixel text-[7px] w-3 h-3 flex items-center justify-center rounded-sm">a{t.ante}</div>
                     </div>
                 ))}
                 {analysis.tags.length === 0 && <span className="font-pixel text-[8px] text-white/10 italic">None</span>}
@@ -85,7 +85,7 @@ export function BossPanel({ analysis }: PanelProps) {
                 {analysis.bosses.slice(1, 5).map((b, i) => (
                     <div key={i} className="relative group/boss">
                         <Sprite name={b.boss} width={32} className="drop-shadow-sm group-hover/boss:scale-110" />
-                        <div className="absolute -top-1 -right-1 bg-black/60 text-white font-pixel text-[7px] w-3.5 h-3.5 flex items-center justify-center rounded-sm border border-white/10">{b.ante}</div>
+                        <div className="absolute -top-1 -right-1 bg-black/60 text-white font-pixel text-[7px] w-3 h-3 flex items-center justify-center rounded-sm">a{b.ante}</div>
                     </div>
                 ))}
                 {analysis.bosses.length === 0 && <span className="font-pixel text-[8px] text-white/10 italic">None</span>}

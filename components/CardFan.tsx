@@ -1,6 +1,5 @@
 import React from 'react';
-import { RealPlayingCard } from './RealPlayingCard';
-import { JimboInnerPanel } from '@/components/JimboPanel';
+import { PlayingCard } from './PlayingCard';
 
 interface CardFanProps {
     count: number;
@@ -76,7 +75,7 @@ export function CardFan({ count, cards, className = '', label, showLabel = true 
                                     animationDelay: `${i * 0.02}s`,
                                 }}
                             >
-                                <RealPlayingCard
+                                <PlayingCard
                                     rank={cardData.rank as any}
                                     suit={cardData.suit as any}
                                     size={cardSize}
@@ -88,12 +87,13 @@ export function CardFan({ count, cards, className = '', label, showLabel = true 
                         );
                     })
                 ) : (
-                    <JimboInnerPanel className="flex items-center justify-center h-full w-full">
-                        <span className="font-pixel text-[var(--jimbo-grey)] text-[10px] uppercase tracking-widest">Deck Empty</span>
-                    </JimboInnerPanel>
+                    <div className="flex items-center justify-center h-full w-full bg-white/5 rounded-lg border border-white/5">
+                        <span className="font-pixel text-white/10 text-[10px] uppercase tracking-widest">Deck Empty</span>
+                    </div>
                 )}
             </div>
 
         </div>
     );
 }
+

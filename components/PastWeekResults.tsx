@@ -2,9 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Trophy, Calendar } from "lucide-react";
-import { JimboPanel, JimboInnerPanel } from "@/components/JimboPanel";
-
-import { EPOCH } from "@/lib/config";
 
 interface DayResult {
     day_number: number;
@@ -12,6 +9,8 @@ interface DayResult {
     score: number;
     seed: string;
 }
+
+import { EPOCH } from "@/lib/config";
 
 export function PastWeekResults() {
     const [results, setResults] = useState<DayResult[]>([]);
@@ -34,16 +33,17 @@ export function PastWeekResults() {
         }
         fetchWeekResults();
     }, []);
-
     const getDayLabel = (dayNum: number) => {
         const dayDate = new Date(EPOCH + (dayNum - 1) * 24 * 60 * 60 * 1000);
         return dayDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
     };
 
     return (
-        <JimboPanel className="relative overflow-hidden">
+        <div className="bg-black/30 backdrop-blur-lg border-[2px] border-white/40 rounded-xl p-6 shadow-2xl relative overflow-hidden">
+            {/* Scanline effect */}
+            <div className="absolute inset-0 pointer-events-none opacity-5 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%] z-0"></div>
             <div className="flex items-center gap-3 mb-6">
-                <div className="bg-[var(--jimbo-blue)] p-2 rounded">
+                <div className="bg-[var(--balatro-blue)] p-2 rounded border-2 border-white shadow-sm">
                     <Calendar size={24} className="text-white" />
                 </div>
                 <h2 className="text-3xl font-header text-white tracking-wider">
@@ -52,13 +52,13 @@ export function PastWeekResults() {
             </div>
 
             {loading && (
-                <div className="text-center py-8 text-[var(--jimbo-grey)] font-pixel animate-pulse">
+                <div className="text-center py-8 text-zinc-400 font-pixel animate-pulse">
                     Loading past results...
                 </div>
             )}
 
             {error && (
-                <div className="text-center py-8 text-[var(--jimbo-gold)] font-pixel">
+                <div className="text-center py-8 text-[var(--balatro-orange)] font-pixel">
                     {error}
                 </div>
             )}
@@ -66,7 +66,7 @@ export function PastWeekResults() {
             {!loading && !error && results.length === 0 && (
                 <div className="text-center py-8 space-y-2">
                     <div className="text-4xl">🎮</div>
-                    <p className="text-[var(--jimbo-grey)] font-pixel text-lg">
+                    <p className="text-zinc-400 font-pixel text-lg">
                         No winners yet! Be the first to submit your score.
                     </p>
                 </div>
@@ -75,28 +75,28 @@ export function PastWeekResults() {
             {!loading && !error && results.length > 0 && (
                 <div className="space-y-3">
                     {results.map((result, i) => (
-                        <JimboInnerPanel key={result.day_number} className="flex items-center gap-4">
+                        <div key={result.day_number} className="flex items-center gap-4 bg-black/30 p-4 rounded-lg border border-white/10">
                             <div className="w-12 text-center">
                                 {i === 0 ? (
-                                    <Trophy size={24} className="text-[var(--jimbo-gold)] mx-auto" />
+                                    <Trophy size={24} className="text-[var(--balatro-gold)] mx-auto" />
                                 ) : (
-                                    <span className="font-pixel text-[var(--jimbo-grey)]">#{result.day_number}</span>
+                                    <span className="font-pixel text-zinc-500">#{result.day_number}</span>
                                 )}
                             </div>
                             <div className="flex-1">
                                 <div className="font-header text-white text-xl">{result.player_name}</div>
-                                <div className="font-pixel text-[var(--jimbo-grey)] text-sm">{getDayLabel(result.day_number)}</div>
+                                <div className="font-pixel text-zinc-500 text-sm">{getDayLabel(result.day_number)}</div>
                             </div>
                             <div className="text-right">
-                                <div className="font-header text-2xl text-[var(--jimbo-gold)]">
+                                <div className="font-header text-2xl text-[var(--balatro-gold)]">
                                     {result.score.toLocaleString()}
                                 </div>
-                                <div className="font-pixel text-[var(--jimbo-grey)] text-xs">chips</div>
+                                <div className="font-pixel text-zinc-500 text-xs uppercase">chips</div>
                             </div>
-                        </JimboInnerPanel>
+                        </div>
                     ))}
                 </div>
             )}
-        </JimboPanel>
+        </div>
     );
 }

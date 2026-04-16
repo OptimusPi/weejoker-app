@@ -4,11 +4,8 @@ import { useState } from 'react';
 import { useIceLakeScanner } from '@/lib/hooks/ice-lake/useIceLakeScanner';
 import { Search, Database, Loader2, Play, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import {
-  ICELAKE_BUCKET_URL,
-  buildIceLakePartitions,
-  ICELAKE_PATH_STYLE,
-} from '@/lib/iceLakeConfig';
+
+const BUCKET_URL = "https://r2.weejoker.app/parquet_lake";
 
 const RANKS = ['2s', '3s', '4s', '5s', '6s', '7s', '8s', '9s', '10s', 'Jacks', 'Queens', 'Kings', 'Aces'];
 const SUITS = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
@@ -42,7 +39,10 @@ export function SeedExplorer() {
         setResults([]);
         setScannedCount(0);
 
-        const partitions = buildIceLakePartitions(selectedRanks, selectedSuits);
+        const partitions = [
+            ...selectedRanks.map(r => `ranks/${r}`),
+            ...selectedSuits.map(s => `suits/${s}`)
+        ];
 
         try {
             const filter: any = {
@@ -59,7 +59,7 @@ export function SeedExplorer() {
 
             await scanIceLake(
                 partitions,
-                ICELAKE_BUCKET_URL,
+                BUCKET_URL,
                 filter,
                 (seed, score) => {
                     setResults(prev => [...prev, { seed, score }].slice(0, 100));
@@ -81,21 +81,17 @@ export function SeedExplorer() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <h2 className="text-lg font-header flex items-center gap-2 text-white">
-                    <Database className="text-[var(--jimbo-blue)]" size={18} />
+                    <Database className="text-[var(--balatro-blue)]" size={18} />
                     Deep Scanner
                 </h2>
-                <div className="flex items-center gap-2 text-[10px] text-[var(--jimbo-grey)]">
+                <div className="flex items-center gap-2 text-[10px] text-white/60">
                     <span className={cn(
                         "w-2 h-2 rounded-full",
-                        isScanning ? "bg-[var(--jimbo-dark-green)] animate-pulse" : "bg-[var(--jimbo-grey)] opacity-50"
+                        isScanning ? "bg-[var(--jimbo-green)] animate-pulse" : "bg-white/30"
                     )} />
                     {isScanning ? 'Scanning...' : 'Ready'}
                 </div>
             </div>
-
-            <p className="text-[10px] text-[var(--jimbo-grey)] font-mono truncate" title={ICELAKE_BUCKET_URL}>
-                Source: {ICELAKE_BUCKET_URL} · paths: {ICELAKE_PATH_STYLE}
-            </p>
 
             {/* Rank/Suit Selection — THE key UI to preserve */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -116,10 +112,10 @@ export function SeedExplorer() {
                                 key={rank}
                                 onClick={() => toggleSelection(rank, selectedRanks, setSelectedRanks)}
                                 className={cn(
-                                    "px-2.5 py-1 rounded-sm text-xs border transition-all hover:bg-white/10 hover:text-white",
+                                    "px-2.5 py-1 rounded text-xs border transition-all",
                                     selectedRanks.includes(rank)
-                                        ? "bg-[var(--jimbo-blue)] border-[var(--jimbo-blue)] text-white shadow-xl"
-                                        : "bg-[#111] border-[var(--jimbo-panel-edge)] text-[var(--jimbo-grey)]"
+                                        ? "bg-[var(--jimbo-blue)] border-[var(--jimbo-blue)] text-white shadow-[0_2px_0_rgba(0,0,0,0.3)]"
+                                        : "bg-[var(--jimbo-panel-edge)] border-[var(--jimbo-dark-grey)] text-white/50 hover:text-white hover:border-white/30"
                                 )}
                             >
                                 {rank}
@@ -137,10 +133,10 @@ export function SeedExplorer() {
                                 key={suit}
                                 onClick={() => toggleSelection(suit, selectedSuits, setSelectedSuits)}
                                 className={cn(
-                                    "px-2.5 py-1 rounded text-xs border transition-all hover:bg-white/10 hover:text-white",
+                                    "px-2.5 py-1 rounded text-xs border transition-all",
                                     selectedSuits.includes(suit)
                                         ? "bg-[var(--jimbo-red)] border-[var(--jimbo-red)] text-white shadow-[0_2px_0_rgba(0,0,0,0.3)]"
-                                        : "bg-[#111] border-[var(--jimbo-panel-edge)] text-[var(--jimbo-grey)]"
+                                        : "bg-[var(--jimbo-panel-edge)] border-[var(--jimbo-dark-grey)] text-white/50 hover:text-white hover:border-white/30"
                                 )}
                             >
                                 {suit}

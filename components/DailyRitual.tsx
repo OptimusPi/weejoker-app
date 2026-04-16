@@ -5,56 +5,48 @@ import { RitualChallengeBoard } from "./RitualChallengeBoard";
 import { HowToPlay } from "./HowToPlay";
 import { SubmitScoreModal } from "./SubmitScoreModal";
 import { LeaderboardModal } from "./LeaderboardModal";
-import { parseJamlToFilter } from "@/lib/hooks/useJamlFilter";
-import { parseJamlToObjectives } from "@/lib/jaml/jamlObjectives";
+import { Sprite } from "./Sprite";
+import { useSeedAnalyzer } from "@/lib/hooks/useSeedAnalyzer";
 import { cn } from "@/lib/utils";
+
 import { ritualConfig } from "@/lib/config";
 
-type RitualCacheEntry = {
-    seed: string;
-    jaml: string;
-    title: string;
-    tagline: string;
-    defaultObjective: string;
-};
-
-type RitualRuntimeState = {
-    title: string;
-    tagline: string;
-    epoch: number;
-    today: number;
-    defaultObjective: string;
-    jamlConfig: string;
-    seeds: string[];
+export const getDayNumber = (epoch: number) => {
+    if (!epoch) return 0;
+    const now = Date.now();
+    const diff = now - epoch;
+    return Math.floor(diff / (24 * 60 * 60 * 1000)) + 1;
 };
 
 export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: string, initialDay?: number }) {
-    const ritualId = propId || ritualConfig.id;
+    const defaultRitualId = propId || ritualConfig.id;
+    const [ritualId, setRitualId] = useState(defaultRitualId);
     const [configLoading, setConfigLoading] = useState(false);
+    const [serverToday, setServerToday] = useState(1);
 
     // Initialize specific viewing day from server prop (SSR safe)
     const [viewingDay, setViewingDay] = useState<number>(initialDay);
 
     const [mounted, setMounted] = useState(false);
-    const [ritualRuntime, setRitualRuntime] = useState<RitualRuntimeState>({
-        title: ritualConfig.title,
-        tagline: ritualConfig.tagline,
-        epoch: ritualConfig.epoch,
-        today: 1,
-        defaultObjective: ritualConfig.defaultObjective,
-        jamlConfig: '',
-        seeds: [],
-    });
+    const [seedsList, setSeedsList] = useState<string[]>([]);
+    const [jamlConfig, setJamlConfig] = useState<string | null>(null);
+    const [ritualTitle, setRitualTitle] = useState(ritualConfig.title);
+    const [ritualTagline, setRitualTagline] = useState(ritualConfig.tagline);
+    const [activeEpoch, setActiveEpoch] = useState(ritualConfig.epoch);
+    const [defaultObjective, setDefaultObjective] = useState(ritualConfig.defaultObjective);
 
-    const todayNumber = ritualRuntime.today;
+    // Simplified: always use serverToday if available, or compute locally (as backup)
+    const todayNumber = serverToday || getDayNumber(activeEpoch);
 
     // Cache to prevent redundant re-fetches
-    const [ritualCache, setRitualCache] = useState<Record<number, RitualCacheEntry>>({});
+    const [ritualCache, setRitualCache] = useState<Record<number, { seed: string, jaml: string }>>({});
 
+    // Modals
     // Modals
     const [showSubmit, setShowSubmit] = useState(false);
     const [showHowTo, setShowHowTo] = useState(false);
     const [showLeaderboard, setShowLeaderboard] = useState(false);
+    const [isStale, setIsStale] = useState(false); // For dimming during transitions
 
 
     // Mount Effect
@@ -75,6 +67,9 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
 
     // Load Ritual Config (with Debounced Loading State)
     useEffect(() => {
+        // Immediate visual feedback without layout shift (dimming)
+        setIsStale(true);
+
         let active = true;
         // Only show full loading spinner if it takes more than 200ms
         const timer = setTimeout(() => {
@@ -89,18 +84,13 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                 // 0. Check Cache First
                 if (fetchDay && ritualCache[fetchDay]) {
                     const cached = ritualCache[fetchDay];
-                    setRitualRuntime(prev => ({
-                        ...prev,
-                        title: cached.title,
-                        tagline: cached.tagline,
-                        defaultObjective: cached.defaultObjective,
-                        jamlConfig: cached.jaml,
-                        seeds: [cached.seed],
-                    }));
+                    setJamlConfig(cached.jaml);
+                    setSeedsList([cached.seed]);
                     // setViewingDay(fetchDay); // Don't self-update if we are already here
                     if (active) {
                         clearTimeout(timer);
                         setConfigLoading(false);
+                        setIsStale(false);
                     }
                     return;
                 }
@@ -119,7 +109,6 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                     tagline: string;
                     epoch: string;
                     today: number;
-                    defaultObjective?: string;
                     jamlConfig: string;
                     seeds: string[];
                     currentSeed?: string;
@@ -128,27 +117,14 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
 
                 if (!active) return;
 
-                console.log('[DailyRitual] Received config for day', config.dayNumber, '— seeds:', config.seeds?.length);
+                setRitualTitle(config.title);
+                setRitualTagline(config.tagline);
+                const epoch = new Date(config.epoch).getTime();
+                setActiveEpoch(epoch);
+                setServerToday(config.today || 1);
 
-                const nextSeeds = Array.isArray(config.seeds) && config.seeds.length > 0
-                    ? config.seeds
-                    : config.currentSeed
-                        ? [config.currentSeed]
-                        : [];
-
-                if (nextSeeds.length === 0) {
-                    console.warn(`[DailyRitual] No seeds available!`);
-                }
-
-                setRitualRuntime({
-                    title: config.title,
-                    tagline: config.tagline,
-                    epoch: new Date(config.epoch).getTime(),
-                    today: config.today || 1,
-                    defaultObjective: config.defaultObjective || ritualConfig.defaultObjective,
-                    jamlConfig: config.jamlConfig,
-                    seeds: nextSeeds,
-                });
+                setJamlConfig(config.jamlConfig);
+                setSeedsList(Array.isArray(config.seeds) && config.seeds.length > 0 ? config.seeds : (config.currentSeed ? [config.currentSeed] : []));
 
                 // Only update viewingDay if we were in "latest" mode (0) and got a specific day
                 if (viewingDay === 0 && config.dayNumber) {
@@ -164,8 +140,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                             seed: config.currentSeed!,
                             jaml: config.jamlConfig,
                             title: config.title,
-                            tagline: config.tagline,
-                            defaultObjective: config.defaultObjective || ritualConfig.defaultObjective
+                            tagline: config.tagline
                         }
                     }));
                 }
@@ -188,12 +163,13 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
             } catch (err: any) {
                 console.error("Ritual Fetch Error:", err);
                 if (err.message.includes("future")) {
-                    setRitualRuntime(prev => ({ ...prev, seeds: [] }));
+                    setSeedsList([]);
                 }
             } finally {
                 if (active) {
                     clearTimeout(timer);
                     setConfigLoading(false);
+                    setIsStale(false);
                 }
             }
         }
@@ -209,27 +185,45 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
 
     // Get Current Seed
     const currentSeedId = useMemo(() => {
-        const seed = ritualRuntime.seeds.length > 1 && viewingDay > 0
-            ? (ritualRuntime.seeds[viewingDay - 1] ?? null)
-            : (ritualRuntime.seeds[0] ?? null);
-        return seed;
-    }, [ritualRuntime.seeds, viewingDay]);
-
-    const showLoading = configLoading;
-    const ritualFilter = useMemo(() => parseJamlToFilter(ritualRuntime.jamlConfig || ''), [ritualRuntime.jamlConfig]);
-    const ritualDeck = ritualFilter.deck || 'Erratic';
-    const ritualStake = ritualFilter.stake || 'White';
-
-    // Objectives — extract must-clause values from parsed JAML
-    const objectives = useMemo(() => {
-        if (!ritualRuntime.jamlConfig) return [ritualRuntime.defaultObjective];
-        try {
-            const parsed = parseJamlToObjectives(ritualRuntime.jamlConfig);
-            return parsed.length > 0 ? parsed : [ritualRuntime.defaultObjective];
-        } catch {
-            return [ritualRuntime.defaultObjective];
+        // If we have history, lookup by day index (1-based -> 0-based)
+        if (seedsList.length > 1 && viewingDay > 0) {
+            return seedsList[viewingDay - 1] || null;
         }
-    }, [ritualRuntime.defaultObjective, ritualRuntime.jamlConfig]);
+        // Fallback for single-seed mode
+        return seedsList[0] || (viewingDay <= todayNumber ? (seedsList.length > 0 ? seedsList[0] : null) : null);
+    }, [seedsList, viewingDay, todayNumber]);
+
+    // Run Analyzer - Guard against LOCKED
+    const analyzerSeed = currentSeedId === 'LOCKED' ? null : currentSeedId;
+    const { data: analysisData, loading: analysisLoading, error: analysisError } = useSeedAnalyzer(analyzerSeed);
+
+    // Debounced loading: only show skeleton after 500ms of sustained loading.
+    // This prevents the flash on fast transitions.
+    const [showLoading, setShowLoading] = useState(false);
+    const isActuallyLoading = configLoading || analysisLoading;
+    useEffect(() => {
+        if (!isActuallyLoading) {
+            setShowLoading(false);
+            return;
+        }
+        const timer = setTimeout(() => setShowLoading(true), 500);
+        return () => clearTimeout(timer);
+    }, [isActuallyLoading]);
+
+    // Objectives Parsing
+    const objectives = useMemo(() => {
+        if (!jamlConfig) return ["Wee Joker"];
+        const mustBlock = jamlConfig.split('must:')[1]?.split('should:')[0]?.split('mustNot:')[0];
+        if (mustBlock) {
+            const values: string[] = [];
+            const valueMatches = mustBlock.matchAll(/value:\s*([^ \n#]+)/g);
+            for (const match of valueMatches) {
+                values.push(match[1].trim());
+            }
+            return values.length > 0 ? values : ["Wee Joker"];
+        }
+        return ["Wee Joker"];
+    }, [jamlConfig]);
 
     const handleCopySeed = useCallback(() => {
         if (currentSeedId) {
@@ -242,34 +236,41 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
     const canGoForward = viewingDay < todayNumber + 1;
 
     const displayDate = viewingDay > 0
-        ? new Date(ritualRuntime.epoch + (viewingDay - 1) * 86400000).toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' })
+        ? new Date(activeEpoch + (viewingDay - 1) * 86400000).toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' })
         : "PRE-LAUNCH";
 
 
 
+    // Helper to update day and ensure we scroll top or reset state if needed
+    const updateDay = (newDay: number) => {
+        setViewingDay(newDay);
+    };
+
+
+
     return (
-        <div className="flex flex-col h-full min-h-0">
+        <div className="ritual-locked-layout h-[100svh] overflow-hidden flex flex-col">
             {/* Main Content Areas - Mobile First Scaling */}
-            <main className="z-10 flex-1 min-h-0 relative overflow-auto">
+            <main className="match-height-content z-10 flex-1 min-h-0 relative">
                 {viewingDay <= 0 && !configLoading ? (
                     <div className="w-full max-w-full md:max-w-xl aspect-[4/3] flex flex-col items-center justify-center p-4 md:p-12 text-center">
-                        <div className="jimbo-panel p-4 md:p-8">
-                            <h3 className="font-header text-2xl md:text-3xl text-[var(--jimbo-gold)] mb-2 md:mb-4">{ritualRuntime.title}</h3>
-                            <div className="flex justify-between items-center py-1 border-y border-[var(--jimbo-panel-edge)] text-[11px] md:text-[13px] font-pixel text-[var(--jimbo-grey)] tracking-[0.1em] md:tracking-[0.2em]">
-                                Epoch begins {new Date(ritualRuntime.epoch).toLocaleDateString()}
+                        <div className="balatro-panel border-white/10 bg-black/20 p-4 md:p-8">
+                            <h3 className="font-header text-2xl md:text-3xl text-[var(--balatro-gold)] mb-2 md:mb-4">{ritualTitle}</h3>
+                            <div className="flex justify-between items-center py-1 border-y border-white/10 text-[11px] md:text-[13px] font-pixel text-white/40 tracking-[0.1em] md:tracking-[0.2em]">
+                                The Weepoch begins {new Date(activeEpoch).toLocaleDateString()}
                             </div>
                             <div className="flex flex-col gap-2 md:gap-4 mt-4">
                                 <button
                                     type="button"
                                     onClick={() => setShowHowTo(true)}
-                                    className="jimbo-btn jimbo-btn-blue text-xs md:text-sm"
+                                    className="balatro-button balatro-button-blue text-xs md:text-sm w-full"
                                 >
                                     How to Play
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => setViewingDay(Math.max(1, todayNumber))}
-                                    className="jimbo-btn bg-[var(--jimbo-grey)] text-xs md:text-sm"
+                                    onClick={() => updateDay(Math.max(1, todayNumber))}
+                                    className="balatro-button balatro-button-grey text-xs md:text-sm w-full"
                                 >
                                     Go to Today (Day {Math.max(1, todayNumber)})
                                 </button>
@@ -278,45 +279,46 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                     </div>
                 ) : (
                     <div className={cn(
-                        "w-full px-1 mx-auto h-full min-h-0 flex flex-col justify-start pt-2"
+                        "w-full px-1 md:px-4 max-w-[360px] mx-auto h-full min-h-0 flex flex-col justify-center transition-opacity duration-200",
+                        isStale && "opacity-50 pointer-events-none"
                     )}>
                         {showLoading ? (
                             <div className="flex flex-col h-full justify-center w-full">
                                 <div className="jimbo-panel mx-8 md:mx-12 min-h-[500px] animate-pulse relative overflow-hidden">
                                     {/* Header Skeleton */}
                                     <div className="jimbo-inner-panel p-2 md:p-3 h-[54px] flex items-center shrink-0 mb-3">
-                                        <div className="w-24 h-6 bg-[var(--jimbo-panel-edge)] rounded" />
+                                        <div className="w-24 h-6 bg-white/10 rounded" />
                                     </div>
 
                                     {/* Body Skeleton */}
                                     <div className="flex flex-col gap-4 flex-1 w-full">
                                         {/* Deck Fan */}
-                                        <div className="w-full rounded-lg aspect-[2/1] bg-[var(--jimbo-panel-edge)] border border-[var(--jimbo-panel-edge)]" />
+                                        <div className="w-full rounded-lg aspect-[2/1] bg-white/5 border border-white/5" />
 
                                         {/* Jokers */}
-                                        <div className="w-full rounded-lg h-16 bg-[var(--jimbo-panel-edge)] border border-[var(--jimbo-panel-edge)]" />
+                                        <div className="w-full rounded-lg h-16 bg-white/5 border border-white/5" />
 
                                         <div className="flex-1" />
 
                                         {/* Button */}
-                                        <div className="w-full h-12 rounded-lg bg-[var(--jimbo-dark-blue)] border border-[var(--jimbo-blue)]" />
+                                        <div className="w-full h-12 rounded-lg bg-[var(--balatro-blue)]/20 border border-[var(--balatro-blue)]/30" />
                                     </div>
                                 </div>
-                                <div className="text-center mt-6 font-pixel text-[var(--jimbo-grey)] text-[11px] md:text-xs tracking-[0.2em] md:tracking-[0.4em] animate-pulse absolute bottom-12 left-0 right-0">
+                                <div className="text-center mt-6 font-pixel text-white/20 text-[11px] md:text-xs tracking-[0.2em] md:tracking-[0.4em] animate-pulse absolute bottom-12 left-0 right-0">
                                     {configLoading ? "Connecting to Ritual Factory..." : "Reading Seed Data..."}
                                 </div>
                             </div>
-                        ) : (!currentSeedId && viewingDay <= todayNumber) ? (
-                            <div className="jimbo-panel border-[var(--jimbo-red)] p-6 md:p-12 text-center max-w-full md:max-w-md mx-auto">
-                                <h3 className="font-header text-[var(--jimbo-red)] text-xl md:text-2xl mb-2 md:mb-3 uppercase">Ritual Lost</h3>
-                                <p className="font-pixel text-[var(--jimbo-grey)] text-[11px] md:text-xs leading-relaxed">
+                        ) : analysisError || (!currentSeedId && viewingDay <= todayNumber) ? (
+                            <div className="balatro-panel border-red-500/20 bg-red-950/20 p-6 md:p-12 text-center max-w-full md:max-w-md mx-auto">
+                                <h3 className="font-header text-red-400 text-xl md:text-2xl uppercase mb-2 md:mb-3">Ritual Lost</h3>
+                                <p className="font-pixel text-red-300/40 text-[11px] md:text-xs leading-relaxed">
                                     The spirits failed to provide data for Day {viewingDay}. <br />
                                     Check your connection or return to today.
                                 </p>
                                 <button
                                     type="button"
-                                    onClick={() => setViewingDay(todayNumber)}
-                                    className="jimbo-btn jimbo-btn-blue mt-4 md:mt-6 text-xs md:text-sm"
+                                    onClick={() => updateDay(todayNumber)}
+                                    className="balatro-button balatro-button-blue mt-4 md:mt-6 text-xs md:text-sm"
                                 >
                                     Back to Today
                                 </button>
@@ -325,7 +327,6 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                             <RitualChallengeBoard
                                 seed={currentSeedId || 'LOCKED'}
                                 objectives={objectives}
-                                ritualTitle={ritualRuntime.title}
                                 onCopy={handleCopySeed}
                                 onShowHowTo={() => setShowHowTo(true)}
                                 onOpenSubmit={() => setShowSubmit(true)}
@@ -333,9 +334,9 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                                 isLocked={viewingDay > todayNumber}
                                 dayNumber={viewingDay}
                                 ritualId={ritualId}
-                                onPrevDay={() => setViewingDay(Math.max(0, viewingDay - 1))}
-                                onNextDay={() => setViewingDay(Math.min(todayNumber + 1, viewingDay + 1))}
-                                jamlConfig={ritualRuntime.jamlConfig}
+                                onPrevDay={() => updateDay(Math.max(0, viewingDay - 1))}
+                                onNextDay={() => updateDay(Math.min(todayNumber + 1, viewingDay + 1))}
+                                jamlConfig={jamlConfig || ''}
                                 canGoBack={canGoBack}
                                 canGoForward={canGoForward}
                                 displayDate={displayDate}
@@ -350,9 +351,7 @@ export function DailyRitual({ ritualId: propId, initialDay = 0 }: { ritualId?: s
                 isOpen={showHowTo}
                 onClose={() => setShowHowTo(false)}
                 seedId={currentSeedId || undefined}
-                objectiveName={ritualRuntime.defaultObjective}
-                deckName={ritualDeck}
-                stakeName={ritualStake}
+                objectiveName={defaultObjective}
             />
 
             {showSubmit && currentSeedId && (

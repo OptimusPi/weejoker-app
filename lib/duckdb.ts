@@ -15,7 +15,7 @@ export async function initDuckDB() {
     const worker = new Worker(worker_url);
     const logger = new duckdb.ConsoleLogger();
     const db = new duckdb.AsyncDuckDB(logger, worker);
-    await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+    await db.instantiate(bundle.mainWorker!, bundle.pthreadWorker);
     URL.revokeObjectURL(worker_url);
 
     return db;

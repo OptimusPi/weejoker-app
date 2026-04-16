@@ -129,12 +129,12 @@ export function AdRotator({ onOpenWisdom, onOpenLeaderboard, topScore, isLocked 
                     <div className="flex flex-col items-start text-left z-10 shrink min-w-0">
                         {/* Title with Ad Color Highlight */}
                         <span
-                            className="font-header text-[14px] sm:text-[16px] tracking-wider leading-none mb-1 drop-shadow-sm transition-colors duration-200 whitespace-nowrap truncate w-full"
+                            className="font-header text-[14px] sm:text-[16px] uppercase tracking-wider leading-none mb-1 drop-shadow-sm transition-colors duration-200 whitespace-nowrap truncate w-full"
                             style={{ color: currentAd.color }}
                         >
                             {currentAd.title}
                         </span>
-                        <span className="font-pixel text-[10px] sm:text-[12px] text-white/70 truncate w-full">
+                        <span className="font-pixel text-[10px] sm:text-[12px] text-white/70 truncate w-full uppercase">
                             {currentAd.subtitle}
                         </span>
                     </div>

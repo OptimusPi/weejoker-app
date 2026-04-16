@@ -1,4 +1,4 @@
-import { AnalyzedSeed, MotelyItemTypeCategory } from '../seedAnalyzer';
+import { AnalyzedSeed } from '../seedAnalyzer';
 import { JamlClause, JamlFilter } from '../hooks/useJamlFilter';
 
 export interface ClauseMatch {
@@ -35,13 +35,6 @@ export interface AnalyzedItem {
 /**
  * Normalizes a clause type or item type for comparison
  */
-function categoryTypeName(cat: MotelyItemTypeCategory): string {
-    if (cat === MotelyItemTypeCategory.TarotCard) return 'Tarot';
-    if (cat === MotelyItemTypeCategory.PlanetCard) return 'Planet';
-    if (cat === MotelyItemTypeCategory.SpectralCard) return 'Spectral';
-    return 'Unknown';
-}
-
 function normalizeType(type: string): string {
     return type.toLowerCase().replace(/_|\s/g, '');
 }
@@ -130,7 +123,7 @@ function flattenAnalyzedSeed(seedData: AnalyzedSeed): AnalyzedItem[] {
     seedData.jokers.forEach(j => pushItem('Joker', j));
 
     // Consumables
-    seedData.consumables.forEach(c => pushItem(categoryTypeName(c.type), c));
+    seedData.consumables.forEach(c => pushItem(c.type, c)); // type is 'tarot', 'spectral', etc.
 
     // Vouchers
     seedData.vouchers.forEach(v => items.push({

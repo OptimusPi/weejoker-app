@@ -1,27 +1,21 @@
-// UI Options derived from motely-wasm/jaml-schema (source of truth)
-import {
-    DECK_VALUES,
-    STAKE_VALUES,
-    EDITION_VALUES,
-    SEAL_VALUES,
-    ENHANCEMENT_VALUES,
-    RANK_VALUES,
-    SUIT_VALUES,
-    CLAUSE_TYPE_KEYS,
-    SOURCE_KEYS,
-} from '@/lib/jaml/jamlSchema';
-
-export const DECK_OPTIONS = [...DECK_VALUES];
-export const STAKE_OPTIONS = [...STAKE_VALUES];
+// UI Options derived from local constants (Blueprint retired)
+export const DECK_OPTIONS = ['Red', 'Blue', 'Yellow', 'Green', 'Black', 'Magic', 'Nebula', 'Ghost', 'Abandoned', 'Checkered', 'Painted', 'Anaglyph', 'Plasma', 'Erratic'];
+export const STAKE_OPTIONS = ['White', 'Red', 'Green', 'Black', 'Blue', 'Purple', 'Orange', 'Gold'];
 
 export const ANTE_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8];
 export const SLOT_OPTIONS = [1, 2, 3, 4, 5];
 
-export const RANK_OPTIONS = [...RANK_VALUES];
-export const SUIT_OPTIONS = [...SUIT_VALUES];
-export const ENHANCEMENT_OPTIONS = [...ENHANCEMENT_VALUES];
-export const EDITION_OPTIONS = [...EDITION_VALUES];
-export const SEAL_OPTIONS = [...SEAL_VALUES];
+export const RANK_OPTIONS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace'];
+export const SUIT_OPTIONS = ['Spades', 'Hearts', 'Diamonds', 'Clubs'];
+export const ENHANCEMENT_OPTIONS = ['Bonus', 'Mult', 'Wild', 'Glass', 'Steel', 'Lucky', 'Stone', 'Gold'];
+export const EDITION_OPTIONS = ['Foil', 'Holographic', 'Polychrome', 'Negative'];
+export const SEAL_OPTIONS = ['Gold', 'Red', 'Blue', 'Purple'];
 
-export const CLAUSE_TYPES = [...CLAUSE_TYPE_KEYS];
-export const SOURCE_OPTIONS = [...SOURCE_KEYS];
+export const CLAUSE_TYPES = [
+    'Joker', 'Tarot', 'Planet', 'Spectral', 'Voucher', 'Tag', 'Boss', 'PlayingCard', 'StandardCard'
+];
+
+export const SOURCE_OPTIONS = [
+    'shop', 'arcana_pack', 'celestial_pack', 'spectral_pack', 'buffoon_pack', 'standard_pack',
+    'uncommon_tag', 'rare_tag', 'top_up_tag', 'emperor', 'vagabond', 'judgement', 'wraith'
+];

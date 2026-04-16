@@ -1,163 +1,142 @@
 'use client'
 
-import React, { memo } from 'react'
+import React from 'react'
 import { cn } from '@/lib/utils'
 
+// ============================================
+// JimboPanel — the structural container
+//
+// RULES:
+// - Uses .jimbo-panel CSS class (globals.css)
+// - If onBack is provided, a full-width gold "Back" button
+//   is ALWAYS rendered at the bottom. Structural guarantee.
+// ============================================
+
 export interface JimboPanelProps {
-    children?: React.ReactNode
-    className?: string
-    style?: React.CSSProperties
-    sway?: boolean
+    children: React.ReactNode
     onBack?: () => void
     backLabel?: string
     hideBack?: boolean
-    onClick?: React.MouseEventHandler<HTMLDivElement>
-    [key: string]: unknown
+    className?: string
 }
 
-export const JimboPanel = memo(function JimboPanel({
-    children, className, sway, onBack, backLabel, hideBack, style, ...props
+export function JimboPanel({
+    children,
+    onBack,
+    backLabel = 'Back',
+    hideBack = false,
+    className,
 }: JimboPanelProps) {
     return (
-        <div
-            className={cn('jimbo-panel relative flex flex-col', sway && 'animate-sway', className)}
-            style={style}
-            {...props as React.HTMLAttributes<HTMLDivElement>}
-        >
-            {!hideBack && onBack && (
-                <button
-                    onClick={onBack}
-                    className="jimbo-btn jimbo-btn-back self-start mb-2 text-xs"
-                >
-                    ← {backLabel ?? 'Back'}
-                </button>
+        <div className={cn('jimbo-panel', className)}>
+            <div className="flex-1">
+                {children}
+            </div>
+            {onBack && !hideBack && (
+                <div className="mt-3">
+                    <JimboBackButton onClick={onBack} label={backLabel} />
+                </div>
             )}
-            {children}
         </div>
     )
-})
-
-export interface JimboInnerPanelProps {
-    children?: React.ReactNode
-    className?: string
-    style?: React.CSSProperties
-    [key: string]: unknown
 }
 
-export const JimboInnerPanel = memo(function JimboInnerPanel({
-    children, className, style, ...props
-}: JimboInnerPanelProps) {
+// ============================================
+// JimboInnerPanel — nested content
+// Nesting rule: DARK_GREY → INNER_BORDER → DARK_GREY → repeat
+// ============================================
+
+export function JimboInnerPanel({
+    children,
+    className,
+}: {
+    children: React.ReactNode
+    className?: string
+}) {
     return (
-        <div
-            className={cn('jimbo-inner-panel', className)}
-            style={style}
-            {...props as React.HTMLAttributes<HTMLDivElement>}
-        >
+        <div className={cn('jimbo-inner-panel', className)}>
             {children}
         </div>
     )
-})
+}
 
-export type JimboButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'back' | 'red' | 'green'
-export type JimboButtonSize = 'sm' | 'md' | 'lg'
+// ============================================
+// JimboButton — uses .jimbo-btn + variant class
+// ============================================
 
-export interface JimboButtonProps {
-    children?: React.ReactNode
-    variant?: JimboButtonVariant
-    size?: JimboButtonSize
-    fullWidth?: boolean
-    className?: string
-    style?: React.CSSProperties
-    disabled?: boolean
+type ButtonVariant = 'red' | 'blue' | 'green' | 'gold' | 'back'
+
+const VARIANT_CLASS: Record<ButtonVariant, string> = {
+    red: 'jimbo-btn-red',
+    blue: 'jimbo-btn-blue',
+    green: 'jimbo-btn-green',
+    gold: 'jimbo-btn-gold',
+    back: 'jimbo-btn-back',
+}
+
+export function JimboButton({
+    children,
+    variant = 'red',
+    onClick,
+    disabled = false,
+    className,
+}: {
+    children: React.ReactNode
+    variant?: ButtonVariant
     onClick?: () => void
-    type?: 'button' | 'submit' | 'reset'
-    [key: string]: unknown
-}
-
-const VARIANT_CLASS: Record<JimboButtonVariant, string> = {
-    primary: 'jimbo-btn jimbo-btn-red',
-    secondary: 'jimbo-btn jimbo-btn-blue',
-    danger: 'jimbo-btn jimbo-btn-red',
-    ghost: 'jimbo-btn jimbo-btn-ghost',
-    back: 'jimbo-btn jimbo-btn-back',
-    red: 'jimbo-btn jimbo-btn-red',
-    green: 'jimbo-btn jimbo-btn-green',
-}
-
-export const JimboButton = memo(function JimboButton({
-    children, variant = 'primary', size, fullWidth, className, style, disabled, onClick, type = 'button', ...props
-}: JimboButtonProps) {
+    disabled?: boolean
+    className?: string
+}) {
     return (
         <button
-            type={type}
-            disabled={disabled}
             onClick={onClick}
-            className={cn(
-                VARIANT_CLASS[variant],
-                size === 'sm' && 'text-xs px-2 py-1',
-                size === 'lg' && 'text-base px-6 py-3',
-                fullWidth && 'w-full',
-                disabled && 'opacity-50 cursor-not-allowed',
-                className,
-            )}
-            style={style}
-            {...props as React.ButtonHTMLAttributes<HTMLButtonElement>}
+            disabled={disabled}
+            className={cn('jimbo-btn', VARIANT_CLASS[variant], className)}
         >
             {children}
         </button>
     )
-})
+}
 
-export const JimboBackButton = memo(function JimboBackButton({
-    children, className, ...props
-}: JimboButtonProps) {
+// ============================================
+// JimboBackButton — gold, full-width, structural
+// No X icons. No close buttons. Just "Back".
+// ============================================
+
+export function JimboBackButton({
+    onClick,
+    label = 'Back',
+    className,
+}: {
+    onClick?: () => void
+    label?: string
+    className?: string
+}) {
     return (
-        <JimboButton variant="back" className={cn('self-start', className)} {...props}>
-            {children ?? '← Back'}
+        <JimboButton variant="back" onClick={onClick} className={className}>
+            {label}
         </JimboButton>
     )
-})
-
-export interface JimboInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-    label?: string
-    className?: string
 }
 
-export const JimboInput = memo(function JimboInput({ label, className, ...props }: JimboInputProps) {
-    return (
-        <div className="flex flex-col gap-1">
-            {label && <label className="text-xs text-white/50 font-pixel uppercase">{label}</label>}
-            <input
-                className={cn(
-                    'bg-[#111] border border-[var(--jimbo-panel-edge)] text-white text-sm px-3 py-2 rounded-sm',
-                    'focus:outline-none focus:border-[var(--jimbo-blue)] placeholder:text-white/20',
-                    className,
-                )}
-                {...props}
-            />
-        </div>
-    )
-})
+// ============================================
+// JimboInput / JimboTextArea — uses .jimbo-input
+// ============================================
 
-export interface JimboTextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-    label?: string
-    className?: string
+export function JimboInput({
+    className,
+    ...props
+}: React.InputHTMLAttributes<HTMLInputElement>) {
+    return (
+        <input className={cn('jimbo-input', className)} {...props} />
+    )
 }
 
-export const JimboTextArea = memo(function JimboTextArea({ label, className, ...props }: JimboTextAreaProps) {
+export function JimboTextArea({
+    className,
+    ...props
+}: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
     return (
-        <div className="flex flex-col gap-1">
-            {label && <label className="text-xs text-white/50 font-pixel uppercase">{label}</label>}
-            <textarea
-                className={cn(
-                    'bg-[#111] border border-[var(--jimbo-panel-edge)] text-white text-sm px-3 py-2 rounded-sm resize-y',
-                    'focus:outline-none focus:border-[var(--jimbo-blue)] placeholder:text-white/20',
-                    className,
-                )}
-                {...props}
-            />
-        </div>
+        <textarea className={cn('jimbo-input', className)} {...props} />
     )
-})
-
-export default JimboPanel
+}

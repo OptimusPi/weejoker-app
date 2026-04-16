@@ -1,30 +1,50 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import { analyzeSeedServer } from "@/lib/server/motelyAnalyze";
+import { normalizeAnalysis } from "@/lib/seedAnalyzer";
+
+/** Embedded WASM (`motely-wasm-compat`) needs the Node.js runtime, not the Edge Worker. */
+export const runtime = "nodejs";
 
 /**
  * GET /api/analyze/[seed]
  *
- * Server-side seed analysis is no longer available.
- * motely-wasm v7 requires a browser WASM environment (NativeAOT-LLVM).
- * Use client-side openSingleSeedContext() from lib/motelyWasm instead.
+ * Server: `motely-wasm-compat` (embedded Bootsharp). Client UI may still use
+ * `motely-wasm` + `/motely-wasm` via `analyzeSeedWasm` in `@/lib/api/motelyWasm`.
  */
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ seed: string }> }
 ) {
   const { seed } = await params;
+  const url = new URL(request.url);
+
+  const deck = url.searchParams.get("deck") || "erratic";
+  const stake = url.searchParams.get("stake") || "white";
 
   if (!seed || !/^[A-Z0-9]{7,8}$/i.test(seed)) {
     return NextResponse.json(
-      { error: 'Invalid seed format. Expected 7-8 alphanumeric characters.' },
+      { error: "Invalid seed format. Expected 7-8 alphanumeric characters." },
       { status: 400 }
     );
   }
 
-  return NextResponse.json(
-    {
-      error: 'Server-side analysis is not available in motely-wasm v7. Use client-side WASM analysis.',
-      seed: seed.toUpperCase(),
-    },
-    { status: 501 }
-  );
+  try {
+    const rawResult = await analyzeSeedServer(seed.toUpperCase(), deck, stake);
+    const analysis = normalizeAnalysis(rawResult);
+
+    return NextResponse.json(analysis, {
+      headers: {
+        "Cache-Control": "public, max-age=86400, s-maxage=86400",
+      },
+    });
+  } catch (error) {
+    console.error("[GET /api/analyze/[seed]]", error);
+    return NextResponse.json(
+      {
+        error: "Analysis failed",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
+  }
 }

@@ -37,6 +37,13 @@ main {
     overflow: hidden;
 }
 
+/* UNIVERSAL NO BOLD, NO UPPERCASE POLICY - USER MANDATE */
+* {
+    font-weight: normal !important;
+    text-transform: none !important;
+    image-rendering: auto;
+}
+
 /* ============================================================================
    2. DESIGN TOKENS (CSS VARIABLES)
    ============================================================================ */
@@ -70,17 +77,17 @@ main {
     /* Shadows - Actual Pitch Black */
     --balatro-shadow: #000000;
 
-    /* Borders & Outlines */
-    --balatro-outline-dark: #2a3a3d;
-    --balatro-outline-light: #5a7a7f;
-
-    /* Button shadow (used by tab buttons in SeedCard etc.) */
-    --btn-shadow: #1a2a2d;
-
     /* Semantic Aliases (Backwards Compatibility) */
     --balatro-modal-bg: var(--balatro-black);
     --balatro-modal-inner: var(--balatro-light-black);
     --balatro-modal-border: var(--balatro-outline-light);
+
+    /* Legacy Mappings (Deprecated but kept for safety) */
+    --color-red: var(--balatro-red);
+    --color-blue: var(--balatro-blue);
+    --color-green: var(--balatro-green);
+    --color-orange: var(--balatro-orange);
+    --color-gold: var(--balatro-gold);
 
     /* --------------------------------
        JIMBO UI TOKENS (Eyedropped from game pixels)
@@ -90,9 +97,8 @@ main {
     --jimbo-dark-red: #a02721;
     --jimbo-blue: #0093ff;
     --jimbo-dark-blue: #0057a1;
-    --jimbo-gold: #e4b643;
-    --jimbo-orange: #ff9800;
-    --jimbo-dark-orange: #b36b00;
+    --jimbo-gold: #ff9800;
+    --jimbo-dark-gold: #a05b00;
     --jimbo-green: #429f79;
     --jimbo-dark-green: #215f46;
     --jimbo-purple: #9e74ce;
@@ -114,6 +120,24 @@ main {
    4. COMPONENT LAYER
    ============================================================================ */
 @layer components {
+
+    /* --- PANELS --- */
+    /* authentic G.C.BLACK panel with hard shadow */
+    .balatro-panel {
+        background-color: var(--balatro-black);
+        border: 4px solid var(--balatro-outline-dark);
+        border-radius: 1rem;
+        box-shadow: 0 6px 0 var(--balatro-shadow);
+        position: relative;
+        overflow: hidden;
+        padding: 0.75rem;
+    }
+
+    .balatro-panel-inner {
+        background-color: var(--balatro-light-black);
+        border-radius: 0.5rem;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
 
     /* --- JIMBO UI COMPONENTS --- */
     /* Eyedropped from game pixels. Structural classes. */
@@ -206,48 +230,22 @@ main {
         background-color: var(--jimbo-dark-green);
     }
 
-    .jimbo-btn-orange {
-        background-color: var(--jimbo-orange);
-    }
-
-    .jimbo-btn-orange:hover:not(:disabled) {
-        background-color: var(--jimbo-dark-orange);
-    }
-
-    .jimbo-btn-purple {
-        background-color: var(--jimbo-purple);
-    }
-
-    .jimbo-btn-purple:hover:not(:disabled) {
-        background-color: #6b4e8a;
-    }
-
     .jimbo-btn-gold {
         background-color: var(--jimbo-gold);
     }
 
     .jimbo-btn-gold:hover:not(:disabled) {
-        background-color: #c49a35;
+        background-color: var(--jimbo-dark-gold);
     }
 
-    .jimbo-btn-ghost {
-        background-color: transparent;
-        border: 2px solid var(--jimbo-grey);
-        box-shadow: none;
-    }
-
-    .jimbo-btn-ghost:hover:not(:disabled) {
-        background-color: rgba(255, 255, 255, 0.05);
-    }
-
-    /* Back button = orange, always full-width — THE way to exit in Balatro */
+    /* Back button = gold, always full-width — THE way to exit in Balatro */
     .jimbo-btn-back {
-        background-color: var(--jimbo-orange);
+        background-color: var(--jimbo-gold);
         font-size: 1.125rem;
     }
 
     .jimbo-btn-back:hover:not(:disabled) {
-        background-color: var(--jimbo-dark-orange);
+        background-color: var(--jimbo-dark-gold);
     }
 
     .jimbo-version-badge {
@@ -262,8 +260,28 @@ main {
         align-items: center;
     }
 
-
+    /* --- BUTTONS (2D Flat Style) --- */
+    /* 
+       Rules:
+       1. Solid face color (from palette)
+       2. 4px solid black shadow
+       3. NO transitions (snap)
+       4. Active: translate down 4px, remove shadow
+    */
     .balatro-button {
+        color: var(--balatro-text-light);
+        font-family: var(--font-header), monospace;
+        font-weight: normal;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 1.5rem;
+        font-size: 1.5rem;
+
         /* Authentic Text Shadow */
         text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
 
@@ -275,54 +293,30 @@ main {
         transform: translateY(0);
     }
 
-    /* Button Variants — flat color, dark hover, Jimbo standard */
+    /* Button Variants */
     .balatro-button-red {
-        background-color: var(--jimbo-red);
-    }
-
-    .balatro-button-red:hover:not(:disabled) {
-        background-color: var(--jimbo-dark-red);
+        background-color: var(--balatro-red);
     }
 
     .balatro-button-blue {
-        background-color: var(--jimbo-blue);
-    }
-
-    .balatro-button-blue:hover:not(:disabled) {
-        background-color: var(--jimbo-dark-blue);
+        background-color: var(--balatro-blue);
     }
 
     .balatro-button-green {
-        background-color: var(--jimbo-green);
-    }
-
-    .balatro-button-green:hover:not(:disabled) {
-        background-color: var(--jimbo-dark-green);
+        background-color: var(--balatro-green);
     }
 
     .balatro-button-orange {
-        background-color: var(--jimbo-orange);
-    }
-
-    .balatro-button-orange:hover:not(:disabled) {
-        background-color: var(--jimbo-dark-orange);
+        background-color: var(--balatro-orange);
     }
 
     .balatro-button-purple {
         background-color: var(--balatro-purple);
     }
 
-    .balatro-button-purple:hover:not(:disabled) {
-        background-color: #6b4e8a;
-    }
-
     .balatro-button-gold {
-        background-color: var(--jimbo-gold);
+        background-color: var(--balatro-gold);
         color: white;
-    }
-
-    .balatro-button-gold:hover:not(:disabled) {
-        background-color: #c49a35;
     }
 
     .balatro-button-grey {
@@ -330,21 +324,19 @@ main {
         color: var(--balatro-text-light);
     }
 
-    .balatro-button-grey:hover:not(:disabled) {
-        background-color: var(--jimbo-dark-grey);
+    /* Interaction State */
+    .balatro-button:hover:not(:disabled) {
+        filter: brightness(1.1);
     }
 
-    /* Pressed = scoot down, kill shadow */
     .balatro-button:active:not(:disabled) {
         transform: translateY(4px);
-        box-shadow: none;
+        box-shadow: none !important;
     }
 
     .balatro-button:disabled {
-        opacity: 1;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
+        /* Keep shadow for disabled */
+        transform: none !important;
     }
 
     /* --- INPUTS --- */
@@ -363,7 +355,6 @@ main {
         border-color: var(--balatro-blue);
         background-color: var(--balatro-black);
     }
-
 }
 
 /* ============================================================================
@@ -387,27 +378,41 @@ main {
     width: 100%;
 }
 
+.floating-help-button {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    background-color: var(--balatro-blue);
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: var(--font-header), monospace;
+    font-size: 2rem;
+    box-shadow: 0 4px 0 var(--balatro-shadow);
+    cursor: pointer;
+    z-index: 1000;
+    transition: transform 0.1s;
+    -webkit-user-select: none;
+    user-select: none;
+}
 
+.floating-help-button:active {
+    transform: translateY(4px);
+    box-shadow: none;
+}
 
 .font-header {
     font-family: var(--font-header), monospace;
     letter-spacing: 0.1em;
 }
 
-/* Text Shadow Utilities */
-.text-shadow-sm {
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
-}
-
-.text-shadow-md {
-    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
-}
-
-.balatro-text-shadow-hard {
+.text-shadow-balatro {
     text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
 }
-
-
 
 .bg-dots-grid {
     background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0);
@@ -517,8 +522,7 @@ main {
     }
 }
 
-.animate-juice-pop,
-.juice-pop {
+.animate-juice-pop {
     animation: juice-pop 2.5s ease-in-out infinite;
 }
 
@@ -712,11 +716,6 @@ main {
 /* Animation delay via CSS variable for juice-pop items */
 .juice-pop-delay {
     animation-delay: var(--delay, 0s);
-}
-
-/* Staggered animation delays for juice-pop elements */
-.balatro-delay-2 {
-    animation-delay: 0.15s;
 }
 
 /* ============================================================================

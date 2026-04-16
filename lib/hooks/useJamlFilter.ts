@@ -22,8 +22,8 @@ export interface JamlFilter {
     stake: string;
     defaults: {
         antes: number[];
-        boosterPacks: number[];
-        shopItems: number[];
+        packSlots: number[];
+        shopSlots: number[];
         score: number;
     };
     must: JamlClause[];
@@ -108,7 +108,7 @@ export function useJamlFilter(initialJaml?: string) {
     };
 }
 
-export function parseJamlToFilter(text: string): JamlFilter {
+function parseJamlToFilter(text: string): JamlFilter {
     if (!text.trim()) return createBlankFilter();
 
     try {
@@ -149,26 +149,20 @@ export function parseJamlToFilter(text: string): JamlFilter {
                     if (propMatch) {
                         const [_, key, val] = propMatch;
                         if (key === 'antes') filter.defaults.antes = parseNumArray(val);
-                        if (key === 'boosterPacks') filter.defaults.boosterPacks = parseNumArray(val);
-                        if (key === 'shopItems') filter.defaults.shopItems = parseNumArray(val);
+                        if (key === 'packSlots') filter.defaults.packSlots = parseNumArray(val);
+                        if (key === 'shopSlots') filter.defaults.shopSlots = parseNumArray(val);
                         if (key === 'score') filter.defaults.score = parseInt(val) || 0;
                     }
                 } else {
-                    // Start of new clause (e.g. - type: joker OR - joker: Blueprint)
-                    const lineMatch = trimmed.match(/^-\s*(\w+):\s*(.+)$/);
-                    if (lineMatch) {
-                        const [_, key, val] = lineMatch;
-                        if (key === 'type') {
-                            currentClause = { type: val.trim(), value: '' };
-                        } else {
-                            // Shorthand: - joker: Blueprint
-                            currentClause = { type: key, value: val.trim() };
-                        }
+                    // Start of new clause
+                    const typeMatch = trimmed.match(/^-\s*type:\s*(.+)$/);
+                    if (typeMatch) {
+                        currentClause = { type: typeMatch[1].trim(), value: '' };
                         filter[currentSection].push(currentClause);
                         continue;
                     }
 
-                    // Properties of current clause (e.g. edition: Foil)
+                    // Properties of current clause
                     if (currentClause) {
                         const propMatch = trimmed.match(/^(\w+):\s*(.+)$/);
                         if (propMatch) {
@@ -176,7 +170,6 @@ export function parseJamlToFilter(text: string): JamlFilter {
                             if (key === 'antes') currentClause.antes = parseNumArray(val);
                             else if (key === 'sources') currentClause.sources = parseStringArray(val);
                             else if (key === 'score') currentClause.score = parseInt(val) || 0;
-                            else if (key === 'value') currentClause.value = val.trim();
                             else (currentClause as any)[key] = val.trim();
                         }
                     }
@@ -211,8 +204,8 @@ function filterToJaml(filter: JamlFilter): string {
     lines.push('');
     lines.push('defaults:');
     lines.push(`  antes: [${filter.defaults.antes.join(', ')}]`);
-    lines.push(`  boosterPacks: [${filter.defaults.boosterPacks.join(', ')}]`);
-    lines.push(`  shopItems: [${filter.defaults.shopItems.join(', ')}]`);
+    lines.push(`  packSlots: [${filter.defaults.packSlots.join(', ')}]`);
+    lines.push(`  shopSlots: [${filter.defaults.shopSlots.join(', ')}]`);
     lines.push(`  score: ${filter.defaults.score}`);
     lines.push('');
 
@@ -236,15 +229,8 @@ function filterToJaml(filter: JamlFilter): string {
 
 function clauseToLines(clause: JamlClause, indent: string): string[] {
     const lines: string[] = [];
-    // Emit in the schema-preferred shorthand if possible
-    // e.g. - joker: Blueprint
-    if (clause.type && clause.value) {
-        lines.push(`${indent}- ${clause.type}: ${clause.value}`);
-    } else {
-        lines.push(`${indent}- type: ${clause.type || 'Item'}`);
-        if (clause.value) lines.push(`${indent}  value: ${clause.value}`);
-    }
-
+    lines.push(`${indent}- type: ${clause.type}`);
+    lines.push(`${indent}  value: ${clause.value}`);
     if (clause.label) lines.push(`${indent}  label: ${clause.label}`);
     if (clause.antes && clause.antes.length > 0) lines.push(`${indent}  antes: [${clause.antes.join(', ')}]`);
     if (clause.score) lines.push(`${indent}  score: ${clause.score}`);
@@ -266,8 +252,8 @@ function createBlankFilter(): JamlFilter {
         stake: 'White',
         defaults: {
             antes: [...ANTE_OPTIONS],
-            boosterPacks: [...SLOT_OPTIONS],
-            shopItems: [...SLOT_OPTIONS],
+            packSlots: [...SLOT_OPTIONS],
+            shopSlots: [...SLOT_OPTIONS],
             score: 1
         },
         must: [],

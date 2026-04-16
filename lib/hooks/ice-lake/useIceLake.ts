@@ -13,25 +13,6 @@ export interface RemoteSeedResult {
     [key: string]: any;
 }
 
-function resolvePartitionSource(partition: string, bucketUrl: string) {
-    const trimmed = partition.trim();
-    const normalizedBucketUrl = bucketUrl.replace(/\/$/, '');
-
-    if (/^https?:\/\//i.test(trimmed)) {
-        const filename = trimmed.split('/').pop() || 'partition.parquet';
-        return { url: trimmed, filename };
-    }
-
-    const normalizedPath = trimmed.replace(/^\/+/, '');
-    const filename = normalizedPath.split('/').pop() || 'partition.parquet';
-    const objectPath = normalizedPath.endsWith('.parquet') ? normalizedPath : `${normalizedPath}.parquet`;
-
-    return {
-        url: `${normalizedBucketUrl}/${objectPath}`,
-        filename,
-    };
-}
-
 /**
  * Hook to interact with the "Ice Lake" (R2 Parquet Data Lake)
  * Uses DuckDB WASM to query remote Parquet files directly via HTTP Range requests.
@@ -44,40 +25,40 @@ export function useIceLake() {
 
     const connectToPartitions = useCallback(async (partitions: string[], bucketUrl: string) => {
         if (!db) return;
-
+        
         try {
             setIsLoading(true);
-            setError(null);
-
+            
             // Clean up old tables
             // Note: In a real app we might want to track registered tables to avoid collisions
-
+            
             // Register each partition as a separate table or create a VIEW to union them?
             // DuckDB WASM supports querying multiple files: SELECT * FROM 'file1.parquet', 'file2.parquet'
             // So we just need to register them.
-
+            
             const urls: string[] = [];
-
+            
             for (const p of partitions) {
-                const { url, filename } = resolvePartitionSource(p, bucketUrl);
-
+                const url = `${bucketUrl}/${p}.parquet`;
+                const filename = `${p.replace('/', '_')}.parquet`; // suits_Hearts.parquet
+                
                 await db.registerFileURL(
-                    filename,
-                    url,
-                    duckdb.DuckDBDataProtocol.HTTP,
+                    filename, 
+                    url, 
+                    duckdb.DuckDBDataProtocol.HTTP, 
                     false
                 );
                 urls.push(`'${filename}'`);
             }
-
+            
             // Create a view that unions them all
             // "CREATE OR REPLACE VIEW active_view AS SELECT * FROM read_parquet([file1, file2])"
             const viewSql = `CREATE OR REPLACE VIEW active_partition AS SELECT * FROM read_parquet([${urls.join(', ')}])`;
             await conn?.query(viewSql);
-
+            
             setCurrentPartition(partitions.join('+'));
             console.log(`🧊 Ice Lake: Connected to ${partitions.length} partitions`);
-
+            
         } catch (err: any) {
             console.error("🧊 Ice Lake Connection Error:", err);
             setError(err.message);
@@ -96,7 +77,10 @@ export function useIceLake() {
 
         try {
             setIsLoading(true);
-            const result = await conn.query(sql);
+            // Replace generic table name with our registered alias
+            const executableSql = sql.replace('seeds.parquet', 'active_partition.parquet');
+            
+            const result = await conn.query(executableSql);
             return result.toArray().map((row: any) => row.toJSON());
         } catch (err: any) {
             console.error("Query Error:", err);

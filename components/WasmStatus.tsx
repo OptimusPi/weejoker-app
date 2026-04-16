@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { getWasmCapabilities } from '@/lib/motelyWasm';
+import { getCapabilities, getVersion } from '@/lib/api/motelyWasm';
 import { Cpu, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -18,9 +18,9 @@ export function WasmStatus() {
         const load = async () => {
             setStatus('loading');
             try {
-                const caps = await getWasmCapabilities();
+                const [info, caps] = await Promise.all([getVersion(), getCapabilities()]);
                 if (cancelled) return;
-                setVersion(caps.version || 'unknown');
+                setVersion(info.version);
                 setThreads(caps.threads);
                 setSimd(caps.simd);
                 setProcessors(caps.processorCount);
@@ -54,8 +54,8 @@ export function WasmStatus() {
                         <Cpu size={16} />}
 
             <div className="flex flex-col">
-                <span className="text-[12px] tracking-widest leading-tight">
-                    WASM: {status}
+                <span className="text-[12px] uppercase tracking-widest leading-tight">
+                    WASM: {status.toUpperCase()}
                 </span>
                 {displayVersion && (
                     <span className="text-[11px] opacity-70 leading-tight">

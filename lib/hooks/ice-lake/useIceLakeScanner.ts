@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
+import { analyzeSeedWasm } from '@/lib/api/motelyWasm';
 import { evaluateSeed } from '@/lib/jaml/jamlEvaluator';
-import { openSingleSeedContext } from '@/lib/motelyWasm';
 import { useIceLake } from './useIceLake';
 import { JamlFilter } from '../useJamlFilter';
 import { normalizeAnalysis } from '@/lib/seedAnalyzer';
@@ -35,7 +35,7 @@ export function useIceLakeScanner() {
             // Fetch batch
             const sql = `SELECT seed FROM active_partition LIMIT ${batchSize} OFFSET ${offset}`;
             const rows = await query(sql);
-
+            
             if (rows.length === 0) {
                 hasMore = false;
                 break;
@@ -46,12 +46,12 @@ export function useIceLakeScanner() {
                 const seed = row.seed;
                 try {
                     // Analyze with Motely (C# WASM)
-                    const rawAnalysis = await openSingleSeedContext(seed, filter.deck || 'Erratic', filter.stake || 'White');
+                    const rawAnalysis = await analyzeSeedWasm(seed, filter.deck || 'Erratic', filter.stake || 'White');
                     const analysis = normalizeAnalysis(rawAnalysis);
-
+                    
                     // Evaluate with JAML (TS)
                     const evaluation = evaluateSeed(analysis, filter);
-
+                    
                     if (evaluation.isMatch) {
                         onResult(seed, evaluation.score);
                     }
@@ -62,7 +62,7 @@ export function useIceLakeScanner() {
 
             await Promise.all(promises);
             offset += batchSize;
-
+            
             // Optional: Yield to UI thread to prevent freezing
             await new Promise(r => setTimeout(r, 0));
         }

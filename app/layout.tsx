@@ -7,7 +7,7 @@ import { BackgroundShader } from '@/components/BackgroundShader';
 import localFont from 'next/font/local';
 import ClientProviders from '@/components/ClientProviders';
 import NavBar from '@/components/NavBar';
-import { BalatroFanSiteAttributionFooter } from '@/components/BalatroFanSiteAttributionFooter';
+import { PageFooter } from '@/components/PageFooter';
 
 const fontHeader = localFont({
     src: '../public/fonts/m6x11plusplus.otf',
@@ -61,13 +61,13 @@ export default function RootLayout({
                         <NavBar />
                     </header>
 
-                    <div className="flex-grow flex flex-col min-h-0 overflow-hidden relative z-0">
+                    <div className="flex-grow flex flex-col min-h-0 relative z-0">
                         <ClientProviders>
                             {children}
                         </ClientProviders>
                     </div>
 
-                    <BalatroFanSiteAttributionFooter />
+                    <PageFooter />
                 </div>
             </body>
         </html>

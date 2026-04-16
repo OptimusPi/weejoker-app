@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { RealPlayingCard } from './RealPlayingCard';
+import React from 'react';
+import { PlayingCard } from './PlayingCard';
 
 // Card string format: "2_C", "10_H", "K_S", "A_D"
 const RANK_MAP: Record<string, string> = {
@@ -19,8 +19,6 @@ interface DeckFan4RowProps {
     className?: string;
     /** If set, cards matching this rank will be highlighted and others dimmed */
     featuredRank?: string;
-    /** Card size in pixels (default: 28) */
-    cardSize?: number;
 }
 
 function parseCard(card: string) {
@@ -28,12 +26,7 @@ function parseCard(card: string) {
     return { rank: r, suit: s };
 }
 
-export function DeckFan4Row({ cards, className = '', featuredRank, cardSize }: DeckFan4RowProps) {
-    const [animated, setAnimated] = useState(false);
-    useEffect(() => {
-        const t = setTimeout(() => setAnimated(true), 80);
-        return () => clearTimeout(t);
-    }, []);
+export function DeckFan4Row({ cards, className = '', featuredRank }: DeckFan4RowProps) {
     // Separate cards by suit
     const bySuit: Record<string, string[]> = { S: [], H: [], C: [], D: [] };
     for (const card of cards) {
@@ -56,16 +49,16 @@ export function DeckFan4Row({ cards, className = '', featuredRank, cardSize }: D
                 const suitCards = bySuit[suit];
                 if (suitCards.length === 0) return null;
                 return (
-                    <SuitFanRow key={suit} cards={suitCards} featuredRank={featuredRank} animated={animated} cardSize={cardSize} />
+                    <SuitFanRow key={suit} cards={suitCards} featuredRank={featuredRank} />
                 );
             })}
         </div>
     );
 }
 
-function SuitFanRow({ cards, featuredRank, animated, cardSize: propCardSize }: { cards: string[]; featuredRank?: string; animated?: boolean; cardSize?: number }) {
+function SuitFanRow({ cards, featuredRank }: { cards: string[]; featuredRank?: string }) {
     const count = cards.length;
-    const cardSize = propCardSize ?? 28; // Small cards to fit in narrow container
+    const cardSize = 28; // Small cards to fit in narrow container
     // Slight overlap - less cards = more spacing
     const overlap = count > 10 ? 0.7 : count > 6 ? 0.55 : 0.4;
     const cardSpacing = cardSize * (1 - overlap);
@@ -103,7 +96,7 @@ function SuitFanRow({ cards, featuredRank, animated, cardSize: propCardSize }: {
                 return (
                     <div
                         key={i}
-                        className={`suit-fan-card-wrapper ${animated ? (isFeatured && featuredRank ? 'animate-juice-pop' : 'animate-sway') : ''}`}
+                        className={`suit-fan-card-wrapper ${isFeatured && featuredRank ? 'animate-juice-pop' : 'animate-sway'}`}
                         style={{
                             ['--card-left' as any]: `${xPos}px`,
                             ['--card-y' as any]: `${yOffset}px`,
@@ -112,7 +105,7 @@ function SuitFanRow({ cards, featuredRank, animated, cardSize: propCardSize }: {
                             ['--card-delay' as any]: `${i * 0.15}s`,
                         }}
                     >
-                        <RealPlayingCard
+                        <PlayingCard
                             rank={RANK_MAP[rank] as any}
                             suit={SUIT_MAP[suit] as any}
                             size={cardSize}

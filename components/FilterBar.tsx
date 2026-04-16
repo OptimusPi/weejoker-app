@@ -9,20 +9,20 @@ interface FilterBarProps {
 
 export function FilterBar({ onSearch, onSortChange }: FilterBarProps) {
     return (
-        <div className="flex flex-col md:flex-row gap-6 mb-12 p-4 jimbo-panel border-4 border-[var(--jimbo-panel-edge)] bg-[#111] relative">
+        <div className="flex flex-col md:flex-row gap-6 mb-12 p-4 balatro-panel border-4 border-[var(--balatro-border)] bg-[var(--balatro-modal-bg)] relative">
             {/* Search Section */}
             <div className="flex-1 relative">
-                <div className="absolute -top-5 left-4 bg-[var(--jimbo-red)] text-white px-3 py-1 rounded-sm text-sm font-header uppercase tracking-wider shadow-md z-10 border-2 border-[var(--jimbo-panel-edge)]">
+                <div className="absolute -top-5 left-4 bg-balatro-red text-white px-3 py-1 rounded-md text-sm font-header uppercase tracking-wider shadow-md z-10 border-2 border-balatro-red-dark">
                     Search Seeds
                 </div>
                 <div className="relative mt-2">
-                    <div className="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none z-10 text-[var(--jimbo-blue)]">
+                    <div className="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none z-10 text-balatro-blue">
                         <Search size={24} strokeWidth={3} />
                     </div>
                     <input
                         type="text"
                         placeholder="ENTER SEED..."
-                        className="w-full pl-12 pr-4 py-4 jimbo-input font-header text-2xl uppercase tracking-widest text-[#fff]"
+                        className="w-full pl-12 pr-4 py-4 bg-[var(--balatro-grey-darker)] border-b-4 border-[var(--balatro-border)] rounded-lg text-white font-header text-2xl placeholder:text-white/40 focus:outline-none focus:border-[var(--balatro-blue)] focus:bg-black/80 transition-all shadow-inner uppercase tracking-widest"
                         onChange={(e) => onSearch(e.target.value)}
                     />
                 </div>
@@ -31,14 +31,13 @@ export function FilterBar({ onSearch, onSortChange }: FilterBarProps) {
             {/* Sort Section */}
             <div className="flex gap-4 items-end">
                 <div className="relative flex-grow md:flex-grow-0">
-                    <div className="absolute -top-5 left-4 bg-[var(--jimbo-red)] text-white px-3 py-1 rounded-sm text-sm font-header uppercase tracking-wider shadow-md z-10 border-2 border-[var(--jimbo-panel-edge)]">
+                    <div className="absolute -top-5 left-4 bg-balatro-red text-white px-3 py-1 rounded-md text-sm font-header uppercase tracking-wider shadow-md z-10 border-2 border-balatro-red-dark">
                         Sort By
                     </div>
                     <div className="relative mt-2 h-full">
                         <select
                             onChange={(e) => onSortChange(e.target.value)}
-                            title="Sort Seeds"
-                            className="bg-[var(--jimbo-orange)] hover:bg-[var(--jimbo-gold)] text-white border-b-4 border-[var(--jimbo-panel-edge)] active:border-b-0 active:translate-y-1 rounded-sm font-header text-xl shadow-md appearance-none cursor-pointer uppercase tracking-wider py-4 pl-6 pr-12 w-full md:w-64 text-center transition-all focus:outline-none"
+                            className="bg-[var(--balatro-orange)] hover:bg-[var(--balatro-orange-hover)] text-white border-b-4 border-[var(--color-dark-orange)] active:border-b-0 active:translate-y-1 rounded-lg font-header text-xl balatro-select-shadow appearance-none cursor-pointer uppercase tracking-wider py-4 pl-6 pr-12 w-full md:w-64 text-center transition-all focus:outline-none"
                         >
                             <option value="default">Most Rated</option>
                             <option value="wee_desc">Wee Joker</option>
