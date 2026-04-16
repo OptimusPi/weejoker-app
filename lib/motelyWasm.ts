@@ -1,6 +1,5 @@
 'use client';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import dotnet, { MotelyWasm, Motely } from 'motely-wasm';
 import { decodeMotelyItemName, motelyItemCategory } from 'jaml-ui/motely';
 
