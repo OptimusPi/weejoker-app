@@ -2,14 +2,14 @@ import { NextResponse } from "next/server";
 import { analyzeSeedServer } from "@/lib/server/motelyAnalyze";
 import { normalizeAnalysis } from "@/lib/seedAnalyzer";
 
-/** Embedded WASM (`motely-wasm-compat`) needs the Node.js runtime, not the Edge Worker. */
+/** `motely-wasm` (embedded) needs the Node.js runtime, not the Edge Worker. */
 export const runtime = "nodejs";
 
 /**
  * GET /api/analyze/[seed]
  *
- * Server: `motely-wasm-compat` (embedded Bootsharp). Client UI may still use
- * `motely-wasm` + `/motely-wasm` via `analyzeSeedWasm` in `@/lib/api/motelyWasm`.
+ * Server: same `motely-wasm` npm package (embedded LLVM WASM). Client uses
+ * `analyzeSeedWasm` in `@/lib/api/motelyWasm`.
  */
 export async function GET(
   request: Request,

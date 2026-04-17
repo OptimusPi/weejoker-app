@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Motely WASM — main `motely-wasm` package with side-loaded `/motely-wasm` runtime.
- * Binaries are copied to `public/motely-wasm` via `scripts/copy-motely-wasm.mjs` (predev/prebuild).
+ * motely-wasm — NativeAOT-LLVM WASM, single `index.mjs`, one thread (browser or Node).
+ * Prefer `jaml-ui` helpers for display; this module wires boot + search + analysis for the app.
  */
 
 export interface VersionInfo {
@@ -33,33 +33,32 @@ export interface SearchOptions {
   batchSize?: number;
   startBatch?: number;
   endBatch?: number;
+  /** Ignored — WASM search is fixed single-threaded; kept for call-site compatibility. */
   threadCount?: number;
 }
 
 export type SeedAnalysisInfo = Record<string, unknown>;
 export type ValidateResult = { valid: boolean; errors?: string[] };
 
-import bootsharp, {
-  MotelyJamlSearchBuilder,
-  MotelySingleSearchContext,
-  SearchEvents,
+import motely, {
   Motely,
-  MotelyWasmHost,
+  MotelyWasm,
+  MotelyWasmEvents,
 } from "motely-wasm";
 
-const MOTELY_WASM_PUBLIC_PATH = "/motely-wasm";
+import { buildSingleSeedAnalysis } from "@/lib/motely/singleSeedAnalysis";
 
 let bootPromise: Promise<void> | null = null;
 
 async function ensureBooted(): Promise<void> {
   if (typeof window === "undefined") {
     throw new Error(
-      "[MotelyWasm] Browser-only. For Route Handlers use `@/lib/server/motelyAnalyze` (motely-wasm-compat)."
+      "[MotelyWasm] Browser-only. For Route Handlers use `@/lib/server/motelyAnalyze` (motely-wasm)."
     );
   }
   if (!bootPromise) {
     bootPromise = (async () => {
-      await bootsharp.boot({ root: MOTELY_WASM_PUBLIC_PATH });
+      await motely.boot();
     })().catch((e) => {
       bootPromise = null;
       throw e;
@@ -68,9 +67,24 @@ async function ensureBooted(): Promise<void> {
   return bootPromise;
 }
 
-// --- High-level facade (replaces legacy loadMotely / MotelyWasmApi) ---
+function wasmSearchStateLabel(state: Motely.MotelyWasmSearchState): string {
+  const name = Motely.MotelyWasmSearchState[state];
+  return typeof name === "string" ? name : String(state);
+}
 
-let activeSession: import("motely-wasm").BrowserWasm.IMotelySearchSession | null = null;
+function disposeSearchHandle(s: Motely.IMotelyWasmSearch | null): void {
+  if (!s) return;
+  const ext = s as Motely.IMotelyWasmSearch & { dispose?: () => void };
+  try {
+    ext.dispose?.();
+  } catch {
+    /* noop */
+  }
+}
+
+// --- High-level facade ---
+
+let activeSession: Motely.IMotelyWasmSearch | null = null;
 const searchUnsubs: Array<() => void> = [];
 
 function cleanupSearchSubs() {
@@ -82,19 +96,16 @@ async function getFacade() {
   return {
     getVersion(): VersionInfo {
       return {
-        version: MotelyJamlSearchBuilder.getVersion(),
-        runtime: "NativeAOT-LLVM WASM",
+        version: MotelyWasm.getVersion(),
+        runtime: "NativeAOT-LLVM WASM (single-thread)",
       };
     },
     getCapabilities(): CapabilitiesInfo {
       return {
-        version: MotelyJamlSearchBuilder.getVersion(),
-        threads: typeof SharedArrayBuffer !== "undefined",
+        version: MotelyWasm.getVersion(),
+        threads: false,
         simd: true,
-        processorCount:
-          typeof navigator !== "undefined"
-            ? navigator.hardwareConcurrency ?? 1
-            : 1,
+        processorCount: 1,
       };
     },
     async analyzeSeed(
@@ -103,18 +114,7 @@ async function getFacade() {
       stake: string
     ): Promise<SeedAnalysisInfo> {
       await ensureBooted();
-      const deckEnum =
-        Motely.MotelyDeck[deck as keyof typeof Motely.MotelyDeck] ??
-        Motely.MotelyDeck.Erratic;
-      const stakeEnum =
-        Motely.MotelyStake[stake as keyof typeof Motely.MotelyStake] ??
-        Motely.MotelyStake.White;
-      const ctx = MotelySingleSearchContext.open(seed, deckEnum, stakeEnum);
-      try {
-        return JSON.parse(JSON.stringify(ctx)) as SeedAnalysisInfo;
-      } catch {
-        return { seed, deck, stake, analysis: ctx } as SeedAnalysisInfo;
-      }
+      return buildSingleSeedAnalysis(seed, deck, stake);
     },
     async startJamlSearch(
       jamlContent: string,
@@ -138,24 +138,8 @@ async function getFacade() {
         } catch {
           /* noop */
         }
+        disposeSearchHandle(activeSession);
         activeSession = null;
-      }
-
-      MotelyJamlSearchBuilder.loadJaml(jamlContent);
-      if (options?.specificSeed?.trim()) {
-        MotelyJamlSearchBuilder.seedList([options.specificSeed.trim()]);
-      } else if (
-        options?.batchSize != null &&
-        options?.startBatch != null &&
-        options?.endBatch != null
-      ) {
-        MotelyJamlSearchBuilder.configured(
-          options.batchSize,
-          BigInt(options.startBatch),
-          BigInt(options.endBatch)
-        );
-      } else {
-        MotelyJamlSearchBuilder.random(options?.randomSeeds ?? 1_000_000);
       }
 
       const startMs = Date.now();
@@ -170,54 +154,62 @@ async function getFacade() {
             resultCount
           );
         };
-        SearchEvents.onProgress.subscribe(h);
-        searchUnsubs.push(() => SearchEvents.onProgress.unsubscribe(h));
+        MotelyWasmEvents.onProgress.subscribe(h);
+        searchUnsubs.push(() => MotelyWasmEvents.onProgress.unsubscribe(h));
       }
       if (options?.onResult) {
         const h = (seed: string, score: number, tally: Int32Array) => {
           resultCount += 1;
           options.onResult!(seed, score, tally);
         };
-        SearchEvents.onResult.subscribe(h);
-        searchUnsubs.push(() => SearchEvents.onResult.unsubscribe(h));
+        MotelyWasmEvents.onResult.subscribe(h);
+        searchUnsubs.push(() => MotelyWasmEvents.onResult.unsubscribe(h));
       }
 
-      return await new Promise<SearchStatusInfo>((resolve, reject) => {
-        const done = (
-          status: string,
-          total: bigint,
-          matching: bigint
-        ) => {
-          cleanupSearchSubs();
-          activeSession = null;
-          resolve({
-            status,
-            totalSearched: Number(total),
-            matchingSeeds: Number(matching),
-            elapsedMs: Date.now() - startMs,
-            resultCount,
-          });
-        };
-        const onComplete = (
-          status: string,
-          total: bigint,
-          matching: bigint
-        ) => {
-          SearchEvents.onComplete.unsubscribe(onComplete);
-          done(status, total, matching);
-        };
-        SearchEvents.onComplete.subscribe(onComplete);
-        searchUnsubs.push(() =>
-          SearchEvents.onComplete.unsubscribe(onComplete)
-        );
-        try {
-          activeSession = MotelyJamlSearchBuilder.run();
-        } catch (e) {
-          cleanupSearchSubs();
-          activeSession = null;
-          reject(e);
+      let search: Motely.IMotelyWasmSearch;
+      try {
+        if (options?.specificSeed?.trim()) {
+          search = MotelyWasm.startSeedListSearch(jamlContent, [
+            options.specificSeed.trim(),
+          ]);
+        } else if (
+          options?.batchSize != null &&
+          options?.startBatch != null &&
+          options?.endBatch != null
+        ) {
+          search = MotelyWasm.startSequentialSearch(
+            jamlContent,
+            options.batchSize,
+            BigInt(options.startBatch),
+            BigInt(options.endBatch)
+          );
+        } else {
+          search = MotelyWasm.startRandomSearch(
+            jamlContent,
+            options?.randomSeeds ?? 1_000_000
+          );
         }
-      });
+      } catch (e) {
+        cleanupSearchSubs();
+        throw e;
+      }
+
+      activeSession = search;
+
+      try {
+        const completion = await search.waitForCompletion();
+        return {
+          status: wasmSearchStateLabel(completion.state),
+          totalSearched: Number(completion.totalSeedsSearched),
+          matchingSeeds: Number(completion.matchingSeeds),
+          elapsedMs: Date.now() - startMs,
+          resultCount,
+        };
+      } finally {
+        cleanupSearchSubs();
+        disposeSearchHandle(search);
+        activeSession = null;
+      }
     },
     stopSearch() {
       cleanupSearchSubs();
@@ -227,6 +219,7 @@ async function getFacade() {
         } catch {
           /* noop */
         }
+        disposeSearchHandle(activeSession);
         activeSession = null;
       }
     },
@@ -235,15 +228,11 @@ async function getFacade() {
     },
     async validateJaml(jamlContent: string): Promise<ValidateResult> {
       await ensureBooted();
-      try {
-        MotelyWasmHost.loadJaml(jamlContent);
-        return { valid: true };
-      } catch (e) {
-        return {
-          valid: false,
-          errors: [e instanceof Error ? e.message : String(e)],
-        };
+      const msg = MotelyWasm.validateJaml(jamlContent);
+      if (msg && msg !== "valid") {
+        return { valid: false, errors: [msg] };
       }
+      return { valid: true };
     },
   };
 }
@@ -380,16 +369,9 @@ export async function searchSeedsWasm(
     isSearchActive = false;
   }
 
-  const threadCount =
-    typeof navigator !== "undefined"
-      ? Math.max(1, (navigator.hardwareConcurrency || 4) - 1)
-      : 4;
-  console.log(`[MotelyWasm] Starting search with ${threadCount} threads`);
-
   isSearchActive = true;
 
   const searchPromise = api.startJamlSearch(jamlContent, {
-    threadCount,
     ...options,
     onProgress: (
       totalSearched: number,
