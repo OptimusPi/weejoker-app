@@ -196,20 +196,22 @@ async function getFacade() {
 
       activeSession = search;
 
-      try {
-        const completion = await search.waitForCompletion();
-        return {
-          status: wasmSearchStateLabel(completion.state),
-          totalSearched: Number(completion.totalSeedsSearched),
-          matchingSeeds: Number(completion.matchingSeeds),
-          elapsedMs: Date.now() - startMs,
-          resultCount,
+      return new Promise<SearchStatusInfo>((resolve) => {
+        const completeHandler = (_status: string, totalSeedsSearched: bigint, matchingSeeds: bigint) => {
+          MotelyWasmEvents.onComplete.unsubscribe(completeHandler);
+          cleanupSearchSubs();
+          disposeSearchHandle(search);
+          activeSession = null;
+          resolve({
+            status: _status,
+            totalSearched: Number(totalSeedsSearched),
+            matchingSeeds: Number(matchingSeeds),
+            elapsedMs: Date.now() - startMs,
+            resultCount,
+          });
         };
-      } finally {
-        cleanupSearchSubs();
-        disposeSearchHandle(search);
-        activeSession = null;
-      }
+        MotelyWasmEvents.onComplete.subscribe(completeHandler);
+      });
     },
     stopSearch() {
       cleanupSearchSubs();
