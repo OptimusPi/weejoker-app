@@ -47,6 +47,7 @@ next-env.d.ts
 # large data
 public/seeds.txt
 /public/_framework
+/public/motely-wasm
 /Blueprint
 /.open-next/server-functions/default/node_modules
 /.open-next/.build
