@@ -29,59 +29,15 @@ export interface RitualConfig {
 }
 
 /**
- * Seed data record from the seeds file
- * Core fields (seed, score) are always present
- * All other fields are dynamic based on the JAML filter columns
+ * Seed data record from the seeds file.
+ * All scoring fields are dynamic — driven by the JAML filter's label columns.
  */
 export interface SeedData {
     seed: string;
     score: number;
-
-    // Common JAML labels for The Daily Wee
-    // These can vary based on the ritual's JAML filter
-    twos?: number;
-
-    // Stake is passed from RitualConfig for UI display
     stake?: StakeType;
-
-    // Wee Joker
-    WeeJoker_Ante1?: number;
-    WeeJoker_Ante2?: number;
-
-    // Hanging Chad
-    HanginChad_Ante1?: number;
-    HanginChad_Ante2?: number;
-
-    // Hack
-    Hack_Ante1?: number;
-    Hack_Ante2?: number;
-
-    // Copy Jokers
-    blueprint_early?: number;
-    brainstorm_early?: number;
-
-    // Showman
-    Showman_Ante1?: number;
-
-    // Specific Cards
-    red_Seal_Two?: number;
-    polychrome_Twop?: number;
-
-    // Consumables/Other
-    InvisibleJoker?: number;
-    Temperance?: number;
-    Ankh_Ante1?: number;
-
-    // Theme Cards (e.g., "Glass 2 of Clubs", "Red Seal King of Spades")
-    themeCardAnte1?: string;
-    themeCardAnte2?: string;
-
-    // JAMZ Rich Data
     startingDeck?: string[];
     relevantEvents?: RelevantEvent[];
-
-    // Dynamic fields from JAML filter
-    // Column names are derived from the filter's "label" fields
     [key: string]: string | number | boolean | string[] | RelevantEvent[] | undefined;
 }
 

@@ -8,7 +8,6 @@ import { CardFan } from "./CardFan";
 import { DeckSprite } from "./DeckSprite";
 import { cn } from "@/lib/utils";
 import { parseCardToken } from "@/lib/cardParser";
-import { parseDailyRitualSeed, groupItemsByType } from "@/lib/parseDailyRitual";
 
 interface SeedCardProps {
     seed: SeedData;
@@ -86,33 +85,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                 }));
         }
 
-        // 2. Fallback for legacy flat data (The Hardcoded Past - we'll keep this until data is fully JAMZ)
-        const items: { id: string; name: string; tally: number; type: string }[] = [];
-        const ITEM_DEFS = [
-            { key: 'WeeJoker_Ante1', id: 'weejoker', name: 'Wee Joker', type: 'joker' },
-            { key: 'WeeJoker_Ante2', id: 'weejoker', name: 'Wee Joker', type: 'joker' },
-            { key: 'Hack_Ante1', id: 'hack', name: 'Hack', type: 'joker' },
-            { key: 'Hack_Ante2', id: 'hack', name: 'Hack', type: 'joker' },
-            { key: 'HanginChad_Ante1', id: 'hangingchad', name: 'Hanging Chad', type: 'joker' },
-            { key: 'HanginChad_Ante2', id: 'hangingchad', name: 'Hanging Chad', type: 'joker' },
-            { key: 'blueprint_early', id: 'blueprint', name: 'Blueprint', type: 'joker' },
-            { key: 'brainstorm_early', id: 'brainstorm', name: 'Brainstorm', type: 'joker' },
-            { key: 'Showman_Ante1', id: 'showman', name: 'Showman', type: 'joker' },
-            { key: 'Temperance', id: 'temperance', name: 'Temperance', type: 'consumable' },
-            { key: 'Ankh_Ante1', id: 'ankh', name: 'Ankh', type: 'consumable' },
-            { key: 'InvisibleJoker', id: 'invisiblejoker', name: 'Invisible Joker', type: 'voucher' },
-        ];
-
-        ITEM_DEFS.forEach(def => {
-            const val = seed[def.key];
-            if (typeof val === 'number' && val > 0 && types.includes(def.type as any)) {
-                const existing = items.find(i => i.id === def.id);
-                if (existing) existing.tally += val;
-                else items.push({ id: def.id, name: def.name, tally: val, type: def.type });
-            }
-        });
-
-        return items;
+        return [];
     };
 
     const [timeLeft, setTimeLeft] = useState("");
@@ -216,12 +189,12 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                                 </div>
                             </div>
 
-                            {/* ITEMS Section - Ante 1 and Ante 2 */}
-                            {/* ITEMS Section - Grouped by Type */}
+                            {/* ITEMS Section - Grouped by Type, driven by relevantEvents */}
                             {(() => {
-                                // Parse items directly from the seed object using our new parser
-                                const parsed = parseDailyRitualSeed(seed);
-                                const { jokers, consumables, vouchers } = groupItemsByType(parsed.items);
+                                const events = seed.relevantEvents ?? [];
+                                const jokers = events.filter(e => e.type === 'joker');
+                                const consumables = events.filter(e => e.type === 'tarot' || e.type === 'spectral' || e.type === 'planet');
+                                const vouchers = events.filter(e => e.type === 'voucher');
 
                                 // Helper to render a group section
                                 const renderGroup = (label: string, items: any[], spriteWidth: number = 71) => (
@@ -298,12 +271,7 @@ export function SeedCard({ seed, dayNumber, className, onAnalyze, onOpenSubmit, 
                                         <p key={idx}>{idx + 1}. Find {e.displayName || e.id} (Ante {e.ante})</p>
                                     ))
                                 ) : (
-                                    <>
-                                        <p>1. Buy Wee Joker in Ante {seed.WeeJoker_Ante1 ? '1' : '2'}.</p>
-                                        <p>2. Copy it with Hack/Chad.</p>
-                                        <p>3. Scale it with 2s.</p>
-                                        <p>4. Submit your high score!</p>
-                                    </>
+                                    <p className="opacity-40">Check the JAML filter for strategy tips.</p>
                                 )}
                             </div>
                             <button onClick={onAnalyze} className="balatro-button balatro-button-blue text-sm py-2 shrink-0">How do I play?</button>
