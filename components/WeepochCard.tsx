@@ -32,8 +32,8 @@ export function WeepochCard({ onShowHowTo, onEnterRitual }: WeepochCardProps) {
                         <div className="flex justify-between border-b border-white/5 pb-0.5">
                             <span>Inspiration</span>
                             <div className="flex gap-2 text-[var(--balatro-blue)]">
-                                <a href="https://daylatro.fly.dev/" target="_blank" className="hover:underline">Daylatro</a>
-                                <a href="https://nytimes.com/games/wordle" target="_blank" className="hover:underline">Wordle</a>
+                                <a href="https://daylatro.fly.dev/" target="_blank" rel="noopener noreferrer" className="hover:underline">Daylatro</a>
+                                <a href="https://nytimes.com/games/wordle" target="_blank" rel="noopener noreferrer" className="hover:underline">Wordle</a>
                             </div>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-0.5">
@@ -42,7 +42,7 @@ export function WeepochCard({ onShowHowTo, onEnterRitual }: WeepochCardProps) {
                         </div>
                         <div className="flex justify-between">
                             <span>Engine</span>
-                            <a href="https://github.com/Tacodiva/Motely" target="_blank" className="text-[var(--balatro-orange)] hover:underline">Motely</a>
+                            <a href="https://github.com/Tacodiva/Motely" target="_blank" rel="noopener noreferrer" className="text-[var(--balatro-orange)] hover:underline">Motely</a>
                         </div>
                     </div>
                 </div>

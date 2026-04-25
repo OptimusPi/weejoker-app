@@ -12,6 +12,12 @@ import { normalizeAnalysis } from "@/lib/seedAnalyzer";
 import { cn } from "@/lib/utils";
 
 export default function CreateRitualPage() {
+    return (
+        <div className="min-h-screen bg-[var(--balatro-black)] text-white flex items-center justify-center flex-col gap-4">
+            <h1 className="font-header text-5xl text-[var(--balatro-blue)]">Community Rituals</h1>
+            <p className="font-pixel text-xl text-white/60">Coming soon in v2.</p>
+        </div>
+    );
     const router = useRouter();
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);

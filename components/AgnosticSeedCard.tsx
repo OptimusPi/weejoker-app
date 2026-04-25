@@ -87,8 +87,8 @@ export function AgnosticSeedCard({
                 <p className="font-pixel text-[10px] text-white/30 max-w-[200px]">
                     This seed unlocks tomorrow. You can view the deck, but the strategy is hidden!
                 </p>
-                <div className="mt-6 px-3 py-1.5 bg-black/40 rounded-lg border border-white/5">
-                    <span className="font-header text-sm text-[var(--balatro-gold)]">UNLOCKS DAY {dayNumber}</span>
+                <div className="mt-6 px-4 py-2 bg-black/60 rounded-xl border-2 border-white/10 shadow-[0_4px_0_rgba(0,0,0,0.5)]">
+                    <span className="font-header text-xl text-[var(--balatro-gold)] text-shadow-balatro">UNLOCKS DAY {dayNumber}</span>
                 </div>
             </div>
         );
@@ -139,10 +139,10 @@ export function AgnosticSeedCard({
             </div>
 
             {/* Footer - Mobile Optimized */}
-            <div className="flex items-center justify-end pt-4 border-t border-white/5">
-                <button className="flex items-center gap-2 font-header text-sm text-[var(--balatro-gold)] hover:brightness-125 transition-all active:scale-95 py-2 px-3 -mr-3">
-                    VIEW STRATEGY <ChevronRight size={16} />
-                </button>
+            <div className="mt-auto flex items-center justify-center pt-3 border-t border-white/5">
+                <span className="font-header text-lg text-[var(--balatro-gold)] group-hover:text-white transition-colors text-shadow-balatro">
+                    CLICK TO VIEW STRATEGY
+                </span>
             </div>
         </div>
     );

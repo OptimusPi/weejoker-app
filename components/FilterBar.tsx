@@ -1,5 +1,5 @@
-
-import { SlidersHorizontal, Search, ArrowUpDown } from "lucide-react";
+import { useState } from "react";
+import { SlidersHorizontal, Search, ArrowUpDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface FilterBarProps {
@@ -8,6 +8,8 @@ interface FilterBarProps {
 }
 
 export function FilterBar({ onSearch, onSortChange }: FilterBarProps) {
+    const [sortValue, setSortValue] = useState("default");
+
     return (
         <div className="flex flex-col md:flex-row gap-6 mb-12 p-4 balatro-panel border-4 border-[var(--balatro-border)] bg-[var(--balatro-modal-bg)] relative">
             {/* Search Section */}
@@ -31,13 +33,32 @@ export function FilterBar({ onSearch, onSortChange }: FilterBarProps) {
             {/* Sort Section */}
             <div className="flex gap-4 items-end">
                 <div className="relative flex-grow md:flex-grow-0">
-                    <div className="absolute -top-5 left-4 bg-balatro-red text-white px-3 py-1 rounded-md text-sm font-header uppercase tracking-wider shadow-md z-10 border-2 border-balatro-red-dark">
-                        Sort By
+                    <div className={cn(
+                        "absolute -top-5 left-4 text-white px-3 py-1 rounded-md text-sm font-header uppercase tracking-wider shadow-md z-10 border-2 flex items-center gap-1 transition-colors",
+                        sortValue !== "default" 
+                            ? "bg-balatro-blue border-[var(--balatro-blue)]" 
+                            : "bg-balatro-red border-balatro-red-dark"
+                    )}>
+                        {sortValue !== "default" ? (
+                            <>
+                                <Check size={14} strokeWidth={4} /> Sort Set
+                            </>
+                        ) : "Sort By"}
                     </div>
                     <div className="relative mt-2 h-full">
                         <select
-                            onChange={(e) => onSortChange(e.target.value)}
-                            className="bg-[var(--balatro-orange)] hover:bg-[var(--balatro-orange-hover)] text-white border-b-4 border-[var(--color-dark-orange)] active:border-b-0 active:translate-y-1 rounded-lg font-header text-xl balatro-select-shadow appearance-none cursor-pointer uppercase tracking-wider py-4 pl-6 pr-12 w-full md:w-64 text-center transition-all focus:outline-none"
+                            aria-label="Sort By"
+                            value={sortValue}
+                            onChange={(e) => {
+                                setSortValue(e.target.value);
+                                onSortChange(e.target.value);
+                            }}
+                            className={cn(
+                                "text-white border-b-4 active:border-b-0 active:translate-y-1 rounded-lg font-header text-xl balatro-select-shadow appearance-none cursor-pointer uppercase tracking-wider py-4 pl-6 pr-12 w-full md:w-64 text-center transition-all focus:outline-none",
+                                sortValue !== "default" 
+                                    ? "bg-[var(--balatro-blue)] hover:bg-[#3d6fb5] border-[#2c4e7d]" 
+                                    : "bg-[var(--balatro-orange)] hover:bg-[var(--balatro-orange-hover)] border-[var(--color-dark-orange)]"
+                            )}
                         >
                             <option value="default">Most Rated</option>
                             <option value="wee_desc">Wee Joker</option>

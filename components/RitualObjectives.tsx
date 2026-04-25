@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { load } from 'js-yaml';
 import { Sprite } from "./Sprite";
 
 interface RitualObjectivesProps {

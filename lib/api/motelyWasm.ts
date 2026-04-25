@@ -58,7 +58,7 @@ async function ensureBooted(): Promise<void> {
   }
   if (!bootPromise) {
     bootPromise = (async () => {
-      await motely.boot();
+      await motely.boot({ root: "https://r2.weejoker.app/motely-wasm" });
     })().catch((e) => {
       bootPromise = null;
       throw e;
