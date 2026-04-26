@@ -8,7 +8,7 @@ export const jamlClauseCatalog = createCatalog({
         ClauseForm: {
             props: z.object({
                 clauseType: z.enum(['must', 'should', 'mustNot']),
-                itemType: z.enum(['Joker', 'Tarot', 'Planet', 'Spectral', 'Voucher', 'Tag', 'Boss', 'PlayingCard', 'StandardCard']),
+                itemType: z.enum(['Joker', 'Tarot', 'Planet', 'Spectral', 'Voucher', 'Tag', 'Boss', 'Standardcard', 'StandardCard']),
                 itemValue: z.string(),
                 label: z.string().optional(),
             }),

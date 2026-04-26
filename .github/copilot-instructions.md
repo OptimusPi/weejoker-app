@@ -30,7 +30,7 @@
 - Never make the UI wider than 375px on mobile
 - Use `balatro-panel`, `balatro-button`, `balatro-button-red/blue/green` CSS classes
 - All sprites rendered via `<Sprite name="..." width={N} />` component
-- Playing cards via `<PlayingCard rank="..." suit="..." size={N} />`
+- Standard cards via `<Standardcard rank="..." suit="..." size={N} />`
 - Deck backs via `<DeckSprite deck="erratic" stake="white" size={N} />`
 
 ### Animations

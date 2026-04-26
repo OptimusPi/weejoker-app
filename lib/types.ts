@@ -93,10 +93,10 @@ export interface RelevantEvent {
     /** Optional edition modifier (e.g., "negative", "polychrome", "foil", "holographic") */
     edition?: string;
 
-    /** Optional enhancement (for playing cards: "bonus", "mult", "wild", etc.) */
+    /** Optional enhancement (for standard cards: "bonus", "mult", "wild", etc.) */
     enhancement?: string;
 
-    /** Optional seal (for playing cards: "gold", "red", "blue", "purple") */
+    /** Optional seal (for standard cards: "gold", "red", "blue", "purple") */
     seal?: string;
 
     /** Count of this item (defaults to 1 if not specified) */

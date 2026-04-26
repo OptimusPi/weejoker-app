@@ -12,7 +12,7 @@ export const EDITION_OPTIONS = ['Foil', 'Holographic', 'Polychrome', 'Negative']
 export const SEAL_OPTIONS = ['Gold', 'Red', 'Blue', 'Purple'];
 
 export const CLAUSE_TYPES = [
-    'Joker', 'Tarot', 'Planet', 'Spectral', 'Voucher', 'Tag', 'Boss', 'PlayingCard', 'StandardCard'
+    'Joker', 'Tarot', 'Planet', 'Spectral', 'Voucher', 'Tag', 'Boss', 'Standardcard', 'StandardCard'
 ];
 
 export const SOURCE_OPTIONS = [

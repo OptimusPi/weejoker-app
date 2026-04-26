@@ -57,7 +57,7 @@ const EDITION_TO_POS: Record<string, { x: number; y: number }> = {
     'Negative': { x: 3, y: 0 },
 }
 
-interface RealPlayingCardProps {
+interface RealStandardcardProps {
     suit: CardSuit
     rank: CardRank
     enhancement?: CardEnhancement
@@ -68,19 +68,19 @@ interface RealPlayingCardProps {
     style?: React.CSSProperties
 }
 
-export function RealPlayingCard({ 
-    suit, 
-    rank, 
-    enhancement, 
-    seal, 
-    edition, 
-    className, 
-    size = 71, 
-    style 
-}: RealPlayingCardProps) {
+export function RealStandardcard({
+    suit,
+    rank,
+    enhancement,
+    seal,
+    edition,
+    className,
+    size = 71,
+    style
+}: RealStandardcardProps) {
     const col = RANK_TO_COL[rank]
     const row = SUIT_TO_ROW[suit]
-    
+
     if (col === undefined || row === undefined) {
         console.warn(`Invalid card: ${rank} of ${suit}`)
         return null

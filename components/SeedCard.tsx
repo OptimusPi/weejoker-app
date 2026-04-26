@@ -3,7 +3,7 @@ import { SeedData } from "@/lib/types";
 import { Copy, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Sprite } from "./Sprite";
-import { PlayingCard } from "./PlayingCard";
+import { Standardcard } from "./Standardcard";
 import { CardFan } from "./CardFan";
 import { DeckSprite } from "./DeckSprite";
 import { cn } from "@/lib/utils";
