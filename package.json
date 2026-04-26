@@ -30,7 +30,7 @@
     "js-yaml": "^4.1.1",
     "lucide-react": "^0.561.0",
     "monaco-editor": "^0.55.1",
-    "motely-wasm": "^14.0.0",
+    "motely-wasm": "^14.0.2",
     "next": "^16.1.6",
     "papaparse": "^5.5.3",
     "postcss-preset-mantine": "^1.18.0",
