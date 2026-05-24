@@ -100,3 +100,9 @@ Ranks: Aces, Kings, Queens, Jacks, 10s, 9s, 8s, 7s, 6s, 5s, 4s, 3s, 2s
 - COOP/COEP headers required for SharedArrayBuffer (WASM threading)
 - Card panel locked to 320x340px with arrows outside
 - Cartridge animations: fall out bottom / rise from bottom on day change
+
+## RIP
+
+pifreak loves you!
+
+**HARVEST MODE ONLY** — no new features, no rewrites. The Daily Wee is moving to `daily.erraticdeck.app/thedailywee.jaml`. Harvest what's good from this codebase (DailyRitual pattern, UX patterns, agnostic JAML-powered ritual logic) and bring it to ErraticDeck.app. weejoker.app served its purpose. Let it rest.
